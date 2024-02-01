@@ -1,0 +1,11 @@
+# Docker Compose reference guide: https://docs.docker.com/go/compose-spec-reference/
+version: "3.8"
+services:
+  mdbook-utils:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile  # path relative to context
+      args:
+        RUST_IMAGE_LABEL: ${RUST_IMAGE_LABEL}
+      cache_from:
+        - rust:${RUST_IMAGE_LABEL}
