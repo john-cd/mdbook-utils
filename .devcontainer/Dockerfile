@@ -64,6 +64,12 @@ FROM base as development
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/command_history/.bash_history" \
     && echo "$SNIPPET" >> "/root/.bashrc"
 
+## Git config
+ARG EMAIL
+ARG GIT_AUTHOR_NAME
+
+RUN git config --global user.email ${EMAIL} && git config --global user.name ${GIT_AUTHOR_NAME}
+
 ## https://code.visualstudio.com/remote/advancedcontainers/start-processes
 COPY --chmod=755 .devcontainer/dev.sh ./.devcontainer/
 ENTRYPOINT [ "./.devcontainer/dev.sh" ]
