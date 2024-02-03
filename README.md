@@ -33,7 +33,7 @@ You may export environment variables manually or store them in a `.env` file:
 ```bash
 # Root directory of the book
 # `book.toml` is looked up in BOOK_ROOT_DIR_PATH, if set,
-# othwerwise the current working directory.
+# otherwise the current working directory.
 export BOOK_ROOT_DIR_PATH=./test_book/
 
 # Markdown source directory

@@ -5,7 +5,6 @@
 //! where the configuration file is located.
 
 use std::collections::HashMap;
-use std::ffi::OsString;
 use std::fs::{self};
 use std::path::Path;
 use std::path::PathBuf;
@@ -34,7 +33,7 @@ pub(crate) struct Book {
     // Source files
     // [book]
     // src = "src"
-    src: Option<OsString>,
+    src: Option<String>,  // TODO consider std::ffi::OsString - need a custom deserializer?
     // We don't care about the rest.
 }
 
@@ -44,7 +43,7 @@ pub(crate) struct Build {
     // [build]
     // build-dir = "book"
     #[serde(rename = "build-dir")]
-    build_dir: Option<OsString>,
+    build_dir: Option<String>,
     // We don't care about the rest.
 }
 
@@ -70,7 +69,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     let book_toml: BookToml = toml::from_str(&fs::read_to_string(book_toml_path)?)?;
 
     let markdown_dir_path = if let Some(bk) = book_toml.book {
-        bk.src.map(PathBuf::from)
+        bk.src.map(|s| PathBuf::from(book_root_dir_path.as_ref()).join(s))
     } else {
         None
     };
@@ -78,7 +77,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     let mut book_html_build_dir_path = book_toml
         .build
         .and_then(|bld| bld.build_dir)
-        .map(PathBuf::from);
+        .map(|s| PathBuf::from(book_root_dir_path.as_ref()).join(s));
 
     // If there is only one [output.*] backend in `book.toml`, `mdbook` places
     // its output directly in the book directory (see `build.build-dir`).
