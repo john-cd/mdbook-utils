@@ -66,7 +66,7 @@ fn main() -> Result<()> {
             let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
             let log_dest_path = config.dest_file_path(args.dest, "debug.log");
             println!(
-                "Parsing Markdown files found in {} and writing raw events to {}...",
+                "Parsing Markdown files in {} and writing raw events to {}...",
                 markdown_src_dir_path.display(),
                 log_dest_path.display()
             );

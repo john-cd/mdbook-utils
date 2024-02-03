@@ -33,7 +33,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
             let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "all_links.md");
             println!(
-                "Parsing markdown files found in {} and writing existing links to {}...",
+                "Parsing markdown files in {} and writing existing links to {}...",
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );
@@ -45,7 +45,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
             let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "inline_links.md");
             println!(
-                "Parsing markdown files found in {} and writing found inline / auto links to {}",
+                "Parsing markdown files in {} and writing inline / auto links to {}...",
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );
@@ -57,7 +57,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
             let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "duplicate_links.md");
             println!(
-                "Parsing markdown files found in {} and writing duplicates links to {}...",
+                "Parsing markdown files in {} and writing duplicates links to {}...",
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );
@@ -69,7 +69,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
             let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "broken_links.md");
             println!(
-                "Parsing markdown files found in {} and writing broken links to {}...",
+                "Parsing markdown files in {} and writing broken links to {}...",
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );

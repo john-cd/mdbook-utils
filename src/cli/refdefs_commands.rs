@@ -20,6 +20,8 @@ pub(crate) enum RefDefsSubCommand {
     /// from the dependencies of the code examples
     /// and merge them with those found in the Markdown source
     /// directory
+    #[allow(dead_code)]
+    #[command(skip)]
     #[command(name = "from-dependencies")]
     GenerateFromDependencies(DependenciesDirAndDestFileArgs),
 }
@@ -30,7 +32,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
             let refdef_dest_path = config.dest_file_path(args.dest, "existing_refs.md");
             println!(
-                "Parsing markdown files found in {} and writing existing reference definitions to {}...",
+                "Parsing markdown files in {} and writing existing reference definitions to {}...",
                 markdown_src_dir_path.display(),
                 refdef_dest_path.display()
             );
@@ -42,7 +44,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
             let refdef_dest_path = config.dest_file_path(args.dest, "badge_refs.md");
             println!(
-                "Parsing markdown files found in {} and writing new (github badge) reference definitions to {}...",
+                "Parsing markdown files in {} and writing new (github badge) reference definitions to {}...",
                 markdown_src_dir_path.display(),
                 refdef_dest_path.display()
             );

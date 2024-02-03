@@ -21,9 +21,13 @@ pub(crate) enum MarkdownSubCommand {
 
     /// Generate a listing of crates.io dependencies
     /// and write to a Markdown file
+    #[allow(dead_code)]
+    #[command(skip)]
     GenerateCategories(DestFileArgs),
 
     /// Generate a crate index and write to a Markdown file
+    #[allow(dead_code)]
+    #[command(skip)]
     GenerateCrates(MarkdownSrcDirAndDestFileArgs),
     // TODO autoreplace autolinks / inline links by ref links
 }
@@ -34,7 +38,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             let markdown_drafts_dir_path = config.markdown_dir_path(args.src, "./drafts/")?;
             let code_dest_dir_path = config.dest_dir_path(args.dest);
             println!(
-                "Parsing Markdown files found in {} and copying found Rust code blocks to {}...",
+                "Parsing Markdown files in {} and copying found Rust code blocks to {}...",
                 markdown_drafts_dir_path.display(),
                 code_dest_dir_path.display()
             );
@@ -69,7 +73,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
         MarkdownSubCommand::ReplaceIncludesByContents(args) => {
             let markdown_src_dir_path = config.markdown_dir_path(args, "./drafts/")?;
             println!(
-                "About to parse Markdown files found in {} and replace any {{#include <file>.md}} statements by the corresponding file contents (excluding includes of *refs.md files)...",
+                "About to parse Markdown files in {} and replace any {{#include <file>.md}} statements by the corresponding file contents (excluding includes of *refs.md files)...",
                 markdown_src_dir_path.display()
             );
             let confirmation = Confirm::new()
