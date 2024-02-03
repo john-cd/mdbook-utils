@@ -37,7 +37,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );
-            mdbook_utils::write_links(markdown_src_dir_path, links_dest_path)
+            mdbook_utils::write_all_links(markdown_src_dir_path, links_dest_path)
                 .context("[run] Failed to write links to a file.")?;
             println!("Done.");
         }

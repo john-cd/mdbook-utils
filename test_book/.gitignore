@@ -1,3 +1,11 @@
 book
+*.log
 existing_refs.md
 badge_refs.md
+dependencies_refs.md
+all_links.md
+inline_links.md
+duplicate_links.md
+broken_links.md
+categories.md
+crates.md

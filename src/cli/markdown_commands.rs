@@ -14,7 +14,7 @@ pub(crate) enum MarkdownSubCommand {
 
     /// Replace Rust code examples from the Markdown by
     /// {{#include ...}} statements
-    ReplaceCodeExamplesByIncludes(MarkdownDirArgs),
+    ReplaceCodeExamplesByIncludes(MarkdownSrcDirAndDestDirArgs),
 
     /// Replace {{#include file.md}} by the file contents
     ReplaceIncludesByContents(MarkdownDirArgs),
@@ -50,19 +50,24 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             println!("Done.");
         }
         MarkdownSubCommand::ReplaceCodeExamplesByIncludes(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args, "./drafts/")?;
+            let markdown_drafts_dir_path = config.markdown_dir_path(args.src, "./drafts/")?;
+            let code_dir_path = config.dest_dir_path(args.dest);
             println!(
-                "About to remove Rust code examples from Markdown files in {}, replacing them with {{#include ... }} statements...",
-                markdown_src_dir_path.display()
+                "About to remove Rust code examples from Markdown files in {}, replacing them with {{#include ... }} statements pointing to code files in {}...",
+                markdown_drafts_dir_path.display(),
+                code_dir_path.display()
             );
             let confirmation = Confirm::new()
-                .with_prompt("Do you want to continue?")
+                .with_prompt(
+                    "This command will modify your Markdown files. Do you want to continue?",
+                )
                 .default(false)
                 .interact()
                 .context("[run] Failed to obtain user confirmation.")?;
             if confirmation {
                 mdbook_utils::markdown::remove_code_from_all_markdown_files_in(
-                    markdown_src_dir_path,
+                    markdown_drafts_dir_path,
+                    code_dir_path,
                 )
                 .context("[run] Failed to remove code from Markdown files.")?;
                 println!("Done.");
@@ -77,7 +82,9 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 markdown_src_dir_path.display()
             );
             let confirmation = Confirm::new()
-                .with_prompt("Do you want to continue?")
+                .with_prompt(
+                    "This command will modify your Markdown files. Do you want to continue?",
+                )
                 .default(false)
                 .interact()
                 .context("[run] Failed to obtain user confirmation.")?;

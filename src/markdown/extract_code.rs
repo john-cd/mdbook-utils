@@ -3,7 +3,9 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use std::path::PathBuf;
 
+use anyhow::anyhow;
 use anyhow::Result;
 use once_cell::sync::Lazy;
 use rand::distributions::Alphanumeric;
@@ -63,7 +65,7 @@ where
                 ".rs"
             );
             let code_path = code_dest_dir_path.as_ref().join(code_filename);
-            info!(" {number}:\n {code_path:?}\n");
+            info!(" {number}: {code_path:?}\n");
             File::create(code_path)?.write_all(code.as_bytes())?;
         }
     }
@@ -79,9 +81,15 @@ where
 ///
 /// markdown_src_dir_path: path to the source directory containing the
 /// Markdown files
-pub fn remove_code_from_all_markdown_files_in<P>(markdown_src_dir_path: P) -> Result<()>
+///
+/// code_dir_path: path to the folder containing the Rust code.
+pub fn remove_code_from_all_markdown_files_in<P1, P2>(
+    markdown_src_dir_path: P1,
+    code_dir_path: P2,
+) -> Result<()>
 where
-    P: AsRef<Path>,
+    P1: AsRef<Path>,
+    P2: AsRef<Path>,
 {
     // Locate the Markdown files with the src directory
     let markdown_file_paths = crate::fs::find_markdown_files_in(markdown_src_dir_path)?;
@@ -93,8 +101,12 @@ where
         let re = Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.+?)(?<last>```)")?;
         if re.is_match(&buf) {
             let replacement = format!(
-                "$first{{#include ../../../deps/examples/{}.rs}}\n$last",
-                p.file_stem().unwrap().to_string_lossy()
+                "$first{{#include {}.rs}}\n$last",
+                PathBuf::from(code_dir_path.as_ref())
+                    .join(p.file_stem().ok_or(anyhow!(
+                        "[remove_code_from_all_markdown_files_in] There is no file name."
+                    ))?)
+                    .display()
             );
             let new_txt = re.replace_all(&buf, replacement);
             // debug!("{}", new_txt);

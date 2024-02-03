@@ -21,7 +21,7 @@ pub(crate) fn write_github_repo_badge_refdefs<W>(parser: Parser<'_, '_>, w: &mut
 where
     W: Write,
 {
-    let sorted_refdefs = crate::parser::get_sorted_ref_defs(&parser);
+    let sorted_refdefs = crate::parser::get_sorted_refdefs(&parser);
 
     let rule = &crate::link::GLOBAL_RULES["github repo"];
     let re = Regex::new(rule.re).unwrap();
@@ -53,7 +53,6 @@ where
     write_badge_refdefs_and_links_to_two(links, w, &mut refdef_buffer)?;
 
     // Write reference definitions after links
-    write!(w, "\n")?;
     w.write_all(&refdef_buffer)?;
     Ok(())
 }

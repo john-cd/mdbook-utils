@@ -114,7 +114,7 @@ pub fn test() -> Result<()> {
 /// src_dir_path: path to the source directory
 ///
 /// dest_file_path: path to the file to create and write into
-pub fn write_ref_defs_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
+pub fn write_refdefs_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
@@ -122,7 +122,7 @@ where
     helper(
         src_dir_path,
         dest_file_path,
-        write_from_parser::write_ref_defs_to,
+        write_from_parser::write_refdefs_to,
     )?;
     Ok(())
 }
@@ -175,7 +175,7 @@ where
                     .any(|&x| l.get_link_type().unwrap() == x)
             })
             .collect();
-        link::write_links_to(links, f)?;
+        link::write_reference_style_links_to(links, f)?;
         Ok(())
     })?;
 
@@ -188,14 +188,14 @@ where
 /// src_dir_path: path to the source directory
 ///
 /// dest_file_path: path to the file to create and write into
-pub fn write_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
+pub fn write_all_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
     helper(src_dir_path, dest_file_path, |parser, f| {
         let links: Vec<link::Link<'_>> = parser::extract_links(parser);
-        link::write_links_to(links, f)?;
+        link::write_reference_style_links_to(links, f)?;
         Ok(())
     })?;
 
@@ -284,13 +284,13 @@ where
     // TODO can we read just the *-refs.md files?
     helper(markdown_dir_path, refdef_dest_file_path, |parser, f| {
         // Read existing ref defs
-        let _sorted_linkdefs = parser::get_sorted_ref_defs(&parser);
+        let _sorted_linkdefs = parser::get_sorted_refdefs(&parser);
         // TODO
         println!("NOT IMPLEMENTED!");
         let existing_links = Vec::new();
 
         let links = gen::merge_links(existing_links, &mut new_links);
-        link::write_ref_defs_to(links, f)?;
+        link::write_refdefs_to(links, f)?;
         Ok(())
     })?;
     Ok(())

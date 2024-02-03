@@ -6,6 +6,11 @@ Example code block:
 fn main() {}
 ```
 
+I am included!
+
+
+{{#include ./wont-be-included-refs.md}}
+
 Links:
 
 [Inline]( https://inline )
