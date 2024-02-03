@@ -24,21 +24,39 @@ Use `mdbook-utils <command> <subcommand> --help` or `help <command> <subcommand>
 
 ### Command-line options and environment variables
 
-Each subcommand uses defaults that can be overriden by setting environment variables or command-line options (the latter trumps the former).
+Each subcommand uses defaults that are overwritten by values in `book.toml` (if present), by environment variables (if set), or command-line options (the latter trumps the former).
 
 Command-line options vary by subcommand and include `-o` to set the path of the output file; `-m` to set the path of the source Markdown directory (`./src` or `./drafts` by default, depending on the subcommand); `-c` to set the path to the directory containing the `Cargo.toml` that declares the dependencies (Rust crates) used in the book; and `-t` to set the path to the destination directory.
 
 You may export environment variables manually or store them in a `.env` file:
 
 ```bash
+# Root directory of the book
+# `book.toml` is looked up in BOOK_ROOT_DIR_PATH, if set,
+# othwerwise the current working directory.
+export BOOK_ROOT_DIR_PATH=./test_book/
+
+# Markdown source directory
 export MARKDOWN_DIR_PATH=./test_book/src/
-export BOOK_DIR_PATH=./test_book/book/
-export DEFAULT_DEST_DIR_PATH=./test_book/book/temp/
+
+# Directory where mdbook outputs the book's HTML and JS;
+# typically ./book/ or ./book/html/
+export BOOK_HTML_BUILD_DIR_PATH=./test_book/book/
+
+# Directory where `Cargo.toml` may be found
 export CARGO_TOML_DIR_PATH=./test_book/book/code/
-export BASE_URL=http://example.com/mybook/
+
+# Default destination directory for mdbook-utils outputs.
+export DEFAULT_DEST_DIR_PATH=./test_book/temp/
+
+# Base url of the website where the book will be deployed
+# (used to build sitemaps)
+export BASE_URL=http://myexample.com/some_book/
 ```
 
 You may also set the [`RUST_LOG`][rust-log] environment variable to display the logs.
+
+See `cli/config.rs` for more details.
 
 ## Development
 

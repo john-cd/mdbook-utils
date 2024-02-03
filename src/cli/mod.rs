@@ -8,6 +8,7 @@
 //! <https://github.com/clap-rs/clap/tree/master/examples>
 
 mod args;
+mod book_toml;
 pub(crate) mod config;
 pub(crate) mod links_commands;
 pub(crate) mod markdown_commands;

@@ -17,22 +17,22 @@ fn main() -> Result<()> {
     // Set RUST_LOG, if not present, and initialize logging
     let key = "RUST_LOG";
     if env::var(key).is_err() {
-        env::set_var(key, "debug");
+        env::set_var(key, "debug"); // TODO
     }
     tracing_subscriber::fmt::init();
 
     match dotenv {
         Ok(pb) => {
-            debug!(".env file loaded: {:?}", pb);
+            debug!("`.env` file loaded: {:?}", pb);
         }
         Err(e) => {
-            debug!(".env file not found or not readable: {}", e);
+            debug!("`.env` file not found or not readable: {}", e);
         }
     }
 
-    // Retrieves default configuration (from env. vars or hard-coded defaults)
-    let config = cli::config::retrieve_env_vars()?;
-    debug!("Configuration: {:?}", config);
+    // Retrieves default configuration (from book.toml, env. vars, or hard-coded defaults)
+    let config = cli::config::init()?;
+    // debug!("{:?}", config);
 
     let Cli { command: cmd } = cli::parse_arguments();
 

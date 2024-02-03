@@ -2,6 +2,8 @@
 *.log
 /book
 /drafts
+/*refs.md
+/all_links.md
 
 # Windows ------------------------
 
