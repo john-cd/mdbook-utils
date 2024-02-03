@@ -40,7 +40,7 @@ pub(crate) struct Configuration {
     /// CARGO_TOML_DIR_PATH environment variable:
     /// Directory where Cargo.toml may be found,
     /// typically '.'
-    cargo_toml_dir_path: PathBuf,
+    cargo_toml_dir_path: Option<PathBuf>,
     /// DEFAULT_DEST_DIR_PATH environment variable:
     /// Default destination directory for mdbook-utils outputs.
     default_dest_dir_path: Option<PathBuf>,
@@ -57,7 +57,7 @@ impl Default for Configuration {
             book_root_dir_path: PathBuf::from("."),
             markdown_dir_path: None,
             book_html_build_dir_path: None,
-            cargo_toml_dir_path: PathBuf::from("."),
+            cargo_toml_dir_path: None,
             default_dest_dir_path: None,
             base_url: String::from("http://example.com/mybook/"),
         }
@@ -126,12 +126,12 @@ impl Configuration {
 
     /// Returns the default destination directory where to store mdbook-utils
     /// outputs, as provided by the DEFAULT_DEST_DIR_PATH environment variable
-    /// (if set), otherwise the current working directory.
+    /// (if set), otherwise the book root directory (which defaults to '.').
     fn default_dest_dir_path(&self) -> PathBuf {
         if let Some(ref pb) = self.default_dest_dir_path {
             pb.into()
         } else {
-            PathBuf::from(".")
+            self.book_root_dir_path.clone()
         }
     }
 
@@ -154,11 +154,11 @@ impl Configuration {
     /// Returns the directory where `Cargo.toml` may be found,
     /// as provided by the command-line argument (if set),
     /// the CARGO_TOML_DIR_PATH environment variable (if set),
-    /// or the default value ('.') otherwise.
+    /// or BOOK_ROOT_DIR_PATH (which defaults to '.') otherwise.
     pub(crate) fn cargo_toml_dir_path(&self, args: CargoTomlDirArgs) -> Result<PathBuf> {
         let p = args
             .cargo_toml_dir_path
-            .unwrap_or(self.cargo_toml_dir_path.clone());
+            .unwrap_or(if let Some(ref ctdp) = self.cargo_toml_dir_path { ctdp.clone() } else { self.book_root_dir_path.clone() });
         let p = p.canonicalize().with_context(|| format!("[cargo_toml_dir_path] The directory {} where `Cargo.toml` may be found does not exist or cannot be resolved.", p.display()))?;
         Ok(p)
     }
