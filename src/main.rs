@@ -1,10 +1,10 @@
 use std::env;
 
 use anyhow::Result;
-use cli::*;
-use dotenvy::dotenv;
 use tracing::debug;
-use tracing::info;
+
+use crate::cli::Cli;
+use crate::cli::Command;
 
 mod cli;
 
@@ -12,7 +12,7 @@ fn main() -> Result<()> {
     // Load environment variables from a `.env` file (in the current directory or
     // parents), if it exists. If variables with the same names already exist in
     // the environment, their values are preserved.
-    let dotenv = dotenv();
+    let dotenv = dotenvy::dotenv();
 
     // Set RUST_LOG, if not present, and initialize logging
     let key = "RUST_LOG";
@@ -31,20 +31,20 @@ fn main() -> Result<()> {
     }
 
     // Retrieves default configuration (from env. vars or hard-coded defaults)
-    let config = config::retrieve_env_vars()?;
+    let config = cli::config::retrieve_env_vars()?;
     debug!("Configuration: {:?}", config);
 
     let Cli { command: cmd } = cli::parse_arguments();
 
     match cmd {
         Command::RefDefs(subcmd) => {
-            refdefs_commands::run(subcmd, config)?;
+            cli::refdefs_commands::run(subcmd, config)?;
         }
         Command::Links(subcmd) => {
-            links_commands::run(subcmd, config)?;
+            cli::links_commands::run(subcmd, config)?;
         }
         Command::Markdown(subcmd) => {
-            markdown_commands::run(subcmd, config)?;
+            cli::markdown_commands::run(subcmd, config)?;
         }
         Command::SiteMap(args) => {
             let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
