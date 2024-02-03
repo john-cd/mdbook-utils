@@ -1,12 +1,15 @@
 # TODO
 
-- add to README
-- retest all commands / subcommands
-
+- README - add better usage explanation of env. vars, book.toml parsing, and command line options
+- retest all commands / subcommands - WIP
+- use write()
+- use the test_book in #[test]
 - fix TODOs
 - write_inline_links remove internal links
 
-- use the test_book in tests
+- publish crate
+
+- add unit tests
 
 ```rust
 # [cfg(test)]
