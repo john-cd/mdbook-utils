@@ -1,4 +1,4 @@
-# Chapter 1
+# Example
 
 Example code block:
 
