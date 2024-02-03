@@ -1,3 +1,4 @@
+use anyhow::Context;
 use anyhow::Result;
 use clap::Subcommand;
 use dialoguer::Confirm;
@@ -33,14 +34,15 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             let markdown_drafts_dir_path = config.markdown_dir_path(args.src, "./drafts/")?;
             let code_dest_dir_path = config.dest_dir_path(args.dest);
             println!(
-                "Parsing Markdown files found in {} and copying found Rust code blocks to {}",
+                "Parsing Markdown files found in {} and copying found Rust code blocks to {}...",
                 markdown_drafts_dir_path.display(),
                 code_dest_dir_path.display()
             );
             mdbook_utils::markdown::extract_code_from_all_markdown_files_in(
                 markdown_drafts_dir_path,
                 code_dest_dir_path,
-            )?;
+            )
+            .context("[run] Failed to extract code examples.")?;
             println!("Done.");
         }
         MarkdownSubCommand::ReplaceCodeExamplesByIncludes(args) => {
@@ -52,11 +54,13 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             let confirmation = Confirm::new()
                 .with_prompt("Do you want to continue?")
                 .default(false)
-                .interact()?;
+                .interact()
+                .context("[run] Failed to obtain user confirmation.")?;
             if confirmation {
                 mdbook_utils::markdown::remove_code_from_all_markdown_files_in(
                     markdown_src_dir_path,
-                )?;
+                )
+                .context("[run] Failed to remove code from Markdown files.")?;
                 println!("Done.");
             } else {
                 println!("Cancelled.");
@@ -71,9 +75,11 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             let confirmation = Confirm::new()
                 .with_prompt("Do you want to continue?")
                 .default(false)
-                .interact()?;
+                .interact()
+                .context("[run] Failed to obtain user confirmation.")?;
             if confirmation {
-                mdbook_utils::markdown::include_in_all_markdown_files_in(markdown_src_dir_path)?;
+                mdbook_utils::markdown::include_in_all_markdown_files_in(markdown_src_dir_path)
+                    .context("[run] Failed to replace {{#include ...}} statements by contents.")?;
                 println!("Done.");
             } else {
                 println!("Cancelled.");

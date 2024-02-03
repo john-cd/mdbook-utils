@@ -1,3 +1,4 @@
+use anyhow::Context;
 use anyhow::Result;
 use clap::Subcommand;
 
@@ -33,7 +34,8 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                 markdown_src_dir_path.display(),
                 refdef_dest_path.display()
             );
-            mdbook_utils::write_ref_defs_to(markdown_src_dir_path, refdef_dest_path)?;
+            mdbook_utils::write_ref_defs_to(markdown_src_dir_path, refdef_dest_path)
+                .context("[run] Failed to write reference definitions to a file.")?;
             println!("Done.");
         }
         RefDefsSubCommand::GenerateBadges(args) => {
@@ -44,7 +46,8 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                 markdown_src_dir_path.display(),
                 refdef_dest_path.display()
             );
-            mdbook_utils::generate_badges(markdown_src_dir_path, refdef_dest_path)?;
+            mdbook_utils::generate_badges(markdown_src_dir_path, refdef_dest_path)
+                .context("[run] Failed to generate badges.")?;
             println!("Done.");
         }
         RefDefsSubCommand::GenerateFromDependencies(args) => {
@@ -61,7 +64,8 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                 cargo_toml_dir_path,
                 markdown_src_dir_path,
                 refdef_dest_file_path,
-            )?;
+            )
+            .context("[run] Failed to generate reference definitions from dependencies.")?;
             println!("Done.");
         } /* _ => {
            *     println!("NOT IMPLEMENTED");

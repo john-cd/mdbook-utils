@@ -1,5 +1,6 @@
 use std::env;
 
+use anyhow::Context;
 use anyhow::Result;
 use tracing::debug;
 
@@ -30,7 +31,8 @@ fn main() -> Result<()> {
         }
     }
 
-    // Retrieves default configuration (from book.toml, env. vars, or hard-coded defaults)
+    // Retrieves default configuration (from book.toml, env. vars,
+    // or hard-coded defaults)
     let config = cli::config::init()?;
     // debug!("{:?}", config);
 
@@ -56,11 +58,8 @@ fn main() -> Result<()> {
                 sitemap_dest_file_path.display(),
                 markdown_src_dir_path.display(),
             );
-            mdbook_utils::generate_sitemap(
-                markdown_src_dir_path,
-                base_url,
-                sitemap_dest_file_path,
-            )?;
+            mdbook_utils::generate_sitemap(markdown_src_dir_path, base_url, sitemap_dest_file_path)
+                .context("[main] Failed to generate the sitemap.")?;
             println!("Done.");
         }
         Command::Debug(args) => {
@@ -71,11 +70,12 @@ fn main() -> Result<()> {
                 markdown_src_dir_path.display(),
                 log_dest_path.display()
             );
-            mdbook_utils::debug_parse_to(markdown_src_dir_path, log_dest_path)?;
+            mdbook_utils::debug_parse_to(markdown_src_dir_path, log_dest_path)
+                .context("[main] Failed to generate the debug log.")?;
             println!("Done.");
         }
         Command::Test => {
-            mdbook_utils::test()?;
+            mdbook_utils::test().context("[main] Failed to generate the test file.")?;
             println!("Done.");
         } /* Add more subcommands here: Some(args::Commands::...) => { ... }
            * _ => {

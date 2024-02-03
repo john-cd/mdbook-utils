@@ -3,6 +3,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::bail;
+use anyhow::Context;
 use anyhow::Error;
 use tracing::info;
 
@@ -14,7 +15,7 @@ where
 {
     let dir_path = dir_path.as_ref();
     if !dir_path.is_dir() {
-        bail!("{:?} should be a folder!", dir_path);
+        bail!("{:?} should be a folder and exist on disk!", dir_path);
     }
     Ok(dir_path.to_path_buf())
 }
@@ -41,9 +42,9 @@ where
 {
     match dir_path.as_ref().try_exists() {
         Ok(false) => {
-            std::fs::create_dir_all(dir_path.as_ref())?;
-            let p = dir_path.as_ref().display();
-            info!("{} created", p);
+            std::fs::create_dir_all(dir_path.as_ref())
+                .with_context(|| format!("[create_dir] Failed to create {} or one of its parents. Do you have appropriate permissions?", dir_path.as_ref().display()))?;
+            info!("{} created", dir_path.as_ref().display());
         }
         Ok(true) => {
             // debug: tracing::debug!("{} already exists", dest_dir);

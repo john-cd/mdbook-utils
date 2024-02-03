@@ -3,6 +3,7 @@
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
+use anyhow::Context;
 use anyhow::Result;
 use serde::Deserialize;
 use tracing::debug;
@@ -78,7 +79,7 @@ impl Configuration {
         args: MarkdownDirArgs,
         default_dir_path: S,
     ) -> Result<PathBuf> {
-        Ok(args
+        let p = args
             .markdown_dir_path
             .unwrap_or(if let Some(ref mdp) = self.markdown_dir_path {
                 debug!("MARKDOWN_DIR_PATH set: {}", mdp.display());
@@ -87,13 +88,23 @@ impl Configuration {
                 debug!("markdown_dir_path set from `book.toml`: {}", p.display());
                 p
             } else {
-                debug!("markdown_dir_path set to default: {:?}", default_dir_path.as_ref());
+                debug!(
+                    "markdown_dir_path set to default: {:?}",
+                    default_dir_path.as_ref()
+                );
                 PathBuf::from(default_dir_path.as_ref())
-            })
-            .canonicalize()?)
+            });
+
+        let p = p.canonicalize()
+            .with_context(|| format!("[markdown_dir_path] The Markdown source directory {} does not exist or cannot be resolved.", p.display()))?;
+
+        Ok(p)
     }
 
-    /// Return markdown_dir_path if retreivable from book.toml, None otherwise.
+    /// Return markdown_dir_path if retrievable from `book.toml`,
+    /// None otherwise.
+    ///
+    /// Swallows errors, since having a `book.toml` is optional.
     fn get_markdown_dir_path_from_book_toml(&self) -> Option<PathBuf> {
         match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
             // `book.toml` exists, is parseable, and book.src is defined
@@ -145,17 +156,21 @@ impl Configuration {
     /// the CARGO_TOML_DIR_PATH environment variable (if set),
     /// or the default value ('.') otherwise.
     pub(crate) fn cargo_toml_dir_path(&self, args: CargoTomlDirArgs) -> Result<PathBuf> {
-        Ok(args
+        let p = args
             .cargo_toml_dir_path
-            .unwrap_or(self.cargo_toml_dir_path.clone())
-            .canonicalize()?)
+            .unwrap_or(self.cargo_toml_dir_path.clone());
+        let p = p.canonicalize().with_context(|| format!("[cargo_toml_dir_path] The directory {} where `Cargo.toml` may be found does not exist or cannot be resolved.", p.display()))?;
+        Ok(p)
     }
 
     /// Returns the base url of the website where the book will be deployed
     /// (used to build sitemaps), as provided by the BASE_URL environment
     /// variable (if set), otherwise the default value.
     pub(crate) fn base_url(&self, args: UrlArgs) -> Result<url::Url> {
-        Ok(args.url.unwrap_or(url::Url::parse(&self.base_url)?))
+        Ok(args.url.unwrap_or(
+            url::Url::parse(&self.base_url)
+                .context("[base_url] Could not parse the base url provided.")?,
+        ))
     }
 
     /// Returns the sitemap output file path, as provided by

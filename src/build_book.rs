@@ -3,6 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 use anyhow::anyhow;
+use anyhow::Context;
 use anyhow::Result;
 
 // Invoke `mdbook build`
@@ -18,7 +19,8 @@ pub(crate) fn build_book(root_path: &Path) -> Result<()> {
     let output = Command::new("mdbook")
         .args(["build"])
         .current_dir(root_path)
-        .output()?; // return if failed to execute process
+        .output()
+        .context("[build_book] Failed to execute `mdbook`. Is it installed?")?; // return if failed to execute process
 
     // write_log(&output.stdout, &output.stderr)?;
 
@@ -26,8 +28,10 @@ pub(crate) fn build_book(root_path: &Path) -> Result<()> {
         return Err(anyhow!(
             "Book building failed. Status: {}. Output: {}\n{}",
             output.status,
-            String::from_utf8(output.stdout)?,
-            String::from_utf8(output.stderr)?
+            String::from_utf8(output.stdout)
+                .context("[build_book] Failed to read a string from stdout.")?,
+            String::from_utf8(output.stderr)
+                .context("[build_book] Failed to read a string from stderr.")?
         ));
     }
     Ok(())
@@ -37,9 +41,10 @@ pub(crate) fn build_book(root_path: &Path) -> Result<()> {
 // change.
 // See also: https://crates.io/crates/cargo-emit
 // fn build_rs_helper() -> Result<()> {
-//     let root_path = std::fs::canonicalize("..")?;
-//     let original_markdown_dir_path = root_path.join("src/");
-//     let original_markdown_paths =
+//     let root_path = std::fs::canonicalize("..")
+//          .context("[build_rs_helper] Failed to locate the root path on disk.
+// Does it exist?")?;     let original_markdown_dir_path =
+// root_path.join("src/");     let original_markdown_paths =
 // WalkDir::new(original_markdown_dir_path).into_iter()
 //         .map(|p| p.unwrap().path().to_string_lossy().into_owned())
 // // DirEntry to String         .filter(|p| p.ends_with(".md"))

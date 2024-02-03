@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use anyhow::Context;
 use anyhow::Result;
 use clap::Subcommand;
 
@@ -36,7 +37,8 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );
-            mdbook_utils::write_links(markdown_src_dir_path, links_dest_path)?;
+            mdbook_utils::write_links(markdown_src_dir_path, links_dest_path)
+                .context("[run] Failed to write links to a file.")?;
             println!("Done.");
         }
         LinksSubCommand::WriteInline(args) => {
@@ -47,7 +49,8 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );
-            mdbook_utils::write_inline_links(markdown_src_dir_path, links_dest_path)?;
+            mdbook_utils::write_inline_links(markdown_src_dir_path, links_dest_path)
+                .context("[run] Failed to write inline links to a file.")?;
             println!("Done.");
         }
         LinksSubCommand::DuplicateLinks(args) => {
@@ -58,7 +61,8 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );
-            mdbook_utils::write_duplicate_links(markdown_src_dir_path, links_dest_path)?;
+            mdbook_utils::write_duplicate_links(markdown_src_dir_path, links_dest_path)
+                .context("[run] Failed to write duplicate links to a file.")?;
             println!("Done.");
         }
         LinksSubCommand::BrokenLinks(args) => {
@@ -69,7 +73,8 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 markdown_src_dir_path.display(),
                 links_dest_path.display()
             );
-            mdbook_utils::write_broken_links(markdown_src_dir_path, links_dest_path)?;
+            mdbook_utils::write_broken_links(markdown_src_dir_path, links_dest_path)
+                .context("[run] Failed to write broken links to a file.")?;
             println!("Done.");
         } /* _ => {
            *     println!("NOT IMPLEMENTED");

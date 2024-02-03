@@ -32,6 +32,7 @@ use std::io::Write;
 use std::path::Path;
 
 use anyhow::bail;
+use anyhow::Context;
 use anyhow::Result;
 use pulldown_cmark::LinkType;
 use pulldown_cmark::Parser;
@@ -52,7 +53,12 @@ where
 
     fs::create_parent_dir_for(dest_file_path.as_ref())?;
 
-    let mut f = File::create(dest_file_path)?;
+    let mut f = File::create(dest_file_path.as_ref()).with_context(|| {
+        format!(
+            "[helper] Could not create file {}",
+            dest_file_path.as_ref().display()
+        )
+    })?;
 
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
     let parser = parser::get_parser(all_markdown.as_ref());
@@ -88,12 +94,15 @@ pub fn test() -> Result<()> {
     fs::create_dir("./book/temp/")?;
 
     let dest_file_path = "./book/temp/test.log";
-    let mut f = BufWriter::new(File::create(dest_file_path)?);
+    let mut f = BufWriter::new(File::create(dest_file_path).context(
+        "[test] Failed to create the destination file. Does the full directory path exist?",
+    )?);
 
     let test_markdown = test_markdown::get_test_markdown();
     let parser = parser::get_parser(test_markdown.as_ref());
     write_from_parser::write_raw_to(parser, &mut f)?;
-    f.flush()?;
+    f.flush()
+        .context("Not all bytes could be written due to I/O errors or EOF being reached.")?;
     Ok(())
 }
 
@@ -314,7 +323,7 @@ where
     // meaning that parsing a relative URL string with this URL
     // as the base will return an error.
     if base_url.cannot_be_a_base() {
-        bail!("Invalid URL - cannot be a base: {}", base_url)
+        bail!("Invalid URL - cannot be a base: {}", base_url);
     }
 
     // Create the parent folders of the destination file, if needed
@@ -322,7 +331,12 @@ where
 
     // File::create will create a file if it does not exist,
     // and will truncate it if it does.
-    let mut f = File::create(dest_file_path)?;
+    let mut f = File::create(dest_file_path.as_ref()).with_context(|| {
+        format!(
+            "Failed to create the sitemap file {}. The full directory path may not exist.",
+            dest_file_path.as_ref().display()
+        )
+    })?;
 
     crate::sitemap::generate_sitemap(src_dir_path, base_url, &mut f)?;
 
@@ -332,4 +346,4 @@ where
 // TODO write_to_markdown
 
 // let markdown_input_length = markdown_input.as_ref().len();
-// write_markdown_to(parser, markdown_input_length, f)?;
+// write_markdown_to(parser, markdown_input_length, f).context("")?;

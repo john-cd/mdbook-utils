@@ -1,12 +1,13 @@
 //! Read one or multiple files into a string or vector of strings
 
 use std::borrow::Cow;
+use std::fs;
 use std::fs::File;
-use std::fs::{self};
+use std::io;
 use std::io::BufRead;
-use std::io::{self};
 use std::path::Path;
 
+use anyhow::Context;
 use anyhow::Result;
 
 // // Read a single file to String
@@ -32,7 +33,12 @@ where
     // Read all .md files into one big String
     let mut buf = Vec::<String>::with_capacity(120);
     for p in paths {
-        let s = fs::read_to_string(p.as_path())?;
+        let s = fs::read_to_string(p.as_path()).with_context(|| {
+            format!(
+                "[read_to_string_all_markdown_files_in] Could not read {}. Does the file exist?",
+                p.display()
+            )
+        })?;
         // debug!("{:?}: length = {}", p, s.len());
         buf.push(s);
     }
@@ -54,7 +60,12 @@ pub(crate) fn read_lines<P>(file_path: P) -> Result<Vec<Cow<'static, str>>>
 where
     P: AsRef<Path>,
 {
-    let file = File::open(file_path)?;
+    let file = File::open(file_path.as_ref()).with_context(|| {
+        format!(
+            "[read_lines] Could not open {}. Does the file exist?",
+            file_path.as_ref().display()
+        )
+    })?;
     // Returns an Iterator to the Reader of the lines of the file.
     Ok(io::BufReader::new(file)
         .lines()
