@@ -15,6 +15,8 @@ pub(crate) fn write_links_to<W>(links: Vec<Link<'_>>, link_writer: &mut W) -> Re
 where
     W: Write,
 {
+    writeln!(link_writer, "# Links\n")?;
+
     for l in links.iter() {
         write_link_to(l, link_writer)?;
     }
@@ -26,6 +28,8 @@ pub(crate) fn write_ref_defs_to<W>(links: Vec<Link<'_>>, ref_def_writer: &mut W)
 where
     W: Write,
 {
+    writeln!(ref_def_writer, "# Reference Definitions\n")?;
+
     for l in links.iter() {
         write_ref_def_to(l, ref_def_writer)?;
     }
@@ -37,6 +41,7 @@ where
 // &mut W) -> Result<()> where
 //     W: Write,
 // {
+//     writeln!(writer, "# Links and Reference Definitions\n")?;
 //     for l in links.iter() {
 //         write_link_to(l, writer)?;
 //         write_ref_def_to(l, writer)?;
@@ -44,9 +49,9 @@ where
 //     Ok(())
 // }
 
-/// Write a reference definition and link
-/// to two separate writers (e.g. files)
-pub(crate) fn write_ref_defs_and_links_to_two<W1, W2>(
+/// Write a badge-style link and associated reference definitions
+/// to two separate writers
+pub(crate) fn write_badge_refdefs_and_links_to_two<W1, W2>(
     links: Vec<Link<'_>>,
     link_writer: &mut W1,
     ref_def_writer: &mut W2,
@@ -55,9 +60,14 @@ where
     W1: Write,
     W2: Write,
 {
+    writeln!(link_writer, "# Links and Reference Definitions\n")?;
+
+    let link_flags = LinkWrite::LinkWithBadge.into();
+    let refdef_flags =
+        (LinkWrite::ReferenceDefinition | LinkWrite::BadgeReferenceDefinition).into();
     for l in links.iter() {
-        write_link_to(l, link_writer)?;
-        write_ref_def_to(l, ref_def_writer)?;
+        write(l, &link_flags, link_writer)?;
+        write(l, &refdef_flags, ref_def_writer)?;
     }
     Ok(())
 }
@@ -113,14 +123,15 @@ enum LinkWrite {
     BadgeReferenceDefinition = 16,
 }
 
-// All = LinkWrite::InlineLink | LinkWrite::ReferenceLink |
-// LinkWrite::ReferenceDefinition | LinkWrite::LinkWithBadge |
-// LinkWrite::BadgeReferenceDefinition,
-
-// TODO
-#[allow(dead_code)]
+/// Write a link to a writer in the format specified by flags.
+///
+/// l: the Link struct
+///
+/// flags: Bitflags
+///
+/// w: the writer e.g. a File or Vec<u8>
 #[inline]
-fn write<W: Write>(l: Link<'_>, flags: BitFlags<LinkWrite>, w: &mut W) -> Result<()> {
+fn write<W: Write>(l: &Link<'_>, flags: &BitFlags<LinkWrite>, w: &mut W) -> Result<()> {
     if flags.contains(LinkWrite::InlineLink) {
         writeln!(w, "{}", l.to_inline_link())?;
     }

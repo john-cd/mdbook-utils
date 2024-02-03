@@ -1,5 +1,5 @@
+//! Generate links and reference definitions
 use std::borrow::Cow;
-/// Generate links and reference definitions
 use std::io::Write;
 
 use anyhow::Result;
@@ -8,7 +8,7 @@ use pulldown_cmark::Parser;
 use regex::Regex;
 use tracing::debug;
 
-use crate::link::write_ref_defs_and_links_to_two;
+use crate::link::write_badge_refdefs_and_links_to_two;
 use crate::link::LinkBuilder;
 
 /// Get existing reference definitions from a Markdown parser,
@@ -40,6 +40,7 @@ where
 
             let link = LinkBuilder::default()
                 .set_label(Cow::from(lbl))
+                .set_url(Cow::from(dest_url.as_ref()))
                 .set_image_url(badge_image_url)
                 .build();
             links.push(link);
@@ -47,11 +48,12 @@ where
     }
 
     // ...and write the reference definition and link to it.
-    let mut link_buffer = Vec::new();
+    let mut refdef_buffer = Vec::new();
 
-    write_ref_defs_and_links_to_two(links, &mut link_buffer, w)?;
+    write_badge_refdefs_and_links_to_two(links, w, &mut refdef_buffer)?;
 
-    // Write links after reference definitions
-    w.write_all(&link_buffer)?;
+    // Write reference definitions after links
+    write!(w, "\n")?;
+    w.write_all(&refdef_buffer)?;
     Ok(())
 }

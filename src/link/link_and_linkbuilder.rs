@@ -30,12 +30,12 @@ impl<'a> LinkBuilder<'a> {
         }
     }
 
-    // pub(crate) fn set_url(mut self, url: Cow<'a, str>) -> Self {
-    //     if !url.is_empty() {
-    //         self.link.url = Some(url);
-    //     }
-    //     self
-    // }
+    pub(crate) fn set_url(mut self, url: Cow<'a, str>) -> Self {
+        if !url.is_empty() {
+            self.link.url = Some(url);
+        }
+        self
+    }
 
     pub(crate) fn add_text(mut self, text: Cow<'a, str>) -> Self {
         if !text.is_empty() {
