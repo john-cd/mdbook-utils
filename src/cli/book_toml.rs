@@ -33,8 +33,8 @@ pub(crate) struct Book {
     // Source files
     // [book]
     // src = "src"
-    src: Option<String>,  // TODO consider std::ffi::OsString - need a custom deserializer?
-    // We don't care about the rest.
+    src: Option<String>, /* TODO consider std::ffi::OsString - need a custom deserializer?
+                          * We don't care about the rest. */
 }
 
 #[derive(Deserialize, Debug)]
@@ -69,7 +69,8 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     let book_toml: BookToml = toml::from_str(&fs::read_to_string(book_toml_path)?)?;
 
     let markdown_dir_path = if let Some(bk) = book_toml.book {
-        bk.src.map(|s| PathBuf::from(book_root_dir_path.as_ref()).join(s))
+        bk.src
+            .map(|s| PathBuf::from(book_root_dir_path.as_ref()).join(s))
     } else {
         None
     };

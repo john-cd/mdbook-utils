@@ -156,9 +156,13 @@ impl Configuration {
     /// the CARGO_TOML_DIR_PATH environment variable (if set),
     /// or BOOK_ROOT_DIR_PATH (which defaults to '.') otherwise.
     pub(crate) fn cargo_toml_dir_path(&self, args: CargoTomlDirArgs) -> Result<PathBuf> {
-        let p = args
-            .cargo_toml_dir_path
-            .unwrap_or(if let Some(ref ctdp) = self.cargo_toml_dir_path { ctdp.clone() } else { self.book_root_dir_path.clone() });
+        let p =
+            args.cargo_toml_dir_path
+                .unwrap_or(if let Some(ref ctdp) = self.cargo_toml_dir_path {
+                    ctdp.clone()
+                } else {
+                    self.book_root_dir_path.clone()
+                });
         let p = p.canonicalize().with_context(|| format!("[cargo_toml_dir_path] The directory {} where `Cargo.toml` may be found does not exist or cannot be resolved.", p.display()))?;
         Ok(p)
     }
