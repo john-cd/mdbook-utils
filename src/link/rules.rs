@@ -14,6 +14,7 @@ pub(crate) struct Rule<'a> {
                              * badge link */
 }
 
+// TODO the Regexes need testing
 /// All rules that transform a URL to a label or badge URL
 pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     let mut m = HashMap::new();

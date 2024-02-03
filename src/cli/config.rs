@@ -1,11 +1,10 @@
-//! Handles environment variables
+//! Handles CLI configuration, environment variables, and defaults
 
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
 use anyhow::Result;
 use serde::Deserialize;
-use tracing::info;
 
 use super::args::CargoTomlDirArgs;
 use super::args::DestDirArgs;
@@ -16,10 +15,11 @@ use super::args::UrlArgs;
 // CONFIGURATION FROM ENVIRONMENT VARIABLES
 // ----------------------------------------
 
+/// Stores environment variables into a Configuration struct.
+/// Defaults apply if not present.
 pub(crate) fn retrieve_env_vars() -> Result<Configuration> {
     // Serialize environment variables into the Configuration struct
     let c = envy::from_env::<Configuration>()?;
-    info!("{:?}", c);
     Ok(c)
 }
 

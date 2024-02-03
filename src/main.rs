@@ -2,18 +2,37 @@ use std::env;
 
 use anyhow::Result;
 use cli::*;
+use dotenvy::dotenv;
+use tracing::debug;
+use tracing::info;
 
 mod cli;
 
 fn main() -> Result<()> {
+    // Load environment variables from a `.env` file (in the current directory or
+    // parents), if it exists. If variables with the same names already exist in
+    // the environment, their values are preserved.
+    let dotenv = dotenv();
+
+    // Set RUST_LOG, if not present, and initialize logging
     let key = "RUST_LOG";
     if env::var(key).is_err() {
-        env::set_var(key, "info");
+        env::set_var(key, "debug");
     }
-
     tracing_subscriber::fmt::init();
 
+    match dotenv {
+        Ok(pb) => {
+            debug!(".env file loaded: {:?}", pb);
+        }
+        Err(e) => {
+            debug!(".env file not found or not readable: {}", e);
+        }
+    }
+
+    // Retrieves default configuration (from env. vars or hard-coded defaults)
     let config = config::retrieve_env_vars()?;
+    debug!("Configuration: {:?}", config);
 
     let Cli { command: cmd } = cli::parse_arguments();
 
