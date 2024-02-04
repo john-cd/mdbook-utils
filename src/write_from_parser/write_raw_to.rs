@@ -14,12 +14,12 @@ use pulldown_cmark::Tag;
 ///
 /// See <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Event.html>
 /// and <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Tag.html>
-pub(crate) fn write_raw_to<W>(parser: Parser<'_, '_>, w: &mut W) -> Result<()>
+pub(crate) fn write_raw_to<W>(parser: &mut Parser<'_>, w: &mut W) -> Result<()>
 where
     W: Write,
 {
-    for event in parser {
-        match &event {
+    for event in parser.into_iter() {
+        match event {
             // Start of a tagged element. Events that are yielded after this
             // event and before its corresponding End event are inside this
             // element. Start and end events are guaranteed to be balanced.
@@ -33,11 +33,16 @@ where
                     // A heading. The first field indicates the level of the
                     // heading, the second the fragment identifier, and the
                     // third the classes.
-                    Tag::Heading(level, id, classes) => {
+                    Tag::Heading {
+                        level,
+                        id,
+                        classes,
+                        attrs,
+                    } => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::Heading( heading_level: {} fragment identifier: {:?} classes: {:?} ))",
-                            level, id, classes
+                            "Event::Start(Tag::Heading{{ level: {} fragment identifier: {:?} classes: {:?} attributes: {:?} }})",
+                            level, id, classes, attrs
                         )?;
                     }
                     Tag::BlockQuote => {
@@ -50,6 +55,10 @@ where
                             "Event::Start(Tag::CodeBlock(code_block_kind: {:?} ))",
                             code_block_kind
                         )?;
+                    }
+                    // A HTML block.
+                    Tag::HtmlBlock => {
+                        writeln!(w, "Event::Start(Tag::HtmlBlock)")?;
                     }
                     // A list. If the list is ordered the field indicates the
                     // number of the first item. Contains only list items.
@@ -107,21 +116,35 @@ where
                     }
                     // A link. The first field is the link type, the second the
                     // destination URL and the third is a title.
-                    Tag::Link(link_type, dest_url, title) => {
+                    Tag::Link {
+                        link_type,
+                        dest_url,
+                        title,
+                        id,
+                    } => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::Link() link_type: {:?} url: {} title: {} ))",
-                            link_type, dest_url, title
+                            "Event::Start(Tag::Link{{ link_type: {:?} url: {} title: {} id: {} }})",
+                            link_type, dest_url, title, id
                         )?;
                     }
                     // An image. The first field is the link type, the second
                     // the destination URL and the third is a title.
-                    Tag::Image(link_type, dest_url, title) => {
+                    Tag::Image {
+                        link_type,
+                        dest_url,
+                        title,
+                        id,
+                    } => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::Image( link_type: {:?} url: {} title: {} ))",
-                            link_type, dest_url, title
+                            "Event::Start(Tag::Image( link_type: {:?} url: {} title: {} id: {} ))",
+                            link_type, dest_url, title, id
                         )?;
+                    }
+                    // A metadata block.
+                    Tag::MetadataBlock(kind) => {
+                        writeln!(w, "Event::Start(Tag::MetadataBlock({:?}))", kind)?;
                     }
                 }
             }
@@ -140,6 +163,10 @@ where
             // An HTML node.
             Event::Html(s) => {
                 writeln!(w, "Event::Html({:?})", s)?;
+            }
+            // An inline HTML node.
+            Event::InlineHtml(s) => {
+                writeln!(w, "Event::InlineHtml({:?})", s)?;
             }
             // A reference to a footnote with given label, which may or may not
             // be defined by an event with a Tag::FootnoteDefinition tag.

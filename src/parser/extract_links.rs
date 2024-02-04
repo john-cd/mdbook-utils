@@ -4,6 +4,7 @@ use std::borrow::Cow;
 use pulldown_cmark::Event;
 use pulldown_cmark::Parser;
 use pulldown_cmark::Tag;
+use pulldown_cmark::TagEnd;
 use tracing::debug;
 use tracing::error;
 
@@ -21,31 +22,37 @@ enum Where {
 
 /// Read from a Markdown parser, extract links from the event stream,
 /// and return said links
-pub(crate) fn extract_links<'input, 'callback>(
-    parser: Parser<'input, 'callback>,
-) -> Vec<Link<'input>> {
+pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'input>> {
     let mut state: Vec<(Where, LinkBuilder<'input>)> = Vec::new();
     let mut links: Vec<Link<'input>> = Vec::new();
 
     // Retrieve and group all Link-related events
-    parser.for_each(|event| {
+    for event in parser {
         match event {
             // Start of a link
-            Event::Start(Tag::Link(link_type, dest_url, title)) => {
+            Event::Start(Tag::Link {
+                link_type,
+                dest_url,
+                title,
+                id,
+            }) => {
                 debug!(
-                    "Link: link_type: {:?}, url: {}, title: {}",
-                    link_type,
-                    dest_url.as_ref(),
-                    title.as_ref()
+                    "Link: link_type: {:?}, url: {}, title: {}, id: {}",
+                    link_type, dest_url, title, id
                 );
                 state.push((
                     Where::InLink,
-                    LinkBuilder::from_type_url_title(link_type, dest_url.into(), title.into()),
+                    LinkBuilder::from_type_url_title(
+                        link_type,
+                        dest_url.into(),
+                        title.into(),
+                        id.into(),
+                    ),
                 ));
             }
 
             // End of the link
-            ref e @ Event::End(Tag::Link(..)) => {
+            ref e @ Event::End(TagEnd::Link) => {
                 debug!("{:?}", e);
                 let (whr, link_builder) = state.pop().unwrap(); // Start and End events are balanced
                 assert_eq!(whr, Where::InLink);
@@ -53,22 +60,25 @@ pub(crate) fn extract_links<'input, 'callback>(
             }
 
             // Inspect events while in the link
-            Event::Start(Tag::Image(image_link_type, image_url, image_title))
-                if !state.is_empty() =>
-            {
+            Event::Start(Tag::Image {
+                link_type,
+                dest_url,
+                title,
+                id,
+            }) if !state.is_empty() => {
                 debug!(
-                    "image: link_type: {:?}, url: {}, title: {}",
-                    image_link_type, image_url, image_title
+                    "image: link type: {:?}, image url: {}, image title: {}, label: {}",
+                    link_type, dest_url, title, id
                 );
                 let (whr, link_builder) = state.pop().unwrap();
                 assert_eq!(whr, Where::InLink);
                 state.push((
                     Where::InImageInLink,
-                    link_builder.set_image(image_link_type, image_url.into(), image_title.into()),
+                    link_builder.set_image(link_type, dest_url.into(), title.into(), id.into()),
                 ));
             }
 
-            ref e @ Event::End(Tag::Image(..)) if !state.is_empty() => {
+            ref e @ Event::End(TagEnd::Image) if !state.is_empty() => {
                 debug!("{:?}", e);
                 let (whr, link_builder) = state.pop().unwrap();
                 assert_eq!(whr, Where::InImageInLink);
@@ -106,7 +116,7 @@ pub(crate) fn extract_links<'input, 'callback>(
                 debug!("Ignored: {:?}", e);
             }
         }
-    });
+    }
     assert!(state.is_empty());
 
     links

@@ -19,12 +19,14 @@ impl<'a> LinkBuilder<'a> {
         link_type: LinkType,
         url: Cow<'a, str>,
         title: Cow<'a, str>,
+        label: Cow<'a, str>,
     ) -> Self {
         Self {
             link: Link {
                 link_type: Some(link_type),
                 url: if !url.is_empty() { Some(url) } else { None },
                 title: if !title.is_empty() { Some(title) } else { None },
+                label: if !label.is_empty() { Some(label) } else { None },
                 ..Link::default()
             },
         }
@@ -56,6 +58,7 @@ impl<'a> LinkBuilder<'a> {
         image_link_type: LinkType,
         image_url: Cow<'a, str>,
         image_title: Cow<'a, str>,
+        image_label: Cow<'a, str>,
     ) -> Self {
         Self {
             link: Link {
@@ -69,6 +72,11 @@ impl<'a> LinkBuilder<'a> {
                     Some(image_title)
                 } else {
                     self.link.image_title
+                },
+                image_label: if !image_label.is_empty() {
+                    Some(image_label)
+                } else {
+                    self.link.image_label
                 },
                 ..self.link
             },

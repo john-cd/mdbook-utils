@@ -2,11 +2,10 @@
 /// extract reference definitions and links
 /// from said parser
 mod extract_links;
-mod extract_refdefs;
 
 pub(crate) use extract_links::*;
-pub(crate) use extract_refdefs::*;
 use pulldown_cmark::BrokenLink;
+use pulldown_cmark::BrokenLinkCallback;
 use pulldown_cmark::CowStr;
 use pulldown_cmark::Options;
 use pulldown_cmark::Parser;
@@ -17,7 +16,9 @@ use tracing::warn;
 // RETURN A PARSER WITH APPROPRIATE OPTIONS
 
 /// Return a parser with suitable options
-pub(crate) fn get_parser<'callback>(markdown_input: &str) -> Parser<'_, 'callback> {
+///
+/// markdown_input: the unprocessed markdown text
+pub(crate) fn get_parser(markdown_input: &str) -> Parser<'_> {
     Parser::new_ext(markdown_input, get_options())
 }
 
@@ -35,20 +36,57 @@ fn get_options() -> Options {
     options
 }
 
-/// Callback function for broken references
-///
-/// In case the parser encounters any potential links that have a
-/// broken reference (e.g \[foo\] when there is no \[foo\]:  entry at
-/// the bottom) the provided callback will be called with the
-/// reference name, and the returned pair will be used as the link
-/// name and title if it is not None.
-fn _callback<'input>(
-    broken_link: BrokenLink<'input>,
+// BROKEN REFERENCES -----------------------------------
+
+/// Handler for broken references
+#[derive(Debug)]
+pub(crate) struct Handler<'input> {
     markdown_input: &'input str,
-) -> Option<(CowStr<'input>, CowStr<'input>)> {
-    warn!(
-        "Issue with the markdown: reference: {}, `{}`, type: {:?}",
-        broken_link.reference, &markdown_input[broken_link.span], broken_link.link_type,
-    );
-    Some(("https://TODO".into(), "".into()))
+    pub broken_links: Vec<(String, String, String)>,
+}
+
+impl<'input> Handler<'input> {
+    fn new(markdown_input: &'input str) -> Self {
+        let broken_links = Vec::new();
+        Self {
+            markdown_input,
+            broken_links,
+        }
+    }
+}
+
+/// Implement the trait required by `new_with_broken_link_callback`
+impl<'input> BrokenLinkCallback<'input> for Handler<'input> {
+    /// In case the parser encounters any potential links that have a broken
+    /// reference (e.g [foo] when there is no [foo]:  entry at the bottom) the
+    /// provided callback will be called with the reference name, and the
+    /// returned pair will be used as the link URL and title if it is not None.
+    fn handle_broken_link(
+        &mut self,
+        link: BrokenLink<'input>,
+    ) -> Option<(CowStr<'input>, CowStr<'input>)> {
+        let txt: &str = self.markdown_input.get(link.span).unwrap_or("");
+        warn!(
+            "Issue with the markdown: reference: {}, `{}`, type: {:?}",
+            link.reference,
+            txt,
+            link.link_type,
+        );
+        self.broken_links.push( ( link.reference.into_string(), txt.into(), format!("{:?}", link.link_type) ) );
+        Some(("http://TODO".into(), ":BROKEN_LINK:".into()))
+        // or simply return None
+    }
+}
+
+// TODO
+/// Return a parser with suitable options and
+#[allow(dead_code)]
+pub(crate) fn get_parser_with_broken_links_handler<'input>(
+    markdown_input: &'input str,
+) -> Parser<'_, Handler<'_>> {
+    Parser::<'input, Handler<'_>>::new_with_broken_link_callback(
+        markdown_input,
+        get_options(),
+        Some(Handler::<'_>::new(markdown_input)),
+    )
 }

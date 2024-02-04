@@ -1,14 +1,15 @@
 //! Generate links and reference definitions
 use std::borrow::Cow;
+use std::collections::BTreeMap;
 use std::io::Write;
 
 use anyhow::Result;
-use pulldown_cmark::LinkDef;
 use pulldown_cmark::Parser;
 use regex::Regex;
 use tracing::debug;
 
 use crate::link::write_badge_refdefs_and_links_to_two;
+use crate::link::Link;
 use crate::link::LinkBuilder;
 
 /// Get existing reference definitions from a Markdown parser,
@@ -16,12 +17,16 @@ use crate::link::LinkBuilder;
 /// links, and write to a writer / file.
 ///
 /// parser: Markdown parser
+/// 
 /// w: Writer (e.g. File) to write to
-pub(crate) fn write_github_repo_badge_refdefs<W>(parser: Parser<'_, '_>, w: &mut W) -> Result<()>
+pub(crate) fn write_github_repo_badge_refdefs<'input, W>(
+    parser: &'input mut Parser<'input>,
+    w: &mut W,
+) -> Result<()>
 where
     W: Write,
 {
-    let sorted_refdefs = crate::parser::get_sorted_refdefs(&parser);
+    let sorted_refdefs: BTreeMap<_, _> = parser.reference_definitions().iter().collect();
 
     let rule = &crate::link::GLOBAL_RULES["github repo"];
     let re = Regex::new(rule.re).unwrap();
@@ -29,18 +34,19 @@ where
     let mut links = Vec::new();
 
     // Iterate through all ref defs
-    for (lbl, LinkDef { dest: dest_url, .. }) in sorted_refdefs {
+    for (lbl, linkdef) in sorted_refdefs {
         // if the URL is a github repo...
-        if let Some(capture) = re.captures(dest_url.as_ref()) {
-            debug!("dest_url: {} -> {:?}", dest_url, capture);
+        if let Some(capture) = re.captures(linkdef.dest.as_ref()) {
+            debug!("dest_url: {} -> {:?}", linkdef.dest, capture);
 
             // ...create the URL for the badge...
-            let badge_image_url = re.replace(dest_url.as_ref(), rule.badge_url_pattern);
+            let badge_image_url: Cow<'_, str> =
+                re.replace(linkdef.dest.as_ref(), rule.badge_url_pattern);
             debug!("badge_image_url: {}", badge_image_url);
 
-            let link = LinkBuilder::default()
+            let link: Link<'input> = LinkBuilder::default()
                 .set_label(Cow::from(lbl))
-                .set_url(Cow::from(dest_url.as_ref()))
+                .set_url(Cow::from(linkdef.dest.as_ref()))
                 .set_image_url(badge_image_url)
                 .build();
             links.push(link);

@@ -47,7 +47,7 @@ fn helper<P1, P2, F>(src_dir_path: P1, dest_file_path: P2, func: F) -> Result<()
 where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
-    F: for<'a, 'b, 'c> FnOnce(Parser<'a, 'b>, &'c mut File) -> Result<()>,
+    F: for<'a, 'b> FnOnce(&'a mut Parser<'a>, &'b mut File) -> Result<()>,
 {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
 
@@ -61,9 +61,9 @@ where
     })?;
 
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
-    let parser = parser::get_parser(all_markdown.as_ref());
+    let mut parser = parser::get_parser(all_markdown.as_ref());
 
-    func(parser, &mut f)?;
+    func(&mut parser, &mut f)?;
     Ok(())
 }
 
@@ -99,8 +99,8 @@ pub fn test() -> Result<()> {
     )?);
 
     let test_markdown = test_markdown::get_test_markdown();
-    let parser = parser::get_parser(test_markdown.as_ref());
-    write_from_parser::write_raw_to(parser, &mut f)?;
+    let mut parser = parser::get_parser(test_markdown.as_ref());
+    write_from_parser::write_raw_to(&mut parser, &mut f)?;
     f.flush()
         .context("Not all bytes could be written due to I/O errors or EOF being reached.")?;
     Ok(())
@@ -284,7 +284,8 @@ where
     // TODO can we read just the *-refs.md files?
     helper(markdown_dir_path, refdef_dest_file_path, |parser, f| {
         // Read existing ref defs
-        let _sorted_linkdefs = parser::get_sorted_refdefs(&parser);
+        let _sorted_linkdefs: std::collections::BTreeMap<_, _> =
+            parser.reference_definitions().iter().collect();
         // TODO
         println!("NOT IMPLEMENTED!");
         let existing_links = Vec::new();
@@ -347,15 +348,10 @@ where
             summary_md_path.display()
         )
     })?;
-    let parser = parser::get_parser(markdown.as_str());
-    let links: Vec<link::Link<'_>> = parser::extract_links(parser);
+    let mut parser = parser::get_parser(markdown.as_str());
+    let links: Vec<link::Link<'_>> = parser::extract_links(&mut parser);
 
     sitemap::generate_sitemap(links, base_url, &mut f)?;
 
     Ok(())
 }
-
-// TODO write_to_markdown
-
-// let markdown_input_length = markdown_input.as_ref().len();
-// write_markdown_to(parser, markdown_input_length, f).context("")?;

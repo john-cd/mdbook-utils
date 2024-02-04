@@ -1,7 +1,6 @@
 use std::io::Write;
 
 use anyhow::Result;
-use pulldown_cmark::LinkDef;
 use pulldown_cmark::Parser;
 
 /// Write reference definitions parsed from a Markdown parser to a
@@ -9,17 +8,18 @@ use pulldown_cmark::Parser;
 ///
 /// parser: Markdown parser
 /// w: Writer e.g. File
-pub(crate) fn write_refdefs_to<W>(parser: Parser<'_, '_>, w: &mut W) -> Result<()>
+pub(crate) fn write_refdefs_to<W>(parser: &mut Parser<'_>, w: &mut W) -> Result<()>
 where
     W: Write,
 {
-    let sorted_refdefs = crate::parser::get_sorted_refdefs(&parser); // ::<'input, 'callback>
+    let sorted_linkdefs: std::collections::BTreeMap<_, _> =
+        parser.reference_definitions().iter().collect();
 
-    for (s, LinkDef { dest, title, .. }) in sorted_refdefs {
-        if let Some(t) = title {
-            writeln!(w, "[{s}]: {dest} \"{t:?}\"")?;
+    for (s, linkdef) in sorted_linkdefs {
+        if let Some(t) = &linkdef.title {
+            writeln!(w, "[{s}]: {} \"{t:?}\"", linkdef.dest)?;
         } else {
-            writeln!(w, "[{s}]: {dest}")?;
+            writeln!(w, "[{s}]: {}", linkdef.dest)?;
         }
     }
     Ok(())
