@@ -2,10 +2,9 @@
 
 - README - add better usage explanation of env. vars, book.toml parsing, and command line options
 - retest all commands / subcommands - WIP
-- use write()
 - use the test_book in #[test]
 - fix TODOs
-- write_inline_links remove internal links
+- write_inline_links: remove internal links
 
 - publish crate
 

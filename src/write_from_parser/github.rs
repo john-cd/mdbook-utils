@@ -17,7 +17,7 @@ use crate::link::LinkBuilder;
 /// links, and write to a writer / file.
 ///
 /// parser: Markdown parser
-/// 
+///
 /// w: Writer (e.g. File) to write to
 pub(crate) fn write_github_repo_badge_refdefs<'input, W>(
     parser: &'input mut Parser<'input>,

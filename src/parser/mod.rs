@@ -68,18 +68,22 @@ impl<'input> BrokenLinkCallback<'input> for Handler<'input> {
         let txt: &str = self.markdown_input.get(link.span).unwrap_or("");
         warn!(
             "Issue with the markdown: reference: {}, `{}`, type: {:?}",
-            link.reference,
-            txt,
-            link.link_type,
+            link.reference, txt, link.link_type,
         );
-        self.broken_links.push( ( link.reference.into_string(), txt.into(), format!("{:?}", link.link_type) ) );
+        self.broken_links.push((
+            link.reference.into_string(),
+            txt.into(),
+            format!("{:?}", link.link_type),
+        ));
         Some(("http://TODO".into(), ":BROKEN_LINK:".into()))
         // or simply return None
     }
 }
 
-// TODO
-/// Return a parser with suitable options and
+// TODO use this function
+/// Return a parser with suitable options and a broken link handler.
+///
+/// markdown_input: the Markdown contents to parse
 #[allow(dead_code)]
 pub(crate) fn get_parser_with_broken_links_handler<'input>(
     markdown_input: &'input str,
@@ -89,4 +93,10 @@ pub(crate) fn get_parser_with_broken_links_handler<'input>(
         get_options(),
         Some(Handler::<'_>::new(markdown_input)),
     )
+    // Alternative with a closure:
+    // let parser = Parser::new_with_broken_link_callback(
+    //     markdown_input.as_ref(),
+    //     get_options(),
+    //     Some(&mut |broken_link: BrokenLink| { callback(broken_link,
+    // markdown_input.as_ref()) }), )
 }

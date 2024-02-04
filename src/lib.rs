@@ -1,14 +1,14 @@
 //! # mdbook-utils
 //!
-//! To use the tool, run `mdbook-utils` at a command-line prompt. A list of
-//! commands will be displayed.
+//! To use the command-line tool, run `mdbook-utils` at a shell prompt. A list
+//! of commands will be displayed.
 //!
-//! The following is the **API** doc. This crate can be used if more control is
-//! required.
+//! The following is the **library API** doc. This crate can be used if more
+//! control is required.
 //!
 //! Some reasons why you would want to use the crate (over the CLI):
 //!
-//! - Integrate it in a current project
+//! - Integrate it in your project
 //! - Extend its capabilities
 //! - ...
 
@@ -38,7 +38,8 @@ use pulldown_cmark::LinkType;
 use pulldown_cmark::Parser;
 
 /// Helper function:
-/// Checks the source directory exists,
+///
+/// Checks if the source directory exists,
 /// create the destination directory if it doesn't exist,
 /// create the destination file,
 /// parse all the Markdown files in the source directory,
@@ -75,6 +76,7 @@ where
 /// write all raw events to a file for debugging purposes
 ///
 /// src_dir_path: path to the source directory
+///
 /// dest_file_path: path to the file to create and write into
 pub fn debug_parse_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
@@ -243,14 +245,6 @@ where
 
     Ok(())
 }
-// // TODO
-// // Set up the parser. We can treat is as any other iterator.
-// // For each event, we print its details, such as the tag or string.
-// let parser = Parser::new_with_broken_link_callback(
-//     markdown_input.as_ref(),
-//     get_options(),
-//     Some(&mut |broken_link: BrokenLink| { callback(broken_link,
-// markdown_input.as_ref()) }), )
 
 // GENERATE REF DEFS FROM DEPENDENCIES
 
