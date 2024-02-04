@@ -35,7 +35,7 @@ pub(crate) enum MarkdownSubCommand {
 pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<()> {
     match subcmd {
         MarkdownSubCommand::ExtractCodeExamples(args) => {
-            let markdown_drafts_dir_path = config.markdown_dir_path(args.src, "./drafts/")?;
+            let markdown_drafts_dir_path = config.markdown_src_dir_path(args.src, "./drafts/")?;
             let code_dest_dir_path = config.dest_dir_path(args.dest);
             println!(
                 "Parsing Markdown files in {} and copying found Rust code blocks to {}...",
@@ -50,7 +50,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             println!("Done.");
         }
         MarkdownSubCommand::ReplaceCodeExamplesByIncludes(args) => {
-            let markdown_drafts_dir_path = config.markdown_dir_path(args.src, "./drafts/")?;
+            let markdown_drafts_dir_path = config.markdown_src_dir_path(args.src, "./drafts/")?;
             let code_dir_path = config.dest_dir_path(args.dest);
             println!(
                 "About to remove Rust code examples from Markdown files in {}, replacing them with {{#include ... }} statements pointing to code files in {}...",
@@ -76,7 +76,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             }
         }
         MarkdownSubCommand::ReplaceIncludesByContents(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args, "./drafts/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args, "./drafts/")?;
             println!(
                 "About to parse Markdown files in {} and replace any {{#include <file>.md}} statements by the corresponding file contents (excluding includes of *refs.md files)...",
                 markdown_src_dir_path.display()

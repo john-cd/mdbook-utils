@@ -1,59 +1,55 @@
 mod xml;
 
-use std::ffi::OsStr;
 use std::io::Write;
-use std::path::Path;
-use std::path::PathBuf;
 
-use anyhow::anyhow;
 use anyhow::Context;
 use anyhow::Error;
 use anyhow::Result;
-use tracing::error;
 use tracing::info;
 
-// Create a sitemap.xml file from the  list of markdown files
-// in a source directory.
-pub(crate) fn generate_sitemap<P1, W>(src_dir_path: P1, base_url: url::Url, w: &mut W) -> Result<()>
+/// Create a sitemap.xml file from a list of links and a base URL.
+///
+/// links: the list of links to Markdown files / book chapters (e.g. from
+/// SUMMARY.md)
+///
+/// base_url: the base URL used as the prefix for HTML files.
+///
+/// w: a writer (e.g. a File) to write the sitemap to.
+pub(crate) fn generate_sitemap<W>(
+    links: Vec<crate::link::Link<'_>>,
+    base_url: url::Url,
+    w: &mut W,
+) -> Result<()>
 where
-    P1: AsRef<Path>,
     W: Write,
 {
-    // Locate the Markdown files
-    let paths: Vec<PathBuf> = crate::fs::find_markdown_files_in(src_dir_path.as_ref())?;
-
     // Remove a few exceptions
     let exclude = ["refs.md", "SUMMARY.md"];
-    let l = paths.into_iter().filter(|p| {
-        !exclude.iter().any(|&ex| {
-            p.file_name()
-                .unwrap_or(OsStr::new(""))
-                .to_str()
-                .unwrap_or_default()
-                .ends_with(ex)
-        })
-    }); // p.ends_with(ex) did not work here for some reason
-    // debug: let l = l.map(|path| { tracing::debug!("{:?}", path); path
-    // });
+    let ls = links
+        .into_iter()
+        .filter(|l| !exclude.iter().any(|&ex| l.get_url().ends_with(ex)));
+    // debug: let l = l.map(|l| { tracing::debug!("{:?}", l); l });
 
-    let l = l.map(|p: PathBuf| {
-        p.with_extension("html")
-            .strip_prefix(src_dir_path.as_ref()) // Result<&Path, _>
-            .map_err(anyhow::Error::from)
-            .and_then(|p| p.to_str().ok_or(anyhow!("Non UTF-8 path: {:?}", p)))
-            .map(|s| format!("{base_url}{s}")) // Prefix with domain
-            .map(|s| s.replace("intro.html", "index.html"))
+    // Change the extension and replace intro.html by index.html
+    let ls = ls.map(|l| {
+        base_url.join(
+            l.get_url()
+                .replace("intro.md", "index.md")
+                .replace(".md", ".html")
+                .as_str(),
+        )
     });
 
     // Separate links from errors and print errors if any
-    let (links, errors): (Vec<Result<_, _>>, Vec<Result<_, _>>) = l.partition(Result::is_ok);
-    let mut links: Vec<String> = links.into_iter().map(Result::unwrap).collect();
-    let errors: Vec<Error> = errors.into_iter().map(Result::unwrap_err).collect();
+    let (links, errors): (Vec<Result<_, _>>, Vec<Result<_, _>>) = ls.partition(Result::is_ok);
+    let mut links: Vec<String> = links.into_iter().map(|r| r.unwrap().to_string()).collect();
+    let errors: Vec<Error> = errors.into_iter().map(|r| r.unwrap_err().into()).collect();
     // debug: tracing::debug!("Links: {:?}", links);
     if !errors.is_empty() {
-        error!("Errors: {:?}", errors);
+        tracing::error!("Errors: {:?}", errors);
     }
 
+    // Deduplicate and sort links
     links.dedup();
     links.sort();
 

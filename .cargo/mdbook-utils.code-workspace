@@ -10,7 +10,8 @@
 	"settings": {
 		"rust-analyzer.linkedProjects": [
 			"./Cargo.toml",
-			"./test_book/code/Cargo.toml"
-		]
+			"./test_book/code/Cargo.toml",
+		],
+		"rust-analyzer.showUnlinkedFileNotification": false
 	}
 }

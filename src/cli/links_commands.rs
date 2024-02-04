@@ -30,7 +30,7 @@ pub(crate) enum LinksSubCommand {
 pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> {
     match subcmd {
         LinksSubCommand::WriteAll(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "all_links.md");
             println!(
                 "Parsing markdown files in {} and writing existing links to {}...",
@@ -42,7 +42,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
             println!("Done.");
         }
         LinksSubCommand::WriteInline(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "inline_links.md");
             println!(
                 "Parsing markdown files in {} and writing inline / auto links to {}...",
@@ -54,7 +54,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
             println!("Done.");
         }
         LinksSubCommand::DuplicateLinks(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "duplicate_links.md");
             println!(
                 "Parsing markdown files in {} and writing duplicates links to {}...",
@@ -66,7 +66,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
             println!("Done.");
         }
         LinksSubCommand::BrokenLinks(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "broken_links.md");
             println!(
                 "Parsing markdown files in {} and writing broken links to {}...",

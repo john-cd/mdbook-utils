@@ -49,7 +49,7 @@ fn main() -> Result<()> {
             cli::markdown_commands::run(subcmd, config)?;
         }
         Command::SiteMap(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let base_url = config.base_url(args.base)?;
             let sitemap_dest_file_path = config.sitemap_file_path(args.dest);
 
@@ -63,7 +63,7 @@ fn main() -> Result<()> {
             println!("Done.");
         }
         Command::Debug(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let log_dest_path = config.dest_file_path(args.dest, "debug.log");
             println!(
                 "Parsing Markdown files in {} and writing raw events to {}...",

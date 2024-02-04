@@ -29,7 +29,7 @@ pub(crate) enum RefDefsSubCommand {
 pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()> {
     match subcmd {
         RefDefsSubCommand::Write(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let refdef_dest_path = config.dest_file_path(args.dest, "existing_refs.md");
             println!(
                 "Parsing markdown files in {} and writing existing reference definitions to {}...",
@@ -41,7 +41,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             println!("Done.");
         }
         RefDefsSubCommand::GenerateBadges(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let refdef_dest_path = config.dest_file_path(args.dest, "badge_refs.md");
             println!(
                 "Parsing markdown files in {} and writing new (github badge) reference definitions to {}...",
@@ -53,7 +53,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             println!("Done.");
         }
         RefDefsSubCommand::GenerateFromDependencies(args) => {
-            let markdown_src_dir_path = config.markdown_dir_path(args.src, "./src/")?;
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let cargo_toml_dir_path = config.cargo_toml_dir_path(args.manifest)?;
             let refdef_dest_file_path = config.dest_file_path(args.dest, "dependencies_refs.md");
             println!(

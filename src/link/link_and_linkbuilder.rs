@@ -129,6 +129,15 @@ impl<'a> Link<'a> {
         self.text.clone().unwrap_or(Cow::from("TODO"))
     }
 
+    /// Returns the link's url
+    pub(crate) fn get_url(&self) -> Cow<'a, str> {
+        if let Some(u) = &self.url {
+            u.clone()
+        } else {
+            Cow::from(String::new())
+        }
+    }
+
     /// Returns the link's url (and title if present)
     fn get_url_and_title(&self) -> Cow<'a, str> {
         if let Some(u) = &self.url {
@@ -156,14 +165,14 @@ impl<'a> Link<'a> {
         }
     }
 
-    /// Return a Markdown inline link: [text](url) or [text](url
-    /// "title")
+    /// Return a Markdown inline link:
+    /// [text](url) or [text](url "title")
     pub(crate) fn to_inline_link(&self) -> Cow<'a, str> {
         format!("[{}]( {} )", self.get_text(), self.get_url_and_title()).into()
     }
 
-    /// Return a reference-style Markdown link: \[text\]\[label\] or
-    /// \[text/label\]
+    /// Return a reference-style Markdown link:
+    /// \[text\]\[label\] or \[text/label\]
     pub(crate) fn to_reference_link(&self) -> Cow<'a, str> {
         let txt: String = self.get_text().into();
         let label: String = self.get_label().into();
@@ -174,8 +183,8 @@ impl<'a> Link<'a> {
         }
     }
 
-    /// Return a Markdown reference definition: \[label\]: url or
-    /// \[label\]: url "title"
+    /// Return a Markdown reference definition:
+    /// \[label\]: url or \[label\]: url "title"
     pub(crate) fn to_reference_definition(&self) -> Cow<'a, str> {
         format!("[{}]: {}", self.get_label(), self.get_url_and_title()).into()
     }
@@ -196,8 +205,8 @@ impl<'a> Link<'a> {
         }
     }
 
-    /// Return the label for the badge reference e.g. image_label or
-    /// \<label\>-badge
+    /// Return the label for the badge reference
+    /// e.g. image_label or \<label\>-badge
     fn get_badge_label(&self) -> Cow<'a, str> {
         if let Some(ref img_lbl) = self.image_label {
             img_lbl.clone()

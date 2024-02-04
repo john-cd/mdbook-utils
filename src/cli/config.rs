@@ -74,7 +74,7 @@ impl Configuration {
     ///
     /// `book.toml` is looked up in BOOK_ROOT_DIR_PATH, if set,
     /// or the current working directory.
-    pub(crate) fn markdown_dir_path<S: AsRef<OsStr>>(
+    pub(crate) fn markdown_src_dir_path<S: AsRef<OsStr>>(
         &self,
         args: MarkdownDirArgs,
         default_dir_path: S,
