@@ -9,7 +9,7 @@ It is the companion tool for the ["Rust How-to"](https://www.john-cd.com/rust_ho
 
 Run the tool without arguments to display the the list of commands:
 
-```bash
+```txt
   refdefs   Manage reference definitions
   links     Manage links
   markdown  Manage code blocks (embedded examples) and includes
@@ -81,13 +81,13 @@ Clone the repo and open the folder in [VS Code][vs-code]. Edit `.devcontainer/.e
 - [Dev Container extension][dev-container-extension]
 - [Docker Desktop][docker-desktop] (or at least the Docker engine).
 
-Note that opening the code folder in VS Code may take a little while the first time around.
+Note that opening the code folder in `VS Code` may take a little while the first time around.
 
 #### Other
 
 If you are not using `VS Code`, install the [Dev Container CLI][dev-container-CLI], use `Docker Compose` directly (see below), or simply install the required tools on your local machine.
 
-The following works with Ubuntu and Windows WSL:
+The following works with `Ubuntu` and `Windows` `WSL`:
 
 ```bash
 sudo apt-get update
@@ -133,7 +133,7 @@ just update # Update Cargo.lock
 
 ### Docker Compose
 
-Test the `Docker Compose` setup used during developement (which Dev Container runs) with:
+Test the `Docker Compose` setup used during developement (which `Dev Containers` runs) with:
 
 ```bash
 cd ./.devcontainer
@@ -153,11 +153,11 @@ docker compose up --build -d
 
 ## Links
 
-mdbook-utils' [GitHub repo][github-repo]
+`mdbook-utils`' [GitHub repo][mdbook-utils-github]
 
 [dev-container-CLI]: https://github.com/devcontainers/cli
 [dev-container-extension]: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
 [docker-desktop]: https://www.docker.com/products/docker-desktop/
-[github-repo]: https://github.com/john-cd/mdbook-utils
+[mdbook-utils-github]: https://github.com/john-cd/mdbook-utils
 [rust-log]: https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html
 [vs-code]: https://code.visualstudio.com/
