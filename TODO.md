@@ -1,12 +1,15 @@
 # TODO
 
 - README - add better usage explanation of env. vars, book.toml parsing, and command line options
-- retest all commands / subcommands - WIP
-- use the test_book in #[test]
+
+- Add exclude to Cargo.toml
+- Finish publish.yml
+- [Cargo bump](https://github.com/wraithan/cargo-bump)
+
 - fix TODOs
 - write_inline_links: remove internal links
 
-- publish crate
+- use the test_book in #[test]
 
 - add unit tests
 
