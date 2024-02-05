@@ -100,3 +100,17 @@ pub(crate) fn get_parser_with_broken_links_handler<'input>(
     //     Some(&mut |broken_link: BrokenLink| { callback(broken_link,
     // markdown_input.as_ref()) }), )
 }
+
+// Example using `new_with_broken_link_callback` from https://github.com/raphlinus/pulldown-cmark/blob/1a5e54546b40d79eec8001d4e268b436571a78bb/pulldown-cmark/src/main.rs#L33
+// fn dry_run(text: &str, opts: Options, broken_links: &mut
+// Vec<BrokenLink<'static>>) {     let p =
+// Parser::new_with_broken_link_callback(         text,
+//         opts,
+//         Some(|link: BrokenLink<'_>| {
+//             broken_links.push(link.into_static());
+//             None
+//         }),
+//     );
+//     let count = p.count();
+//     println!("{} events", count);
+// }
