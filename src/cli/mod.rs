@@ -15,6 +15,7 @@ pub(crate) mod markdown_commands;
 pub(crate) mod refdefs_commands;
 
 use args::*;
+use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
 use links_commands::LinksSubCommand;
@@ -36,8 +37,8 @@ pub(crate) struct Cli {
     #[command(subcommand)]
     pub(crate) command: Command,
     // This structure allows the addition of global options, if needed
-    //#[clap(flatten)]
-    // global_opts: GlobalOpts,
+    #[clap(flatten)]
+    pub(crate) global_opts: GlobalOpts,
 }
 
 /// Command-line commands
@@ -70,23 +71,10 @@ pub(crate) enum Command {
     Test,
 }
 
-// // Example global args, if needed
-
-// #[derive(Debug, Args)]
-// struct GlobalOpts {
-//     /// Color
-//     #[clap(long, arg_enum, global = true, default_value_t =
-// Color::Auto)]     color: Color,
-
-//     /// Verbosity level (can be specified multiple times)
-//     #[clap(long, short, global = true, parse(from_occurrences))]
-//     verbose: usize,
-//     //... other global options
-// }
-
-// #[derive(Clone, Debug, ArgEnum)]
-// enum Color {
-//     Always,
-//     Auto,
-//     Never,
-// }
+/// Global options that apply to all (sub)commands
+#[derive(Debug, Args, Default)]
+pub(crate) struct GlobalOpts {
+    /// Automatically answer `yes` to any user confirmation request.
+    #[clap(long, short = 'y', global = true)]
+    pub(crate) yes: bool,
+}

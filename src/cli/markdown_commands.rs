@@ -19,6 +19,9 @@ pub(crate) enum MarkdownSubCommand {
     /// Replace {{#include file.md}} by the file contents
     ReplaceIncludesByContents(MarkdownDirArgs),
 
+    /// Remove left-over {{#include }}
+    RemoveIncludes(MarkdownDirArgs),
+
     /// Generate a listing of crates.io dependencies
     /// and write to a Markdown file
     #[allow(dead_code)]
@@ -57,13 +60,14 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 markdown_drafts_dir_path.display(),
                 code_dir_path.display()
             );
-            let confirmation = Confirm::new()
-                .with_prompt(
-                    "This command will modify your Markdown files. Do you want to continue?",
-                )
-                .default(false)
-                .interact()
-                .context("[run] Failed to obtain user confirmation.")?;
+            let confirmation = config.skip_confirm()
+                || Confirm::new()
+                    .with_prompt(
+                        "This command will modify your Markdown files. Do you want to continue?",
+                    )
+                    .default(false)
+                    .interact()
+                    .context("Failed to obtain user confirmation.")?;
             if confirmation {
                 mdbook_utils::markdown::remove_code_from_all_markdown_files_in(
                     markdown_drafts_dir_path,
@@ -81,16 +85,41 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 "About to parse Markdown files in {} and replace any {{#include <file>.md}} statements by the corresponding file contents (excluding includes of *refs.md files)...",
                 markdown_src_dir_path.display()
             );
-            let confirmation = Confirm::new()
-                .with_prompt(
-                    "This command will modify your Markdown files. Do you want to continue?",
-                )
-                .default(false)
-                .interact()
-                .context("[run] Failed to obtain user confirmation.")?;
+            let confirmation = config.skip_confirm()
+                || Confirm::new()
+                    .with_prompt(
+                        "This command will modify your Markdown files. Do you want to continue?",
+                    )
+                    .default(false)
+                    .interact()
+                    .context("Failed to obtain user confirmation.")?;
             if confirmation {
                 mdbook_utils::markdown::include_in_all_markdown_files_in(markdown_src_dir_path)
                     .context("[run] Failed to replace {{#include ...}} statements by contents.")?;
+                println!("Done.");
+            } else {
+                println!("Cancelled.");
+            }
+        }
+        MarkdownSubCommand::RemoveIncludes(args) => {
+            let markdown_src_dir_path = config.markdown_src_dir_path(args, "./book/markdown")?;
+            println!(
+                "About to parse Markdown files in {} and remove any left-over {{#include ...}} statements...",
+                markdown_src_dir_path.display()
+            );
+            let confirmation = config.skip_confirm()
+                || Confirm::new()
+                    .with_prompt(
+                        "This command will modify your Markdown files. Do you want to continue?",
+                    )
+                    .default(false)
+                    .interact()
+                    .context("Failed to obtain user confirmation.")?;
+            if confirmation {
+                mdbook_utils::markdown::remove_includes_in_all_markdown_files_in(
+                    markdown_src_dir_path,
+                )
+                .context("[run] Failed to remove {{#include ...}} statements.")?;
                 println!("Done.");
             } else {
                 println!("Cancelled.");

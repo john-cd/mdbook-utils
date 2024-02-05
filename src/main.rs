@@ -31,12 +31,15 @@ fn main() -> Result<()> {
         }
     }
 
-    // Retrieves default configuration (from book.toml, env. vars,
-    // or hard-coded defaults)
-    let config = cli::config::init()?;
-    // debug!("{:?}", config);
+    let Cli {
+        command: cmd,
+        global_opts,
+    } = cli::parse_arguments();
 
-    let Cli { command: cmd } = cli::parse_arguments();
+    // Retrieves default configuration (from `book.toml``, env. vars,
+    // or hard-coded defaults); also stores global_opts
+    let config = cli::config::init(global_opts)?;
+    debug!("{:?}", config);
 
     match cmd {
         Command::RefDefs(subcmd) => {

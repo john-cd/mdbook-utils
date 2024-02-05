@@ -13,12 +13,14 @@ use super::args::DestDirArgs;
 use super::args::DestFileArgs;
 use super::args::MarkdownDirArgs;
 use super::args::UrlArgs;
+use super::GlobalOpts;
 
 /// Stores environment variables into a Configuration struct.
 /// Defaults apply if not present.
-pub(crate) fn init() -> Result<Configuration> {
+pub(crate) fn init(global_opts: GlobalOpts) -> Result<Configuration> {
     // Serialize environment variables into the Configuration struct
-    let c = envy::from_env::<Configuration>()?;
+    let mut c = envy::from_env::<Configuration>()?;
+    c.global_opts = global_opts;
     Ok(c)
 }
 
@@ -48,6 +50,10 @@ pub(crate) struct Configuration {
     /// Base url of the website where the book will be deployed
     /// (used to build sitemaps) e.g. https://example.com/mybook/
     base_url: String,
+
+    /// Global options that apply to all (sub)commands.
+    #[serde(skip)]
+    global_opts: GlobalOpts,
 }
 
 /// Defaults if the environment variables are not set
@@ -60,6 +66,7 @@ impl Default for Configuration {
             cargo_toml_dir_path: None,
             default_dest_dir_path: None,
             base_url: String::from("http://example.com/mybook/"),
+            global_opts: GlobalOpts::default(),
         }
     }
 }
@@ -197,5 +204,10 @@ impl Configuration {
             };
             dir.join("sitemap.xml")
         }
+    }
+
+    /// if true, skip confirmation prompts
+    pub(crate) fn skip_confirm(&self) -> bool {
+        self.global_opts.yes
     }
 }

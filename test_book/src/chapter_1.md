@@ -6,8 +6,7 @@ Example code block:
 fn main() {}
 ```
 
-I am included!
-
+{{#include ./included.md}}
 
 {{#include ./wont-be-included-refs.md}}
 

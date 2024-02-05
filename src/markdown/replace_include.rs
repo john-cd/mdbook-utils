@@ -1,4 +1,4 @@
-/// Replace {{#include <file>.md}} by the file contents
+//! Replace {{#include <file>.md}} by the file contents
 use std::fs;
 use std::fs::File;
 use std::io::Write;
