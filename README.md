@@ -2,8 +2,14 @@
 
 This is a **Work In Progress**.
 
-`mdbook-utils` manages links, reference definitions, and code examples in Markdown files, especially `mdbook` source directories.
+The `mdbook-utils` command-line tool manages links, reference definitions, and code examples in Markdown files, especially `mdbook` source directories.
 It is the companion tool for the ["Rust How-to"](https://www.john-cd.com/rust_howto/) book ([github](https://github.com/john-cd/rust_howto)).
+
+## Installation
+
+```bash
+cargo install mdbook-utils
+```
 
 ## Usage
 
@@ -109,7 +115,7 @@ The [`just`](https://just.systems/) command runner is configured to simplify com
 
 Type `just` at a shell prompt for a list of commands:
 
-```bash
+```sh
 just clean  # Clean the `target` folder
 
 just fmt    # Format the code
