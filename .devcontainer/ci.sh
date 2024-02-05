@@ -33,6 +33,9 @@ cargo clippy --all-targets --locked --profile ci -- --deny warnings
 ## Test
 cargo test --all-targets --locked --profile ci -- --show-output
 
+## Generate documentation
+cargo doc --no-deps --locked
+
 echo "----------"
 
 ## Do not remove.
