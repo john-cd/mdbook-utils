@@ -36,19 +36,26 @@ pub(crate) struct Configuration {
     /// typically ./src/
     markdown_dir_path: Option<PathBuf>,
     /// BOOK_HTML_BUILD_DIR_PATH environment variable:
-    /// Directory where mdbook outputs the book's HTML and JS,
+    /// Directory where `mdbook` outputs the book's HTML and JS,
     /// typically ./book/ or ./book/html/
     book_html_build_dir_path: Option<PathBuf>,
+    /// BOOK_MARKDOWN_BUILD_DIR_PATH environment variable:
+    /// Directory where `mdbook` outputs the book's fully expanded Markdown,
+    /// i.e. with all includes resolved. It is typically ./book/markdown/
+    /// The directory is created only if `[output.markdown]` is added to
+    /// `book.toml`.
+    book_markdown_build_dir_path: Option<PathBuf>,
     /// CARGO_TOML_DIR_PATH environment variable:
-    /// Directory where Cargo.toml may be found,
+    /// Directory where `Cargo.toml` may be found,
     /// typically '.'
     cargo_toml_dir_path: Option<PathBuf>,
     /// DEFAULT_DEST_DIR_PATH environment variable:
-    /// Default destination directory for mdbook-utils outputs.
+    /// Default destination directory for `mdbook-utils` outputs.
     default_dest_dir_path: Option<PathBuf>,
     /// BASE_URL environment variable:
     /// Base url of the website where the book will be deployed
-    /// (used to build sitemaps) e.g. https://example.com/mybook/
+    /// e.g. https://example.com/mybook/
+    /// It is used to build sitemaps.
     base_url: String,
 
     /// Global options that apply to all (sub)commands.
@@ -63,6 +70,7 @@ impl Default for Configuration {
             book_root_dir_path: PathBuf::from("."),
             markdown_dir_path: None,
             book_html_build_dir_path: None,
+            book_markdown_build_dir_path: None,
             cargo_toml_dir_path: None,
             default_dest_dir_path: None,
             base_url: String::from("http://example.com/mybook/"),
@@ -75,9 +83,9 @@ impl Configuration {
     /// Returns the Markdown source directory provided by the
     /// command-line argument (if set);
     /// the MARKDOWN_DIR_PATH environment variable (if set);
-    /// the "src" field in `book.toml` (if set);
-    /// otherwise the default value passed as function argument
-    /// (./src/ or ./drafts/ typically).
+    /// the "book.src" field (which defaults to {book_root_dir_path}/src) in
+    /// `book.toml` (if `book.toml` is found); otherwise the default value
+    /// passed as function argument (./src/ or ./drafts/ typically).
     ///
     /// `book.toml` is looked up in BOOK_ROOT_DIR_PATH, if set,
     /// or the current working directory.
@@ -111,15 +119,11 @@ impl Configuration {
     /// Return markdown_dir_path if retrievable from `book.toml`,
     /// None otherwise.
     ///
-    /// Swallows errors, since having a `book.toml` is optional.
+    /// Does not propagate errors, since having a `book.toml` is optional.
     fn get_markdown_dir_path_from_book_toml(&self) -> Option<PathBuf> {
         match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
-            // `book.toml` exists, is parseable, and book.src is defined
-            Ok((Some(src), _)) => Some(src),
-            Ok((None, _)) => {
-                debug!("`book.src` is not defined in `book.toml`");
-                None
-            }
+            // `book.toml` exists and is parseable
+            Ok((src, _, _)) => Some(src),
             Err(e) => {
                 debug!(
                     "`book.toml` does not exist in {} or is not parseable. Error: {}",
@@ -129,6 +133,51 @@ impl Configuration {
                 None
             }
         }
+    }
+
+    /// Returns the directory where `mdbook` outputs the book's fully expanded
+    /// Markdown, i.e. with all includes resolved, if `[output.markdown]` is
+    /// added to `book.toml`
+    ///
+    /// The return value is provided by the command-line argument (if set);
+    /// the BOOK_MARKDOWN_BUILD_DIR_PATH environment variable (if set);
+    /// the "build.build-dir" field in `book.toml` (which defaults to
+    /// `{book_root_dir_path}/book`) followed by `markdown` (if `book.toml`
+    /// is found); otherwise the default value passed as function argument
+    /// (`./book/markdown` typically).
+    ///
+    /// `book.toml` is looked up in BOOK_ROOT_DIR_PATH, if set,
+    /// or the current working directory.
+    pub(crate) fn book_markdown_build_dir_path<S: AsRef<OsStr>>(
+        &self,
+        args: MarkdownDirArgs,
+        default_dir_path: S,
+    ) -> Result<PathBuf> {
+        let p = args.markdown_dir_path.unwrap_or(
+            if let Some(ref mdp) = self.book_markdown_build_dir_path {
+                debug!("BOOK_MARKDOWN_BUILD_DIR_PATH set: {}", mdp.display());
+                mdp.clone()
+            } else if let Ok((_, _, Some(p))) =
+                super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone())
+            {
+                debug!(
+                    "book_markdown_build_dir_path set from `book.toml`: {}",
+                    p.display()
+                );
+                p
+            } else {
+                debug!(
+                    "book_markdown_build_dir_path set to default: {:?}",
+                    default_dir_path.as_ref()
+                );
+                PathBuf::from(default_dir_path.as_ref())
+            },
+        );
+
+        let p = p.canonicalize()
+            .with_context(|| format!("[book_markdown_build_dir_path] The Markdown output (build) directory {} does not exist or cannot be resolved. Try `mdbook build`.", p.display()))?;
+
+        Ok(p)
     }
 
     /// Returns the default destination directory where to store mdbook-utils
@@ -194,7 +243,7 @@ impl Configuration {
         } else {
             let dir: PathBuf = if let Some(ref d) = self.book_html_build_dir_path {
                 d.clone()
-            } else if let Ok((_, Some(html_output_dir))) =
+            } else if let Ok((_, html_output_dir, _)) =
                 super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone())
             {
                 // `book.toml`` exists, is parseable and build.build-dir is defined

@@ -1,4 +1,6 @@
-//! Remove left-over {{#include <file>.md}}
+//! Remove left-over {{#include file.ext}} from mdbook-style Markdown sources.
+//!
+//! Use to clean up Markdown sources or when the [output.markdown] renderer is enabled in `book.toml`.
 
 use std::fs;
 use std::fs::File;
@@ -20,12 +22,12 @@ static REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{\{#include.*?\}\}").unwr
 ///
 /// markdown_src_dir_path: path to the source directory containing the
 /// Markdown files.
-pub fn remove_includes_in_all_markdown_files_in<P>(markdown_src_dir_path: P) -> Result<()>
+pub fn remove_includes_in_all_markdown_files_in<P>(markdown_dir_path: P) -> Result<()>
 where
     P: AsRef<Path>,
 {
     // Locate the Markdown files with the src directory
-    let paths = crate::fs::find_markdown_files_in(markdown_src_dir_path.as_ref())?;
+    let paths = crate::fs::find_markdown_files_in(markdown_dir_path.as_ref())?;
 
     // Process each .md file
     for p in paths {

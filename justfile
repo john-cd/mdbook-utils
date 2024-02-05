@@ -55,7 +55,7 @@ doc:
   cd /cargo-target-mdbook-utils/target/doc/ ; python3 -m http.server 9000
 
 # Prepare for git push
-prep: fmt clean build clippy test
+prep: fmt clean build clippy test doc
 
 ## Utilities --------------------------------------
 

@@ -102,10 +102,11 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             }
         }
         MarkdownSubCommand::RemoveIncludes(args) => {
-            let markdown_src_dir_path = config.markdown_src_dir_path(args, "./book/markdown")?;
+            let book_markdown_build_dir_path =
+                config.book_markdown_build_dir_path(args, "./book/markdown")?;
             println!(
                 "About to parse Markdown files in {} and remove any left-over {{#include ...}} statements...",
-                markdown_src_dir_path.display()
+                book_markdown_build_dir_path.display()
             );
             let confirmation = config.skip_confirm()
                 || Confirm::new()
@@ -117,7 +118,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                     .context("Failed to obtain user confirmation.")?;
             if confirmation {
                 mdbook_utils::markdown::remove_includes_in_all_markdown_files_in(
-                    markdown_src_dir_path,
+                    book_markdown_build_dir_path,
                 )
                 .context("[run] Failed to remove {{#include ...}} statements.")?;
                 println!("Done.");

@@ -49,6 +49,11 @@ export MARKDOWN_DIR_PATH=./test_book/src/
 # typically ./book/ or ./book/html/
 export BOOK_HTML_BUILD_DIR_PATH=./test_book/book/
 
+# Directory where `mdbook` outputs the book's fully expanded Markdown,
+# i.e. with all includes resolved, when `[output.markdown]` is added to `book.toml`.
+# It is typically ./book/markdown/.
+export BOOK_MARKDOWN_BUILD_DIR_PATH=./test_book/book/markdown/
+
 # Directory where `Cargo.toml` may be found
 export CARGO_TOML_DIR_PATH=./test_book/book/code/
 
@@ -78,7 +83,7 @@ The following is of interest only if you want to contribute to the project.
   - `devcontainer.json` uses Docker Compose (configured in `compose.yaml` and `compose.override.yaml`), which in turn creates a container from `Dockerfile`.
 - `.github` contains the CI GitHub Actions workflow.
 
-### Installation
+### Development Setup
 
 #### Using VS Code
 
