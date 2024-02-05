@@ -12,6 +12,14 @@ use crate::link::write_badge_refdefs_and_links_to_two;
 use crate::link::Link;
 use crate::link::LinkBuilder;
 
+// TODO
+// - handle - and _ in github repo names (shields.io conventions)
+// - set the image alt-text
+//
+// [![github][github-badge]][github]
+// [github]: https://github.com/john-cd/mdbook-utils
+// [github-badge]: https://img.shields.io/badge/mdbook-utils-navy?logo=github
+
 /// Get existing reference definitions from a Markdown parser,
 /// identify URLs that are GitHub repos, create badge URLs for these
 /// links, and write to a writer / file.
@@ -47,6 +55,7 @@ where
             let link: Link<'input> = LinkBuilder::default()
                 .set_label(Cow::from(lbl))
                 .set_url(Cow::from(linkdef.dest.as_ref()))
+                // .add_image_alt_text( )
                 .set_image_url(badge_image_url)
                 .build();
             links.push(link);
