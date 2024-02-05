@@ -31,6 +31,10 @@ New commands
 - suggest label names based on URL type - WIP
 - autoreplace autolinks / inline links by ref links
 
+Links commands:
+
+- add "link format" option to output links in reference, inline, autolink... formats
+
 Markdown commands
 
 - generate categories.md - WIP
