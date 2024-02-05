@@ -35,10 +35,11 @@ RUN rustup toolchain install nightly \
     && rustup component add rustfmt --toolchain nightly
 
 ## Install cargo binstall (binary install)
-## Install just and nextest from the binary release
+## Install just, etc... from the binary release
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash \
     && cargo binstall --no-confirm just \
-    && cargo binstall --no-confirm --secure cargo-nextest
+    && cargo binstall --no-confirm mdbook
+#    && cargo binstall --no-confirm --secure cargo-nextest
 
 ## TODO Install cargo check tools
 # RUN cargo install --locked cargo-deny || true
