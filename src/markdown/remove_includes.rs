@@ -1,6 +1,7 @@
 //! Remove left-over {{#include file.ext}} from mdbook-style Markdown sources.
 //!
-//! Use to clean up Markdown sources or when the [output.markdown] renderer is enabled in `book.toml`.
+//! Use to clean up Markdown sources or when the [output.markdown] renderer is
+//! enabled in `book.toml`.
 
 use std::fs;
 use std::fs::File;
