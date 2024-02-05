@@ -22,10 +22,8 @@ pub(crate) struct BookToml {
     // [build] table
     build: Option<Build>,
 
-    // Capture additional fields
-    // https://serde.rs/attr-flatten.html
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
+    // [output.*] tables
+    output: Option<Output>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -45,6 +43,14 @@ pub(crate) struct Build {
     #[serde(rename = "build-dir")]
     build_dir: Option<String>,
     // We don't care about the rest.
+}
+
+#[derive(Deserialize, Debug)]
+pub(crate) struct Output {
+    // Capture additional fields
+    // https://serde.rs/attr-flatten.html
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 /// Parse `book.toml`, the configuration file use by `mdbook`
@@ -86,15 +92,18 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     // placed in a separate directory underneath `build-dir`
     // - for example, directories `book/html` and `book/markdown`.
     // https://rust-lang.github.io/mdBook/format/configuration/renderers.html
-    if book_toml
+    debug!("{:?}", book_toml.output);
+
+    if let Some(output) = book_toml.output {
+        if output
         .extra
         .iter()
-        .filter(|(k, _)| k.contains("output"))
         .count()
         >= 2
     {
         book_html_build_dir_path = book_html_build_dir_path.map(|pb| pb.join("html"));
     }
+}
     debug!(
         "try_parse_book_toml: markdown_dir_path: {:?}; book_build_dir_path: {:?}",
         markdown_dir_path, book_html_build_dir_path

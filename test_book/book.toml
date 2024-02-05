@@ -28,3 +28,5 @@ page-break = true # insert page-break after each chapter
 
 [output.html.search]
 limit-results = 15
+
+[output.markdown]
