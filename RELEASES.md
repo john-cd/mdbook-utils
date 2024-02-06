@@ -1,10 +1,13 @@
 # RELEASES
 
-## vNext
+## v0.1.2
 
-- List modified files when calling the markdown > remove-includes subcommand
-- Return a list of modified files from markdown::remove_includes_in_all_markdown_files_in
+- markdown > remove-includes:
+  - added hard-coded string to replace the removed includes.
+  - List modified files when calling the markdown > remove-includes subcommand.
+  - Return a list of modified files from the markdown::remove_includes_in_all_markdown_files_in function
 - Add RELEASES.md file.
+- Exclude unnecessary files from package.
 
 ## v0.1.1
 
