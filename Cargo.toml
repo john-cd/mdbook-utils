@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 keywords = [ "documentation", "markdown", "book", "mdbook", "rustbook" ]
 categories = [ "parser-implementations", "parsing", "text-processing", "development-tools", "command-line-utilities" ]
 publish = true
-exclude = ["/.devcontainer", "/.github", "/test_book", ".*", "TODO.md", "rustfmt.toml", "justfile"]
+exclude = ["/.devcontainer", "/.github", "/test_book", ".*", "TODO.md", "rustfmt.toml", "justfile", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
