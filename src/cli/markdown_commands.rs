@@ -117,10 +117,13 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                     .interact()
                     .context("Failed to obtain user confirmation.")?;
             if confirmation {
-                mdbook_utils::markdown::remove_includes_in_all_markdown_files_in(
+                let modified_files = mdbook_utils::markdown::remove_includes_in_all_markdown_files_in(
                     book_markdown_build_dir_path,
                 )
                 .context("[run] Failed to remove {{#include ...}} statements.")?;
+                for f in modified_files.iter() {
+                    println!("Modified: {}", f.display())
+                }
                 println!("Done.");
             } else {
                 println!("Cancelled.");

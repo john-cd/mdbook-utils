@@ -23,10 +23,14 @@ static REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{\{#include.*?\}\}").unwr
 ///
 /// markdown_src_dir_path: path to the source directory containing the
 /// Markdown files.
-pub fn remove_includes_in_all_markdown_files_in<P>(markdown_dir_path: P) -> Result<()>
+pub fn remove_includes_in_all_markdown_files_in<P>(
+    markdown_dir_path: P,
+) -> Result<Vec<std::path::PathBuf>>
 where
     P: AsRef<Path>,
 {
+    let mut modified = Vec::new();
+
     // Locate the Markdown files with the src directory
     let paths = crate::fs::find_markdown_files_in(markdown_dir_path.as_ref())?;
 
@@ -40,10 +44,11 @@ where
                 new_txt = new_txt.replace(cap.get(0).unwrap().as_str(), "");
             }
             if new_txt != buf {
-                // debug!("{}",  new_txt);
-                File::create(p)?.write_all(new_txt.as_bytes())?;
+                // tracing::debug!("modified: {}", p.display());
+                File::create(p.clone())?.write_all(new_txt.as_bytes())?;
+                modified.push(p);
             }
         }
     }
-    Ok(())
+    Ok(modified)
 }
