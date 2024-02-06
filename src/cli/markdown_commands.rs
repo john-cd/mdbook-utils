@@ -19,7 +19,8 @@ pub(crate) enum MarkdownSubCommand {
     /// Replace {{#include file.md}} by the file contents
     ReplaceIncludesByContents(MarkdownDirArgs),
 
-    /// Remove left-over {{#include }}
+    /// Remove {{#include }} statements
+    /// (and replace them by a hard-coded string)
     RemoveIncludes(MarkdownDirArgs),
 
     /// Generate a listing of crates.io dependencies
@@ -117,10 +118,13 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                     .interact()
                     .context("Failed to obtain user confirmation.")?;
             if confirmation {
-                let modified_files = mdbook_utils::markdown::remove_includes_in_all_markdown_files_in(
-                    book_markdown_build_dir_path,
-                )
-                .context("[run] Failed to remove {{#include ...}} statements.")?;
+                let contents_to_insert = "// MISSING INCLUDE FILE\nfn main() {}";
+                let modified_files =
+                    mdbook_utils::markdown::remove_includes_in_all_markdown_files_in(
+                        book_markdown_build_dir_path,
+                        contents_to_insert,
+                    )
+                    .context("[run] Failed to remove {{#include ...}} statements.")?;
                 for f in modified_files.iter() {
                     println!("Modified: {}", f.display())
                 }
