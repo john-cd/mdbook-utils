@@ -1,6 +1,8 @@
-// Inspired by <https://github.com/rxdn/mdbook-sitemap-generator/tree/master>
-// Consider using <https://docs.rs/sitewriter/1.0.4/sitewriter/>.
-// or <https://crates.io/crates/sitemap> instead.
+//! Write links to sitemap.xml
+//!
+//! Inspired by <https://github.com/rxdn/mdbook-sitemap-generator/tree/master>
+//! Consider using <https://docs.rs/sitewriter/1.0.4/sitewriter/>.
+//! or <https://crates.io/crates/sitemap> instead.
 
 use std::io::Write;
 
@@ -46,7 +48,7 @@ pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> Result<()> {
     Ok::<_, Error>(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

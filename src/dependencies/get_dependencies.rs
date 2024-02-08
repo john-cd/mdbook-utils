@@ -1,4 +1,4 @@
-/// Get the book's examples' dependencies
+//! Get the book's examples' dependencies
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -11,6 +11,7 @@ use anyhow::anyhow;
 use anyhow::Result;
 use serde::Deserialize;
 
+/// Stores a dependency to a crate
 #[derive(Debug, Deserialize)]
 pub(crate) struct Dependency<'a> {
     pub(crate) library_name: Cow<'a, str>,
@@ -86,7 +87,7 @@ fn write_log(out: &[u8], err: &[u8]) -> Result<()> {
     Ok(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

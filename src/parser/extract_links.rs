@@ -1,4 +1,4 @@
-/// Use a Markdown parser to extract links
+//! Use a Markdown parser to extract links
 use std::borrow::Cow;
 
 use pulldown_cmark::Event;
@@ -122,7 +122,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
     links
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

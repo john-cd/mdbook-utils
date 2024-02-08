@@ -57,7 +57,7 @@ fn generate_refdefs_for_one_library(
     Vec::new()
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

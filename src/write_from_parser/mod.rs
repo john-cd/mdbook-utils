@@ -1,5 +1,5 @@
-/// Functions that take a Markdown parser
-/// and write (parts of) its contents to a file
+//! Functions that take a Markdown parser
+//! and write (parts of) its contents to a file
 mod github;
 mod write_raw_to;
 mod write_refdefs;

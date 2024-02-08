@@ -1,6 +1,6 @@
-/// Functions that create parsers, and
-/// extract reference definitions and links
-/// from said parser
+//! Functions that create parsers, and
+//! extract reference definitions and links
+//! from said parser
 mod extract_links;
 
 pub(crate) use extract_links::*;

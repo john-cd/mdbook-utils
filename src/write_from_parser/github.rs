@@ -1,4 +1,4 @@
-//! Generate links and reference definitions
+//! Generate links and reference definitions for GitHub repos
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::io::Write;
@@ -72,7 +72,7 @@ where
     Ok(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

@@ -18,7 +18,7 @@ pub(crate) fn merge_links<'a>(
     buf
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

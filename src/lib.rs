@@ -1,7 +1,7 @@
 //! # mdbook-utils
 //!
-//! To use the command-line tool, run `mdbook-utils` at a shell prompt. A list
-//! of commands will be displayed.
+//! To use the command-line tool, run `mdbook-utils` at a shell prompt.
+//! A list of commands will be displayed.
 //!
 //! The following is the **library API** doc. This crate can be used if more
 //! control is required.
@@ -14,6 +14,9 @@
 
 #![deny(missing_docs)]
 #![deny(rust_2018_idioms)]
+#![doc(html_playground_url = "https://play.rust-lang.org/")]
+// #![doc(html_favicon_url = "https://example.com/favicon.ico")]
+// #![doc(html_logo_url = "https://example.com/logo.jpg")]
 
 mod build_book;
 mod dependencies;
@@ -350,7 +353,7 @@ where
     Ok(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

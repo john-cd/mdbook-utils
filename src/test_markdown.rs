@@ -47,7 +47,7 @@ pub fn get_test_markdown() -> String {
     md.to_owned()
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

@@ -1,4 +1,4 @@
-/// Write links and reference definitions to file(s)
+//! Write links and reference definitions to file(s)
 use std::io::Write;
 
 use anyhow::Context;
@@ -109,6 +109,7 @@ where
 
 // PRIVATE FUNCTIONS
 
+/// Type of link or reference definition to write
 #[bitflags(default = ReferenceLink | ReferenceDefinition)]
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -151,7 +152,7 @@ fn write<W: Write>(l: &Link<'_>, flags: &BitFlags<LinkWrite>, w: &mut W) -> Resu
     Ok(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

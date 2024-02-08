@@ -1,4 +1,4 @@
-/// Output markdown parsing debugging information
+//! Output markdown parsing debugging information
 use std::io::Write;
 
 use anyhow::Result;
@@ -196,7 +196,7 @@ where
     Ok(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

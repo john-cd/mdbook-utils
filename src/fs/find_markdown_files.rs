@@ -1,7 +1,8 @@
+//! Locate Markdown files within a directory
+
 use std::path::Path;
 use std::path::PathBuf;
 
-/// Locate Markdown files within a directory
 use anyhow::Result;
 use tracing::warn;
 use walkdir::DirEntry;

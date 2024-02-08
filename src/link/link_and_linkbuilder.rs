@@ -1,14 +1,12 @@
-/// `Link` is a structure that collects all necessary information to
-/// write Markdown (inline or reference-style) links and reference
-/// definitions, including badges.
+//! Internal models for a link and linkbuilder
 use std::borrow::Cow;
 use std::cmp::Ordering;
 
 use heck::ToKebabCase;
 use pulldown_cmark::LinkType;
 
-// Link builder that progressively construct a Link
-// from pieces of information
+/// Link builder that progressively construct a Link
+/// from pieces of information
 #[derive(Debug, Default)]
 pub(crate) struct LinkBuilder<'a> {
     link: Link<'a>,
@@ -105,6 +103,9 @@ impl<'a> LinkBuilder<'a> {
 
 // LINK -----------------------------
 
+/// `Link` is a structure that collects all necessary information to
+/// write Markdown (inline or reference-style) links and reference
+/// definitions, including badges.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct Link<'a> {
     link_type: Option<LinkType>,
@@ -294,7 +295,7 @@ impl<'a> PartialEq for Link<'a> {
 /// Eq implementation for Link
 impl<'a> Eq for Link<'a> {}
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

@@ -26,6 +26,7 @@ pub(crate) struct BookToml {
     output: Option<Output>,
 }
 
+/// [book] table
 #[derive(Deserialize, Debug)]
 pub(crate) struct Book {
     // Source files
@@ -35,6 +36,7 @@ pub(crate) struct Book {
                           * We don't care about the rest. */
 }
 
+/// [build] table
 #[derive(Deserialize, Debug)]
 pub(crate) struct Build {
     // Directory where the output is placed
@@ -45,6 +47,7 @@ pub(crate) struct Build {
     // We don't care about the rest.
 }
 
+/// [output.*] tables
 #[derive(Deserialize, Debug)]
 pub(crate) struct Output {
     // Capture additional fields
@@ -120,7 +123,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     ))
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

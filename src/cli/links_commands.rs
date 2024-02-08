@@ -1,3 +1,4 @@
+//! Command-line subcommands to handle links
 #![allow(dead_code)]
 
 use anyhow::Context;
@@ -27,6 +28,7 @@ pub(crate) enum LinksSubCommand {
     BrokenLinks(MarkdownSrcDirAndDestFileArgs),
 }
 
+/// Process "links" subcommands of the command-line interface
 pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> {
     match subcmd {
         LinksSubCommand::WriteAll(args) => {

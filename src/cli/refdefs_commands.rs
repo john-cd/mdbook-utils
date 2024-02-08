@@ -1,3 +1,4 @@
+//! Command-line subcommands to handle reference definitions
 use anyhow::Context;
 use anyhow::Result;
 use clap::Subcommand;
@@ -26,6 +27,7 @@ pub(crate) enum RefDefsSubCommand {
     GenerateFromDependencies(DependenciesDirAndDestFileArgs),
 }
 
+/// "refdefs" subcommands of the command-line interface
 pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()> {
     match subcmd {
         RefDefsSubCommand::Write(args) => {

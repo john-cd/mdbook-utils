@@ -1,3 +1,4 @@
+//! Command-line interface
 use std::env;
 
 use anyhow::Context;
@@ -9,6 +10,7 @@ use crate::cli::Command;
 
 mod cli;
 
+/// Entrypoint of the command-line interface
 fn main() -> Result<()> {
     // Load environment variables from a `.env` file (in the current directory or
     // parents), if it exists. If variables with the same names already exist in

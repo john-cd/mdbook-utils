@@ -1,3 +1,5 @@
+//! Regular expressions used for reference definition generation
+
 use regex::Regex;
 
 /// Regexes to retrieve Markdown elements

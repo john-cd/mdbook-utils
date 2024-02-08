@@ -1,3 +1,4 @@
+//! Write reference definitions
 use std::io::Write;
 
 use anyhow::Result;
@@ -25,7 +26,7 @@ where
     Ok(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

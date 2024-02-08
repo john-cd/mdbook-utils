@@ -1,3 +1,4 @@
+//! Sitemap file generation
 mod xml;
 
 use std::io::Write;
@@ -59,7 +60,7 @@ where
     Ok(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

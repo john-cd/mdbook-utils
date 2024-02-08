@@ -1,3 +1,4 @@
+//! Parse `Cargo.toml`
 #![allow(dead_code)]
 
 use std::path::Path;
@@ -7,6 +8,8 @@ use cargo_toml::Manifest;
 use tracing::debug;
 
 /// Parse `Cargo.toml` (using the `cargo_toml` crate)
+///
+/// cargo_toml_dir_path: the path to the directory where Cargo.toml may be found
 pub(crate) fn parse_cargo_toml<P: AsRef<Path>>(
     cargo_toml_dir_path: P,
 ) -> Result<Vec<String>, Error> {
@@ -46,7 +49,7 @@ pub(crate) fn parse_cargo_toml<P: AsRef<Path>>(
     Ok(deps.keys().cloned().collect::<Vec<String>>())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

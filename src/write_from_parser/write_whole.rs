@@ -1,5 +1,5 @@
-/// Functions that read from a Markdown parser and write the whole
-/// content to various outputs / formats
+//! Functions that read from a Markdown parser and write the whole
+//! content to various outputs / formats
 use std::io::Write;
 
 use anyhow::Result;
@@ -98,7 +98,7 @@ where
 //     Ok(())
 // }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

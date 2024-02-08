@@ -1,3 +1,4 @@
+//! Command-line subcommands to manipulate Markdown
 use anyhow::Context;
 use anyhow::Result;
 use clap::Subcommand;
@@ -36,6 +37,7 @@ pub(crate) enum MarkdownSubCommand {
     // TODO autoreplace autolinks / inline links by ref links
 }
 
+/// Process "markdown" subcommands of the command-line interface
 pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<()> {
     match subcmd {
         MarkdownSubCommand::ExtractCodeExamples(args) => {

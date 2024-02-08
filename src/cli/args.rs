@@ -1,4 +1,4 @@
-//! Command arguments
+//! Command arguments / options
 
 use std::path::PathBuf;
 
@@ -111,7 +111,7 @@ pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {
     pub(crate) dest: DestFileArgs,
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

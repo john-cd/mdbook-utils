@@ -24,6 +24,7 @@ pub(crate) fn init(global_opts: GlobalOpts) -> Result<Configuration> {
     Ok(c)
 }
 
+/// Application configuration and environment variables
 #[derive(Deserialize, Debug)]
 #[serde(default)]
 pub(crate) struct Configuration {
@@ -261,7 +262,7 @@ impl Configuration {
     }
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

@@ -1,3 +1,4 @@
+//! `mdbook` book building
 #![allow(unused)]
 use std::path::Path;
 use std::process::Command;
@@ -6,15 +7,15 @@ use anyhow::anyhow;
 use anyhow::Context;
 use anyhow::Result;
 
-// Invoke `mdbook build`
-//
-// Usage example:
-// println!("Info: building the book...");
-// let res = build_book(&root_path);
-// if let Err(ref e) = res {
-//     println!("cargo:warning=ERROR: {}", e);
-//     return res;
-// }
+/// Invoke `mdbook build`
+///
+/// Usage example:
+/// println!("Info: building the book...");
+/// let res = build_book(&root_path);
+/// if let Err(ref e) = res {
+///     println!("cargo:warning=ERROR: {}", e);
+///     return res;
+/// }
 pub(crate) fn build_book(root_path: &Path) -> Result<()> {
     let output = Command::new("mdbook")
         .args(["build"])
@@ -58,7 +59,7 @@ pub(crate) fn build_book(root_path: &Path) -> Result<()> {
 //     Ok(())
 // }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

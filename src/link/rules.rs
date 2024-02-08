@@ -1,6 +1,7 @@
+//! Rules to create a reference label and/or a badge URL
+//! from a link URL
 #![allow(clippy::vec_init_then_push)]
-/// Rules to create a reference label and/or a badge URL
-/// from a link URL
+
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
@@ -255,7 +256,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m
 });
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

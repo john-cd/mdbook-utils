@@ -32,7 +32,7 @@ pub(crate) fn parse_arguments() -> Cli {
 #[command(author, version, about, long_about = None)]
 // Displays the help, if no arguments are provided
 // #[command(arg_required_else_help = true)]
-/// Command-line arguments
+/// Command-line interface: commands and global options
 pub(crate) struct Cli {
     #[command(subcommand)]
     pub(crate) command: Command,
@@ -79,7 +79,7 @@ pub(crate) struct GlobalOpts {
     pub(crate) yes: bool,
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 

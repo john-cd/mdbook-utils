@@ -1,4 +1,4 @@
-/// Directory handling
+//! Directory handling
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -59,7 +59,7 @@ where
     Ok(())
 }
 
-# [cfg(test)]
+#[cfg(test)]
 mod test {
     // use super::*;
 
