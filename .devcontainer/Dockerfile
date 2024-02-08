@@ -60,6 +60,7 @@ FROM base as development
 # nano \
 
 # RUN cargo binstall --no-confirm ripgrep
+RUN cargo install cargo-bump
 
 ## https://code.visualstudio.com/remote/advancedcontainers/persist-bash-history
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/command_history/.bash_history" \
