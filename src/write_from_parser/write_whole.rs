@@ -97,3 +97,12 @@ where
 //     w.write_all(buf.as_bytes())?;
 //     Ok(())
 // }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

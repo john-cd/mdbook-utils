@@ -150,3 +150,12 @@ fn write<W: Write>(l: &Link<'_>, flags: &BitFlags<LinkWrite>, w: &mut W) -> Resu
     }
     Ok(())
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

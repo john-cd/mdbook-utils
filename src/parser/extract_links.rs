@@ -121,3 +121,12 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
 
     links
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

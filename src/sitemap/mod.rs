@@ -58,3 +58,12 @@ where
     info!("sitemap.xml created.");
     Ok(())
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

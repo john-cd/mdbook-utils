@@ -293,3 +293,12 @@ impl<'a> PartialEq for Link<'a> {
 
 /// Eq implementation for Link
 impl<'a> Eq for Link<'a> {}
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

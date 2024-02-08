@@ -45,3 +45,12 @@ pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> Result<()> {
         })?;
     Ok::<_, Error>(())
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

@@ -110,3 +110,12 @@ pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {
     #[command(flatten)]
     pub(crate) dest: DestFileArgs,
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

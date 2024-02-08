@@ -17,3 +17,12 @@ pub(crate) fn merge_links<'a>(
     buf.dedup();
     buf
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

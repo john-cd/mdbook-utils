@@ -85,3 +85,12 @@ fn write_log(out: &[u8], err: &[u8]) -> Result<()> {
     buffer.flush()?;
     Ok(())
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

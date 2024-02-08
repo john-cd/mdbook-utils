@@ -45,3 +45,12 @@ pub(crate) fn parse_cargo_toml<P: AsRef<Path>>(
     // Return the crate names
     Ok(deps.keys().cloned().collect::<Vec<String>>())
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

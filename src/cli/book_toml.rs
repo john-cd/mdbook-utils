@@ -119,3 +119,12 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
         book_markdown_build_dir_path,
     ))
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

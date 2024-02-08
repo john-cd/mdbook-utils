@@ -78,3 +78,12 @@ pub(crate) struct GlobalOpts {
     #[clap(long, short = 'y', global = true)]
     pub(crate) yes: bool,
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}

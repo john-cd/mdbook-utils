@@ -260,3 +260,12 @@ impl Configuration {
         self.global_opts.yes
     }
 }
+
+# [cfg(test)]
+mod test {
+    // use super::*;
+
+    // #[test]
+    // fn test() {
+    // }
+}
