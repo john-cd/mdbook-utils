@@ -20,7 +20,7 @@ use anyhow::Result;
 // buf
 // }
 
-/// Read all Markdown files in a directory into one big string
+/// Read all Markdown files in a directory into one big string.
 pub(crate) fn read_to_string_all_markdown_files_in<'a, P>(
     markdown_root_dir_path: P,
 ) -> Result<Cow<'a, str>>
@@ -48,6 +48,7 @@ where
 }
 
 /// Read a file line by line into a vector of strings.
+///
 /// Returns an error if the file does not exist or cannot be read.
 /// # Example
 /// ```ignore

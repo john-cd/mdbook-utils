@@ -1,4 +1,4 @@
-//! Output markdown parsing debugging information
+//! Output markdown parsing debugging information.
 use std::io::Write;
 
 use anyhow::Result;
@@ -7,13 +7,14 @@ use pulldown_cmark::Parser;
 use pulldown_cmark::Tag;
 
 /// Parse Markdown and write all raw events to e.g. a file
-/// for debugging purposes
+/// for debugging purposes.
 ///
-/// parser: source Markdown parser
-/// w: writer / file to write to
+/// parser: source Markdown parser.
+///
+/// w: writer / file to write to.
 ///
 /// See <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Event.html>
-/// and <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Tag.html>
+/// and <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Tag.html>.
 pub(crate) fn write_raw_to<W>(parser: &mut Parser<'_>, w: &mut W) -> Result<()>
 where
     W: Write,

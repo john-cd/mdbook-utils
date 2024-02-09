@@ -1,4 +1,4 @@
-//! Generate links and reference definitions for GitHub repos
+//! Generate links and reference definitions for GitHub repos.
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::io::Write;
@@ -24,9 +24,9 @@ use crate::link::LinkBuilder;
 /// identify URLs that are GitHub repos, create badge URLs for these
 /// links, and write to a writer / file.
 ///
-/// parser: Markdown parser
+/// parser: Markdown parser.
 ///
-/// w: Writer (e.g. File) to write to
+/// w: writer (e.g. File) to write to.
 pub(crate) fn write_github_repo_badge_refdefs<'input, W>(
     parser: &'input mut Parser<'input>,
     w: &mut W,

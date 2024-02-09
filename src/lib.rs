@@ -46,7 +46,7 @@ use pulldown_cmark::Parser;
 /// create the destination directory if it doesn't exist,
 /// create the destination file,
 /// parse all the Markdown files in the source directory,
-/// and invoke a closure that uses the parser to write to the file
+/// and invoke a closure that uses the parser to write to the file.
 fn helper<P1, P2, F>(src_dir_path: P1, dest_file_path: P2, func: F) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -76,11 +76,11 @@ where
 // DEBUG
 
 /// Parse Markdown from all .md files in a given source directory and
-/// write all raw events to a file for debugging purposes
+/// write all raw events to a file for debugging purposes.
 ///
-/// src_dir_path: path to the source directory
+/// src_dir_path: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into
+/// dest_file_path: path to the file to create and write into.
 pub fn debug_parse_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -94,7 +94,7 @@ where
     Ok(())
 }
 
-/// Test function that uses fake Markdown
+/// Test function that uses fake Markdown.
 pub fn test() -> Result<()> {
     fs::create_dir("./book/temp/")?;
 
@@ -114,11 +114,11 @@ pub fn test() -> Result<()> {
 // REFERENCE DEFINITIONS
 
 /// Parse Markdown from all .md files in a given source directory
-/// and write reference definitions found therein to a file
+/// and write reference definitions found therein to a file.
 ///
-/// src_dir_path: path to the source directory
+/// src_dir_path: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into
+/// dest_file_path: path to the file to create and write into.
 pub fn write_refdefs_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -138,9 +138,9 @@ where
 /// create badge URLs for these links,
 /// and write to a file.
 ///
-/// src_dir_path: path to the source directory
+/// src_dir_path: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into
+/// dest_file_path: path to the file to create and write into.
 pub fn generate_badges<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -160,11 +160,11 @@ where
 
 /// Parse Markdown from all .md files in a given source directory,
 /// write all inline links and autolinks (i.e., not written as
-/// reference-style links) found therein to a file
+/// reference-style links) found therein to a file.
 ///
-/// src_dir_path: path to the source directory
+/// src_dir_path: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into
+/// dest_file_path: path to the file to create and write into.
 pub fn write_inline_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -188,11 +188,11 @@ where
 }
 
 /// Parse Markdown from all .md files in a given source directory,
-/// write all links found therein to a file
+/// write all links found therein to a file.
 ///
-/// src_dir_path: path to the source directory
+/// src_dir_path: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into
+/// dest_file_path: path to the file to create and write into.
 pub fn write_all_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -208,11 +208,11 @@ where
 }
 
 /// Parse Markdown from all .md files in a given source directory,
-/// write duplicated links found therein to a file
+/// write duplicated links found therein to a file.
 ///
-/// src_dir_path: path to the source directory
+/// src_dir_path: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into
+/// dest_file_path: path to the file to create and write into.
 pub fn write_duplicate_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -229,11 +229,11 @@ where
 }
 
 /// Parse Markdown from all .md files in a given source directory,
-/// write duplicated links found therein to a file
+/// write duplicated links found therein to a file.
 ///
-/// src_dir_path: path to the source directory
+/// src_dir_path: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into
+/// dest_file_path: path to the file to create and write into.
 pub fn write_broken_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -253,14 +253,14 @@ where
 
 /// Given a Cargo.toml path,
 /// generate reference definitions from code dependencies
-/// and write them to a file
+/// and write them to a file.
 ///
-/// cargo_toml_dir_path: path to the directory containing `Cargo.toml`
+/// cargo_toml_dir_path: path to the directory containing `Cargo.toml`.
 ///
-/// markdown_dir_path: path to the directory containing Markdown files
+/// markdown_dir_path: path to the directory containing Markdown files.
 ///
 /// refdef_dest_file_path: path to the file to create and
-/// write into
+/// write into.
 pub fn generate_refdefs_to<P1, P2, P3>(
     cargo_toml_dir_path: P1,
     markdown_dir_path: P2,
@@ -297,14 +297,14 @@ where
 // SITEMAP
 
 /// Create a sitemap.xml file from the list of Markdown files in a
-/// source directory
+/// source directory.
 ///
-/// src_dir_path: path to the source directory
+/// src_dir_path: path to the source directory.
 ///
-/// domain: base URL e.g. <https://john-cd.com/rust_howto/>
+/// domain: base URL e.g. <https://john-cd.com/rust_howto/>.
 ///
 /// dest_file_path: the path to the destination file e.g.
-/// book/html/sitemap.xml
+/// book/html/sitemap.xml.
 pub fn generate_sitemap<P1, P2>(
     markdown_src_dir_path: P1,
     base_url: url::Url,

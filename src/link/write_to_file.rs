@@ -1,4 +1,4 @@
-//! Write links and reference definitions to file(s)
+//! Write [links][Link] and reference definitions to file(s)
 use std::io::Write;
 
 use anyhow::Context;
@@ -127,7 +127,7 @@ enum LinkWrite {
 ///
 /// flags: Bitflags
 ///
-/// w: the writer e.g. a File or Vec<u8>
+/// w: the writer e.g. a File or Vec\<u8\>
 #[inline]
 fn write<W: Write>(l: &Link<'_>, flags: &BitFlags<LinkWrite>, w: &mut W) -> Result<()> {
     if flags.contains(LinkWrite::InlineLink) {

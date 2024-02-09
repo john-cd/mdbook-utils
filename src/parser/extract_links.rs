@@ -11,7 +11,7 @@ use tracing::error;
 use super::super::link::Link;
 use super::super::link::LinkBuilder;
 
-/// Tracks where we are in the Markdown parser event stream
+/// Tracks where we are in the Markdown parser event stream.
 #[derive(Debug, PartialEq, Copy, Clone)]
 enum Where {
     Elsewhere,
@@ -21,7 +21,7 @@ enum Where {
 }
 
 /// Read from a Markdown parser, extract links from the event stream,
-/// and return said links
+/// and return said links.
 pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'input>> {
     let mut state: Vec<(Where, LinkBuilder<'input>)> = Vec::new();
     let mut links: Vec<Link<'input>> = Vec::new();

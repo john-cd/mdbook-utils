@@ -3,7 +3,7 @@
 
 use crate::link::Link;
 
-/// Append, sort and dedupe reference definitions
+/// Append, sort and dedupe reference definitions.
 pub(crate) fn merge_links<'a>(
     existing_links: Vec<Link<'a>>,
     new_links: &mut Vec<Link<'a>>,

@@ -8,6 +8,7 @@ use anyhow::Error;
 use tracing::info;
 
 /// Check if a path is a directory
+///
 /// Return a PathBuf if it is.
 pub(crate) fn check_is_dir<P>(dir_path: P) -> Result<PathBuf, Error>
 where
@@ -21,7 +22,7 @@ where
 }
 
 /// Create the parent directory(ies) for a given file (that will be
-/// created later), if they don't exist
+/// created later), if they don't exist.
 pub(crate) fn create_parent_dir_for<P>(file_path: P) -> Result<(), Error>
 where
     P: AsRef<Path>,
@@ -35,7 +36,7 @@ where
     Ok(())
 }
 
-/// Create a directory (including parent directories as needed)
+/// Create a directory (including parent directories as needed).
 pub(crate) fn create_dir<P>(dir_path: P) -> Result<(), Error>
 where
     P: AsRef<Path>,

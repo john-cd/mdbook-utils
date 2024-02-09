@@ -1,4 +1,4 @@
-//! Create reference definitions from dependencies
+//! Create reference definitions from dependencies.
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;

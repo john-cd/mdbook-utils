@@ -1,5 +1,5 @@
-//! Functions that generate reference definitions e.g. from code dependencies
-//! and links
+//! Functions that generate reference definitions
+//! e.g. from code dependencies and links.
 mod merge_refdefs;
 mod refdefs_from_dependencies;
 

@@ -1,4 +1,4 @@
-//! Sitemap file generation
+//! Sitemap file generation.
 mod xml;
 
 use std::io::Write;
@@ -11,7 +11,7 @@ use tracing::info;
 /// Create a sitemap.xml file from a list of links and a base URL.
 ///
 /// links: the list of links to Markdown files / book chapters (e.g. from
-/// SUMMARY.md)
+/// SUMMARY.md).
 ///
 /// base_url: the base URL used as the prefix for HTML files.
 ///

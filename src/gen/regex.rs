@@ -2,7 +2,7 @@
 
 use regex::Regex;
 
-/// Regexes to retrieve Markdown elements
+/// Regexes to retrieve Markdown elements.
 static GLOBAL_REGEX: Lazy<BTreeMap<&str, Re>> = Lazy::new(|| {
     tracing::debug!("Initializing Regexes...\n");
     // A sorted map

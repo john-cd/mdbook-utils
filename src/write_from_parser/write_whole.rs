@@ -8,9 +8,9 @@ use pulldown_cmark::Event;
 
 // HTML
 
-/// Read from a Markdown parser and write HTML to standard output
+/// Read from a Markdown parser and write HTML to standard output.
 ///
-/// parser: Markdown parser
+/// parser: Markdown parser.
 #[allow(dead_code)]
 pub(crate) fn write_html_to_stdout<'a, I>(parser: I)
 where
@@ -24,9 +24,9 @@ where
     html::write_html(&mut handle, parser).unwrap();
 }
 
-/// Read from a Markdown parser and write HTML to bytes
+/// Read from a Markdown parser and write HTML to bytes.
 ///
-/// parser: Markdown parser
+/// parser: Markdown parser.
 #[allow(dead_code)]
 pub(crate) fn write_html_to_bytes<'a, I>(parser: I) -> Result<Vec<u8>>
 where
@@ -38,9 +38,9 @@ where
     Ok(bytes)
 }
 
-/// Read from a Markdown parser and write HTML to string
+/// Read from a Markdown parser and write HTML to string.
 ///
-/// parser: Markdown parser
+/// parser: Markdown parser.
 #[allow(dead_code)]
 pub(crate) fn write_html_to_string<'a, I>(parser: I) -> String
 where
@@ -61,8 +61,9 @@ where
 // /// Read from a Markdown parser and write Markdown to a writer (e.g.
 // /// File).
 // ///
-// /// parser: Markdown parser
-// /// w: Writer e.g. File
+// /// parser: Markdown parser.
+// ///
+// /// w: writer e.g. File to write to.
 // #[allow(dead_code)]
 // pub(crate) fn write_markdown_to<'a, I, E, W>(
 //     parser: I,

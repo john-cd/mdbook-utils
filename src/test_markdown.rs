@@ -1,6 +1,6 @@
-//! Example Markdown for testing
+//! Example Markdown for testing.
 
-/// Returns a test string with various Markdown constructs
+/// Returns a test string with various Markdown constructs.
 #[allow(dead_code)]
 pub fn get_test_markdown() -> String {
     let md: &'static str = "

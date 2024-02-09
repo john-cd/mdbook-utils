@@ -1,11 +1,11 @@
-//! Internal models for a link and linkbuilder
+//! Internal models for a Markdown [Link] and [LinkBuilder]
 use std::borrow::Cow;
 use std::cmp::Ordering;
 
 use heck::ToKebabCase;
 use pulldown_cmark::LinkType;
 
-/// Link builder that progressively construct a Link
+/// Link builder that progressively construct a [Link]
 /// from pieces of information
 #[derive(Debug, Default)]
 pub(crate) struct LinkBuilder<'a> {

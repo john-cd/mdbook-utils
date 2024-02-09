@@ -7,7 +7,8 @@ use pulldown_cmark::Parser;
 /// Write reference definitions parsed from a Markdown parser to a
 /// file / writer.
 ///
-/// parser: Markdown parser
+/// parser: Markdown parser.
+///
 /// w: Writer e.g. File
 pub(crate) fn write_refdefs_to<W>(parser: &mut Parser<'_>, w: &mut W) -> Result<()>
 where

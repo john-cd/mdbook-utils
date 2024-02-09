@@ -8,7 +8,7 @@ use tracing::warn;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
 
-/// Returns true if the directory entry is hidden (starts with a `.`)
+/// Returns `true`` if the directory entry is hidden (starts with a `.`).
 fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
@@ -18,6 +18,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
 }
 
 /// Locate Markdown files within a directory
+/// 
 /// If root_dir_path is a file, then it is the first and only item
 /// yielded
 pub(crate) fn find_markdown_files_in<P>(root_dir_path: P) -> Result<Vec<PathBuf>>
