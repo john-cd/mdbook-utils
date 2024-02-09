@@ -69,7 +69,7 @@ where
     // Returns an Iterator to the Reader of the lines of the file.
     Ok(io::BufReader::new(file)
         .lines()
-        .flatten()
+        .map_while(Result::ok)
         .map(Cow::from)
         .collect())
 }
