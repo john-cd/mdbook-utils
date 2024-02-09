@@ -1,5 +1,15 @@
 # RELEASES
 
+## vNext (0.1.3)
+
+- Updated main README
+- Removed container after run in CI workflow
+- Upgraded to Rust 1.76
+- Code documentation improvements
+- Added test stubs
+- Added cargo bump
+- Excluded unecessary files from package
+
 ## v0.1.2
 
 - markdown > remove-includes:

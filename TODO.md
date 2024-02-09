@@ -1,19 +1,18 @@
 # TODO
 
-- README - add better usage explanation of env. vars, book.toml parsing, and command line options
+- README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
 
 - Finish publish.yml
 
 - fix TODOs
 - write_inline_links: remove internal links
 
-- use the test_book in #[test]
-
-- add unit tests
+- add unit tests - WIP
+- use test_book in automated (integration) tests
 
 - make more functions fully public
 
-New commands
+New commands:
 
 - finish generation of refdefs from dependencies - WIP
 - duplicate links - WIP
