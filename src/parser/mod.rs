@@ -58,9 +58,10 @@ impl<'input> Handler<'input> {
 /// Implement the trait required by `new_with_broken_link_callback`
 impl<'input> BrokenLinkCallback<'input> for Handler<'input> {
     /// In case the parser encounters any potential links that have a broken
-    /// reference (e.g \[foo\] when there is no \[foo\]:  entry at the bottom) the
-    /// provided callback will be called with the reference name, and the
-    /// returned pair will be used as the link URL and title if it is not None.
+    /// reference (e.g \[foo\] when there is no \[foo\]:  entry at the bottom)
+    /// the provided callback will be called with the reference name, and
+    /// the returned pair will be used as the link URL and title if it is
+    /// not None.
     fn handle_broken_link(
         &mut self,
         link: BrokenLink<'input>,

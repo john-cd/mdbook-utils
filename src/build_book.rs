@@ -19,7 +19,6 @@ use anyhow::Result;
 ///     return res;
 /// }
 /// ```
-///
 pub(crate) fn build_book(root_path: &Path) -> Result<()> {
     let output = Command::new("mdbook")
         .args(["build"])
