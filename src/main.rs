@@ -3,11 +3,11 @@ use std::env;
 
 use anyhow::Context;
 use anyhow::Result;
+use console::style;
 use tracing::debug;
 
 use crate::cli::Cli;
 use crate::cli::Command;
-
 mod cli;
 
 /// Entrypoint of the command-line interface.
@@ -60,28 +60,28 @@ fn main() -> Result<()> {
 
             println!(
                 "Generating {} from the list of Markdown files in {}...",
-                sitemap_dest_file_path.display(),
-                markdown_src_dir_path.display(),
+                style(sitemap_dest_file_path.display()).cyan(),
+                style(markdown_src_dir_path.display()).cyan(),
             );
             mdbook_utils::generate_sitemap(markdown_src_dir_path, base_url, sitemap_dest_file_path)
                 .context("[main] Failed to generate the sitemap.")?;
-            println!("Done.");
+            println!("{}", style("Done.").green());
         }
         Command::Debug(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let log_dest_path = config.dest_file_path(args.dest, "debug.log");
             println!(
                 "Parsing Markdown files in {} and writing raw events to {}...",
-                markdown_src_dir_path.display(),
-                log_dest_path.display()
+                style(markdown_src_dir_path.display()).cyan(),
+                style(log_dest_path.display()).cyan()
             );
             mdbook_utils::debug_parse_to(markdown_src_dir_path, log_dest_path)
                 .context("[main] Failed to generate the debug log.")?;
-            println!("Done.");
+            println!("{}", style("Done.").green());
         }
         Command::Test => {
             mdbook_utils::test().context("[main] Failed to generate the test file.")?;
-            println!("Done.");
+            println!("{}", style("Done.").green());
         } /* Add more subcommands here: Some(args::Commands::...) => { ... }
            * _ => {
            *     println!("NOT IMPLEMENTED");

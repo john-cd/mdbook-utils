@@ -7,6 +7,8 @@
 - fix TODOs
 - write_inline_links: remove internal links
 
+- add interactivity & prompt for destination paths, etc
+
 - add unit tests - WIP
 - use test_book in automated (integration) tests
 

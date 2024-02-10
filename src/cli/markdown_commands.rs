@@ -149,7 +149,10 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
         }
         MarkdownSubCommand::GenerateCrates(args) => {
             let crates_dest_path = config.dest_file_path(args.dest, "crates.md");
-            println!("Writing crate index to {}...", crates_dest_path.display());
+            println!(
+                "Writing crate index to {}...",
+                style(crates_dest_path.display()).cyan()
+            );
             // TODO
             println!("{}", style("NOT IMPLEMENTED").red());
             println!("{}", style("Done.").green());
