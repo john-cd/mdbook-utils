@@ -341,6 +341,7 @@ dependencies = [
  "anyhow",
  "cargo_toml",
  "clap",
+ "console",
  "csv",
  "dialoguer",
  "dotenvy",

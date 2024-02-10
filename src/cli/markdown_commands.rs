@@ -2,6 +2,8 @@
 use anyhow::Context;
 use anyhow::Result;
 use clap::Subcommand;
+use console::style;
+use dialoguer::theme::ColorfulTheme;
 use dialoguer::Confirm;
 
 use super::args::*;
@@ -45,26 +47,26 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             let code_dest_dir_path = config.dest_dir_path(args.dest);
             println!(
                 "Parsing Markdown files in {} and copying found Rust code blocks to {}...",
-                markdown_drafts_dir_path.display(),
-                code_dest_dir_path.display()
+                style(markdown_drafts_dir_path.display()).cyan(),
+                style(code_dest_dir_path.display()).cyan(),
             );
             mdbook_utils::markdown::extract_code_from_all_markdown_files_in(
                 markdown_drafts_dir_path,
                 code_dest_dir_path,
             )
             .context("[run] Failed to extract code examples.")?;
-            println!("Done.");
+            println!("{}", style("Done.").green());
         }
         MarkdownSubCommand::ReplaceCodeExamplesByIncludes(args) => {
             let markdown_drafts_dir_path = config.markdown_src_dir_path(args.src, "./drafts/")?;
             let code_dir_path = config.dest_dir_path(args.dest);
             println!(
                 "About to remove Rust code examples from Markdown files in {}, replacing them with {{#include ... }} statements pointing to code files in {}...",
-                markdown_drafts_dir_path.display(),
-                code_dir_path.display()
+                style(markdown_drafts_dir_path.display()).cyan(),
+                style(code_dir_path.display()).cyan()
             );
             let confirmation = config.skip_confirm()
-                || Confirm::new()
+                || Confirm::with_theme(&ColorfulTheme::default())
                     .with_prompt(
                         "This command will modify your Markdown files. Do you want to continue?",
                     )
@@ -77,19 +79,19 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                     code_dir_path,
                 )
                 .context("[run] Failed to remove code from Markdown files.")?;
-                println!("Done.");
+                println!("{}", style("Done.").green());
             } else {
-                println!("Cancelled.");
+                println!("{}", style("Cancelled.").yellow());
             }
         }
         MarkdownSubCommand::ReplaceIncludesByContents(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args, "./drafts/")?;
             println!(
                 "About to parse Markdown files in {} and replace any {{#include <file>.md}} statements by the corresponding file contents (excluding includes of *refs.md files)...",
-                markdown_src_dir_path.display()
+                style(markdown_src_dir_path.display()).cyan()
             );
             let confirmation = config.skip_confirm()
-                || Confirm::new()
+                || Confirm::with_theme(&ColorfulTheme::default())
                     .with_prompt(
                         "This command will modify your Markdown files. Do you want to continue?",
                     )
@@ -99,9 +101,9 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             if confirmation {
                 mdbook_utils::markdown::include_in_all_markdown_files_in(markdown_src_dir_path)
                     .context("[run] Failed to replace {{#include ...}} statements by contents.")?;
-                println!("Done.");
+                println!("{}", style("Done.").green());
             } else {
-                println!("Cancelled.");
+                println!("{}", style("Cancelled.").yellow());
             }
         }
         MarkdownSubCommand::RemoveIncludes(args) => {
@@ -109,10 +111,10 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 config.book_markdown_build_dir_path(args, "./book/markdown")?;
             println!(
                 "About to parse Markdown files in {} and remove any left-over {{#include ...}} statements...",
-                book_markdown_build_dir_path.display()
+                style(book_markdown_build_dir_path.display()).cyan()
             );
             let confirmation = config.skip_confirm()
-                || Confirm::new()
+                || Confirm::with_theme(&ColorfulTheme::default())
                     .with_prompt(
                         "This command will modify your Markdown files. Do you want to continue?",
                     )
@@ -128,29 +130,29 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                     )
                     .context("[run] Failed to remove {{#include ...}} statements.")?;
                 for f in modified_files.iter() {
-                    println!("Modified: {}", f.display())
+                    println!("Modified: {}", style(f.display()).cyan())
                 }
-                println!("Done.");
+                println!("{}", style("Done.").green());
             } else {
-                println!("Cancelled.");
+                println!("{}", style("Cancelled.").yellow());
             }
         }
         MarkdownSubCommand::GenerateCategories(args) => {
             let categories_dest_path = config.dest_file_path(args, "categories.md");
             println!(
                 "Writing crates.io categories to {}...",
-                categories_dest_path.display()
+                style(categories_dest_path.display()).cyan()
             );
             // TODO
-            println!("NOT IMPLEMENTED");
-            println!("Done.");
+            println!("{}", style("NOT IMPLEMENTED").red());
+            println!("{}", style("Done.").green());
         }
         MarkdownSubCommand::GenerateCrates(args) => {
             let crates_dest_path = config.dest_file_path(args.dest, "crates.md");
             println!("Writing crate index to {}...", crates_dest_path.display());
             // TODO
-            println!("NOT IMPLEMENTED");
-            println!("Done.");
+            println!("{}", style("NOT IMPLEMENTED").red());
+            println!("{}", style("Done.").green());
         } /* _ => {
            *     println!("NOT IMPLEMENTED");
            * } */
