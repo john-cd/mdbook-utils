@@ -10,6 +10,7 @@
 mod args;
 mod book_toml;
 pub(crate) mod config;
+// mod interact;
 pub(crate) mod links_commands;
 pub(crate) mod markdown_commands;
 pub(crate) mod refdefs_commands;
