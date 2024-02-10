@@ -40,6 +40,7 @@ pub(crate) struct CargoTomlDirArgs {
 /// URL
 #[derive(Args, Debug)]
 pub(crate) struct UrlArgs {
+    /// Base URL
     #[arg(short='b', long="base-url", value_name = "URL", value_parser = parse_url)]
     pub(crate) url: Option<url::Url>,
 }
