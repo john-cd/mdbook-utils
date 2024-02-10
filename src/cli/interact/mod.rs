@@ -1,10 +1,13 @@
 mod completion;
 mod history;
 
+use std::fmt::Display;
+
 use anyhow::Result;
 use completion::*;
 use dialoguer::theme::ColorfulTheme;
 use dialoguer::Input;
+use dialoguer::Select;
 use history::*;
 
 pub(crate) fn input<S>(prompt: S) -> Result<String>
@@ -31,4 +34,19 @@ where
             //     }
             // })
             .interact_text()?)
+}
+
+pub(crate) fn select<S>(prompt: S, items: Vec<S>) -> Result<String>
+where
+    S: Into<String> + Display,
+{
+    println!("Select one of the following commands:");
+    println!();
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .items(&items)
+        .default(0)
+        .interact()?;
+
+    Ok(items[selection].to_string())
 }
