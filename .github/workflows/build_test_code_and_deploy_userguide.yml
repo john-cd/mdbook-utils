@@ -27,11 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Basic information
-        run: echo "The job was automatically triggered by a ${{ github.event_name }} event from @${{ github.actor }}. The OS is ${{ runner.os }}"
+        run: echo "The job was automatically triggered by a ${{ github.event_name }} event from @${{ github.actor }}. The OS is ${{ runner.os }}. The current dir is $(pwd)"
       - name: Code checkout
         uses: actions/checkout@v4
       - name: Create output folder
-        run: mkdir -p -v ./userguide/
+        run: mkdir -p -v ./userguide_book/
       - name: Build docker image
         run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml build
       - name: Build the code and the user guide
@@ -42,9 +42,9 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./userguide/book/
+          path: ./userguide_book/
       - name: Debug
-        run: ls -lAR ./userguide/
+        run: pwd; ls -lAR .
 
   ## Deployment job
   deploy:

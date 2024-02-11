@@ -11,4 +11,9 @@ services:
         - type=gha,mode=max
         #- type=local,dest=./.cache
     volumes:
-      - /userguide:/code/userguide/
+      - type: bind
+        ## Path where the container will write the book HTML / JS to, on the CI host (provided by GitHub Action)
+        source: ../userguide_book/
+        target: /code/userguide/book/
+        bind:
+          create_host_path: true
