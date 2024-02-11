@@ -14,6 +14,8 @@
 
 - make more functions fully public
 
+- sitemap and GA for user guide
+
 New commands:
 
 - finish generation of refdefs from dependencies - WIP
