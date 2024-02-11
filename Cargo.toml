@@ -6,7 +6,7 @@ edition = "2021"
 rust-version = "1.75"
 description = "Tools to manage links, reference definitions, and code examples in Markdown files, especially `mdbook` source directories."
 readme = "README.md"
-# homepage = ""
+homepage = "https://john-cd.com/mdbook-utils/"
 repository = "https://github.com/john-cd/mdbook-utils/"
 license = "MIT OR Apache-2.0"
 keywords = [ "documentation", "markdown", "book", "mdbook", "rustbook" ]
@@ -19,7 +19,7 @@ exclude = ["/.devcontainer", "/.github", "/test_book", ".*", "TODO.md", "rustfmt
 anyhow = "1"
 cargo_toml = "0.19"
 clap = { version = "4", features = ["derive"] }
-console = "0.15.8"
+console = "0.15"
 csv = "1"
 dialoguer = { version = "0.11", features = ["history", "completion"] }
 dotenvy = "0.15"

@@ -43,8 +43,8 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./userguide_book/
-      - name: Debug
-        run: pwd; ls -lAR .
+      # - name: Debug
+      #   run: pwd; ls -lAR .
 
   ## Deployment job
   deploy:

@@ -1,15 +1,17 @@
 //! # mdbook-utils
 //!
-//! To use the command-line tool, run `mdbook-utils` at a shell prompt.
-//! A list of commands will be displayed.
+//! For installation and usage instructions for the `mdbook-utils` command-line tool,
+//! consult the [User Guide](https://john-cd.com/mdbook-utils/).
 //!
-//! The following is the **library API** doc. This crate can be used if more
-//! control is required.
+//! A list of available commands is displayed when entering `mdbook-utils` at a shell prompt.
 //!
-//! Some reasons why you would want to use the crate (over the CLI):
+//! The following (<https://docs.rs/mdbook-utils/>) contains the **library API** doc.
+//! Please consult the [Public API](https://john-cd.com/mdbook-utils/public_api.html) page as well.
 //!
-//! - Integrate it in your project
-//! - Extend its capabilities
+//! You will want to use the Public API (over the CLI) to:
+//!
+//! - Integrate it in your project, for example call it from a `build.rs` build script,
+//! - Extend its capabilities,
 //! - ...
 
 #![deny(missing_docs)]
