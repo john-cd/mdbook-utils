@@ -1,16 +1,18 @@
 //! # mdbook-utils
 //!
-//! For installation and usage instructions for the `mdbook-utils` command-line tool,
-//! consult the [User Guide](https://john-cd.com/mdbook-utils/).
+//! For installation and usage instructions for the `mdbook-utils` command-line
+//! tool, consult the [User Guide](https://john-cd.com/mdbook-utils/).
 //!
-//! A list of available commands is displayed when entering `mdbook-utils` at a shell prompt.
+//! A list of available commands is displayed when entering `mdbook-utils` at a
+//! shell prompt.
 //!
 //! The following (<https://docs.rs/mdbook-utils/>) contains the **library API** doc.
 //! Please consult the [Public API](https://john-cd.com/mdbook-utils/public_api.html) page as well.
 //!
 //! You will want to use the Public API (over the CLI) to:
 //!
-//! - Integrate it in your project, for example call it from a `build.rs` build script,
+//! - Integrate it in your project, for example call it from a `build.rs` build
+//!   script,
 //! - Extend its capabilities,
 //! - ...
 
