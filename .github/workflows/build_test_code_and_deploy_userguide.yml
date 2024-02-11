@@ -1,9 +1,5 @@
-## Workflow for building and deploying mdbook-utils
-##
+name: Build and test the mdbook-utils code; build, test, and deploy its user guide (mdBook site) to Pages
 ## To get started with mdBook see: https://rust-lang.github.io/mdBook/index.html
-## See also https://ectobit.com/blog/speed-up-github-actions-rust-pipelines/
-##
-name:
 
 on:
   ## Runs on pushes targeting the default branch
@@ -34,18 +30,28 @@ jobs:
         run: echo "The job was automatically triggered by a ${{ github.event_name }} event from @${{ github.actor }}. The OS is ${{ runner.os }}"
       - name: Code checkout
         uses: actions/checkout@v4
-      ## Use the following in conjunction with cache_from/to type=local in compose-ci.yaml if type=gha caching does not work
-      ## See also https://doc.rust-lang.org/cargo/guide/cargo-home.html?highlight=crate%20cache#caching-the-cargo-home-in-ci
-      # - name: Set up cargo cache
-      #   uses: actions/cache@v3
-      #   continue-on-error: false
-      #   with:
-      #     path: |
-      #       ./.cache/
-      #     key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      #     restore-keys: ${{ runner.os }}-cargo-
-      ## Rust
+      - name: Create output folder
+        uses: mkdir -p -v ./userguide/
       - name: Build docker image
         run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml build
-      - name: Build the code
+      - name: Build the code and the user guide
         run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm mdbook-utils
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./userguide/
+
+  ## Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

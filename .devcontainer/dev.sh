@@ -30,6 +30,10 @@ cargo fetch
 echo "Build code"
 cargo build --all-targets --locked
 
+echo "Build books"
+mdbook build ./userguide/
+mdbook build ./test_book/
+
 echo "Toolchain info:"
 rustup check
 echo "-------------------------------------------"

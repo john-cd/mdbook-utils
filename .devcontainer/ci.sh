@@ -26,15 +26,19 @@ cargo fetch
 ## - see .cargo/config.toml for `ci` profile config.
 cargo build --all-targets --locked --profile ci
 
-## Lint
+## Scan the code for common errors
 ## - Elevate clippy warnings to errors, which will in turn fail the build.
 cargo clippy --all-targets --locked --profile ci -- --deny warnings
 
-## Test
+## Test the code
 cargo test --all-targets --locked --profile ci -- --show-output
 
-## Generate documentation
+## Generate docs.rs documentation
 cargo doc --no-deps --locked
+
+## Build and test the user guide
+mdbook build ./userguide/
+mdbook test ./userguide/
 
 echo "----------"
 

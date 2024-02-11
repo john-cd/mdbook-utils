@@ -16,7 +16,7 @@ default:
 # Clean Cargo's `target` and mdbook's `book` folders
 clean:
   cargo clean
-  mdbook clean ./docs/
+  mdbook clean ./userguide/
   mdbook clean ./test_book/
 
 # Format all code
@@ -31,7 +31,7 @@ check:
 # Build all code and books
 build:
   cargo build --all-targets --locked
-  mdbook build ./docs/
+  mdbook build ./userguide/
   mdbook build ./test_book/
 # `--all-targets`` is equivalent to specifying `--lib --bins --tests --benches --examples`.
 # optional: --timings
@@ -43,7 +43,7 @@ clippy:
 # Test all code and books
 test:
   cargo test --all-targets --locked
-  mdbook test ./docs/
+  mdbook test ./userguide/
   mdbook test ./test_book/
 # `--all-targets`` is equivalent to specifying `--lib --bins --tests --benches --examples`.
 
@@ -63,7 +63,7 @@ doc:
 
 # Display the user guide
 serve:
-  mdbook serve ./docs/
+  mdbook serve ./userguide/
 
 # Run all the steps required before pushing code to GitHub
 prep: fmt clean build clippy test doc

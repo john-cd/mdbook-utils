@@ -10,3 +10,5 @@ services:
       cache_to:
         - type=gha,mode=max
         #- type=local,dest=./.cache
+    volumes:
+      - /userguide:/code/userguide/book/

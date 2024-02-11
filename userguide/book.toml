@@ -1,0 +1,30 @@
+[book]
+title = "mdbook-utils' User Guide"
+authors = ["John CD"]
+description = "The user guide for the `mdbook-utils` tool."
+language = "en"
+multilingual = false
+
+[rust]
+edition = "2021"
+
+[build]
+create-missing = false
+use-default-preprocessors = false
+
+[preprocessor.index]
+
+[output.html]
+no-section-label = true
+git-repository-url = "https://github.com/john-cd/mdbook-utils"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/john-cd/mdbook-utils/edit/master/guide/{path}"
+site-url = "/mdbook-utils/"
+# cname = "myproject.rs"
+
+[output.html.print]
+enable = true    # include support for printable output
+page-break = true # insert page-break after each chapter
+
+[output.html.playground]
+editable = true         # allows editing the source code

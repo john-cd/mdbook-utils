@@ -1,6 +1,4 @@
-# mdBook Utilities
-
-This is a **Work In Progress**. The command-line interface (CLI) and underlying API are subject to change. A summary of recently released changes is found in [RELEASES.md](./RELEASES.md). You may also consult [TODO.md](./TODO.md).
+# Introduction
 
 ## What is `mdbook-utils` for?
 
@@ -16,13 +14,11 @@ The `mdbook-utils` command-line tool manages _links_, _reference definitions_, a
 - replace code examples by `{{#include  ... }}` statements,
 - conversely replace includes by the file contents.
 
-Consult the [User Guide][mdbook-utils-user-guide] for installation and usage instructions.
-
 `mdbook-utils`' underlying library also exposes a [public API](https://docs.rs/mdbook-utils/latest/mdbook_utils/) that may be used from your code.
 
 ## Key Links
 
-`mdbook-utils` [(GitHub repo)][mdbook-utils-github]  [(docs.rs)][mdbook-utils-docs-rs]  [(crates.io)][mdbook-utils-crates-io]  [(user guide)][mdbook-utils-user-guide]
+`mdbook-utils` [(GitHub repo)][mdbook-utils-github]  [(docs.rs)][mdbook-utils-docs-rs]  [(crates.io)][mdbook-utils-crates-io]  [(user guide - this book)][mdbook-utils-user-guide]
 
 [mdbook-utils-github]: https://github.com/john-cd/mdbook-utils
 [mdbook-utils-docs-rs]: https://docs.rs/mdbook-utils/latest/mdbook_utils/
