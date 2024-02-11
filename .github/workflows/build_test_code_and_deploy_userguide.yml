@@ -43,6 +43,8 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./userguide/
+      - name: Debug
+        run: ls -la ./userguide/
 
   ## Deployment job
   deploy:
