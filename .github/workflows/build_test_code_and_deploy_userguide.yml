@@ -42,9 +42,9 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./userguide/
+          path: ./userguide/book/
       - name: Debug
-        run: ls -la ./userguide/
+        run: ls -lAR ./userguide/
 
   ## Deployment job
   deploy:

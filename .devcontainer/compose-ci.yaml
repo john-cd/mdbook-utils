@@ -11,4 +11,4 @@ services:
         - type=gha,mode=max
         #- type=local,dest=./.cache
     volumes:
-      - /userguide:/code/userguide/book/
+      - /userguide:/code/userguide/
