@@ -15,3 +15,5 @@ Links:
 <https://autolink>
 
 [ref]: https://reference-definition/
+
+{{#include ./example2.md}}

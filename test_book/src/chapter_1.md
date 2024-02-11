@@ -9,7 +9,7 @@ fn main() {}
 {{#include ./included.md}}
 
 ```rust,ignore
-{{#include ./wont-be-included-refs.rs}}
+{{#include ./wont-be-included-refs.md}}
 ```
 
 Links:
