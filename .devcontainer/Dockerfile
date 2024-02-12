@@ -11,18 +11,16 @@ FROM rust:${RUST_IMAGE_LABEL} as base
 
 SHELL ["bash", "-c"]
 
-## Install linker and other utilities
-# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-#     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-#     apt-get update \
-#     && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get install -y --no-install-recommends mold clang \
-#     && apt-get autoremove -y \
-#     && apt-get clean -y \
-#     && rm -rf /var/lib/apt/lists/*
-## Alternatively, use `lld` instead of the `mold` linker
-## Configuration in .cargo/config.toml
-## If using the `slim` Rust image, you may need to install: curl pkg-config libssl-dev
+## Install utilities
+RUN apt-get update \
+    && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y --no-install-recommends jq \
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+## To cache:
+## --mount=type=cache,target=/var/cache/apt,sharing=locked \
+## --mount=type=cache,target=/var/lib/apt,sharing=locked \
 
 ## Update Rust if needed (note: `rustup update stable && rustup default stable` is required for Rust 1.74 -> Rust 1.75 somehow)
 RUN rustup update
@@ -83,7 +81,7 @@ ENTRYPOINT [ "./.devcontainer/dev.sh" ]
 CMD [ "sleep", "infinity" ]
 
 ## --------------------------------
-## Stage for Continuous Integration
+## Stage for Continuous Integration / Deployment
 FROM base as ci
 
 ## Copy the code in the container (in WORKDIR), excluding what is in .dockerignore
@@ -92,6 +90,10 @@ COPY . .
 ENV CARGO_TARGET_DIR=./target/
 
 ## Make sure the start scripts have permission to execute
-RUN chmod +x ./.devcontainer/ci.sh
+RUN chmod +x ./.devcontainer/ci.sh ./.devcontainer/publish.sh
 
+## `ci.sh` builds / tests the code and builds / tests the user guide.
+## The user guide HTML that has been built is exported
+## via the bind mount in `compose-ci.yaml` back to the CI host,
+## so that it could be deployed to GitHub Pages.
 ENTRYPOINT [ "./.devcontainer/ci.sh" ]
