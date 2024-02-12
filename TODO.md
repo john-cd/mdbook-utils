@@ -1,28 +1,34 @@
 # TODO
 
-- README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
+- fix env var CRATES_TOKEN not passed to Docker Compose?
+- test publish.yml
+- publish 0.1.3
 
-- Finish publish.yml
+- README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
+- split the user guide into more pages (reenable includes?)
 
 - fix TODOs
 - write_inline_links: remove internal links
 
 - add interactivity & prompt for destination paths, etc
 
-- add unit tests - WIP
-- use test_book in automated (integration) tests
-
-- make more functions fully public
-
-- sitemap and GA for user guide
-
-New commands:
-
 - finish generation of refdefs from dependencies - WIP
 - duplicate links - WIP
 - broken links - WIP
 - locate all autolink / inline references to external sites - WIP
 - suggest label names based on URL type - WIP
+
+- sitemap and GA for user guide
+
+- config file in TOML format?
+
+- add unit tests - WIP
+- use test_book in automated (integration) tests
+
+- make more functions fully public
+
+New commands:
+
 - autoreplace autolinks / inline links by ref links
 
 Links commands:
@@ -35,8 +41,6 @@ Markdown commands
 - generate crates.md - WIP
 - identify .md files not in SUMMARY.md
 - identify .rs examples not used
-
-Parse book.toml to extract `src`, etc...
 
 Later
 
