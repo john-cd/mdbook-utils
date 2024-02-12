@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Basic information
         run: echo "The job was automatically triggered by a ${{ github.event_name }} event from @${{ github.actor }}. The OS is ${{ runner.os }}. The current dir is $(pwd)"
+      - name: Debug
+        run: echo "${{ secrets.CRATES_TOKEN }}"
       - name: Code checkout
         uses: actions/checkout@v4
       - name: Create output folder
