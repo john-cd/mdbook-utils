@@ -1,5 +1,5 @@
 [book]
-title = "mdbook-utils' User Guide"
+title = "mdbook-utils User Guide"
 authors = ["John CD"]
 description = "The user guide for the `mdbook-utils` tool."
 language = "en"
@@ -10,9 +10,7 @@ edition = "2021"
 
 [build]
 create-missing = false
-use-default-preprocessors = false
-
-[preprocessor.index]
+use-default-preprocessors = true
 
 [output.html]
 no-section-label = true
@@ -20,7 +18,7 @@ git-repository-url = "https://github.com/john-cd/mdbook-utils"
 git-repository-icon = "fa-github"
 edit-url-template = "https://github.com/john-cd/mdbook-utils/edit/master/guide/{path}"
 site-url = "/mdbook-utils/"
-# cname = "myproject.rs"
+# cname = "john-cd.com"
 
 [output.html.print]
 enable = true    # include support for printable output

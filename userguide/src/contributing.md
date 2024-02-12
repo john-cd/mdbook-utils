@@ -26,7 +26,7 @@ Note that opening the code folder in VS Code using Dev Containers may take a lit
 
 ### Other
 
-If you are not using VS Code, install the [Dev Container CLI][dev-container-CLI], use `docker compose` directly (see below), or simply install the required tools on your local machine.
+If you are not using VS Code, install the [Dev Container CLI][dev-container-cli], use `docker compose` directly (see below), or simply install the required tools on your local machine.
 
 The following works with Ubuntu and WSL:
 
@@ -105,17 +105,11 @@ docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml ru
 2. Docker Compose method
 
 - Pass the `publish.sh` script (and required argument `-y`) as a `command` to `docker compose run`.
-- Pass the `CRATES_TOKEN` env. variable (which is used by `publish.sh`) to Docker Compose using `--env` - see <https://docs.docker.com/compose/environment-variables/envvars-precedence/>
+- Pass the `CRATES_TOKEN` env. variable (which is used by `publish.sh`) to Docker Compose using [`--env`][docker-compose-env-vars].
 
 ```bash
 export CRATES_TOKEN="<token from crates.io>"
 docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm --env CRATES_TOKEN mdbook-utils .devcontainer/publish.sh -y
 ```
 
-[cargo-layout]: https://doc.rust-lang.org/cargo/guide/project-layout.html
-[dev-container-CLI]: https://github.com/devcontainers/cli
-[dev-container-extension]: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
-[docker-desktop]: https://www.docker.com/products/docker-desktop/
-[just]: https://just.systems/
-[rust-lang]: https://www.rust-lang.org/
-[vs-code]: https://code.visualstudio.com/
+{{#include ./refs.md}}

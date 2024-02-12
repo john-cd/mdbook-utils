@@ -37,9 +37,6 @@ You may also set the [`RUST_LOG`][rust-log] environment variable to display the 
 
 See `cli/config.rs` in the [GitHub repo][mdbook-utils-github] for more details.
 
-Note: `mdbook-utils` is not a mdbook [preprocessor] or [backend] at this point.
+Note: `mdbook-utils` is not a mdbook [mdbook-preprocessor] or [mdbook-backend] at this point.
 
-[backend]: https://rust-lang.github.io/mdBook/format/configuration/renderers.html
-[mdbook-utils-github]: https://github.com/john-cd/mdbook-utils
-[preprocessor]: https://rust-lang.github.io/mdBook/for_developers/preprocessors.html
-[rust-log]: https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html
+{{#include ./refs.md}}

@@ -1,6 +1,6 @@
 # Installation
 
-Install the command-line tool using [`cargo`](https://doc.rust-lang.org/cargo/index.html):
+Install the command-line tool using [`cargo`][cargo]:
 
 ```bash
 cargo install mdbook-utils
@@ -19,3 +19,5 @@ To uninstall the tool, enter the following in a shell:
 ```bash
 cargo uninstall mdbook-utils
 ```
+
+{{#include ./refs.md}}
