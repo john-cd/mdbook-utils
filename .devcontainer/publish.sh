@@ -17,13 +17,13 @@ do
 done
 shift $(($OPTIND - 1))
 
-## -z tests if the string has zero length
+## `-z` tests if the string has zero length
 if [ -z "$yflag" ]; then
     echo "You MUST pass the -y option to confirm that you truly want to PUBLISH."
     exit 1
 fi
 
-## if the CRATES_TOKEN env var is defined, build, then package and publish
+## Exit if the CRATES_TOKEN env var is not defined
 if [ ! -v CRATES_TOKEN ]; then
   echo "The env. variable CRATES_TOKEN is not set."
   exit 3

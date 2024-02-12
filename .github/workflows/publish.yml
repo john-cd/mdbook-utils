@@ -1,5 +1,3 @@
-## WIP
-
 ## Build, test the mdbook-utils code; build, test its user guide, and optionally publish to crates.io and deploy the user guide to Pages
 ##
 ## Workflow syntax: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
@@ -45,6 +43,7 @@ defaults:
     shell: bash
 
 jobs:
+  # Each job will run inside its own virtual machine runner
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -53,23 +52,36 @@ jobs:
         run: echo "The job was automatically triggered by a ${{ github.event_name }} event from @${{ github.actor }}. The OS is ${{ runner.os }}. The current dir is $(pwd)"
       - name: Code checkout
         uses: actions/checkout@v4
-      ## Build / test the code and the user guide using Docker Compose
+        with:
+          fetch-depth: '0' # 0 indicates all history for all branches and tags. Allows the use of `git`. See https://github.com/actions/checkout
+      - name: Git status and tags
+        run: |
+          git --version
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git status
+          git tag
+          git describe
       - name: Create output folder
-        run: mkdir -p -v ./userguide_book/
-      - name: Build docker image
+        run: mkdir -p ./userguide_book/
+      - name: Build Docker image
         run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml build
-      - name: Build the code and the user guide
-        run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm --env CRATES_TOKEN=${{ secrets.CRATES_TOKEN }} mdbook-utils
-      ## Prepare Pages
-      - name: Setup Pages
+      - name: Build / test the code and the user guide
+        run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm mdbook-utils
+        if: ${{ inputs.publish == 'false' }}"
+      - name: Build / test the code and the user guide AND PUBLISH to crates.io
+        # Pass the crates.io secret as an env. variable, which is then used by `publish.sh`.
+        # See <https://docs.docker.com/compose/environment-variables/envvars-precedence/>
+        run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm \
+             --env CRATES_TOKEN=${{ secrets.CRATES_TOKEN }} mdbook-utils .devcontainer/publish.sh -y
+        if: ${{ inputs.publish == 'true' }}"
+      - name: Setup Github Pages
         id: pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./userguide_book/
-      # - name: Debug
-      #   run: pwd; ls -lAR .
 
   ## GitHub Pages Deployment job
   pages-deploy:
@@ -84,15 +96,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: github_deployment
         uses: actions/deploy-pages@v4
-
-  ## Crates.io Deployment job
-  crates-publish:
-    name: Publish the code to `crates.io`
-    if: ${{ inputs.publish == 'true' }}"
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Publish to crates.io
-        id: crates_io_publish
-        run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm \
-             --env CRATES_TOKEN=${{ secrets.CRATES_TOKEN }} mdbook-utils .devcontainer/publish.sh -y
