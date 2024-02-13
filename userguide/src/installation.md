@@ -8,7 +8,7 @@ cargo install mdbook-utils
 
 then invoke `mdbook-utils` at a shell prompt.
 
-For the bleeding edge development version, use:
+For the bleeding-edge development version, use:
 
 ```bash
 cargo install --git https://github.com/john-cd/mdbook-utils

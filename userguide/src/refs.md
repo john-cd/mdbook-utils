@@ -20,6 +20,7 @@
 [mdbook-utils-user-guide]: https://john-cd.github.io/mdbook-utils/
 [rust-book]: https://doc.rust-lang.org/book/
 [rust-howto]: https://www.john-cd.com/rust_howto/
+[rust-howto-github]: https://github.com/john-cd/mdbook-utils
 [rust-lang]: https://www.rust-lang.org/
 [rust-log]: https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html
 [shields-io]: https://shields.io/

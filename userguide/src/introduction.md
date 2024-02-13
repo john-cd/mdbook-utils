@@ -1,8 +1,8 @@
 # Introduction
 
-## What is `mdbook-utils` for?
+## What is `mdbook-utils`? What is it used for?
 
-The `mdbook-utils` command-line tool manages _links_, _reference definitions_, and _code blocks_ in large collections of Markdown files, especially [mdbook][mdbook] source directories. It is the companion tool for the ["Rust How-to"][rust-howto] book ([github][rust-howto-github]).
+The `mdbook-utils` command-line tool manages _links_, _reference definitions_, and _code blocks_ in large collections of Markdown files, especially [mdbook][mdbook] source directories. It is the companion tool for the [Rust How-to][rust-howto] book ([github][rust-howto-github]).
 
 `mdbook-utils` is useful for the following:
 
