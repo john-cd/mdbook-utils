@@ -1,16 +1,15 @@
 # TODO
 
-- fix env var CRATES_TOKEN not passed to Docker Compose?
 - test publish.yml
 - publish 0.1.3
 
 - README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
-- split the user guide into more pages (reenable includes?)
 
 - fix TODOs
 - write_inline_links: remove internal links
 
 - add interactivity & prompt for destination paths, etc
+- config file in TOML format?
 
 - finish generation of refdefs from dependencies - WIP
 - duplicate links - WIP
@@ -19,8 +18,6 @@
 - suggest label names based on URL type - WIP
 
 - sitemap and GA for user guide
-
-- config file in TOML format?
 
 - add unit tests - WIP
 - use test_book in automated (integration) tests
