@@ -30,7 +30,7 @@ just update # Update Cargo.lock dependencies
 
 ## Docker Compose
 
-Test the `Docker Compose` setup used during developement (which `Dev Containers` runs) with:
+Test the `Docker Compose` setup used during development (which `Dev Containers` runs) with:
 
 ```bash
 cd ./.devcontainer
