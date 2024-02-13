@@ -31,7 +31,7 @@ echo "Build code"
 cargo build --all-targets --locked
 
 echo "Build books"
-mdbook build ./userguide/
+mdbook build ./user_guide/
 mdbook build ./test_book/
 
 echo "Toolchain info:"

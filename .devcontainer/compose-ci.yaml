@@ -14,8 +14,7 @@ services:
       - type: bind
         ## Path where the container will write the book HTML / JS to, on the CI host (provided by GitHub Action)
         ## Source is relative to the Docker Compose file location somehow
-        source: ../userguide_book/
-        target: /code/userguide/book/
+        source: ../user_guide_book/
+        target: /code/user_guide/book/
         bind:
           create_host_path: true
-

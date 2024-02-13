@@ -37,8 +37,8 @@ cargo test --all-targets --locked --profile ci -- --show-output
 cargo doc --no-deps --locked
 
 ## Build and test the user guide
-mdbook build userguide/
-mdbook test userguide/
+mdbook build user_guide/
+mdbook test user_guide/
 
 echo "----------"
 
