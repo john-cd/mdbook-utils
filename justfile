@@ -58,7 +58,7 @@ run cmd=help subcmd=empty:
 [unix]
 doc:
   cargo clean --doc
-  cargo doc --no-deps --locked --document-private-items
+  cargo doc --no-deps --locked # --document-private-items
   cd /cargo-target-mdbook-utils/target/doc/ ; python3 -m http.server 9000
 
 # Display the user guide
