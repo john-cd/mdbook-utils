@@ -22,6 +22,8 @@
 - add unit tests - WIP
 - use test_book in automated (integration) tests
 
+- Github Action: publish Docker image and use in cache_from? <https://docs.github.com/en/actions/publishing-packages/publishing-docker-images>
+
 - make more functions fully public
 
 New commands:
