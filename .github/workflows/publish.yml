@@ -60,8 +60,8 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           git status
-          git tag
-          git describe
+          # git tag
+          # git describe --tags
       - name: Create output folder
         run: mkdir -p ./user_guide_book/
       - name: Build Docker image
