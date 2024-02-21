@@ -2,7 +2,7 @@
 // Keep this file as simple as possible and use Docker Compose files to configure the container instead.
 // For format details, see https://aka.ms/devcontainer.json.
 {
-    "name": "Rust on Debian",
+    "name": "mdbook-utils - Rust on Debian",
     // More info: https://containers.dev/guide/dockerfile
     "dockerComposeFile": [
         "compose.yaml",
