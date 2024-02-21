@@ -18,7 +18,7 @@ use crate::link::LinkBuilder;
 //
 // [![github][github-badge]][github]
 // [github]: https://github.com/john-cd/mdbook-utils
-// [github-badge]: https://img.shields.io/badge/mdbook-utils-navy?logo=github
+// [github-badge]: https://img.shields.io/badge/mdbook-utils-steelblue?logo=github
 
 /// Get existing reference definitions from a Markdown parser,
 /// identify URLs that are GitHub repos, create badge URLs for these

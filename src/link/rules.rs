@@ -148,7 +148,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         Rule {
             re: r"https://github.com/(?<owner>[^/]+?)/(?<repo>[^/]+)/?.*",
             label_pattern: "${repo}-github",
-            badge_url_pattern: "https://img.shields.io/badge/${repo}-navy?logo=github",
+            badge_url_pattern: "https://img.shields.io/badge/${repo}-steelblue?logo=github",
         },
     );
 
