@@ -1,7 +1,6 @@
 # TODO
 
 - test publish.yml
-- publish 0.1.3
 
 - README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
 
