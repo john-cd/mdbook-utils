@@ -7,6 +7,8 @@
 - fix TODOs
 - write_inline_links: remove internal links
 
+- publish as a binary for use by cargo binstall
+
 - add interactivity & prompt for destination paths, etc
 - config file in TOML format?
 
