@@ -42,7 +42,7 @@ where
         // debug!("{:?}: length = {}", p, s.len());
         buf.push(s);
     }
-    let all_markdown = buf.concat(); //or .join("");
+    let all_markdown = buf.concat(); // or .join("");
 
     Ok(Cow::from(all_markdown))
 }
