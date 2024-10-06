@@ -46,8 +46,9 @@ where
                             level, id, classes, attrs
                         )?;
                     }
-                    Tag::BlockQuote => {
-                        writeln!(w, "Event::Start(Tag::BlockQuote)")?;
+                    // A blockQuote with optional kind (Note, Tip, Important, Warning, Caution).
+                    Tag::BlockQuote(k) => {
+                        writeln!(w, "Event::Start(Tag::BlockQuote({:?}))", k)?;
                     }
                     // A code block.
                     Tag::CodeBlock(code_block_kind) => {
@@ -56,6 +57,15 @@ where
                             "Event::Start(Tag::CodeBlock(code_block_kind: {:?} ))",
                             code_block_kind
                         )?;
+                    }
+                    Tag::DefinitionList => {
+                        writeln!(w, "Event::Start(Tag::DefinitionList)")?;
+                    }
+                    Tag::DefinitionListTitle => {
+                        writeln!(w, "Event::Start(Tag::DefinitionListTitle)")?;
+                    }
+                    Tag::DefinitionListDefinition => {
+                        writeln!(w, "Event::Start(DefinitionListDefinition)")?;
                     }
                     // A HTML block.
                     Tag::HtmlBlock => {
@@ -191,6 +201,14 @@ where
             // true when it is checked.
             Event::TaskListMarker(b) => {
                 writeln!(w, "Event::TaskListMarker({:?})", b)?;
+            }
+            // An inline math environment node.
+            Event::InlineMath(s) => {
+                writeln!(w, "Event::InlineMath({:?})", s)?;
+            }
+            // A display math environment node.
+            Event::DisplayMath(s) => {
+                writeln!(w, "Event::DisplayMath({:?})", s)?;
             }
         };
     }
