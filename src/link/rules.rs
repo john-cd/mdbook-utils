@@ -46,11 +46,15 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
 
     // [smol-badge]: https://badge-cache.kominick.com/crates/v/smol.svg?label=smol
     // [smol-crate]: https://crates.io/crates/smol/
-    m.insert("crate", Rule {
-        re: r"https://crates.io/crates/(?<crate>\S+?)/?",
-        label_pattern: "crate-${crate}",
-        badge_url_pattern: "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}"
-    });
+    m.insert(
+        "crate",
+        Rule {
+            re: r"https://crates.io/crates/(?<crate>\S+?)/?",
+            label_pattern: "crate-${crate}",
+            badge_url_pattern:
+                "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}",
+        },
+    );
 
     // DOCS
     m.insert(
@@ -67,11 +71,15 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     // [actix-web]: https://docs.rs/actix-web/latest/actix_web/
     // [join]: https://docs.rs/rayon/latest/rayon/fn.join.html
     // [spawn-blocking]: https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html
-    m.insert("documentation", Rule {
-        re: r"https://docs.rs/(?<crate>\S+?)(/latest/\1)?(?<item>/\S+*)*(?:.html)?",
-        label_pattern: "${crate}-${item}",
-        badge_url_pattern: "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}"
-    });
+    m.insert(
+        "documentation",
+        Rule {
+            re: r"https://docs.rs/(?<crate>\S+?)(/latest/\1)?(?<item>/\S+*)*(?:.html)?",
+            label_pattern: "${crate}-${item}",
+            badge_url_pattern:
+                "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}",
+        },
+    );
 
     // STD DOCS
     // [std]: https://doc.rust-lang.org/std/"
@@ -214,11 +222,15 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
 
     // [visibility-rules-rust-by-example-badge]: https://img.shields.io/badge/RBE-Visibility_Rules-violet?logo=mdbook
     // [visibility-rules-rust-by-example]: https://doc.rust-lang.org/rust-by-example/mod/visibility.html
-    m.insert("rust by example chapter", Rule {
-        re: r"https://doc.rust-lang.org/rust-by-example/(?:\S+?/)*(?<last>\S*?)(?:.html)?",
-        label_pattern: "rust-by-example-${last}",
-        badge_url_pattern: "https://img.shields.io/badge/Rust_by_example-${last}-violet?logo=mdbook"
-    });
+    m.insert(
+        "rust by example chapter",
+        Rule {
+            re: r"https://doc.rust-lang.org/rust-by-example/(?:\S+?/)*(?<last>\S*?)(?:.html)?",
+            label_pattern: "rust-by-example-${last}",
+            badge_url_pattern:
+                "https://img.shields.io/badge/Rust_by_example-${last}-violet?logo=mdbook",
+        },
+    );
 
     // CARGO BOOK
     // [cargo-book]: https://doc.rust-lang.org/cargo/index.html
