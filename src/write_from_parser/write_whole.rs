@@ -21,7 +21,7 @@ where
     let stdout = std::io::stdout();
     let mut handle = stdout.lock();
     handle.write_all(b"\nHTML output:\n").unwrap();
-    html::write_html(&mut handle, parser).unwrap();
+    html::write_html_io(&mut handle, parser).unwrap();
 }
 
 /// Read from a Markdown parser and write HTML to bytes.
@@ -34,7 +34,7 @@ where
 {
     let mut bytes = Vec::new();
     // A Cursor wraps an in-memory buffer
-    html::write_html(std::io::Cursor::new(&mut bytes), parser)?;
+    html::write_html_io(std::io::Cursor::new(&mut bytes), parser)?;
     Ok(bytes)
 }
 

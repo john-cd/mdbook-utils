@@ -1,7 +1,7 @@
 [package]
 name = "mdbook-utils"
-version = "0.1.3"
-authors = ["John CD <johncd222@gmail.com>"]
+version = "0.1.4"
+authors = ["John CD"]
 edition = "2021"
 rust-version = "1.75"
 description = "Tools to manage links, reference definitions, and code examples in Markdown files, especially `mdbook` source directories."
@@ -46,7 +46,7 @@ envy = "0.4"
 heck = "0.5"
 once_cell = "1.20"
 pulldown-cmark = "0.12"
-# pulldown-cmark = { version = "0.9", default-features = false, features = ["simd"] }
+# pulldown-cmark = { version = "0.12", default-features = false, features = ["simd"] }
 # pulldown-cmark-to-cmark = "11"
 quick-xml = "0.36"
 rand = "0.8"
