@@ -4,6 +4,8 @@
 
 - Generate other types of badges
 
+## v0.1.4
+
 ## v0.1.3
 
 - User guide.
