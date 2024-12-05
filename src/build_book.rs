@@ -3,9 +3,9 @@
 use std::path::Path;
 use std::process::Command;
 
-use anyhow::anyhow;
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::anyhow;
 
 /// Invokes `mdbook build`.
 ///

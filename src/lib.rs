@@ -25,7 +25,7 @@
 mod build_book;
 mod dependencies;
 mod fs;
-mod gen;
+mod generate;
 mod link;
 pub mod markdown;
 mod parser;
@@ -38,9 +38,9 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 
-use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::bail;
 use pulldown_cmark::LinkType;
 use pulldown_cmark::Parser;
 
@@ -280,7 +280,7 @@ where
     // for (_, d) in &deps {
     //     tracing::info!("{:?}", d);
     // }
-    let mut new_links = gen::generate_refdefs_from(deps);
+    let mut new_links = generate::generate_refdefs_from(deps);
 
     // TODO can we read just the *-refs.md files?
     helper(markdown_dir_path, refdef_dest_file_path, |parser, f| {
@@ -291,7 +291,7 @@ where
         println!("NOT IMPLEMENTED!");
         let existing_links = Vec::new();
 
-        let links = gen::merge_links(existing_links, &mut new_links);
+        let links = generate::merge_links(existing_links, &mut new_links);
         link::write_refdefs_to(links, f)?;
         Ok(())
     })?;

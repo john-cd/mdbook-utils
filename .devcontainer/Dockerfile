@@ -22,15 +22,17 @@ RUN apt-get update \
 ## --mount=type=cache,target=/var/cache/apt,sharing=locked \
 ## --mount=type=cache,target=/var/lib/apt,sharing=locked \
 
-## Update Rust if needed (note: `rustup update stable && rustup default stable` is required for Rust 1.74 -> Rust 1.75 somehow)
+## Update Rust if needed
 RUN rustup update
 
 ## Install clippy if needed
-RUN rustup component add clippy
+# RUN rustup component add clippy
 
 ## Install nightly fmt
+## NOTE: nightly will be the default until 1.85 (Rust edition 2024) is released
 RUN rustup toolchain install nightly \
-    && rustup component add rustfmt --toolchain nightly
+    && rustup component add rustfmt clippy --toolchain nightly \
+    && rustup default nightly
 
 ARG MDBOOK_VERSION
 
@@ -41,26 +43,32 @@ RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/ca
     && cargo binstall --no-confirm --version ${MDBOOK_VERSION} mdbook
 #    && cargo binstall --no-confirm --secure cargo-nextest
 
-## TODO Install cargo check tools
-# RUN cargo install --locked cargo-deny || true
-# RUN cargo install --locked cargo-outdated || true
-# RUN cargo install --locked cargo-udeps || true
-# RUN cargo install --locked cargo-audit || true
-# RUN cargo install --locked cargo-pants || true
-
 WORKDIR /code
 
 ## --------------------------------
 ## Stage for development
 FROM base as development
 
-## Additional packages for developement only
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && apt-get install -y firefox-esr
-# locales xdg-utils desktop-file-utils \
-# nano \
+## Optional packages for development only
+# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+# && apt-get install -y firefox-esr
+#                       locales \
+#                       xdg-utils \
+#                       desktop-file-utils \
+#                       nano
 
+## Optional cargo installs for development only
 # RUN cargo binstall --no-confirm ripgrep
+# RUN cargo install --locked cargo-deny || true
+# RUN cargo install --locked cargo-outdated || true
+# RUN cargo install --locked cargo-udeps || true
+# RUN cargo install --locked cargo-audit || true
+# RUN cargo install --locked cargo-pants || true
 RUN cargo install cargo-bump
+
+## rustup completions
+RUN mkdir -p ~/.local/share/bash-completion/completions/ \
+  && rustup completions bash > ~/.local/share/bash-completion/completions/rustup
 
 ## https://code.visualstudio.com/remote/advancedcontainers/persist-bash-history
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/command_history/.bash_history" \

@@ -3,8 +3,8 @@
 use std::io::Write;
 
 use anyhow::Result;
-use pulldown_cmark::html;
 use pulldown_cmark::Event;
+use pulldown_cmark::html;
 
 // HTML
 

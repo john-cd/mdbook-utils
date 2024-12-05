@@ -3,8 +3,8 @@ use anyhow::Context;
 use anyhow::Result;
 use clap::Subcommand;
 use console::style;
-use dialoguer::theme::ColorfulTheme;
 use dialoguer::Confirm;
+use dialoguer::theme::ColorfulTheme;
 
 use super::args::*;
 use super::config::Configuration;

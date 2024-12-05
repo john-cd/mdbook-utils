@@ -3,8 +3,8 @@ use std::io::Write;
 
 use anyhow::Context;
 use anyhow::Result;
-use enumflags2::bitflags;
 use enumflags2::BitFlags;
+use enumflags2::bitflags;
 
 use super::Link;
 

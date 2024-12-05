@@ -20,7 +20,9 @@ fn main() -> Result<()> {
     // Set RUST_LOG, if not present, and initialize logging
     let key = "RUST_LOG";
     if env::var(key).is_err() {
-        env::set_var(key, "info"); // TODO
+        unsafe {
+            env::set_var(key, "info"); // TODO
+        }
     }
     tracing_subscriber::fmt::init();
 

@@ -8,9 +8,9 @@ use pulldown_cmark::Parser;
 use regex::Regex;
 use tracing::debug;
 
-use crate::link::write_badge_refdefs_and_links_to_two;
 use crate::link::Link;
 use crate::link::LinkBuilder;
+use crate::link::write_badge_refdefs_and_links_to_two;
 
 // TODO
 // - handle - and _ in github repo names (shields.io conventions)

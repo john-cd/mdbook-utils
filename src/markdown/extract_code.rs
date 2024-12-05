@@ -4,9 +4,10 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::LazyLock;
 
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use once_cell::sync::Lazy;
 use rand::distributions::Alphanumeric;
 use rand::distributions::DistString;
@@ -16,6 +17,9 @@ use tracing::info;
 /// Embedded Rust code extraction from Markdown
 static EXTRACT_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?s)```rust.*?\n(?<code>.*?)```").unwrap());
+
+// TODO document
+static REG: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)^(?:#\s)(?<rest>.*)$").unwrap());
 
 /// Extract code examples from all Markdown files within a source
 /// directory and write them to separate files.
@@ -51,7 +55,7 @@ where
             .enumerate()
         {
             // remove "# " at beginning of lines
-            let code = Regex::new(r"(?m)^(?:#\s)(?<rest>.*)$")?.replace_all(code, "$rest");
+            let code = REG.replace_all(code, "$rest");
             let code_filename = format!(
                 "{}{}{}",
                 p.file_stem()
@@ -71,6 +75,10 @@ where
     }
     Ok(())
 }
+
+// TODO document
+static REG2: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.+?)(?<last>```)").unwrap());
 
 // TODO
 /// Remove Rust code blocks from Markdown files,
@@ -98,8 +106,7 @@ where
     for p in markdown_file_paths {
         info!("{p:?}");
         let buf = fs::read_to_string(p.as_path())?;
-        let re = Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.+?)(?<last>```)")?;
-        if re.is_match(&buf) {
+        if REG2.is_match(&buf) {
             let replacement = format!(
                 "$first{{#include {}.rs}}\n$last",
                 PathBuf::from(code_dir_path.as_ref())
@@ -108,7 +115,7 @@ where
                     ))?)
                     .display()
             );
-            let new_txt = re.replace_all(&buf, replacement);
+            let new_txt = REG2.replace_all(&buf, replacement);
             // debug!("{}", new_txt);
             File::create(p)?.write_all(new_txt.as_bytes())?;
         }
@@ -118,6 +125,7 @@ where
 
 #[cfg(test)]
 mod test {
+    // TODO
     // use super::*;
 
     // #[test]

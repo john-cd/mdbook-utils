@@ -2,9 +2,9 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
+use anyhow::bail;
 use tracing::info;
 
 /// Check if a path is a directory
