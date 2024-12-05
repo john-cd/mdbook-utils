@@ -56,17 +56,19 @@ run cmd=help subcmd=empty:
 
 # Build and display the `cargo doc` documentation
 [unix]
-doc:
+doc: _buildoc
+  cd /cargo-target-mdbook-utils/target/doc/ ; python3 -m http.server 9000
+
+_buildoc:
   cargo clean --doc
   cargo doc --no-deps --locked # --document-private-items
-  cd /cargo-target-mdbook-utils/target/doc/ ; python3 -m http.server 9000
 
 # Display the user guide
 serve:
   mdbook serve ./user_guide/
 
 # Run all the steps required before pushing code to GitHub
-prep: fmt clean build clippy test doc
+prep: fmt clean build clippy test _buildoc
 
 ## Utilities --------------------------------------
 
