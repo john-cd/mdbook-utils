@@ -264,7 +264,7 @@ impl<'a> Link<'a> {
     }
 }
 
-impl<'a> PartialOrd for Link<'a> {
+impl PartialOrd for Link<'_> {
     /// PartialOrd implementation for Link
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         // The type is `Ord``,
@@ -274,7 +274,7 @@ impl<'a> PartialOrd for Link<'a> {
 }
 
 // TODO
-impl<'a> Ord for Link<'a> {
+impl Ord for Link<'_> {
     /// Ord implementation for Link
     fn cmp(&self, other: &Self) -> Ordering {
         self.label
@@ -285,7 +285,7 @@ impl<'a> Ord for Link<'a> {
 }
 
 // TODO
-impl<'a> PartialEq for Link<'a> {
+impl PartialEq for Link<'_> {
     /// PartialEq implementation for Link
     fn eq(&self, other: &Self) -> bool {
         (self.label == other.label) && (self.url == other.url) && (self.title == other.title)
@@ -293,7 +293,7 @@ impl<'a> PartialEq for Link<'a> {
 }
 
 /// Eq implementation for Link
-impl<'a> Eq for Link<'a> {}
+impl Eq for Link<'_> {}
 
 #[cfg(test)]
 mod test {

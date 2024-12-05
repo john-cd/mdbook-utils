@@ -88,11 +88,11 @@ impl<'input> BrokenLinkCallback<'input> for Handler<'input> {
 #[allow(dead_code)]
 pub(crate) fn get_parser_with_broken_links_handler<'input>(
     markdown_input: &'input str,
-) -> Parser<'_, Handler<'_>> {
-    Parser::<'input, Handler<'_>>::new_with_broken_link_callback(
+) -> Parser<'input, Handler<'input>> {
+    Parser::<'input, Handler<'input>>::new_with_broken_link_callback(
         markdown_input,
         get_options(),
-        Some(Handler::<'_>::new(markdown_input)),
+        Some(Handler::<'input>::new(markdown_input)),
     )
     // Alternative with a closure:
     // let parser = Parser::new_with_broken_link_callback(

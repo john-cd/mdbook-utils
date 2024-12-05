@@ -7,8 +7,8 @@ use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use serde::Deserialize;
 
 /// Stores a dependency to a crate

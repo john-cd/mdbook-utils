@@ -8,12 +8,12 @@ use anyhow::Result;
 use serde::Deserialize;
 use tracing::debug;
 
+use super::GlobalOpts;
 use super::args::CargoTomlDirArgs;
 use super::args::DestDirArgs;
 use super::args::DestFileArgs;
 use super::args::MarkdownDirArgs;
 use super::args::UrlArgs;
-use super::GlobalOpts;
 
 /// Stores environment variables into a Configuration struct.
 /// Defaults apply if not present.
@@ -158,20 +158,23 @@ impl Configuration {
             if let Some(ref mdp) = self.book_markdown_build_dir_path {
                 debug!("BOOK_MARKDOWN_BUILD_DIR_PATH set: {}", mdp.display());
                 mdp.clone()
-            } else if let Ok((_, _, Some(p))) =
-                super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone())
-            {
-                debug!(
-                    "book_markdown_build_dir_path set from `book.toml`: {}",
-                    p.display()
-                );
-                p
             } else {
-                debug!(
-                    "book_markdown_build_dir_path set to default: {:?}",
-                    default_dir_path.as_ref()
-                );
-                PathBuf::from(default_dir_path.as_ref())
+                match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
+                    Ok((_, _, Some(p))) => {
+                        debug!(
+                            "book_markdown_build_dir_path set from `book.toml`: {}",
+                            p.display()
+                        );
+                        p
+                    }
+                    _ => {
+                        debug!(
+                            "book_markdown_build_dir_path set to default: {:?}",
+                            default_dir_path.as_ref()
+                        );
+                        PathBuf::from(default_dir_path.as_ref())
+                    }
+                }
             },
         );
 
@@ -244,13 +247,14 @@ impl Configuration {
         } else {
             let dir: PathBuf = if let Some(ref d) = self.book_html_build_dir_path {
                 d.clone()
-            } else if let Ok((_, html_output_dir, _)) =
-                super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone())
-            {
-                // `book.toml`` exists, is parseable and build.build-dir is defined
-                html_output_dir
             } else {
-                "./book".into()
+                match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
+                    Ok((_, html_output_dir, _)) => {
+                        // `book.toml`` exists, is parseable and build.build-dir is defined
+                        html_output_dir
+                    }
+                    _ => "./book".into(),
+                }
             };
             dir.join("sitemap.xml")
         }
