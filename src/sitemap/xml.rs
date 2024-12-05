@@ -14,9 +14,9 @@ use quick_xml::writer::Writer;
 pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Result<()> {
     let mut writer = Writer::new_with_indent(w, b' ', 2);
 
-    writer
-        .write_bom()
-        .map_err(|_e| anyhow!("[write_xml] Failed to write byte-order-marks to the XML document."))?;
+    writer.write_bom().map_err(|_e| {
+        anyhow!("[write_xml] Failed to write byte-order-marks to the XML document.")
+    })?;
     // Insert <?xml version="1.0" encoding="UTF-8"?>
     writer
         .get_mut()
@@ -29,16 +29,15 @@ pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Resu
         .write_inner_content(|writer| {
             for link in links.iter() {
                 // <url><loc>
-                writer
-                    .create_element("url")
-                    .write_inner_content(|w| {
-                        w.create_element("loc")
-                            .write_text_content(BytesText::new(link.as_str()))?;
-                        Ok(())
-                    })?;
+                writer.create_element("url").write_inner_content(|w| {
+                    w.create_element("loc")
+                        .write_text_content(BytesText::new(link.as_str()))?;
+                    Ok(())
+                })?;
             }
             Ok(())
-        }).map_err(|_e| anyhow!("[write_xml] Failed to write the url set."))?;
+        })
+        .map_err(|_e| anyhow!("[write_xml] Failed to write the url set."))?;
     Ok(())
 }
 
