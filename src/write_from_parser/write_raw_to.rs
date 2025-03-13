@@ -157,6 +157,12 @@ where
                     Tag::MetadataBlock(kind) => {
                         writeln!(w, "Event::Start(Tag::MetadataBlock({:?}))", kind)?;
                     }
+                    Tag::Superscript => {
+                        writeln!(w, "Event::Start(Tag::Superscript)")?;
+                    }
+                    Tag::Subscript => {
+                        writeln!(w, "Event::Start(Tag::Subscript)")?;
+                    }
                 }
             }
             // End of a tagged element.

@@ -9,8 +9,8 @@ use std::sync::LazyLock;
 use anyhow::Result;
 use anyhow::anyhow;
 use once_cell::sync::Lazy;
-use rand::distributions::Alphanumeric;
-use rand::distributions::DistString;
+use rand::distr::Alphanumeric;
+use rand::distr::SampleString;
 use regex::Regex;
 use tracing::info;
 
@@ -46,7 +46,7 @@ where
     for p in markdown_file_paths {
         info!("{p:?}");
         let buf = fs::read_to_string(p.as_path())?;
-        let random_string = Alphanumeric.sample_string(&mut rand::thread_rng(), 5);
+        let random_string = Alphanumeric.sample_string(&mut rand::rng(), 5);
 
         // debug!("{:?}: length = {}", p, buf.len());
         for (number, (_, [code])) in EXTRACT_REGEX

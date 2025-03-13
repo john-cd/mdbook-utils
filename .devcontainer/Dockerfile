@@ -11,11 +11,12 @@ FROM rust:${RUST_IMAGE_LABEL} as base
 
 SHELL ["bash", "-c"]
 
+# Set non-interactive mode for APT
+ENV DEBIAN_FRONTEND=noninteractive
+
 ## Install utilities
 RUN apt-get update \
-    && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends jq \
-    && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 ## To cache:
@@ -23,16 +24,10 @@ RUN apt-get update \
 ## --mount=type=cache,target=/var/lib/apt,sharing=locked \
 
 ## Update Rust if needed
-RUN rustup update
-
-## Install clippy if needed
-# RUN rustup component add clippy
-
 ## Install nightly fmt
-## NOTE: nightly will be the default until 1.85 (Rust edition 2024) is released
-RUN rustup toolchain install nightly \
-    && rustup component add rustfmt clippy --toolchain nightly \
-    && rustup default nightly
+RUN rustup update \
+    && rustup toolchain install nightly \
+    && rustup component add rustfmt --toolchain nightly
 
 ARG MDBOOK_VERSION
 
@@ -68,7 +63,7 @@ RUN cargo install cargo-bump
 
 ## rustup completions
 RUN mkdir -p ~/.local/share/bash-completion/completions/ \
-  && rustup completions bash > ~/.local/share/bash-completion/completions/rustup
+    && rustup completions bash > ~/.local/share/bash-completion/completions/rustup
 
 ## https://code.visualstudio.com/remote/advancedcontainers/persist-bash-history
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/command_history/.bash_history" \
@@ -77,7 +72,6 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/command_hist
 ## Git config
 ARG EMAIL
 ARG GIT_AUTHOR_NAME
-
 RUN git config --global user.email ${EMAIL} && git config --global user.name ${GIT_AUTHOR_NAME}
 
 ## https://code.visualstudio.com/remote/advancedcontainers/start-processes
