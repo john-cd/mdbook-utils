@@ -49,7 +49,7 @@ pulldown-cmark = "0.13.0"
 # pulldown-cmark = { version = "0.12", default-features = false, features = ["simd"] }
 # pulldown-cmark-to-cmark = "11"
 quick-xml = "0.37.4"
-rand = "0.9.0"
+rand = "0.9.1"
 regex = "1.11.1"
 serde = { version = "1.0.219", features = ["derive"] }
 toml = { version = "0.8.20", features = ["parse"] }
