@@ -26,6 +26,7 @@ RUN apt-get update \
 ## Update Rust if needed
 ## Install nightly fmt
 RUN rustup update \
+    && rustup component add clippy \
     && rustup toolchain install nightly \
     && rustup component add rustfmt --toolchain nightly
 
