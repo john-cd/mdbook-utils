@@ -1,4 +1,7 @@
 {
-    "rust-analyzer.showUnlinkedFileNotification": false,
-    "dependi.rust.lockFileEnabled": true
+    "rust-analyzer.restartServerOnConfigChange": true,
+    "rust-analyzer.initializeStopped": true,
+    "rust-analyzer.cargo.buildScripts.enable": false,
+    "rust-analyzer.statusBar.clickAction": "stopServer",
+    "rust-analyzer.statusBar.showStatusBar": "always",
 }
