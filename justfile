@@ -59,6 +59,10 @@ run cmd=help subcmd=empty:
 doc: _buildoc
   cd /cargo-target-mdbook-utils/target/doc/ ; python3 -m http.server 9000
 
+[windows]
+doc:
+  echo "Not implemented."
+
 _buildoc:
   cargo clean --doc
   cargo doc --no-deps --locked # --document-private-items
