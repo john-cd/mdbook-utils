@@ -40,7 +40,7 @@ fn main() -> Result<()> {
         global_opts,
     } = cli::parse_arguments();
 
-    // Retrieves default configuration (from `book.toml``, env. vars,
+    // Retrieves default configuration (from `book.toml`, env. vars,
     // or hard-coded defaults); also stores global_opts.
     let config = cli::config::init(global_opts)?;
     debug!("{:?}", config);
