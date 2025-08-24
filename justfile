@@ -1,17 +1,29 @@
 alias f := fmt
+alias fa := fmt
 alias b := build
+alias ba := build
 alias c := clippy
+alias ca := clippy
+alias ck := check
+alias cka := check
 alias t := test
+alias ta := test
 alias r := run
 alias d := doc
 alias s := serve
 alias p := prep
 
-set windows-shell := ["cmd.exe", "/c"]
+set shell := ["bash", "-uc"]
+set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
-default:
+bin_dir := clean(join(source_directory(), "..", "bin"))
+target_dir := clean(join(source_directory(), "..", "target", "mdbook-utils"))
+
+set quiet
+
+[no-exit-message]
+_default:
   @just --list --unsorted
-# or: @just --choose
 
 # Clean Cargo's `target` and mdbook's `book` folders
 clean:
@@ -22,10 +34,12 @@ clean:
 # Format all code
 fmt:
   cargo +nightly fmt --all
+  echo "DONE"
 
 # Check whether the code can compile
 check:
   cargo check --all-targets --locked
+  echo "DONE"
 # `--all-targets`` is equivalent to specifying `--lib --bins --tests --benches --examples`.
 
 # Build all code and books
@@ -55,15 +69,14 @@ run cmd=help subcmd=empty:
   cargo run --locked -- {{cmd}} {{subcmd}}
 
 # Build and display the `cargo doc` documentation
-[unix]
-doc: _buildoc
-  cd /cargo-target-mdbook-utils/target/doc/ ; python3 -m http.server 9000
+doc: _builddoc
+  cd "{{join(target_dir, "doc")}}" && python3 -m http.server 9000
 
-[windows]
-doc:
-  echo "Not implemented."
+# [windows]
+# doc:
+#   echo Not implemented.
 
-_buildoc:
+_builddoc:
   cargo clean --doc
   cargo doc --no-deps --locked # --document-private-items
 
@@ -72,7 +85,11 @@ serve:
   mdbook serve ./user_guide/
 
 # Run all the steps required before pushing code to GitHub
-prep: fmt clean build clippy test _buildoc
+prep: fmt clean build clippy test _builddoc
+
+@release:
+  echo "Build the tools in $(pwd) in release mode and copy to ../bin"
+  cargo +nightly build --bins --locked --all-features --release -Z unstable-options --artifact-dir "{{bin_dir}}"
 
 ## Utilities --------------------------------------
 
