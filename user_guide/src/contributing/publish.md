@@ -5,7 +5,7 @@
 - Go to `crates.io`, sign in, and create an API token in `Account Settings` > `API Tokens`.
 - Use `cargo login <token>` to save the token in `$CARGO_HOME/credentials.toml`.
 - `just build; just clippy; just run; just doc; cargo package --locked`
-- Review the packaging output in `/cargo-target-mdbook-utils/target/package` or use `cargo package --list`.
+- Review the packaging output in `target/mdbook-utils/package` or use `cargo package --list`.
 - When ready, `cargo publish --locked --dry-run; cargo publish --locked`
 
 2. Docker Compose method

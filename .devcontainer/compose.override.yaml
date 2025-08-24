@@ -14,7 +14,7 @@ services:
     volumes:
       - ${ROOT_PROJECT_PATH}:/code
       - cargo_home_cache:/usr/local/cargo/ # https://doc.rust-lang.org/cargo/guide/cargo-home.html?highlight=crate%20cache
-      - cargo_target_cache:/cargo-target-mdbook-utils/ # See .cargo/config.toml
+      - cargo_target_cache:/target/mdbook-utils/ # See .cargo/config.toml
       - command_history:/command_history
 
     ## Required for ptrace-based debugger like C++, Go, and Rust.
