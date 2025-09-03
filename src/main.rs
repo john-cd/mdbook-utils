@@ -28,10 +28,10 @@ fn main() -> Result<()> {
 
     match dotenv {
         Ok(pb) => {
-            debug!("`.env` file loaded: {:?}", pb);
+            debug!("`.env` file loaded: {pb:?}");
         }
         Err(e) => {
-            debug!("`.env` file not found or not readable: {}", e);
+            debug!("`.env` file not found or not readable: {e}");
         }
     }
 
@@ -43,7 +43,7 @@ fn main() -> Result<()> {
     // Retrieves default configuration (from `book.toml`, env. vars,
     // or hard-coded defaults); also stores global_opts.
     let config = cli::config::init(global_opts)?;
-    debug!("{:?}", config);
+    debug!("{config:?}");
 
     match cmd {
         Command::RefDefs(subcmd) => {

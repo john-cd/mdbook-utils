@@ -48,7 +48,7 @@ where
         let buf = fs::read_to_string(p.as_path())?;
         let random_string = Alphanumeric.sample_string(&mut rand::rng(), 5);
 
-        // debug!("{:?}: length = {}", p, buf.len());
+        // debug!("{p:?}: length = {}", buf.len());
         for (number, (_, [code])) in EXTRACT_REGEX
             .captures_iter(&buf)
             .map(|c| c.extract())

@@ -29,7 +29,7 @@ where
     let ls = links
         .into_iter()
         .filter(|l| !exclude.iter().any(|&ex| l.get_url().ends_with(ex)));
-    // debug: let l = l.map(|l| { tracing::debug!("{:?}", l); l });
+    // debug: let l = l.map(|l| { tracing::debug!("{l:?}"); l });
 
     // Change the extension and replace intro.html by index.html
     let ls = ls.map(|l| {
@@ -45,9 +45,9 @@ where
     let (links, errors): (Vec<Result<_, _>>, Vec<Result<_, _>>) = ls.partition(Result::is_ok);
     let mut links: Vec<String> = links.into_iter().map(|r| r.unwrap().to_string()).collect();
     let errors: Vec<Error> = errors.into_iter().map(|r| r.unwrap_err().into()).collect();
-    // debug: tracing::debug!("Links: {:?}", links);
+    // debug: tracing::debug!("Links: {links:?}");
     if !errors.is_empty() {
-        tracing::error!("Errors: {:?}", errors);
+        tracing::error!("Errors: {errors:?}");
     }
 
     // Deduplicate and sort links

@@ -16,7 +16,7 @@ pub(crate) fn generate_refdefs_from(
 ) -> Vec<Link<'static>> {
     let mut buf = Vec::new();
     for (_, dep) in dependencies {
-        info!("{:?}", dep);
+        info!("{dep:?}");
         buf.push(generate_refdefs_for_one_library(
             &dep.library_name,
             dep.package_repo_url.as_deref(),

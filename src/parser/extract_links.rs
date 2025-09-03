@@ -36,10 +36,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 title,
                 id,
             }) => {
-                debug!(
-                    "Link: link_type: {:?}, url: {}, title: {}, id: {}",
-                    link_type, dest_url, title, id
-                );
+                debug!("Link: link_type: {link_type:?}, url: {dest_url}, title: {title}, id: {id}");
                 state.push((
                     Where::InLink,
                     LinkBuilder::from_type_url_title(
@@ -53,7 +50,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
 
             // End of the link
             ref e @ Event::End(TagEnd::Link) => {
-                debug!("{:?}", e);
+                debug!("{e:?}");
                 let (whr, link_builder) = state.pop().unwrap(); // Start and End events are balanced
                 assert_eq!(whr, Where::InLink);
                 links.push(link_builder.build());
@@ -67,8 +64,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 id,
             }) if !state.is_empty() => {
                 debug!(
-                    "image: link type: {:?}, image url: {}, image title: {}, label: {}",
-                    link_type, dest_url, title, id
+                    "image: link type: {link_type:?}, image url: {dest_url}, image title: {title}, label: {id}",
                 );
                 let (whr, link_builder) = state.pop().unwrap();
                 assert_eq!(whr, Where::InLink);
@@ -79,7 +75,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             }
 
             ref e @ Event::End(TagEnd::Image) if !state.is_empty() => {
-                debug!("{:?}", e);
+                debug!("{e:?}");
                 let (whr, link_builder) = state.pop().unwrap();
                 assert_eq!(whr, Where::InImageInLink);
                 state.push((Where::InLink, link_builder));
@@ -88,32 +84,32 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             Event::Text(t)
                 if state.last().map_or(Where::Elsewhere, |s| s.0) == Where::InImageInLink =>
             {
-                debug!("Event::Text({:?})", t);
+                debug!("Event::Text({t:?})");
                 let (whr, link_builder) = state.pop().unwrap();
                 assert_eq!(whr, Where::InImageInLink);
                 state.push((whr, link_builder.add_image_alt_text(Cow::from(t))));
             }
             // Text of a Link
             Event::Text(t) if !state.is_empty() => {
-                debug!("Event::Text({:?})", t);
+                debug!("Event::Text({t:?})");
                 let (whr, link_builder) = state.pop().unwrap();
                 assert_eq!(whr, Where::InLink);
                 state.push((whr, link_builder.add_text(Cow::from(t))));
             }
 
             Event::Code(c) if !state.is_empty() => {
-                debug!("code: {}", c);
+                debug!("code: {c}");
                 let (whr, link_builder) = state.pop().unwrap();
                 state.push((whr, link_builder.add_text(c.into())));
             }
 
             // corner cases: Code within an Image, Link within an Image...
             ref e if !state.is_empty() => {
-                error!("Unhandled event while 'in link': {:?}", e);
+                error!("Unhandled event while 'in link': {e:?}");
             }
 
             ref e => {
-                debug!("Ignored: {:?}", e);
+                debug!("Ignored: {e:?}");
             }
         }
     }

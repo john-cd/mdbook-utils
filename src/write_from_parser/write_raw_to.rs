@@ -25,7 +25,7 @@ where
             // event and before its corresponding End event are inside this
             // element. Start and end events are guaranteed to be balanced.
             Event::Start(tag) => {
-                writeln!(w, "Start({:?})", tag)?;
+                writeln!(w, "Start({tag:?})")?;
 
                 match tag {
                     Tag::Paragraph => {
@@ -42,20 +42,18 @@ where
                     } => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::Heading{{ level: {} fragment identifier: {:?} classes: {:?} attributes: {:?} }})",
-                            level, id, classes, attrs
+                            "Event::Start(Tag::Heading{{ level: {level} fragment identifier: {id:?} classes: {classes:?} attributes: {attrs:?} }})",
                         )?;
                     }
                     // A blockQuote with optional kind (Note, Tip, Important, Warning, Caution).
                     Tag::BlockQuote(k) => {
-                        writeln!(w, "Event::Start(Tag::BlockQuote({:?}))", k)?;
+                        writeln!(w, "Event::Start(Tag::BlockQuote({k:?}))")?;
                     }
                     // A code block.
                     Tag::CodeBlock(code_block_kind) => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::CodeBlock(code_block_kind: {:?} ))",
-                            code_block_kind
+                            "Event::Start(Tag::CodeBlock(code_block_kind: {code_block_kind:?} ))"
                         )?;
                     }
                     Tag::DefinitionList => {
@@ -76,8 +74,7 @@ where
                     Tag::List(ordered_list_first_item_number) => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::List( ordered_list_first_item_number: {:?} ))",
-                            ordered_list_first_item_number
+                            "Event::Start(Tag::List( ordered_list_first_item_number: {ordered_list_first_item_number:?} ))"
                         )?;
                     }
                     // A list item.
@@ -87,19 +84,14 @@ where
                     // A footnote definition. The value contained is the
                     // footnote’s label by which it can be referred to.
                     Tag::FootnoteDefinition(label) => {
-                        writeln!(
-                            w,
-                            "Event::Start(Tag::FootnoteDefinition( label: {} ))",
-                            label
-                        )?;
+                        writeln!(w, "Event::Start(Tag::FootnoteDefinition( label: {label} ))")?;
                     }
                     // A table. Contains a vector describing the text-alignment
                     // for each of its columns.
                     Tag::Table(column_text_alignment_list) => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::Table( column_text_alignment_list: {:?} ))",
-                            column_text_alignment_list
+                            "Event::Start(Tag::Table( column_text_alignment_list: {column_text_alignment_list:?} ))"
                         )?;
                     }
                     // A table header. Contains only TableCells. Note that the
@@ -135,8 +127,7 @@ where
                     } => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::Link{{ link_type: {:?} url: {} title: {} id: {} }})",
-                            link_type, dest_url, title, id
+                            "Event::Start(Tag::Link{{ link_type: {link_type:?} url: {dest_url} title: {title} id: {id} }})"
                         )?;
                     }
                     // An image. The first field is the link type, the second
@@ -149,13 +140,12 @@ where
                     } => {
                         writeln!(
                             w,
-                            "Event::Start(Tag::Image( link_type: {:?} url: {} title: {} id: {} ))",
-                            link_type, dest_url, title, id
+                            "Event::Start(Tag::Image( link_type: {link_type:?} url: {dest_url} title: {title} id: {id} ))"
                         )?;
                     }
                     // A metadata block.
                     Tag::MetadataBlock(kind) => {
-                        writeln!(w, "Event::Start(Tag::MetadataBlock({:?}))", kind)?;
+                        writeln!(w, "Event::Start(Tag::MetadataBlock({kind:?}))")?;
                     }
                     Tag::Superscript => {
                         writeln!(w, "Event::Start(Tag::Superscript)")?;
@@ -167,29 +157,29 @@ where
             }
             // End of a tagged element.
             Event::End(tag) => {
-                writeln!(w, "Event::End({:?})", tag)?;
+                writeln!(w, "Event::End({tag:?})")?;
             }
             // A text node.
             Event::Text(s) => {
-                writeln!(w, "Event::Text({:?})", s)?;
+                writeln!(w, "Event::Text({s:?})")?;
             }
             // An inline code node.
             Event::Code(s) => {
-                writeln!(w, "Event::Code({:?})", s)?;
+                writeln!(w, "Event::Code({s:?})")?;
             }
             // An HTML node.
             Event::Html(s) => {
-                writeln!(w, "Event::Html({:?})", s)?;
+                writeln!(w, "Event::Html({s:?})")?;
             }
             // An inline HTML node.
             Event::InlineHtml(s) => {
-                writeln!(w, "Event::InlineHtml({:?})", s)?;
+                writeln!(w, "Event::InlineHtml({s:?})")?;
             }
             // A reference to a footnote with given label, which may or may not
             // be defined by an event with a Tag::FootnoteDefinition tag.
             // Definitions and references to them may occur in any order.
             Event::FootnoteReference(s) => {
-                writeln!(w, "Event::FootnoteReference({:?})", s)?;
+                writeln!(w, "Event::FootnoteReference({s:?})")?;
             }
             // A soft line break.
             Event::SoftBreak => {
@@ -206,15 +196,15 @@ where
             // A task list marker, rendered as a checkbox in HTML. Contains a
             // true when it is checked.
             Event::TaskListMarker(b) => {
-                writeln!(w, "Event::TaskListMarker({:?})", b)?;
+                writeln!(w, "Event::TaskListMarker({b:?})")?;
             }
             // An inline math environment node.
             Event::InlineMath(s) => {
-                writeln!(w, "Event::InlineMath({:?})", s)?;
+                writeln!(w, "Event::InlineMath({s:?})")?;
             }
             // A display math environment node.
             Event::DisplayMath(s) => {
-                writeln!(w, "Event::DisplayMath({:?})", s)?;
+                writeln!(w, "Event::DisplayMath({s:?})")?;
             }
         };
     }

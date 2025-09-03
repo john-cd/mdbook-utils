@@ -89,7 +89,7 @@ where
 // where
 //     W: Write,
 // {
-//     tracing::debug!("[write_refdef_to] {:?}", l);
+//     tracing::debug!("[write_refdef_to] {l:?}");
 //     let refdef_flags = (LinkWrite::ReferenceDefinition).into();
 //     write(l, &refdef_flags, refdef_writer).context("[write_refdef_to] Failed
 // to write a reference definition.")?;     Ok(())
@@ -101,7 +101,7 @@ where
 // where
 //     W: Write,
 // {
-//     tracing::debug!("[write_link_to] {:?}", l);
+//     tracing::debug!("[write_link_to] {l:?}");
 //     let link_flags = (LinkWrite::ReferenceLink |
 // LinkWrite::ReferenceDefinition ).into();     write(l, &link_flags,
 // link_writer).context("[write_link_to] Failed to write a link.")?;     Ok(())
