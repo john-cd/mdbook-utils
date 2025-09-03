@@ -112,8 +112,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
         }
     }
     debug!(
-        "try_parse_book_toml: markdown_dir_path: {:?}; book_build_dir_path: {:?}; book_markdown_build_dir_path: {:?}",
-        markdown_dir_path, book_html_build_dir_path, book_markdown_build_dir_path,
+        "try_parse_book_toml: markdown_dir_path: {markdown_dir_path:?}; book_build_dir_path: {book_html_build_dir_path:?}; book_markdown_build_dir_path: {book_markdown_build_dir_path:?}",
     );
 
     Ok((

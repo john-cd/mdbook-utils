@@ -12,8 +12,8 @@ use anyhow::Result;
 
 // // Read a single file to String
 // pub(crate) fn read_to_string<P: AsRef<Path>>(path: P) -> String {
-// let mut file = File::open(path).expect(format!("{:?} should
-// exist.", path).as_str());
+// let mut file = File::open(path).expect(format!("{path:?} should
+// exist.").as_str());
 // let mut buf = String::new();
 // // or String::with_capacity(50000);
 // file.read_to_string(&mut buf).expect("file should be readable");
@@ -39,7 +39,7 @@ where
                 p.display()
             )
         })?;
-        // debug!("{:?}: length = {}", p, s.len());
+        // debug!("{p:?}: length = {}", s.len());
         buf.push(s);
     }
     let all_markdown = buf.concat(); // or .join("");
@@ -54,7 +54,7 @@ where
 /// ```ignore
 /// let lines = read_lines("test.txt").unwrap();
 /// for line in lines {
-///     println!("{}", line);
+///     println!("{line}"");
 /// }
 #[allow(dead_code)]
 pub(crate) fn read_lines<P>(file_path: P) -> Result<Vec<Cow<'static, str>>>

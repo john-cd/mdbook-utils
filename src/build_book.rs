@@ -15,7 +15,7 @@ use anyhow::anyhow;
 /// println!("Info: building the book...");
 /// let res = build_book(&root_path);
 /// if let Err(ref e) = res {
-///     println!("cargo:warning=ERROR: {}", e);
+///     println!("cargo:warning=ERROR: {e}");
 ///     return res;
 /// }
 /// ```
@@ -55,8 +55,8 @@ pub(crate) fn build_book(root_path: &Path) -> Result<()> {
 //         .collect::<Vec<_>>();
 
 //     for path in original_markdown_paths {
-//         println!("cargo:rerun-if-changed={}", path);
-//         // println!("cargo:warning=DEBUG:{}", path);
+//         println!("cargo:rerun-if-changed={path}");
+//         // println!("cargo:warning=DEBUG:{path}");
 //     }
 
 //     Ok(())

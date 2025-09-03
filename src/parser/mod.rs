@@ -68,8 +68,8 @@ impl<'input> BrokenLinkCallback<'input> for Handler<'input> {
     ) -> Option<(CowStr<'input>, CowStr<'input>)> {
         let txt: &str = self.markdown_input.get(link.span).unwrap_or("");
         warn!(
-            "Issue with the markdown: reference: {}, `{}`, type: {:?}",
-            link.reference, txt, link.link_type,
+            "Issue with the markdown: reference: {}, `{txt}`, type: {:?}",
+            link.reference, link.link_type,
         );
         self.broken_links.push((
             link.reference.into_string(),
@@ -113,5 +113,5 @@ pub(crate) fn get_parser_with_broken_links_handler<'input>(
 //         }),
 //     );
 //     let count = p.count();
-//     println!("{} events", count);
+//     println!("{count} events");
 // }

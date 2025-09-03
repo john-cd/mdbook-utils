@@ -278,7 +278,7 @@ where
     // Generate ref defs from dependencies
     let deps = dependencies::get_dependencies(&cargo_toml_dir_path)?;
     // for (_, d) in &deps {
-    //     tracing::info!("{:?}", d);
+    //     tracing::info!("{d:?}");
     // }
     let mut new_links = generate::generate_refdefs_from(deps);
 
