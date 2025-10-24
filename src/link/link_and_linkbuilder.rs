@@ -39,7 +39,7 @@ impl<'a> LinkBuilder<'a> {
 
     pub(crate) fn add_text(mut self, text: Cow<'a, str>) -> Self {
         if !text.is_empty() {
-            self.link.text = Some(format!("{}{}", self.link.text.unwrap_or_default(), text).into());
+            self.link.text = Some(format!("{}{text}", self.link.text.unwrap_or_default()).into());
         }
         self
     }
@@ -151,7 +151,7 @@ impl<'a> Link<'a> {
     fn get_url_and_title(&self) -> Cow<'a, str> {
         if let Some(u) = &self.url {
             if let Some(t) = &self.title {
-                format!("{} \"{}\"", u, t).into()
+                format!("{u} \"{t}\"").into()
             } else {
                 u.clone()
             }
@@ -220,7 +220,7 @@ impl<'a> Link<'a> {
         if let Some(ref img_lbl) = self.image_label {
             img_lbl.clone()
         } else if let Some(ref lbl) = self.label {
-            format!("{}-badge", lbl).into()
+            format!("{lbl}-badge").into()
         } else if let Some(ref alt_txt) = self.image_alt_text {
             alt_txt.clone()
         } else {
@@ -232,7 +232,7 @@ impl<'a> Link<'a> {
     fn get_badge_url_and_title(&self) -> Cow<'a, str> {
         if let Some(ref u) = self.image_url {
             if let Some(ref t) = self.image_title {
-                format!("{} \"{}\"", u, t).into()
+                format!("{u} \"{t}\"").into()
             } else {
                 u.clone()
             }
