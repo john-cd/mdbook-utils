@@ -2,7 +2,6 @@ alias f := fmt
 alias fa := fmt
 alias b := build
 alias ba := build
-alias c := clippy
 alias ca := clippy
 alias ck := check
 alias cka := check
@@ -52,7 +51,7 @@ build:
 
 # Scan all code for common mistakes
 clippy:
-  cargo clippy --all-targets --locked
+  cargo clippy --all-targets --locked -- --deny warnings
 
 # Test all code and books
 test:
