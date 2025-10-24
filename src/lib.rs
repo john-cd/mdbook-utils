@@ -318,21 +318,21 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    // Returns an error whether the base URL is a cannot-be-a-base URL,
+    // Returns an error whether the base URL is a 'cannot-be-a-base' URL,
     // meaning that parsing a relative URL string with this URL
     // as the base will return an error.
     if base_url.cannot_be_a_base() {
-        bail!("Invalid URL - cannot be a base: {}", base_url);
+        bail!("Invalid URL - cannot be a base: {base_url}");
     }
 
-    // Verify source path
+    // Verify source path.
     let markdown_src_dir_path = fs::check_is_dir(markdown_src_dir_path)?;
 
-    // Create the parent folders of the destination file, if needed
+    // Create the parent folders of the destination file, if needed.
     fs::create_parent_dir_for(sitemap_dest_file_path.as_ref())?;
 
-    // Create the `sitemap.xml` file
-    // File::create will create a file if it does not exist,
+    // Create the `sitemap.xml` file.
+    // `File::create` will create a file if it does not exist,
     // and will truncate it if it does.
     let mut f = File::create(sitemap_dest_file_path.as_ref()).with_context(|| {
         format!(
