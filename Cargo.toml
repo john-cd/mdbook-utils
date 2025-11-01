@@ -36,7 +36,7 @@ exclude = [
 [dependencies]
 anyhow = "1.0.100"
 cargo_toml = "0.22.3"
-clap = { version = "4.5.50", features = ["derive"] }
+clap = { version = "4.5.51", features = ["derive"] }
 console = "0.16.1"
 csv = "1.4.0"
 dialoguer = { version = "0.12.0", features = ["history", "completion"] }
