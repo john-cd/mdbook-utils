@@ -52,7 +52,7 @@ quick-xml = "0.39.0"
 rand = "0.9.2"
 regex = "1.12.2"
 serde = { version = "1.0.228", features = ["derive"] }
-toml = { version = "0.9.8", features = ["parse"] }
+toml = { version = "0.9.11", features = ["parse"] }
 tracing-subscriber = "0.3.22"
 tracing = "0.1.43"
 url = "2.5.8"
