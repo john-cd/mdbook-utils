@@ -20,12 +20,10 @@ pub(crate) enum LinksSubCommand {
     WriteInline(MarkdownSrcDirAndDestFileArgs),
 
     /// Identify duplicate links / labels and write to a Markdown file
-    #[command(skip)]
     DuplicateLinks(MarkdownSrcDirAndDestFileArgs),
 
     /// Identify broken links (i.e. without reference definition) and
     /// write to a Markdown file
-    #[command(skip)]
     BrokenLinks(MarkdownSrcDirAndDestFileArgs),
 }
 

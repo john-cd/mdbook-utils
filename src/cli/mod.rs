@@ -78,6 +78,10 @@ pub(crate) struct GlobalOpts {
     /// Automatically answer `yes` to any user confirmation request.
     #[clap(long, short = 'y', global = true)]
     pub(crate) yes: bool,
+
+    /// Set the logging level (error, warn, info, debug, trace).
+    #[clap(long, global = true, env = "RUST_LOG")]
+    pub(crate) log: Option<String>,
 }
 
 #[cfg(test)]

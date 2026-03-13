@@ -28,15 +28,17 @@ pub(crate) enum MarkdownSubCommand {
 
     /// Generate a listing of crates.io dependencies
     /// and write to a Markdown file
-    #[allow(dead_code)]
-    #[command(skip)]
     GenerateCategories(DestFileArgs),
 
     /// Generate a crate index and write to a Markdown file
-    #[allow(dead_code)]
-    #[command(skip)]
     GenerateCrates(MarkdownSrcDirAndDestFileArgs),
     // TODO autoreplace autolinks / inline links by ref links
+
+    /// Identify .md files not in SUMMARY.md
+    IdentifyFilesNotInSummary(MarkdownDirArgs),
+
+    /// Identify .rs examples not used in Markdown files
+    IdentifyUnusedRsExamples(MarkdownSrcDirAndDestDirArgs),
 }
 
 /// Process "markdown" subcommands of the command-line interface
@@ -143,19 +145,57 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 "Writing crates.io categories to {}...",
                 style(categories_dest_path.display()).cyan()
             );
-            // TODO
-            println!("{}", style("NOT IMPLEMENTED").red());
+            mdbook_utils::generate_categories(categories_dest_path)
+                .context("[run] Failed to generate categories.")?;
             println!("{}", style("Done.").green());
         }
         MarkdownSubCommand::GenerateCrates(args) => {
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let crates_dest_path = config.dest_file_path(args.dest, "crates.md");
             println!(
-                "Writing crate index to {}...",
-                style(crates_dest_path.display()).cyan()
+                "Writing crate index to {} from Markdown sources in {}...",
+                style(crates_dest_path.display()).cyan(),
+                style(markdown_src_dir_path.display()).cyan()
             );
-            // TODO
-            println!("{}", style("NOT IMPLEMENTED").red());
+            mdbook_utils::generate_crates(markdown_src_dir_path, crates_dest_path)
+                .context("[run] Failed to generate crate index.")?;
             println!("{}", style("Done.").green());
+        }
+        MarkdownSubCommand::IdentifyFilesNotInSummary(args) => {
+            let markdown_src_dir_path = config.markdown_src_dir_path(args, "./src/")?;
+            println!(
+                "Identifying Markdown files in {} not in SUMMARY.md...",
+                style(markdown_src_dir_path.display()).cyan(),
+            );
+            let missing = mdbook_utils::identify_files_not_in_summary(markdown_src_dir_path)
+                .context("[run] Failed to identify files not in SUMMARY.md.")?;
+            if missing.is_empty() {
+                println!("{}", style("All files are in SUMMARY.md.").green());
+            } else {
+                println!("{}", style("Files not in SUMMARY.md:").yellow());
+                for f in missing {
+                    println!("{}", f.display());
+                }
+            }
+        }
+        MarkdownSubCommand::IdentifyUnusedRsExamples(args) => {
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
+            let code_dir_path = config.dest_dir_path(args.dest);
+            println!(
+                "Identifying .rs files in {} not used in Markdown files in {}...",
+                style(code_dir_path.display()).cyan(),
+                style(markdown_src_dir_path.display()).cyan(),
+            );
+            let unused = mdbook_utils::identify_unused_rs_examples(markdown_src_dir_path, code_dir_path)
+                .context("[run] Failed to identify unused .rs examples.")?;
+            if unused.is_empty() {
+                println!("{}", style("All .rs files are used.").green());
+            } else {
+                println!("{}", style("Unused .rs files:").yellow());
+                for f in unused {
+                    println!("{}", f.display());
+                }
+            }
         } /* _ => {
            *     println!("NOT IMPLEMENTED");
            * } */

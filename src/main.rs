@@ -17,14 +17,6 @@ fn main() -> Result<()> {
     // the environment, their values are preserved.
     let dotenv = dotenvy::dotenv();
 
-    // Set RUST_LOG, if not present, and initialize logging
-    let key = "RUST_LOG";
-    if env::var(key).is_err() {
-        unsafe {
-            env::set_var(key, "info"); // TODO
-        }
-    }
-    tracing_subscriber::fmt::init();
 
     match dotenv {
         Ok(pb) => {
@@ -39,6 +31,20 @@ fn main() -> Result<()> {
         command: cmd,
         global_opts,
     } = cli::parse_arguments();
+
+    // Set RUST_LOG, if not present, and initialize logging
+    if let Some(ref log_level) = global_opts.log {
+        // SAFETY: This is called at the beginning of the program,
+        // although after some initializations.
+        unsafe {
+            env::set_var("RUST_LOG", log_level);
+        }
+    } else if env::var("RUST_LOG").is_err() {
+        unsafe {
+            env::set_var("RUST_LOG", "info");
+        }
+    }
+    tracing_subscriber::fmt::init();
 
     // Retrieves default configuration (from `book.toml`, env. vars,
     // or hard-coded defaults); also stores global_opts.
