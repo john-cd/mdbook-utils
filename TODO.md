@@ -24,20 +24,20 @@
 
 - generate categories.md - WIP
 - generate crates.md - WIP
-- TODO identify .md files not in SUMMARY.md
-- TODO identify .rs examples not used
-- TODO duplicate links - WIP
-- TODO broken links - WIP
+- [x] identify .md files not in SUMMARY.md
+- [x] identify .rs examples not used
+- [x] duplicate links - WIP
+- [x] broken links - WIP
 - TODO locate all autolink / inline references to external sites - WIP
 - TODO suggest label names based on URL type - WIP
 - TODO autoreplace autolinks / inline links by ref links - TODO
 
 ## TODOs
 
-- improve CLI help messages
+- [x] improve CLI help messages
 
-- improve user guide - description of functionality
-- README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
+- [x] improve user guide - description of functionality
+- [x] README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
 
 - move common functionality to separate library?
   - move cli to bin folder? or create a cargo workspace?

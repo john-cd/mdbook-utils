@@ -101,7 +101,30 @@ impl<'a> LinkBuilder<'a> {
     }
 }
 
+impl<'a> Link<'a> {
+    pub(crate) fn to_static(&self) -> Link<'static> {
+        Link {
+            link_type: self.link_type,
+            text: self.text.as_ref().map(|c| Cow::Owned(c.to_string())),
+            label: self.label.as_ref().map(|c| Cow::Owned(c.to_string())),
+            url: self.url.as_ref().map(|c| Cow::Owned(c.to_string())),
+            title: self.title.as_ref().map(|c| Cow::Owned(c.to_string())),
+            image_link_type: self.image_link_type,
+            image_alt_text: self
+                .image_alt_text
+                .as_ref()
+                .map(|c| Cow::Owned(c.to_string())),
+            image_label: self.image_label.as_ref().map(|c| Cow::Owned(c.to_string())),
+            image_url: self.image_url.as_ref().map(|c| Cow::Owned(c.to_string())),
+            image_title: self.image_title.as_ref().map(|c| Cow::Owned(c.to_string())),
+        }
+    }
+}
+
 // LINK -----------------------------
+
+use std::hash::Hash;
+use std::hash::Hasher;
 
 /// `Link` is a structure that collects all necessary information to
 /// write Markdown (inline or reference-style) links and reference
@@ -133,10 +156,11 @@ impl<'a> Link<'a> {
         self.link_type
     }
 
-    /// Return the link's text or TODO if empty
+    /// Return the link's text
     fn get_text(&self) -> Cow<'a, str> {
-        self.text.clone().unwrap_or(Cow::from("TODO"))
+        self.text.clone().unwrap_or(Cow::from(""))
     }
+
 
     /// Returns the link's url
     pub(crate) fn get_url(&self) -> Cow<'a, str> {
@@ -160,17 +184,15 @@ impl<'a> Link<'a> {
         }
     }
 
-    // TODO need to look ref defs for existing labels
     /// Returns the link's reference label, if it exists, or the
     /// kebab-cased link's text
     fn get_label(&self) -> Cow<'a, str> {
         if let Some(label) = &self.label {
             label.clone()
         } else if let Some(txt) = &self.text {
-            // TODO
             txt.to_kebab_case().into()
         } else {
-            "XYZ".into()
+            "".into()
         }
     }
 
@@ -210,7 +232,7 @@ impl<'a> Link<'a> {
         } else if let Some(lbl) = &self.label {
             lbl.clone()
         } else {
-            "TODO".into()
+            "".into()
         }
     }
 
@@ -224,7 +246,7 @@ impl<'a> Link<'a> {
         } else if let Some(ref alt_txt) = self.image_alt_text {
             alt_txt.clone()
         } else {
-            "ABC".into() // TODO
+            "badge".into()
         }
     }
 
@@ -294,6 +316,14 @@ impl PartialEq for Link<'_> {
 
 /// Eq implementation for Link
 impl Eq for Link<'_> {}
+
+impl Hash for Link<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.label.hash(state);
+        self.url.hash(state);
+        self.title.hash(state);
+    }
+}
 
 #[cfg(test)]
 mod test {

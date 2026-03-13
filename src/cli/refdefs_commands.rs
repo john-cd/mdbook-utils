@@ -22,8 +22,6 @@ pub(crate) enum RefDefsSubCommand {
     /// from the dependencies of the code examples
     /// and merge them with those found in the Markdown source
     /// directory
-    #[allow(dead_code)]
-    #[command(skip)]
     #[command(name = "from-dependencies")]
     GenerateFromDependencies(DependenciesDirAndDestFileArgs),
 }
