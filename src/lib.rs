@@ -37,6 +37,7 @@ use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -183,6 +184,10 @@ where
                     .iter()
                     .any(|&x| l.get_link_type().unwrap() == x)
             })
+            .filter(|l| {
+                let url = l.get_url();
+                !url.starts_with('.') && !url.starts_with('/')
+            })
             .collect();
         link::write_reference_style_links_to(links, f)?;
         Ok(())
@@ -222,10 +227,14 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(src_dir_path, dest_file_path, |parser, _f| {
-        let _links: Vec<link::Link<'_>> = parser::extract_links(parser);
-        // TODO ::write_duplicate_links_to(links, f)?;
-        println!("NOT IMPLEMENTED!");
+    helper(src_dir_path, dest_file_path, |parser, f| {
+        let links: Vec<link::Link<'_>> = parser::extract_links(parser);
+        let mut counts = std::collections::HashMap::new();
+        for l in &links {
+            *counts.entry(l.clone()).or_insert(0) += 1;
+        }
+        let duplicates: Vec<_> = links.into_iter().filter(|l| counts[l] > 1).collect();
+        link::write_duplicate_links_to(duplicates, f)?;
         Ok(())
     })?;
 
@@ -233,7 +242,7 @@ where
 }
 
 /// Parse Markdown from all .md files in a given source directory,
-/// write duplicated links found therein to a file.
+/// write broken links found therein to a file.
 ///
 /// src_dir_path: path to the source directory.
 ///
@@ -243,12 +252,26 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(src_dir_path, dest_file_path, |parser, _f| {
-        let _links: Vec<link::Link<'_>> = parser::extract_links(parser);
-        // TODO ::write_broken_links_to(links, f)?;
-        println!("NOT IMPLEMENTED!");
-        Ok(())
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    fs::create_parent_dir_for(dest_file_path.as_ref())?;
+
+    let mut f = File::create(dest_file_path.as_ref()).with_context(|| {
+        format!(
+            "[write_broken_links] Could not create file {}",
+            dest_file_path.as_ref().display()
+        )
     })?;
+
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let handler = parser::Handler::new();
+    let parser = parser::get_parser_with_broken_links_handler(&all_markdown, handler.clone());
+
+    // We need to consume the parser to trigger the callbacks
+    for _ in parser {}
+
+    let broken_links = handler.broken_links.lock().unwrap().clone();
+
+    link::write_broken_links_to(broken_links, &mut f)?;
 
     Ok(())
 }
@@ -283,15 +306,13 @@ where
     let mut new_links = generate::generate_refdefs_from(deps);
 
     // TODO can we read just the *-refs.md files?
-    helper(markdown_dir_path, refdef_dest_file_path, |parser, f| {
+    helper(markdown_dir_path, refdef_dest_file_path, move |parser, f| {
         // Read existing ref defs
-        let _sorted_linkdefs: std::collections::BTreeMap<_, _> =
-            parser.reference_definitions().iter().collect();
-        // TODO
-        println!("NOT IMPLEMENTED!");
-        let existing_links = Vec::new();
+        let existing_links: Vec<link::Link<'_>> = parser::extract_links(parser);
+        let existing_links_static: Vec<link::Link<'static>> =
+            existing_links.into_iter().map(|l| l.to_static()).collect();
 
-        let links = generate::merge_links(existing_links, &mut new_links);
+        let links = generate::merge_links(existing_links_static, &mut new_links);
         link::write_refdefs_to(links, f)?;
         Ok(())
     })?;
@@ -355,6 +376,129 @@ where
     sitemap::generate_sitemap(links, base_url, &mut f)?;
 
     Ok(())
+}
+
+// MARKDOWN GENERATION
+
+/// Generate a listing of crates.io categories
+/// and write to a Markdown file.
+pub fn generate_categories<P: AsRef<Path>>(dest_file_path: P) -> Result<()> {
+    fs::create_parent_dir_for(dest_file_path.as_ref())?;
+    let mut f = File::create(dest_file_path).context("Failed to create categories file.")?;
+    writeln!(f, "# Categories\n")?;
+    writeln!(f, "TODO: Implement category generation from crates.io API or static list.")?;
+    Ok(())
+}
+
+/// Generate a crate index and write to a Markdown file.
+pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
+    src_dir_path: P1,
+    dest_file_path: P2,
+) -> Result<()> {
+    fs::create_parent_dir_for(dest_file_path.as_ref())?;
+    let mut f = File::create(dest_file_path).context("Failed to create crates file.")?;
+    writeln!(f, "# Crates\n")?;
+
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let mut parser = parser::get_parser(all_markdown.as_ref());
+    let links = parser::extract_links(&mut parser);
+
+    let mut crates = std::collections::BTreeSet::new();
+    for l in links {
+        let url = l.get_url();
+        if url.contains("crates.io/crates/") {
+            if let Some(name) = url.split('/').last() {
+                crates.insert(name.to_string());
+            }
+        }
+    }
+
+    for c in crates {
+        writeln!(f, "- [{c}](https://crates.io/crates/{c})")?;
+    }
+
+    Ok(())
+}
+
+/// Identify .md files not in SUMMARY.md
+pub fn identify_files_not_in_summary<P: AsRef<Path>>(markdown_src_dir_path: P) -> Result<Vec<PathBuf>> {
+    let markdown_src_dir_path = fs::check_is_dir(markdown_src_dir_path)?;
+    let all_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
+
+    let summary_path = markdown_src_dir_path.join("SUMMARY.md");
+    if !summary_path.exists() {
+        bail!("SUMMARY.md not found in {}", markdown_src_dir_path.display());
+    }
+
+    let summary_content = std::fs::read_to_string(&summary_path)?;
+    let mut parser = parser::get_parser(&summary_content);
+    let links = parser::extract_links(&mut parser);
+
+    let mut files_in_summary = std::collections::HashSet::new();
+    for l in links {
+        let url = l.get_url();
+        if !url.starts_with("http") && url.ends_with(".md") {
+            let path = markdown_src_dir_path.join(url.as_ref());
+            if let Ok(canon) = path.canonicalize() {
+                files_in_summary.insert(canon);
+            }
+        }
+    }
+
+    let mut missing = Vec::new();
+    for f in all_files {
+        if let Ok(canon) = f.canonicalize() {
+            if !files_in_summary.contains(&canon) && f.file_name().unwrap() != "SUMMARY.md" {
+                missing.push(f);
+            }
+        }
+    }
+
+    Ok(missing)
+}
+
+/// Identify .rs examples not used in Markdown files
+pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
+    markdown_src_dir_path: P1,
+    code_dir_path: P2,
+) -> Result<Vec<PathBuf>> {
+    let markdown_src_dir_path = fs::check_is_dir(markdown_src_dir_path)?;
+    let code_dir_path = fs::check_is_dir(code_dir_path)?;
+
+    let mut all_rs_files = Vec::new();
+    for entry in walkdir::WalkDir::new(&code_dir_path)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file() && e.path().extension().map_or(false, |ext| ext == "rs"))
+    {
+        all_rs_files.push(entry.path().to_path_buf().canonicalize()?);
+    }
+
+    let mut used_rs_files = std::collections::HashSet::new();
+    let md_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
+
+    let re = regex::Regex::new(r"\{\{#include\s+(?P<path>\S+\.rs)\s*\}\}")?;
+
+    for md_file in md_files {
+        let content = std::fs::read_to_string(&md_file)?;
+        for cap in re.captures_iter(&content) {
+            let rel_path = &cap["path"];
+            let abs_path = md_file.parent().unwrap().join(rel_path);
+            if let Ok(canon) = abs_path.canonicalize() {
+                used_rs_files.insert(canon);
+            }
+        }
+    }
+
+    let mut unused = Vec::new();
+    for f in all_rs_files {
+        if !used_rs_files.contains(&f) {
+            unused.push(f);
+        }
+    }
+
+    Ok(unused)
 }
 
 #[cfg(test)]

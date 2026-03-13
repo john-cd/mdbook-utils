@@ -25,36 +25,44 @@ pub(crate) fn generate_refdefs_from(
     buf.into_iter().flatten().collect::<Vec<_>>()
 }
 
-// TODO
 /// Create, for a given crate, multiple reference definitions for
 /// common websites such as docs.rs, crates.io, github,
 /// and the associated badge URLs
 fn generate_refdefs_for_one_library(
-    _library_name: &str,
-    _package_repo_url: Option<&str>,
+    library_name: &str,
+    package_repo_url: Option<&str>,
 ) -> Vec<Link<'static>> {
-    // let mut buf = Vec::new();
+    let mut buf = Vec::new();
 
-    // // [arrow-rs]: https://docs.rs/arrow/
-    // let docs_rs_url = format!("https://docs.rs/{}", library_name);
+    // [arrow-rs]: https://docs.rs/arrow/
+    let docs_rs_url = format!("https://docs.rs/{}", library_name);
+    buf.push(
+        crate::link::LinkBuilder::default()
+            .set_label(library_name.to_string().into())
+            .set_url(docs_rs_url.into())
+            .build(),
+    );
 
-    // // [config-crate]: https://crates.io/crates/config/
-    // let crates_io_lbl = format!("{}-crate", library_name);
-    // let crates_io_url = format!("https://crates.io/crates/{}", library_name);
+    // [config-crate]: https://crates.io/crates/config/
+    let crates_io_url = format!("https://crates.io/crates/{}", library_name);
+    buf.push(
+        crate::link::LinkBuilder::default()
+            .set_label(format!("{}-crate", library_name).into())
+            .set_url(crates_io_url.into())
+            .build(),
+    );
 
-    // // [arrow-rs-github]: https://github.com/apache/arrow-rs/
-    // let github_lbl = format!("{}-github", library_name);
+    if let Some(url) = package_repo_url {
+        // [arrow-rs-github]: https://github.com/apache/arrow-rs/
+        buf.push(
+            crate::link::LinkBuilder::default()
+                .set_label(format!("{}-github", library_name).into())
+                .set_url(url.to_string().into())
+                .build(),
+        );
+    }
 
-    // info!("{}", badge_image_url.to_string());
-    // let link = crate::link::LinkBuilder::default()
-    //     .set_label(library_name)
-    //     //.set_url()
-    //     .set_image_url(badge_image_url.to_string())
-    //     .build();
-
-    // buf
-
-    Vec::new()
+    buf
 }
 
 #[cfg(test)]

@@ -12,6 +12,10 @@ Commands:
   replace-code-examples-by-includes  Replace Rust code examples from the Markdown by #include statements
   replace-includes-by-contents       Replace #include statements by the file contents
   remove-includes                    Remove #include statements (and replace them by a hard-coded string)
+  generate-categories                Generate a listing of crates.io categories and write to a Markdown file
+  generate-crates                    Generate a crate index and write to a Markdown file
+  identify-files-not-in-summary      Identify .md files not in SUMMARY.md
+  identify-unused-rs-examples        Identify .rs examples not used in Markdown files
   help                               Print this message or the help of the given subcommand(s)
 
 Options:
