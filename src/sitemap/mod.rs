@@ -32,6 +32,7 @@ where
     // debug: let l = l.map(|l| { tracing::debug!("{l:?}"); l });
 
     // Change the extension and replace intro.html by index.html
+    // TODO: Make the 'intro.md' -> 'index.md' replacement configurable, as not all books use this convention.
     let ls = ls.map(|l| {
         base_url.join(
             l.get_url()
