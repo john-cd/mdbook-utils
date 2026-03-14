@@ -3,41 +3,52 @@
 ## Features
 
 - refdefs
-  - write   Write existing reference definitions to a file
-  - badges  Generate badges (reference definitions) for e.g. Github links
-  - ?
-    - TODO finish generation of refdefs from dependencies - WIP
+  - [x] write existing reference definitions to a file
+  - [x] badges (generate reference definitions for GitHub links)
+  - [x] generation of refdefs from dependencies
 - links
-  - write-all     Write all existing links to a Markdown file
-  - write-inline  Write all existing inline / autolinks (i.e., not written as reference-style links) to a Markdown file
-    - TODO add "link format" option to output links in reference, inline, autolink... formats
-  - ?
+  - [x] write-all (write all existing links to a Markdown file)
+  - [x] write-inline (write all existing inline / autolinks to a Markdown file)
+    - TODO: add "link format" option to output links in reference, inline, autolink formats
+  - [x] duplicate-links (identify duplicate links / labels)
+  - [x] broken-links (identify broken links)
 - markdown
-  - extract-code-examples              Copy Rust code examples from the Markdown into .rs files
-  - replace-code-examples-by-includes  Replace Rust code examples from the Markdown by {{#include ...}} statements
-  - replace-includes-by-contents       Replace {{#include file.md}} by the file contents
-  - remove-includes                    Remove {{#include }} statements (and replace them by a hard-coded string)
+  - [x] extract-code-examples (copy Rust code examples from the Markdown into .rs files)
+  - [x] replace-code-examples-by-includes (replace Rust code examples from the Markdown by {{#include ...}} statements)
+  - [x] replace-includes-by-contents (replace {{#include file.md}} by the file contents)
+  - [x] remove-includes (remove {{#include }} statements and replace them by a hard-coded string)
+  - [x] identify .md files not in SUMMARY.md
+  - [x] identify .rs examples not used
+  - [x] generate crates.md
+  - [ ] generate categories.md (currently a stub)
 
-- sitemap
+- [x] sitemap (generate a sitemap.xml file)
 
-- debug
+- [x] debug (parse Markdown code as events and write to a file)
 
-- generate categories.md - WIP
-- generate crates.md - WIP
-- TODO identify .md files not in SUMMARY.md
-- TODO identify .rs examples not used
-- TODO duplicate links - WIP
-- TODO broken links - WIP
-- TODO locate all autolink / inline references to external sites - WIP
-- TODO suggest label names based on URL type - WIP
-- TODO autoreplace autolinks / inline links by ref links - TODO
+- TODO: locate all autolink / inline references to external sites
+- TODO: suggest label names based on URL type
+- TODO: autoreplace autolinks / inline links by ref links
+
+## High Priority
+
+- [ ] Add unit tests (WIP)
+- [ ] Use `test_book` in automated (integration) tests
+- [ ] Handle nested directories more accurately in `SUMMARY.md` link parsing
+- [ ] Support other ways of including/using .rs files beyond `{{#include ...}}`
+- [ ] Improve the logic for determining output directories in `book.toml` to fully match mdBook's behavior
+- [ ] Improve generic URL regexes in `rules.rs`
+- [ ] Handle multiple Rust code blocks in a single file during replacement (extract_code.rs)
+- [ ] Make 'intro.md' -> 'index.md' replacement in sitemap configurable
+- [ ] Support custom shields.io styles for GitHub badges
+- [ ] Re-evaluate `pulldown-cmark-to-cmark` dependency
 
 ## TODOs
 
-- improve CLI help messages
+- [x] improve CLI help messages
 
-- improve user guide - description of functionality
-- README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
+- [x] improve user guide - description of functionality
+- [x] README - add better usage explanation of env. vars, book.toml parsing, and command line options - WIP
 
 - move common functionality to separate library?
   - move cli to bin folder? or create a cargo workspace?

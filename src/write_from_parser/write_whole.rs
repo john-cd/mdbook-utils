@@ -54,7 +54,7 @@ where
 
 // MARKDOWN
 
-// TODO use write_to_markdown
+// TODO: Re-integrate or remove `pulldown-cmark-to-cmark` dependency if not used.
 // let markdown_input_length = markdown_input.as_ref().len();
 // write_markdown_to(parser, markdown_input_length, f).context("")?;
 
