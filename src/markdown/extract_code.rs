@@ -18,7 +18,8 @@ use tracing::info;
 static EXTRACT_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?s)```rust.*?\n(?<code>.*?)```").unwrap());
 
-// TODO document
+/// Regex to remove "# " from the beginning of lines in Rust code blocks.
+/// These lines are hidden in the rendered mdBook but should be included in the extracted .rs files.
 static REG: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)^(?:#\s)(?<rest>.*)$").unwrap());
 
 /// Extract code examples from all Markdown files within a source
@@ -76,11 +77,11 @@ where
     Ok(())
 }
 
-// TODO document
+/// Regex to identify Rust code blocks for replacement by includes.
 static REG2: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.+?)(?<last>```)").unwrap());
 
-// TODO
+// TODO: Handle multiple Rust code blocks in a single file by generating unique filenames (e.g., using counters).
 /// Remove Rust code blocks from Markdown files,
 /// replacing each by an {{#include ... }} statement.
 ///

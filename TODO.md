@@ -38,6 +38,10 @@
 - [ ] Support other ways of including/using .rs files beyond `{{#include ...}}`
 - [ ] Improve the logic for determining output directories in `book.toml` to fully match mdBook's behavior
 - [ ] Improve generic URL regexes in `rules.rs`
+- [ ] Handle multiple Rust code blocks in a single file during replacement (extract_code.rs)
+- [ ] Make 'intro.md' -> 'index.md' replacement in sitemap configurable
+- [ ] Support custom shields.io styles for GitHub badges
+- [ ] Re-evaluate `pulldown-cmark-to-cmark` dependency
 
 ## TODOs
 
