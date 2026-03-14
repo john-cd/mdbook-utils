@@ -422,6 +422,7 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
 }
 
 /// Identify .md files not in SUMMARY.md
+// TODO: Handle nested directories more accurately in SUMMARY.md link parsing.
 pub fn identify_files_not_in_summary<P: AsRef<Path>>(markdown_src_dir_path: P) -> Result<Vec<PathBuf>> {
     let markdown_src_dir_path = fs::check_is_dir(markdown_src_dir_path)?;
     let all_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
@@ -459,6 +460,7 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(markdown_src_dir_path: P) -
 }
 
 /// Identify .rs examples not used in Markdown files
+// TODO: Support other ways of including/using .rs files beyond {{#include ...}}.
 pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     markdown_src_dir_path: P1,
     code_dir_path: P2,

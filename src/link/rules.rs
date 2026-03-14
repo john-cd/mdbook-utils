@@ -236,10 +236,11 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     );
 
     // GENERIC
+    // TODO: Improve these generic regexes to be more robust and handle various URL structures.
     m.insert(
         "website",
         Rule {
-            re: r"http[s]?://(?<domain>[^/]+/?",
+            re: r"http[s]?://(?<domain>[^/]+)/?",
             label_pattern: "${domain}-website",
             ..Rule::default()
         },
@@ -251,7 +252,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "website page",
         Rule {
-            re: r"http[s]?://(?<domain>[^/]+)/(?:\S+?)/(?<last>[^\]+)(?:/|.html)?",
+            re: r"http[s]?://(?<domain>[^/]+)/(?:\S+?)/(?<last>[^/]+)(?:/|.html)?",
             label_pattern: "${domain}-${last}",
             ..Rule::default()
         },
