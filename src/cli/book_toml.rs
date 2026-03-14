@@ -94,6 +94,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     let mut book_html_build_dir_path = book_build_dir_path.clone();
     let mut book_markdown_build_dir_path = None;
 
+    // TODO: Improve the logic for determining output directories to fully match mdBook's behavior.
     // If there is only one [output.*] backend in `book.toml`, `mdbook` places
     // its output directly in the book directory (see `build.build-dir`).
     // If there is more than one backend, then each backend is

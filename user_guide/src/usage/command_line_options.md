@@ -4,6 +4,8 @@ Command-line options vary by subcommand and include `-o` to set the path of the 
 
 `-y` is a global option that skips confirmation dialogs and is useful when calling `mdbook-utils` from a script.
 
+`--log <LEVEL>` is a global option to set the logging level (error, warn, info, debug, trace). It trumps the `RUST_LOG` environment variable.
+
 Use `mdbook-utils <command> <subcommand> --help` or `help <command> <subcommand>` for more details.
 
 The following illustrates options for `mdbook-utils sitemap`:
