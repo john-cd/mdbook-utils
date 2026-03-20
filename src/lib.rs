@@ -27,9 +27,11 @@ mod dependencies;
 mod fs;
 mod generate;
 mod link;
+/// Markdown manipulation modules
 pub mod markdown;
 mod parser;
 mod sitemap;
+/// Example Markdown for testing
 pub mod test_markdown;
 mod write_from_parser;
 
@@ -99,7 +101,7 @@ where
     Ok(())
 }
 
-/// Test function that uses fake Markdown.
+/// Test function that uses fake Markdown and writes events to `./book/temp/test.log`.
 pub fn test() -> Result<()> {
     fs::create_dir("./book/temp/")?;
 
@@ -186,7 +188,7 @@ where
             })
             .filter(|l| {
                 let url = l.get_url();
-                !url.starts_with('.') && !url.starts_with('/')
+                url.starts_with("http")
             })
             .collect();
         link::write_reference_style_links_to(links, f)?;
@@ -338,6 +340,7 @@ pub fn generate_sitemap<P1, P2>(
     markdown_src_dir_path: P1,
     base_url: url::Url,
     sitemap_dest_file_path: P2,
+    map_index: Option<(String, String)>,
 ) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -377,7 +380,7 @@ where
     let mut parser = parser::get_parser(markdown.as_str());
     let links: Vec<link::Link<'_>> = parser::extract_links(&mut parser);
 
-    sitemap::generate_sitemap(links, base_url, &mut f)?;
+    sitemap::generate_sitemap(links, base_url, &mut f, map_index)?;
 
     Ok(())
 }
@@ -386,14 +389,39 @@ where
 
 /// Generate a listing of crates.io categories
 /// and write to a Markdown file.
-pub fn generate_categories<P: AsRef<Path>>(dest_file_path: P) -> Result<()> {
+pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
+    src_dir_path: P1,
+    dest_file_path: P2,
+) -> Result<()> {
     fs::create_parent_dir_for(dest_file_path.as_ref())?;
     let mut f = File::create(dest_file_path).context("Failed to create categories file.")?;
     writeln!(f, "# Categories\n")?;
-    writeln!(
-        f,
-        "TODO: Implement category generation from crates.io API or static list."
-    )?;
+
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let mut parser = parser::get_parser(all_markdown.as_ref());
+    let links = parser::extract_links(&mut parser);
+
+    let mut categories = std::collections::BTreeSet::new();
+    for l in links {
+        let url = l.get_url();
+        if url.contains("crates.io/categories/") {
+            let mut path = url.split('?').next().unwrap_or("");
+            if path.ends_with('/') {
+                path = &path[..path.len() - 1];
+            }
+            if let Some(name) = path.split('/').next_back() {
+                if !name.is_empty() && name != "categories" {
+                    categories.insert(name.to_string());
+                }
+            }
+        }
+    }
+
+    for c in categories {
+        writeln!(f, "- [{c}](https://crates.io/categories/{c})")?;
+    }
+
     Ok(())
 }
 
@@ -452,7 +480,9 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(
     for l in links {
         let url = l.get_url();
         if !url.starts_with("http") && url.ends_with(".md") {
-            let path = markdown_src_dir_path.join(url.as_ref());
+            // Remove any leading ./ or /
+            let clean_url = url.trim_start_matches("./").trim_start_matches('/');
+            let path = markdown_src_dir_path.join(clean_url);
             if let Ok(canon) = path.canonicalize() {
                 files_in_summary.insert(canon);
             }
@@ -493,7 +523,9 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     let mut used_rs_files = std::collections::HashSet::new();
     let md_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
 
-    let re = regex::Regex::new(r"\{\{#include\s+(?P<path>\S+\.rs)\s*\}\}")?;
+    let re = regex::Regex::new(
+        r"\{\{#(?:rustdoc_include|playground_include|include)\s+(?P<path>\S+\.rs)\s*\}\}",
+    )?;
 
     for md_file in md_files {
         let content = std::fs::read_to_string(&md_file)?;

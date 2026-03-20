@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use std::sync::LazyLock;
 
 use anyhow::Result;
-use anyhow::anyhow;
 use once_cell::sync::Lazy;
 use rand::distr::Alphanumeric;
 use rand::distr::SampleString;
@@ -80,7 +79,7 @@ where
 
 /// Regex to identify Rust code blocks for replacement by includes.
 static REG2: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.+?)(?<last>```)").unwrap());
+    LazyLock::new(|| Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.*?\n)(?<last>```)").unwrap());
 
 // TODO: Handle multiple Rust code blocks in a single file by generating unique
 // filenames (e.g., using counters).
@@ -109,17 +108,26 @@ where
     for p in markdown_file_paths {
         info!("{p:?}");
         let buf = fs::read_to_string(p.as_path())?;
-        if REG2.is_match(&buf) {
-            let replacement = format!(
-                "$first{{#include {}.rs}}\n$last",
-                PathBuf::from(code_dir_path.as_ref())
-                    .join(p.file_stem().ok_or(anyhow!(
-                        "[remove_code_from_all_markdown_files_in] There is no file name."
-                    ))?)
-                    .display()
-            );
-            let new_txt = REG2.replace_all(&buf, replacement);
-            // debug!("{}", new_txt);
+
+        let mut counter = 0;
+        let new_txt = REG2.replace_all(&buf, |caps: &regex::Captures<'_>| {
+            let first = &caps["first"];
+            let last = &caps["last"];
+            let file_stem = p.file_stem().and_then(|s| s.to_str()).unwrap_or("example");
+
+            let filename = if counter == 0 {
+                format!("{file_stem}.rs")
+            } else {
+                format!("{file_stem}{counter}.rs")
+            };
+
+            let include_path = PathBuf::from(code_dir_path.as_ref()).join(filename);
+            let replacement = format!("{first}{{{{#include {}}}}}\n{last}", include_path.display());
+            counter += 1;
+            replacement
+        });
+
+        if counter > 0 {
             File::create(p)?.write_all(new_txt.as_bytes())?;
         }
     }
@@ -128,10 +136,58 @@ where
 
 #[cfg(test)]
 mod test {
-    // TODO
-    // use super::*;
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_extract_code_from_all_markdown_files_in() -> anyhow::Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        let code_dir = dir.path().join("code");
+        fs::create_dir(&src_dir)?;
+
+        let md_file = src_dir.join("test.md");
+        fs::write(
+            &md_file,
+            r#"# Test
+```rust
+fn main() {}
+```
+"#,
+        )?;
+
+        extract_code_from_all_markdown_files_in(&src_dir, &code_dir)?;
+
+        let extracted_file = code_dir.join("test.rs");
+        assert!(extracted_file.exists());
+        let content = fs::read_to_string(extracted_file)?;
+        assert_eq!(content, "fn main() {}\n");
+        Ok(())
+    }
+
+    #[test]
+    fn test_remove_code_from_all_markdown_files_in() -> anyhow::Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        let code_dir = dir.path().join("code");
+        fs::create_dir(&src_dir)?;
+
+        let md_file = src_dir.join("test.md");
+        fs::write(
+            &md_file,
+            r#"# Test
+```rust
+fn main() {}
+```
+"#,
+        )?;
+
+        remove_code_from_all_markdown_files_in(&src_dir, &code_dir)?;
+
+        let content = fs::read_to_string(md_file)?;
+        assert!(content.contains("{{#include"));
+        assert!(content.contains("test.rs"));
+        Ok(())
+    }
 }
