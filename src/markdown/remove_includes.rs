@@ -39,7 +39,7 @@ where
     // Locate the Markdown files with the `src`` directory
     let paths = crate::fs::find_markdown_files_in(markdown_dir_path.as_ref())?;
 
-    // LATER: consider inserting contents from a file
+    // TODO LATER: consider inserting contents from a file
     // path_file_to_insert: Option<P2>,
     // let contents_to_insert = if let Some(to_insert) = path_file_to_insert {
     //      fs::read_to_string(to_insert)?
@@ -65,6 +65,7 @@ where
     Ok(modified)
 }
 
+// TODO write tests
 #[cfg(test)]
 mod test {
     // use super::*;

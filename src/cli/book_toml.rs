@@ -123,6 +123,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     ))
 }
 
+// TODO write tests
 #[cfg(test)]
 mod test {
     // use super::*;

@@ -10,7 +10,6 @@
 mod args;
 mod book_toml;
 pub(crate) mod config;
-// mod interact;
 pub(crate) mod links_commands;
 pub(crate) mod markdown_commands;
 pub(crate) mod refdefs_commands;
@@ -84,6 +83,7 @@ pub(crate) struct GlobalOpts {
     pub(crate) log: Option<String>,
 }
 
+// TODO write tests
 #[cfg(test)]
 mod test {
     // use super::*;
