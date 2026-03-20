@@ -13,7 +13,8 @@ use crate::link::LinkBuilder;
 use crate::link::write_badge_refdefs_and_links_to_two;
 
 // TODO:
-// - Handle '-' and '_' in GitHub repo names to comply with shields.io conventions.
+// - Handle '-' and '_' in GitHub repo names to comply with shields.io
+//   conventions.
 // - Implement setting the image alt-text dynamically.
 // - Support custom shields.io styles (e.g., flat, flat-square, for-the-badge).
 //

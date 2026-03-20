@@ -161,7 +161,6 @@ impl<'a> Link<'a> {
         self.text.clone().unwrap_or(Cow::from(""))
     }
 
-
     /// Returns the link's url
     pub(crate) fn get_url(&self) -> Cow<'a, str> {
         if let Some(u) = &self.url {

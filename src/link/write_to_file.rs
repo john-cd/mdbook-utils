@@ -47,10 +47,7 @@ where
 }
 
 /// Write duplicate links to a writer
-pub(crate) fn write_duplicate_links_to<W>(
-    links: Vec<Link<'_>>,
-    link_writer: &mut W,
-) -> Result<()>
+pub(crate) fn write_duplicate_links_to<W>(links: Vec<Link<'_>>, link_writer: &mut W) -> Result<()>
 where
     W: Write,
 {
