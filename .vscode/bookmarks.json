@@ -4,7 +4,7 @@
 			"path": "src/cli/book_toml.rs",
 			"bookmarks": [
 				{
-					"line": 126,
+					"line": 127,
 					"column": 6,
 					"label": ""
 				}
@@ -14,12 +14,7 @@
 			"path": "src/cli/mod.rs",
 			"bookmarks": [
 				{
-					"line": 12,
-					"column": 13,
-					"label": ""
-				},
-				{
-					"line": 83,
+					"line": 82,
 					"column": 3,
 					"label": ""
 				}
@@ -41,16 +36,6 @@
 				{
 					"line": 124,
 					"column": 34,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/generate/merge_refdefs.rs",
-			"bookmarks": [
-				{
-					"line": 22,
-					"column": 8,
 					"label": ""
 				}
 			]
@@ -117,26 +102,6 @@
 					"line": 27,
 					"column": 16,
 					"label": ""
-				},
-				{
-					"line": 41,
-					"column": 27,
-					"label": ""
-				},
-				{
-					"line": 69,
-					"column": 10,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/markdown/replace_include.rs",
-			"bookmarks": [
-				{
-					"line": 64,
-					"column": 12,
-					"label": ""
 				}
 			]
 		},
@@ -166,16 +131,6 @@
 			]
 		},
 		{
-			"path": "src/link/rules.rs",
-			"bookmarks": [
-				{
-					"line": 17,
-					"column": 18,
-					"label": ""
-				}
-			]
-		},
-		{
 			"path": "src/cli/links_commands.rs",
 			"bookmarks": [
 				{
@@ -194,18 +149,8 @@
 			"path": "README.md",
 			"bookmarks": [
 				{
-					"line": 6,
+					"line": 8,
 					"column": 196,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/fs/dir.rs",
-			"bookmarks": [
-				{
-					"line": 64,
-					"column": 10,
 					"label": ""
 				}
 			]
