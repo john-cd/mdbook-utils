@@ -415,7 +415,7 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     for l in links {
         let url = l.get_url();
         if url.contains("crates.io/crates/") {
-            if let Some(name) = url.split('/').last() {
+            if let Some(name) = url.split('/').next_back() {
                 crates.insert(name.to_string());
             }
         }
@@ -485,9 +485,7 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     for entry in walkdir::WalkDir::new(&code_dir_path)
         .into_iter()
         .filter_map(|e| e.ok())
-        .filter(|e| {
-            e.file_type().is_file() && e.path().extension().map_or(false, |ext| ext == "rs")
-        })
+        .filter(|e| e.file_type().is_file() && e.path().extension().is_some_and(|ext| ext == "rs"))
     {
         all_rs_files.push(entry.path().to_path_buf().canonicalize()?);
     }
