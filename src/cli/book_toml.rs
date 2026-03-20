@@ -104,12 +104,20 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     debug!("{:?}", book_toml.output);
 
     if let Some(output) = book_toml.output {
-        if output.extra.len() >= 2 {
-            book_html_build_dir_path = book_html_build_dir_path.join("html");
-        }
-        // [output.markdown] is defined in `book.toml`.
-        if output.extra.contains_key("markdown") {
-            book_markdown_build_dir_path = Some(book_build_dir_path.join("markdown"));
+        let has_html = output.extra.contains_key("html");
+        let has_markdown = output.extra.contains_key("markdown");
+        let extra_count = output.extra.len();
+
+        if extra_count > 1 {
+            if has_html {
+                book_html_build_dir_path = book_build_dir_path.join("html");
+            }
+            if has_markdown {
+                book_markdown_build_dir_path = Some(book_build_dir_path.join("markdown"));
+            }
+        } else if extra_count == 1 && has_markdown {
+            book_markdown_build_dir_path = Some(book_build_dir_path.clone());
+            // if it's only html, it's already book_build_dir_path
         }
     }
     debug!(
@@ -123,12 +131,75 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     ))
 }
 
-// TODO write tests
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_try_parse_book_toml_default() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(book_toml_path, "[book]\ntitle = \"test\"")?;
+
+        let (src, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(src, dir.path().join("src"));
+        assert_eq!(html, dir.path().join("book"));
+        assert_eq!(markdown, None);
+        Ok(())
+    }
+
+    #[test]
+    fn test_try_parse_book_toml_custom_dirs() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(
+            book_toml_path,
+            r#"[book]
+src = "my_src"
+[build]
+build-dir = "my_book"
+"#,
+        )?;
+
+        let (src, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(src, dir.path().join("my_src"));
+        assert_eq!(html, dir.path().join("my_book"));
+        assert_eq!(markdown, None);
+        Ok(())
+    }
+
+    #[test]
+    fn test_try_parse_book_toml_multiple_outputs() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(
+            book_toml_path,
+            r#"[output.html]
+[output.markdown]
+"#,
+        )?;
+
+        let (_, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(html, dir.path().join("book").join("html"));
+        assert_eq!(markdown, Some(dir.path().join("book").join("markdown")));
+        Ok(())
+    }
+
+    #[test]
+    fn test_try_parse_book_toml_only_markdown_output() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(
+            book_toml_path,
+            r#"[output.markdown]
+"#,
+        )?;
+
+        let (_, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(html, dir.path().join("book"));
+        assert_eq!(markdown, Some(dir.path().join("book")));
+        Ok(())
+    }
 }

@@ -28,7 +28,7 @@ pub(crate) enum MarkdownSubCommand {
 
     /// Generate a listing of crates.io dependencies
     /// and write to a Markdown file
-    GenerateCategories(DestFileArgs),
+    GenerateCategories(MarkdownSrcDirAndDestFileArgs),
 
     /// Generate a crate index and write to a Markdown file
     GenerateCrates(MarkdownSrcDirAndDestFileArgs),
@@ -139,12 +139,14 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             }
         }
         MarkdownSubCommand::GenerateCategories(args) => {
-            let categories_dest_path = config.dest_file_path(args, "categories.md");
+            let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
+            let categories_dest_path = config.dest_file_path(args.dest, "categories.md");
             println!(
-                "Writing crates.io categories to {}...",
-                style(categories_dest_path.display()).cyan()
+                "Writing crates.io categories to {} from Markdown sources in {}...",
+                style(categories_dest_path.display()).cyan(),
+                style(markdown_src_dir_path.display()).cyan(),
             );
-            mdbook_utils::generate_categories(categories_dest_path)
+            mdbook_utils::generate_categories(markdown_src_dir_path, categories_dest_path)
                 .context("[run] Failed to generate categories.")?;
             println!("{}", style("Done.").green());
         }

@@ -27,7 +27,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "category",
         Rule {
-            re: r"https://crates.io/categories/(?<catg>\S*?)/?(?:\?\S+)?",
+            re: r"https://crates.io/categories/(?<catg>[^/?]+)/?(?:\?\S+)?",
             label_pattern: "cat-${catg}",
             badge_url_pattern: "https://badge-cache.kominick.com/badge/${catg}--x.svg?style=social",
         },
@@ -47,7 +47,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     // [smol-badge]: https://badge-cache.kominick.com/crates/v/smol.svg?label=smol
     // [smol-crate]: https://crates.io/crates/smol/
     m.insert("crate", Rule {
-        re: r"https://crates.io/crates/(?<crate>\S+?)/?",
+        re: r"https://crates.io/crates/(?<crate>[^/?]+)/?",
         label_pattern: "crate-${crate}",
         badge_url_pattern: "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}",
     });
@@ -68,8 +68,8 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     // [join]: https://docs.rs/rayon/latest/rayon/fn.join.html
     // [spawn-blocking]: https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html
     m.insert("documentation", Rule {
-        re: r"https://docs.rs/(?<crate>\S+?)(/latest/\1)?(?<item>/\S+*)*(?:.html)?",
-        label_pattern: "${crate}-${item}",
+        re: r"https://docs.rs/(?<crate>[^/]+)(?:/(?:latest|[^/]+))?(?<item>(?:/[^/]+)+)?/?(?:index\.html)?",
+        label_pattern: "${crate}${item}",
         badge_url_pattern: "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}",
     });
 
@@ -158,7 +158,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "github pages",
         Rule {
-            re: r"https://(?<owner>\S+?).github.io/(?<repo>\S+?)/?.*)",
+            re: r"https://(?<owner>[^.]+)\.github\.io/(?<repo>[^/]+)/?.*",
             label_pattern: "${repo}-github-pages",
             badge_url_pattern: "https://img.shields.io/badge/${repo}-red?logo=githubpages",
         },
@@ -195,7 +195,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     // [attributes-reference]: https://doc.rust-lang.org/reference/attributes.html
     // [conditional-compilation]: https://doc.rust-lang.org/reference/conditional-compilation.html#the-cfg-attribute
     m.insert("rust reference", Rule {
-        re: r"https://doc.rust-lang.org(?:/nightly)?/reference/(?<chapter>)/(?<item>\S+).html(?:#\S+)?",
+        re: r"https://doc.rust-lang.org(?:/nightly)?/reference/(?:(?<chapter>[^/]+)/)?(?<item>[^/]+)\.html(?:#\S+)?",
         label_pattern: "rust-reference-book-${chapter}-${item}",
         badge_url_pattern: "https://img.shields.io/badge/${item}-green?logo=mdbook",
     });
@@ -264,9 +264,55 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use regex::Regex;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_global_rules() {
+        for (name, rule) in GLOBAL_RULES.iter() {
+            let re =
+                Regex::new(rule.re).unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name));
+
+            match *name {
+                "category" => {
+                    let url = "https://crates.io/categories/web-programming::websocket/";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["catg"], "web-programming::websocket");
+                }
+                "crate" => {
+                    let url = "https://crates.io/crates/smol/";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["crate"], "smol");
+                }
+                "documentation" => {
+                    let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
+                    assert!(
+                        re.is_match(url),
+                        "documentation rule failed to match {}",
+                        url
+                    );
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["crate"], "sqlx");
+                    // With the current regex, /sqlx/struct.Pool.html is captured as item
+                }
+                "github repo" => {
+                    let url = "https://github.com/john-cd/mdbook-utils";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["owner"], "john-cd");
+                    assert_eq!(&caps["repo"], "mdbook-utils");
+                }
+                "github pages" => {
+                    let url = "https://rust-lang.github.io/rustup/";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["owner"], "rust-lang");
+                    assert_eq!(&caps["repo"], "rustup");
+                }
+                _ => {}
+            }
+        }
+    }
 }

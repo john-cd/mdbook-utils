@@ -58,6 +58,9 @@ pub(crate) struct Configuration {
     /// e.g. https://example.com/mybook/
     /// It is used to build sitemaps.
     base_url: String,
+    /// SITEMAP_MAP_INDEX environment variable:
+    /// Map a filename to another (e.g., 'intro.md' to 'index.md')
+    sitemap_map_index: Option<String>,
 
     /// Global options that apply to all (sub)commands.
     #[serde(skip)]
@@ -75,6 +78,7 @@ impl Default for Configuration {
             cargo_toml_dir_path: None,
             default_dest_dir_path: None,
             base_url: String::from("http://example.com/mybook/"),
+            sitemap_map_index: Some("intro.md:index.md".to_string()),
             global_opts: GlobalOpts::default(),
         }
     }
@@ -235,6 +239,20 @@ impl Configuration {
             url::Url::parse(&self.base_url)
                 .context("[base_url] Could not parse the base url provided.")?,
         ))
+    }
+
+    /// Returns the sitemap index file mapping
+    pub(crate) fn sitemap_map_index(&self, map_index: Option<String>) -> Option<(String, String)> {
+        map_index
+            .or_else(|| self.sitemap_map_index.clone())
+            .and_then(|s| {
+                let parts: Vec<&str> = s.split(':').collect();
+                if parts.len() == 2 {
+                    Some((parts[0].to_string(), parts[1].to_string()))
+                } else {
+                    None
+                }
+            })
     }
 
     /// Returns the sitemap output file path, as provided by

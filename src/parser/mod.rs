@@ -44,6 +44,7 @@ use std::sync::Mutex;
 /// Handler for broken references
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Handler {
+    /// List of broken links found
     pub broken_links: Arc<Mutex<Vec<(String, String, String)>>>,
 }
 
@@ -75,8 +76,7 @@ impl<'input> BrokenLinkCallback<'input> for Handler {
             "".into(), // We don't have the full input here anymore without 'input
             format!("{:?}", link.link_type),
         ));
-        Some(("http://TODO".into(), ":BROKEN_LINK:".into()))
-        // or simply return None
+        None
     }
 }
 

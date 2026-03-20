@@ -27,6 +27,9 @@ static REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{\{#include.*?\}\}").unwr
 ///
 /// contents_to_insert: replacement of {{#include ...}} statements (same value
 /// for all statements). Can be "".
+/// Within each mdBook-style Markdown file in a source directory,
+/// remove any left-over {{#include file.md}} statements
+/// (and replace by a hard-coded string).
 pub fn remove_includes_in_all_markdown_files_in<P>(
     markdown_dir_path: P,
     contents_to_insert: &str,

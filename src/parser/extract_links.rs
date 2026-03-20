@@ -122,9 +122,27 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use pulldown_cmark::Parser;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_extract_links_simple() {
+        let markdown = "[text](url \"title\")";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 1);
+        let link = &links[0];
+        assert_eq!(link.get_url(), "url");
+    }
+
+    #[test]
+    fn test_extract_links_with_image() {
+        let markdown = "[![alt](img_url)](url)";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 1);
+        let link = &links[0];
+        assert_eq!(link.get_url(), "url");
+        // image alt text is not directly exposed in Link yet via getter
+    }
 }
