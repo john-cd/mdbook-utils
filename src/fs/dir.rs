@@ -60,12 +60,41 @@ where
     Ok(())
 }
 
-// TODO write tests
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_check_is_dir() -> Result<(), Error> {
+        let dir = tempdir()?;
+        let res = check_is_dir(dir.path())?;
+        assert_eq!(res, dir.path().canonicalize()?);
+
+        let file_path = dir.path().join("file.txt");
+        fs::write(&file_path, "test")?;
+        assert!(check_is_dir(&file_path).is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn test_create_parent_dir_for() -> Result<(), Error> {
+        let dir = tempdir()?;
+        let file_path = dir.path().join("sub").join("file.txt");
+        create_parent_dir_for(&file_path)?;
+        assert!(dir.path().join("sub").is_dir());
+        Ok(())
+    }
+
+    #[test]
+    fn test_create_dir() -> Result<(), Error> {
+        let dir = tempdir()?;
+        let new_dir = dir.path().join("new_dir");
+        create_dir(&new_dir)?;
+        assert!(new_dir.is_dir());
+        // Should not error if it already exists
+        create_dir(&new_dir)?;
+        Ok(())
+    }
 }

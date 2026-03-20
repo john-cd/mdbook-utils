@@ -110,6 +110,10 @@ pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {
     /// Path to the file to create
     #[command(flatten)]
     pub(crate) dest: DestFileArgs,
+
+    /// Map a filename to another (e.g., 'intro.md' to 'index.md')
+    #[arg(long = "map-index", value_name = "FROM:TO")]
+    pub(crate) map_index: Option<String>,
 }
 
 #[cfg(test)]

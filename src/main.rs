@@ -64,14 +64,20 @@ fn main() -> Result<()> {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let base_url = config.base_url(args.base)?;
             let sitemap_dest_file_path = config.sitemap_file_path(args.dest);
+            let map_index = config.sitemap_map_index(args.map_index);
 
             println!(
                 "Generating {} from the list of Markdown files in {}...",
                 style(sitemap_dest_file_path.display()).cyan(),
                 style(markdown_src_dir_path.display()).cyan(),
             );
-            mdbook_utils::generate_sitemap(markdown_src_dir_path, base_url, sitemap_dest_file_path)
-                .context("[main] Failed to generate the sitemap.")?;
+            mdbook_utils::generate_sitemap(
+                markdown_src_dir_path,
+                base_url,
+                sitemap_dest_file_path,
+                map_index,
+            )
+            .context("[main] Failed to generate the sitemap.")?;
             println!("{}", style("Done.").green());
         }
         Command::Debug(args) => {
