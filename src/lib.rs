@@ -306,16 +306,20 @@ where
     let mut new_links = generate::generate_refdefs_from(deps);
 
     // TODO can we read just the *-refs.md files?
-    helper(markdown_dir_path, refdef_dest_file_path, move |parser, f| {
-        // Read existing ref defs
-        let existing_links: Vec<link::Link<'_>> = parser::extract_links(parser);
-        let existing_links_static: Vec<link::Link<'static>> =
-            existing_links.into_iter().map(|l| l.to_static()).collect();
+    helper(
+        markdown_dir_path,
+        refdef_dest_file_path,
+        move |parser, f| {
+            // Read existing ref defs
+            let existing_links: Vec<link::Link<'_>> = parser::extract_links(parser);
+            let existing_links_static: Vec<link::Link<'static>> =
+                existing_links.into_iter().map(|l| l.to_static()).collect();
 
-        let links = generate::merge_links(existing_links_static, &mut new_links);
-        link::write_refdefs_to(links, f)?;
-        Ok(())
-    })?;
+            let links = generate::merge_links(existing_links_static, &mut new_links);
+            link::write_refdefs_to(links, f)?;
+            Ok(())
+        },
+    )?;
     Ok(())
 }
 
@@ -386,7 +390,10 @@ pub fn generate_categories<P: AsRef<Path>>(dest_file_path: P) -> Result<()> {
     fs::create_parent_dir_for(dest_file_path.as_ref())?;
     let mut f = File::create(dest_file_path).context("Failed to create categories file.")?;
     writeln!(f, "# Categories\n")?;
-    writeln!(f, "TODO: Implement category generation from crates.io API or static list.")?;
+    writeln!(
+        f,
+        "TODO: Implement category generation from crates.io API or static list."
+    )?;
     Ok(())
 }
 
@@ -423,13 +430,18 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 /// Identify .md files not in SUMMARY.md
 // TODO: Handle nested directories more accurately in SUMMARY.md link parsing.
-pub fn identify_files_not_in_summary<P: AsRef<Path>>(markdown_src_dir_path: P) -> Result<Vec<PathBuf>> {
+pub fn identify_files_not_in_summary<P: AsRef<Path>>(
+    markdown_src_dir_path: P,
+) -> Result<Vec<PathBuf>> {
     let markdown_src_dir_path = fs::check_is_dir(markdown_src_dir_path)?;
     let all_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
 
     let summary_path = markdown_src_dir_path.join("SUMMARY.md");
     if !summary_path.exists() {
-        bail!("SUMMARY.md not found in {}", markdown_src_dir_path.display());
+        bail!(
+            "SUMMARY.md not found in {}",
+            markdown_src_dir_path.display()
+        );
     }
 
     let summary_content = std::fs::read_to_string(&summary_path)?;
@@ -460,7 +472,8 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(markdown_src_dir_path: P) -
 }
 
 /// Identify .rs examples not used in Markdown files
-// TODO: Support other ways of including/using .rs files beyond {{#include ...}}.
+// TODO: Support other ways of including/using .rs files beyond {{#include
+// ...}}.
 pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     markdown_src_dir_path: P1,
     code_dir_path: P2,
@@ -472,7 +485,9 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     for entry in walkdir::WalkDir::new(&code_dir_path)
         .into_iter()
         .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file() && e.path().extension().map_or(false, |ext| ext == "rs"))
+        .filter(|e| {
+            e.file_type().is_file() && e.path().extension().map_or(false, |ext| ext == "rs")
+        })
     {
         all_rs_files.push(entry.path().to_path_buf().canonicalize()?);
     }

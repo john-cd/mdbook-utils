@@ -33,7 +33,6 @@ pub(crate) enum MarkdownSubCommand {
     /// Generate a crate index and write to a Markdown file
     GenerateCrates(MarkdownSrcDirAndDestFileArgs),
     // TODO autoreplace autolinks / inline links by ref links
-
     /// Identify .md files not in SUMMARY.md
     IdentifyFilesNotInSummary(MarkdownDirArgs),
 
@@ -186,8 +185,9 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 style(code_dir_path.display()).cyan(),
                 style(markdown_src_dir_path.display()).cyan(),
             );
-            let unused = mdbook_utils::identify_unused_rs_examples(markdown_src_dir_path, code_dir_path)
-                .context("[run] Failed to identify unused .rs examples.")?;
+            let unused =
+                mdbook_utils::identify_unused_rs_examples(markdown_src_dir_path, code_dir_path)
+                    .context("[run] Failed to identify unused .rs examples.")?;
             if unused.is_empty() {
                 println!("{}", style("All .rs files are used.").green());
             } else {

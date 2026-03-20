@@ -17,7 +17,6 @@ fn main() -> Result<()> {
     // the environment, their values are preserved.
     let dotenv = dotenvy::dotenv();
 
-
     match dotenv {
         Ok(pb) => {
             debug!("`.env` file loaded: {pb:?}");

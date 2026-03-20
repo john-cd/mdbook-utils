@@ -236,7 +236,8 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     );
 
     // GENERIC
-    // TODO: Improve these generic regexes to be more robust and handle various URL structures.
+    // TODO: Improve these generic regexes to be more robust and handle various URL
+    // structures.
     m.insert(
         "website",
         Rule {

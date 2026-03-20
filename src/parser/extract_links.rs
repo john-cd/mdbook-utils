@@ -105,7 +105,8 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
 
             // corner cases: Code within an Image, Link within an Image...
             ref e if !state.is_empty() => {
-                // TODO: Robustly handle more complex nested structures in Markdown links/images.
+                // TODO: Robustly handle more complex nested structures in Markdown
+                // links/images.
                 error!("Unhandled event while 'in link': {e:?}");
             }
 

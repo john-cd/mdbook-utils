@@ -70,14 +70,11 @@ impl<'input> BrokenLinkCallback<'input> for Handler {
             "Issue with the markdown: reference: {}, type: {:?}",
             link.reference, link.link_type,
         );
-        self.broken_links
-            .lock()
-            .unwrap()
-            .push((
-                link.reference.into_string(),
-                "".into(), // We don't have the full input here anymore without 'input
-                format!("{:?}", link.link_type),
-            ));
+        self.broken_links.lock().unwrap().push((
+            link.reference.into_string(),
+            "".into(), // We don't have the full input here anymore without 'input
+            format!("{:?}", link.link_type),
+        ));
         Some(("http://TODO".into(), ":BROKEN_LINK:".into()))
         // or simply return None
     }
