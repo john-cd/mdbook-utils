@@ -6,7 +6,6 @@ use pulldown_cmark::Parser;
 use pulldown_cmark::Tag;
 use pulldown_cmark::TagEnd;
 use tracing::debug;
-use tracing::error;
 
 use super::super::link::Link;
 use super::super::link::LinkBuilder;
@@ -104,10 +103,13 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             }
 
             // corner cases: Code within an Image, Link within an Image...
+            // Other events (like formatting tags: Strong, Emphasis, etc.)
+            // while inside a link or image are ignored. Text and Code within
+            // these tags are handled by the Event::Text and Event::Code arms.
             ref e if !state.is_empty() => {
                 // TODO: Robustly handle more complex nested structures in Markdown
                 // links/images.
-                error!("Unhandled event while 'in link': {e:?}");
+                debug!("Unhandled event while 'in link': {e:?}");
             }
 
             ref e => {
@@ -144,5 +146,30 @@ mod test {
         let link = &links[0];
         assert_eq!(link.get_url(), "url");
         // image alt text is not directly exposed in Link yet via getter
+    }
+
+    #[test]
+    fn test_extract_links_with_nested_formatting() {
+        let markdown = "[**bold text** and `code` in link](url \"title\")";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 1);
+        let link = &links[0];
+        assert_eq!(link.get_url(), "url");
+        assert_eq!(
+            link.to_inline_link(),
+            "[bold text and code in link]( url \"title\" )"
+        );
+    }
+
+    #[test]
+    fn test_extract_links_with_image_and_nested_formatting() {
+        let markdown = "[![**badge** alt](badge_url)](link_url)";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 1);
+        let link = &links[0];
+        assert_eq!(link.get_url(), "link_url");
+        assert_eq!(link.to_link_with_badge(), "[![badge alt][badge alt]][]");
     }
 }
