@@ -294,7 +294,6 @@ impl PartialOrd for Link<'_> {
     }
 }
 
-// TODO
 impl Ord for Link<'_> {
     /// Ord implementation for Link
     fn cmp(&self, other: &Self) -> Ordering {
@@ -305,7 +304,6 @@ impl Ord for Link<'_> {
     }
 }
 
-// TODO
 impl PartialEq for Link<'_> {
     /// PartialEq implementation for Link
     fn eq(&self, other: &Self) -> bool {
@@ -326,9 +324,91 @@ impl Hash for Link<'_> {
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_link_equality_and_hash() {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+
+        let link1 = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url1".into(),
+            "title1".into(),
+            "label1".into(),
+        )
+        .build();
+        let link2 = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url1".into(),
+            "title1".into(),
+            "label1".into(),
+        )
+        .build();
+        let link3 = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url2".into(),
+            "title1".into(),
+            "label1".into(),
+        )
+        .build();
+
+        assert_eq!(link1, link2);
+        assert_ne!(link1, link3);
+
+        let mut hasher1 = DefaultHasher::new();
+        link1.hash(&mut hasher1);
+        let hash1 = hasher1.finish();
+
+        let mut hasher2 = DefaultHasher::new();
+        link2.hash(&mut hasher2);
+        let hash2 = hasher2.finish();
+
+        assert_eq!(hash1, hash2);
+    }
+
+    #[test]
+    fn test_link_ordering() {
+        let link_a = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url".into(),
+            "title".into(),
+            "a".into(),
+        )
+        .build();
+        let link_b = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url".into(),
+            "title".into(),
+            "b".into(),
+        )
+        .build();
+        let link_a_url2 = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url2".into(),
+            "title".into(),
+            "a".into(),
+        )
+        .build();
+
+        assert!(link_a < link_b);
+        assert!(link_a < link_a_url2);
+    }
+
+    #[test]
+    fn test_to_reference_definition() {
+        let link = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url".into(),
+            "title".into(),
+            "label".into(),
+        )
+        .build();
+        assert_eq!(link.to_reference_definition(), "[label]: url \"title\"");
+
+        let link_no_title =
+            LinkBuilder::from_type_url_title(LinkType::Shortcut, "url".into(), "".into(), "label".into())
+                .build();
+        assert_eq!(link_no_title.to_reference_definition(), "[label]: url");
+    }
 }
