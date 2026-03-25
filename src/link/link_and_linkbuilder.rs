@@ -294,7 +294,6 @@ impl PartialOrd for Link<'_> {
     }
 }
 
-// TODO
 impl Ord for Link<'_> {
     /// Ord implementation for Link
     fn cmp(&self, other: &Self) -> Ordering {
@@ -305,7 +304,6 @@ impl Ord for Link<'_> {
     }
 }
 
-// TODO
 impl PartialEq for Link<'_> {
     /// PartialEq implementation for Link
     fn eq(&self, other: &Self) -> bool {
