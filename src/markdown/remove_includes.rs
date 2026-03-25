@@ -68,12 +68,45 @@ where
     Ok(modified)
 }
 
-// TODO write tests
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_remove_includes_in_all_markdown_files_in() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let main_md_path = src_dir.join("main.md");
+        let main_content = r#"
+# Main
+{{#include include1.md}}
+Some text
+{{#include include2.md}}
+"#;
+        fs::write(&main_md_path, main_content)?;
+
+        // Test with a replacement string
+        let modified = remove_includes_in_all_markdown_files_in(&src_dir, "REPLACED")?;
+        assert_eq!(modified.len(), 1);
+        assert_eq!(modified[0], main_md_path);
+
+        let updated_content = fs::read_to_string(&main_md_path)?;
+        assert!(!updated_content.contains("{{#include include1.md}}"));
+        assert!(!updated_content.contains("{{#include include2.md}}"));
+        assert_eq!(updated_content.matches("REPLACED").count(), 2);
+
+        // Test with empty string
+        fs::write(&main_md_path, main_content)?;
+        let modified = remove_includes_in_all_markdown_files_in(&src_dir, "")?;
+        assert_eq!(modified.len(), 1);
+        let updated_content = fs::read_to_string(&main_md_path)?;
+        assert!(!updated_content.contains("{{#include"));
+        assert!(updated_content.contains("# Main"));
+        assert!(updated_content.contains("Some text"));
+
+        Ok(())
+    }
 }
