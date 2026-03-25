@@ -483,7 +483,7 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(
             // Remove any leading ./ or /
             let clean_url = url.trim_start_matches("./").trim_start_matches('/');
             let path = markdown_src_dir_path.join(clean_url);
-            if let Ok(canon) = path.canonicalize() {
+            if let Ok(canon) = fs::is_path_within(&markdown_src_dir_path, &path) {
                 files_in_summary.insert(canon);
             }
         }
@@ -530,9 +530,9 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     for md_file in md_files {
         let content = std::fs::read_to_string(&md_file)?;
         for cap in re.captures_iter(&content) {
-            let rel_path = &cap["path"];
+            let rel_path = Path::new(&cap["path"]);
             let abs_path = md_file.parent().unwrap().join(rel_path);
-            if let Ok(canon) = abs_path.canonicalize() {
+            if let Ok(canon) = fs::is_path_within(&code_dir_path, &abs_path) {
                 used_rs_files.insert(canon);
             }
         }
