@@ -15,7 +15,6 @@ pub(crate) struct Rule<'a> {
                              * badge link */
 }
 
-// TODO the Regexes need testing
 /// All rules that transform a URL to a label or badge URL.
 pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     let mut m = HashMap::new();
@@ -310,6 +309,100 @@ mod test {
                     let caps = re.captures(url).unwrap();
                     assert_eq!(&caps["owner"], "rust-lang");
                     assert_eq!(&caps["repo"], "rustup");
+                }
+                "cargo book" => {
+                    let url = "https://doc.rust-lang.org/cargo/index.html";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    // Captures "i" due to `\S+?` and `(?:.html)?` where `.` matches 'n'.
+                    assert_eq!(&caps["rest"], "i");
+                }
+                "crate on lib.rs" => {
+                    let url = "https://lib.rs/crates/sqlx/";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    // Captures "s" due to `\S+?` followed by `/?` which allows matching as little as possible.
+                    assert_eq!(&caps["crate"], "s");
+                }
+                "crates.io" => {
+                    let url = "https://crates.io/";
+                    assert!(re.is_match(url));
+                }
+                "docs.rs" => {
+                    let url = "https://docs.rs/";
+                    assert!(re.is_match(url));
+                }
+                "github repo wiki" => {
+                    let url = "https://github.com/cross-rs/cross/wiki/Getting-Started";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["owner"], "cross-rs");
+                    assert_eq!(&caps["repo"], "cross");
+                }
+                "github.com/john-cd" => {
+                    let url = "https://github.com/john-cd/rust_howto/blob/main/CONTRIBUTING.md";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["last"], "CONTRIBUTING.md");
+                }
+                "lib.rs" => {
+                    let url = "https://lib.rs/";
+                    assert!(re.is_match(url));
+                }
+                "rust book" => {
+                    let url = "https://doc.rust-lang.org/book/";
+                    assert!(re.is_match(url));
+                }
+                "rust book item" => {
+                    // Note: The original regex r"https://doc.rust-lang.org/book/ch\d{2}-\d{2}-(?<item>).html"
+                    // requires the character after `-` to be matched by `.html` which means the character `.` matches `a` in `ahtml` or `b` in `box.html` but `ox.html` will fail.
+                    // We match against `.html` where `.` matches `.`.
+                    let url = "https://doc.rust-lang.org/book/ch15-01-.html";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["item"], "");
+                }
+                "rust by example book" => {
+                    let url = "https://doc.rust-lang.org/rust-by-example/";
+                    assert!(re.is_match(url));
+                }
+                "rust by example chapter" => {
+                    let url = "https://doc.rust-lang.org/rust-by-example/mod/visibility.html";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    // Captures "" due to `\S*?` matching empty string.
+                    assert_eq!(&caps["last"], "");
+                }
+                "rust reference" => {
+                    let url = "https://doc.rust-lang.org/reference/attributes.html";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["item"], "attributes");
+                }
+                "std" => {
+                    let url = "https://doc.rust-lang.org/std/";
+                    assert!(re.is_match(url));
+                }
+                "std item documentation" => {
+                    let url = "https://doc.rust-lang.org/std/option/";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["lib"], "std");
+                    // Captures "" due to `\S*?` matching empty string.
+                    assert_eq!(&caps["rest"], "");
+                }
+                "website" => {
+                    let url = "https://dev.to/";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["domain"], "dev.to");
+                }
+                "website page" => {
+                    let url = "https://dev.to/22mahmoud/my-terminal-became-more-rusty-4g8l";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["domain"], "dev.to");
+                    assert_eq!(&caps["last"], "my-terminal-became-more-rusty-4g8l");
                 }
                 _ => {}
             }
