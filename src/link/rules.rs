@@ -2,6 +2,7 @@
 //! from a link URL
 #![allow(clippy::vec_init_then_push)]
 
+use regex::Regex;
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
@@ -14,6 +15,19 @@ pub(crate) struct Rule<'a> {
     pub(crate) badge_url_pattern: &'a str, /* optional pattern to build a
                              * badge link */
 }
+
+/// Globally compiled regexes for each rule.
+pub(crate) static COMPILED_RULES: Lazy<HashMap<&str, Regex>> = Lazy::new(|| {
+    GLOBAL_RULES
+        .iter()
+        .map(|(name, rule)| {
+            (
+                *name,
+                Regex::new(rule.re).unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name)),
+            )
+        })
+        .collect()
+});
 
 // TODO the Regexes need testing
 /// All rules that transform a URL to a label or badge URL.
@@ -265,54 +279,48 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
 #[cfg(test)]
 mod test {
     use super::*;
-    use regex::Regex;
 
     #[test]
     fn test_global_rules() {
-        for (name, rule) in GLOBAL_RULES.iter() {
-            let re =
-                Regex::new(rule.re).unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name));
+        // By using COMPILED_RULES here, the Lazy block executes exactly once
+        // and validates every single regex. This removes the regex compilation
+        // loop from the test case body entirely.
+        let compiled_rules = &*COMPILED_RULES;
 
-            match *name {
-                "category" => {
-                    let url = "https://crates.io/categories/web-programming::websocket/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["catg"], "web-programming::websocket");
-                }
-                "crate" => {
-                    let url = "https://crates.io/crates/smol/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["crate"], "smol");
-                }
-                "documentation" => {
-                    let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
-                    assert!(
-                        re.is_match(url),
-                        "documentation rule failed to match {}",
-                        url
-                    );
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["crate"], "sqlx");
-                    // With the current regex, /sqlx/struct.Pool.html is captured as item
-                }
-                "github repo" => {
-                    let url = "https://github.com/john-cd/mdbook-utils";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["owner"], "john-cd");
-                    assert_eq!(&caps["repo"], "mdbook-utils");
-                }
-                "github pages" => {
-                    let url = "https://rust-lang.github.io/rustup/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["owner"], "rust-lang");
-                    assert_eq!(&caps["repo"], "rustup");
-                }
-                _ => {}
-            }
-        }
+        let category_re = compiled_rules.get("category").unwrap();
+        let url = "https://crates.io/categories/web-programming::websocket/";
+        assert!(category_re.is_match(url));
+        let caps = category_re.captures(url).unwrap();
+        assert_eq!(&caps["catg"], "web-programming::websocket");
+
+        let crate_re = compiled_rules.get("crate").unwrap();
+        let url = "https://crates.io/crates/smol/";
+        assert!(crate_re.is_match(url));
+        let caps = crate_re.captures(url).unwrap();
+        assert_eq!(&caps["crate"], "smol");
+
+        let doc_re = compiled_rules.get("documentation").unwrap();
+        let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
+        assert!(
+            doc_re.is_match(url),
+            "documentation rule failed to match {}",
+            url
+        );
+        let caps = doc_re.captures(url).unwrap();
+        assert_eq!(&caps["crate"], "sqlx");
+
+        let github_repo_re = compiled_rules.get("github repo").unwrap();
+        let url = "https://github.com/john-cd/mdbook-utils";
+        assert!(github_repo_re.is_match(url));
+        let caps = github_repo_re.captures(url).unwrap();
+        assert_eq!(&caps["owner"], "john-cd");
+        assert_eq!(&caps["repo"], "mdbook-utils");
+
+        let github_pages_re = compiled_rules.get("github pages").unwrap();
+        let url = "https://rust-lang.github.io/rustup/";
+        assert!(github_pages_re.is_match(url));
+        let caps = github_pages_re.captures(url).unwrap();
+        assert_eq!(&caps["owner"], "rust-lang");
+        assert_eq!(&caps["repo"], "rustup");
     }
 }
