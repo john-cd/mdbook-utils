@@ -550,9 +550,53 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use std::fs;
+    use std::io::Write;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_identify_unused_rs_examples() {
+        let dir = tempdir().unwrap();
+        let markdown_dir = dir.path().join("markdown");
+        let code_dir = dir.path().join("code");
+
+        fs::create_dir(&markdown_dir).unwrap();
+        fs::create_dir(&code_dir).unwrap();
+
+        // Create Rust files
+        let used1_rs = code_dir.join("used1.rs");
+        let used2_rs = code_dir.join("used2.rs");
+        let unused_rs = code_dir.join("unused.rs");
+        fs::write(&used1_rs, "fn main() {}").unwrap();
+        fs::write(&used2_rs, "fn main() {}").unwrap();
+        fs::write(&unused_rs, "fn main() {}").unwrap();
+
+        // Create Markdown file using some of the Rust files
+        let md_file = markdown_dir.join("test.md");
+        let mut md = fs::File::create(&md_file).unwrap();
+        writeln!(md, "Some text").unwrap();
+        writeln!(md, "{{{{#include ../code/used1.rs}}}}").unwrap();
+        writeln!(md, "{{{{#rustdoc_include ../code/used2.rs}}}}").unwrap();
+
+        // Call the function
+        let mut unused_files = identify_unused_rs_examples(&markdown_dir, &code_dir).unwrap();
+        unused_files.sort();
+
+        // Only unused.rs should be identified as unused
+        let expected = unused_rs.canonicalize().unwrap();
+        assert_eq!(unused_files.len(), 1);
+        assert_eq!(unused_files[0], expected);
+    }
+
+    #[test]
+    fn test_identify_unused_rs_examples_invalid_dir() {
+        let dir = tempdir().unwrap();
+        let markdown_dir = dir.path().join("markdown"); // Does not exist
+        let code_dir = dir.path().join("code"); // Does not exist
+
+        // Should return an error because the directories don't exist
+        let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
+        assert!(result.is_err());
+    }
 }
