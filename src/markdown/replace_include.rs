@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use tracing::info;
@@ -27,6 +27,8 @@ pub fn include_in_all_markdown_files_in<P>(markdown_src_dir_path: P) -> Result<(
 where
     P: AsRef<Path>,
 {
+    let base_dir = markdown_src_dir_path.as_ref().canonicalize()?;
+
     // Locate the Markdown files with the src directory
     let paths = crate::fs::find_markdown_files_in(markdown_src_dir_path.as_ref())?;
 
@@ -42,6 +44,10 @@ where
                 // debug!("relative file path: {rel_file_path:?}");
                 if !rel_file_path.ends_with("refs.md") {
                     let path_file_to_insert = Path::new(parent_dir.as_ref()).join(rel_file_path);
+                    let canonicalized_insert = path_file_to_insert.canonicalize()?;
+                    if !canonicalized_insert.starts_with(&base_dir) {
+                        bail!("Path traversal detected: attempt to include file outside base directory");
+                    }
                     info!("Insert {path_file_to_insert:?}");
                     let contents_to_insert = fs::read_to_string(path_file_to_insert)?;
                     // debug!("\n{}", contents_to_insert);
