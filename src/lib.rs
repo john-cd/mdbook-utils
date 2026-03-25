@@ -550,9 +550,76 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use std::fs;
+    use std::io::Write;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_generate_categories() -> Result<()> {
+        let temp_dir = tempdir()?;
+        let src_dir = temp_dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md_file_path = src_dir.join("test.md");
+        let mut md_file = File::create(&md_file_path)?;
+        writeln!(md_file, "This is a test file.")?;
+        writeln!(md_file, "[parsing](https://crates.io/categories/parsing)")?;
+        writeln!(md_file, "Another category: [development-tools](https://crates.io/categories/development-tools/)")?;
+        writeln!(md_file, "Duplicate category: [parsing](https://crates.io/categories/parsing?sort=recent-updates)")?;
+        writeln!(md_file, "A crate: [serde](https://crates.io/crates/serde)")?;
+
+        let dest_file_path = temp_dir.path().join("categories.md");
+
+        generate_categories(&src_dir, &dest_file_path)?;
+
+        let content = fs::read_to_string(&dest_file_path)?;
+
+        assert!(content.contains("# Categories"));
+        assert!(content.contains("- [development-tools](https://crates.io/categories/development-tools)"));
+        assert!(content.contains("- [parsing](https://crates.io/categories/parsing)"));
+        assert!(!content.contains("- [serde]"));
+
+        // Ensure they are sorted and deduplicated
+        let lines: Vec<&str> = content.lines().filter(|l| l.starts_with("-")).collect();
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0], "- [development-tools](https://crates.io/categories/development-tools)");
+        assert_eq!(lines[1], "- [parsing](https://crates.io/categories/parsing)");
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_generate_crates() -> Result<()> {
+        let temp_dir = tempdir()?;
+        let src_dir = temp_dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md_file_path = src_dir.join("test.md");
+        let mut md_file = File::create(&md_file_path)?;
+        writeln!(md_file, "This is a test file.")?;
+        writeln!(md_file, "[serde](https://crates.io/crates/serde)")?;
+        writeln!(md_file, "Another crate: [anyhow](https://crates.io/crates/anyhow)")?;
+        writeln!(md_file, "Duplicate crate: [serde](https://crates.io/crates/serde)")?;
+        writeln!(md_file, "A category: [parsing](https://crates.io/categories/parsing)")?;
+
+        let dest_file_path = temp_dir.path().join("crates.md");
+
+        generate_crates(&src_dir, &dest_file_path)?;
+
+        let content = fs::read_to_string(&dest_file_path)?;
+
+        assert!(content.contains("# Crates"));
+        assert!(content.contains("- [anyhow](https://crates.io/crates/anyhow)"));
+        assert!(content.contains("- [serde](https://crates.io/crates/serde)"));
+        assert!(!content.contains("- [parsing]"));
+
+        // Ensure they are sorted and deduplicated
+        let lines: Vec<&str> = content.lines().filter(|l| l.starts_with("-")).collect();
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0], "- [anyhow](https://crates.io/crates/anyhow)");
+        assert_eq!(lines[1], "- [serde](https://crates.io/crates/serde)");
+
+        Ok(())
+    }
 }
