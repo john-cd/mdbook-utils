@@ -54,11 +54,8 @@ where
         info!("Looking into {p:?}");
         let buf = fs::read_to_string(p.as_path())?;
         if REGEX.is_match(&buf) {
-            let mut new_txt = buf.clone();
-            for cap in REGEX.captures_iter(&buf) {
-                new_txt = new_txt.replace(cap.get(0).unwrap().as_str(), contents_to_insert);
-            }
-            if new_txt != buf {
+            let new_txt = REGEX.replace_all(&buf, regex::NoExpand(contents_to_insert));
+            if let std::borrow::Cow::Owned(new_txt) = new_txt {
                 // tracing::debug!("modified: {}", p.display());
                 File::create(p.clone())?.write_all(new_txt.as_bytes())?;
                 modified.push(p);
@@ -68,12 +65,23 @@ where
     Ok(modified)
 }
 
-// TODO write tests
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_remove_includes_in_all_markdown_files_in() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.md");
+        let content = "This is a test. {{#include file.md}} and {{#include another.md}}";
+        fs::write(&file_path, content).unwrap();
+
+        let modified = remove_includes_in_all_markdown_files_in(dir.path(), "REPLACED").unwrap();
+        assert_eq!(modified.len(), 1);
+        assert_eq!(modified[0].file_name().unwrap(), "test.md");
+
+        let new_content = fs::read_to_string(&file_path).unwrap();
+        assert_eq!(new_content, "This is a test. REPLACED and REPLACED");
+    }
 }
