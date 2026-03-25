@@ -502,8 +502,6 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(
 }
 
 /// Identify .rs examples not used in Markdown files
-// TODO: Support other ways of including/using .rs files beyond {{#include
-// ...}}.
 pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     markdown_src_dir_path: P1,
     code_dir_path: P2,
@@ -523,9 +521,7 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     let mut used_rs_files = std::collections::HashSet::new();
     let md_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
 
-    let re = regex::Regex::new(
-        r"\{\{#(?:rustdoc_include|playground_include|include)\s+(?P<path>\S+\.rs)\s*\}\}",
-    )?;
+    let re = regex::Regex::new(r"(?P<path>[a-zA-Z0-9_.\-\/]+\.rs)")?;
 
     for md_file in md_files {
         let content = std::fs::read_to_string(&md_file)?;
