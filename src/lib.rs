@@ -550,9 +550,84 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_identify_files_not_in_summary_all_included() {
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path();
+
+        let root = markdown_src_dir_path.join("src");
+        fs::create_dir(&root).unwrap();
+
+        let summary_path = root.join("SUMMARY.md");
+        fs::write(&summary_path, "[Page 1](./page1.md)\n[Page 2](page2.md)").unwrap();
+
+        fs::write(root.join("page1.md"), "# Page 1").unwrap();
+        fs::write(root.join("page2.md"), "# Page 2").unwrap();
+
+        let missing = identify_files_not_in_summary(&root).unwrap();
+        assert!(missing.is_empty(), "Expected no missing files, but got {:?}", missing);
+    }
+
+    #[test]
+    fn test_identify_files_not_in_summary_some_missing() {
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path();
+
+        // Let's create a non-hidden sub directory, and use that as the root,
+        // since `tempdir` returns a hidden directory like `/tmp/.tmpxxx`.
+        let root = markdown_src_dir_path.join("src");
+        fs::create_dir(&root).unwrap();
+
+        let summary_path = root.join("SUMMARY.md");
+        fs::write(&summary_path, "[Page 1](./page1.md)").unwrap();
+
+        fs::write(root.join("page1.md"), "# Page 1").unwrap();
+        fs::write(root.join("page2.md"), "# Page 2").unwrap();
+
+        let missing = identify_files_not_in_summary(&root).unwrap();
+        assert_eq!(missing.len(), 1);
+        assert_eq!(missing[0].file_name().unwrap(), "page2.md");
+    }
+
+    #[test]
+    fn test_identify_files_not_in_summary_no_summary() {
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path();
+
+        let root = markdown_src_dir_path.join("src");
+        fs::create_dir(&root).unwrap();
+
+        fs::write(root.join("page1.md"), "# Page 1").unwrap();
+
+        let result = identify_files_not_in_summary(&root);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("SUMMARY.md not found in"));
+    }
+
+    #[test]
+    fn test_identify_files_not_in_summary_nested_files() {
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path();
+
+        let root = markdown_src_dir_path.join("src");
+        fs::create_dir(&root).unwrap();
+
+        let sub_dir = root.join("sub");
+        fs::create_dir(&sub_dir).unwrap();
+
+        let summary_path = root.join("SUMMARY.md");
+        fs::write(&summary_path, "[Page 1](./page1.md)\n[Sub Page](sub/page2.md)").unwrap();
+
+        fs::write(root.join("page1.md"), "# Page 1").unwrap();
+        fs::write(sub_dir.join("page2.md"), "# Page 2").unwrap();
+        fs::write(sub_dir.join("page3.md"), "# Page 3").unwrap(); // missing
+
+        let missing = identify_files_not_in_summary(&root).unwrap();
+        assert_eq!(missing.len(), 1);
+        assert_eq!(missing[0].file_name().unwrap(), "page3.md");
+    }
 }
