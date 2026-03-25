@@ -276,40 +276,46 @@ mod test {
             match *name {
                 "category" => {
                     let url = "https://crates.io/categories/web-programming::websocket/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["catg"], "web-programming::websocket");
+                    if let Some(caps) = re.captures(url) {
+                        assert_eq!(&caps["catg"], "web-programming::websocket");
+                    } else {
+                        panic!("category rule failed to match {}", url);
+                    }
                 }
                 "crate" => {
                     let url = "https://crates.io/crates/smol/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["crate"], "smol");
+                    if let Some(caps) = re.captures(url) {
+                        assert_eq!(&caps["crate"], "smol");
+                    } else {
+                        panic!("crate rule failed to match {}", url);
+                    }
                 }
                 "documentation" => {
                     let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
-                    assert!(
-                        re.is_match(url),
-                        "documentation rule failed to match {}",
-                        url
-                    );
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["crate"], "sqlx");
-                    // With the current regex, /sqlx/struct.Pool.html is captured as item
+                    if let Some(caps) = re.captures(url) {
+                        assert_eq!(&caps["crate"], "sqlx");
+                        // With the current regex, /sqlx/struct.Pool.html is captured as item
+                    } else {
+                        panic!("documentation rule failed to match {}", url);
+                    }
                 }
                 "github repo" => {
                     let url = "https://github.com/john-cd/mdbook-utils";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["owner"], "john-cd");
-                    assert_eq!(&caps["repo"], "mdbook-utils");
+                    if let Some(caps) = re.captures(url) {
+                        assert_eq!(&caps["owner"], "john-cd");
+                        assert_eq!(&caps["repo"], "mdbook-utils");
+                    } else {
+                        panic!("github repo rule failed to match {}", url);
+                    }
                 }
                 "github pages" => {
                     let url = "https://rust-lang.github.io/rustup/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["owner"], "rust-lang");
-                    assert_eq!(&caps["repo"], "rustup");
+                    if let Some(caps) = re.captures(url) {
+                        assert_eq!(&caps["owner"], "rust-lang");
+                        assert_eq!(&caps["repo"], "rustup");
+                    } else {
+                        panic!("github pages rule failed to match {}", url);
+                    }
                 }
                 _ => {}
             }
