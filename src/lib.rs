@@ -629,5 +629,66 @@ mod test {
         let missing = identify_files_not_in_summary(&root).unwrap();
         assert_eq!(missing.len(), 1);
         assert_eq!(missing[0].file_name().unwrap(), "page3.md");
+    use tempfile::tempdir;
+    use std::fs;
+
+    #[test]
+    fn test_generate_categories_happy_path() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md1 = src_dir.join("1.md");
+        fs::write(
+            &md1,
+            "Here is [category one](https://crates.io/categories/cat1) and [another](https://crates.io/categories/cat2?sort=recent) and [trailing slash](https://crates.io/categories/cat3/).",
+        )?;
+
+        let md2 = src_dir.join("2.md");
+        fs::write(
+            &md2,
+            "Duplicate [cat1](https://crates.io/categories/cat1), and an unrelated [link](https://example.com).",
+        )?;
+
+        let dest_file = dir.path().join("categories.md");
+        generate_categories(&src_dir, &dest_file)?;
+
+        let content = fs::read_to_string(&dest_file)?;
+        let expected = "# Categories\n\n- [cat1](https://crates.io/categories/cat1)\n- [cat2](https://crates.io/categories/cat2)\n- [cat3](https://crates.io/categories/cat3)\n";
+        assert_eq!(content, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_generate_categories_invalid_dir() {
+        let dir = tempdir().unwrap();
+        let src_dir = dir.path().join("non_existent_src");
+        let dest_file = dir.path().join("categories.md");
+
+        let result = generate_categories(&src_dir, &dest_file);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_generate_categories_edge_cases() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md1 = src_dir.join("1.md");
+        fs::write(
+            &md1,
+            "Here is [empty 1](https://crates.io/categories) and [empty 2](https://crates.io/categories/).",
+        )?;
+
+        let dest_file = dir.path().join("categories.md");
+        generate_categories(&src_dir, &dest_file)?;
+
+        let content = fs::read_to_string(&dest_file)?;
+        let expected = "# Categories\n\n";
+        assert_eq!(content, expected);
+
+        Ok(())
     }
 }
