@@ -236,12 +236,10 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     );
 
     // GENERIC
-    // TODO: Improve these generic regexes to be more robust and handle various URL
-    // structures.
     m.insert(
         "website",
         Rule {
-            re: r"http[s]?://(?<domain>[^/]+)/?",
+            re: r"^https?://(?<domain>[^/]+)/?$",
             label_pattern: "${domain}-website",
             ..Rule::default()
         },
@@ -253,7 +251,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "website page",
         Rule {
-            re: r"http[s]?://(?<domain>[^/]+)/(?:\S+?)/(?<last>[^/]+)(?:/|.html)?",
+            re: r"^https?://(?<domain>[^/]+)/(?:.*/)?(?<last>[^/]+?)(?:/|\.html)?$",
             label_pattern: "${domain}-${last}",
             ..Rule::default()
         },
@@ -310,6 +308,28 @@ mod test {
                     let caps = re.captures(url).unwrap();
                     assert_eq!(&caps["owner"], "rust-lang");
                     assert_eq!(&caps["repo"], "rustup");
+                }
+                "website" => {
+                    let url = "https://john-cd.com/";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["domain"], "john-cd.com");
+
+                    let bad_url = "https://john-cd.com/some/path";
+                    assert!(!re.is_match(bad_url));
+                }
+                "website page" => {
+                    let url = "https://tokio.rs/tokio/tutorial";
+                    assert!(re.is_match(url));
+                    let caps = re.captures(url).unwrap();
+                    assert_eq!(&caps["domain"], "tokio.rs");
+                    assert_eq!(&caps["last"], "tutorial");
+
+                    let url_with_html = "https://example.com/some/path/index.html";
+                    assert!(re.is_match(url_with_html));
+                    let caps = re.captures(url_with_html).unwrap();
+                    assert_eq!(&caps["domain"], "example.com");
+                    assert_eq!(&caps["last"], "index");
                 }
                 _ => {}
             }
