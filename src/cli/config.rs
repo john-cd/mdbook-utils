@@ -61,6 +61,10 @@ pub(crate) struct Configuration {
     /// SITEMAP_MAP_INDEX environment variable:
     /// Map a filename to another (e.g., 'intro.md' to 'index.md')
     sitemap_map_index: Option<String>,
+    /// MDBOOK_PATH environment variable:
+    /// Path to the `mdbook` binary
+    /// typically `mdbook`
+    mdbook_path: Option<PathBuf>,
 
     /// Global options that apply to all (sub)commands.
     #[serde(skip)]
@@ -79,6 +83,7 @@ impl Default for Configuration {
             default_dest_dir_path: None,
             base_url: String::from("http://example.com/mybook/"),
             sitemap_map_index: Some("intro.md:index.md".to_string()),
+            mdbook_path: None,
             global_opts: GlobalOpts::default(),
         }
     }
@@ -281,6 +286,13 @@ impl Configuration {
     /// if true, skip confirmation prompts
     pub(crate) fn skip_confirm(&self) -> bool {
         self.global_opts.yes
+    }
+
+    /// Returns the path to the `mdbook` binary, as provided by the
+    /// MDBOOK_PATH environment variable (if set), otherwise defaults to
+    /// "mdbook".
+    pub(crate) fn mdbook_path(&self) -> PathBuf {
+        self.mdbook_path.clone().unwrap_or_else(|| PathBuf::from("mdbook"))
     }
 }
 
