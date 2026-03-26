@@ -45,7 +45,6 @@ where
                 new_txt.push_str(&buf[last_match..m.start()]);
 
                 let rel_file_path = cap.name("filepath").unwrap().as_str();
-                // debug!("relative file path: {rel_file_path:?}");
                 if !rel_file_path.ends_with("refs.md") {
                     let path_file_to_insert = Path::new(parent_dir.as_ref()).join(rel_file_path);
                     info!("Insert {path_file_to_insert:?}");
