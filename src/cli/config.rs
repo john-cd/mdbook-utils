@@ -61,6 +61,10 @@ pub(crate) struct Configuration {
     /// SITEMAP_MAP_INDEX environment variable:
     /// Map a filename to another (e.g., 'intro.md' to 'index.md')
     sitemap_map_index: Option<String>,
+    /// MDBOOK_PATH environment variable:
+    /// Path to the `mdbook` binary
+    /// typically `mdbook`
+    mdbook_path: Option<PathBuf>,
 
     /// Global options that apply to all (sub)commands.
     #[serde(skip)]
@@ -79,6 +83,7 @@ impl Default for Configuration {
             default_dest_dir_path: None,
             base_url: String::from("http://example.com/mybook/"),
             sitemap_map_index: Some("intro.md:index.md".to_string()),
+            mdbook_path: None,
             global_opts: GlobalOpts::default(),
         }
     }
@@ -267,7 +272,7 @@ impl Configuration {
                 d.clone()
             } else {
                 match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
-                    Ok((_, html_output_dir, _)) => {
+                    Ok((_, Some(html_output_dir), _)) => {
                         // `book.toml`` exists, is parseable and build.build-dir is defined
                         html_output_dir
                     }
