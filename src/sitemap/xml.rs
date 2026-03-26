@@ -32,7 +32,7 @@ pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Resu
                 writer.create_element("url").write_inner_content(|w| {
                     let escaped = quick_xml::escape::escape(link.as_str());
                     w.create_element("loc")
-                        .write_text_content(BytesText::from_escaped(escaped))?;
+                        .write_text_content(BytesText::from_escaped(quick_xml::escape::escape(link.as_str())))?;
                     Ok(())
                 })?;
             }
