@@ -5,7 +5,6 @@ use std::io::Write;
 
 use anyhow::Result;
 use pulldown_cmark::Parser;
-use regex::Regex;
 use tracing::debug;
 
 use crate::link::Link;
@@ -39,7 +38,7 @@ where
     let sorted_refdefs: BTreeMap<_, _> = parser.reference_definitions().iter().collect();
 
     let rule = &crate::link::GLOBAL_RULES["github repo"];
-    let re = Regex::new(rule.re).unwrap();
+    let re = &crate::link::COMPILED_RULES["github repo"];
 
     let mut links = Vec::new();
 
