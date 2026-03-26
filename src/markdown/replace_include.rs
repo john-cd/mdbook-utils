@@ -71,12 +71,46 @@ where
     Ok(())
 }
 
-// TODO write tests
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_include_in_all_markdown_files_in() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let main_md_path = src_dir.join("main.md");
+        let include1_md_path = src_dir.join("include1.md");
+        let refs_md_path = src_dir.join("some-refs.md");
+        let sub_dir = src_dir.join("sub");
+        fs::create_dir(&sub_dir)?;
+        let include2_md_path = sub_dir.join("include2.md");
+
+        fs::write(&include1_md_path, "Content of include1")?;
+        fs::write(&refs_md_path, "Content of refs")?;
+        fs::write(&include2_md_path, "Content of include2")?;
+
+        let main_content = r#"
+# Main
+{{#include include1.md}}
+{{#include some-refs.md}}
+{{#include sub/include2.md}}
+"#;
+        fs::write(&main_md_path, main_content)?;
+
+        include_in_all_markdown_files_in(&src_dir)?;
+
+        let updated_content = fs::read_to_string(&main_md_path)?;
+        assert!(updated_content.contains("Content of include1"));
+        assert!(updated_content.contains("{{#include some-refs.md}}"));
+        assert!(!updated_content.contains("Content of refs"));
+        assert!(updated_content.contains("Content of include2"));
+        assert!(!updated_content.contains("{{#include include1.md}}"));
+        assert!(!updated_content.contains("{{#include sub/include2.md}}"));
+
+        Ok(())
+    }
 }
