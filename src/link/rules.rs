@@ -255,7 +255,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "website",
         Rule {
-            re: r"http[s]?://(?<domain>[^/]+)/?",
+            re: r"https?://(?<domain>[^/]+)/?(?:[?#].*)?$",
             label_pattern: "${domain}-website",
             ..Rule::default()
         },
@@ -267,7 +267,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "website page",
         Rule {
-            re: r"http[s]?://(?<domain>[^/]+)/(?:\S+?)/(?<last>[^/]+)(?:/|.html)?",
+            re: r"https?://(?<domain>[^/]+)/(?:.*/)?(?<last>[^/?#.]+)(?:\.html|/)?(?:[?#].*)?$",
             label_pattern: "${domain}-${last}",
             ..Rule::default()
         },
@@ -456,19 +456,40 @@ mod test {
     #[test]
     fn test_website_rule() {
         let re = get_re("website");
-        let url = "https://dev.to/";
-        assert!(re.is_match(url));
-        let caps = re.captures(url).unwrap();
-        assert_eq!(&caps["domain"], "dev.to");
+        let cases = [
+            ("https://dev.to/", "dev.to"),
+            ("https://example.com/", "example.com"),
+            ("http://example.com", "example.com"),
+            ("https://example.com/?id=1#foo", "example.com"),
+        ];
+        for (url, domain) in cases {
+            assert!(re.is_match(url));
+            let caps = re.captures(url).unwrap();
+            assert_eq!(&caps["domain"], domain);
+        }
+        assert!(!re.is_match("https://example.com/path"));
     }
 
     #[test]
     fn test_website_page_rule() {
         let re = get_re("website page");
-        let url = "https://dev.to/22mahmoud/my-terminal-became-more-rusty-4g8l";
-        assert!(re.is_match(url));
-        let caps = re.captures(url).unwrap();
-        assert_eq!(&caps["domain"], "dev.to");
-        assert_eq!(&caps["last"], "my-terminal-became-more-rusty-4g8l");
+        let cases = [
+            (
+                "https://dev.to/22mahmoud/my-terminal-became-more-rusty-4g8l",
+                "dev.to",
+                "my-terminal-became-more-rusty-4g8l",
+            ),
+            ("https://example.com/foo/bar/baz.html", "example.com", "baz"),
+            ("https://tokio.rs/tokio/tutorial/", "tokio.rs", "tutorial"),
+            ("https://tokio.rs/tokio/tutorial", "tokio.rs", "tutorial"),
+            ("https://example.com/about", "example.com", "about"),
+            ("https://example.com/foo/bar.html?id=1#baz", "example.com", "bar"),
+        ];
+        for (url, domain, last) in cases {
+            assert!(re.is_match(url));
+            let caps = re.captures(url).unwrap();
+            assert_eq!(&caps["domain"], domain);
+            assert_eq!(&caps["last"], last);
+        }
     }
 }
