@@ -62,9 +62,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_check_is_dir() -> Result<(), Error> {

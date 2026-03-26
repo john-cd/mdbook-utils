@@ -4,6 +4,5 @@ pub mod crates;
 mod merge_refdefs;
 mod refdefs_from_dependencies;
 
-pub use crates::*;
 pub(crate) use merge_refdefs::*;
 pub(crate) use refdefs_from_dependencies::*;

@@ -1,4 +1,5 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Result;
 use anyhow::bail;
@@ -104,10 +105,11 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
 
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_identify_files_not_in_summary_all_included() {

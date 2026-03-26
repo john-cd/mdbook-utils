@@ -33,7 +33,8 @@ where
     Ok(())
 }
 
-/// Test function that uses fake Markdown and writes events to `./book/temp/test.log`.
+/// Test function that uses fake Markdown and writes events to
+/// `./book/temp/test.log`.
 pub fn test() -> Result<()> {
     fs::create_dir("./book/temp/")?;
 

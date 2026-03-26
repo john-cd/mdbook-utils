@@ -45,8 +45,9 @@ pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Resu
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::io::Cursor;
+
+    use super::*;
 
     #[test]
     fn test_write_xml_escapes_url() {

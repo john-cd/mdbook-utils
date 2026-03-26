@@ -20,10 +20,10 @@ pub(crate) fn merge_links<'a>(
 
 #[cfg(test)]
 mod test {
-    use crate::link::LinkBuilder;
     use pulldown_cmark::LinkType;
 
     use super::*;
+    use crate::link::LinkBuilder;
 
     #[test]
     fn test_merge_links() {
