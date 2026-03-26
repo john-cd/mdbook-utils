@@ -55,53 +55,55 @@ impl<'a> Link<'a> {
     }
 
     /// Return the link's text
-    fn get_text(&self) -> Cow<'a, str> {
-        self.text.clone().unwrap_or(Cow::from(""))
+    fn get_text(&self) -> Cow<'_, str> {
+        self.text
+            .as_deref()
+            .map(Cow::Borrowed)
+            .unwrap_or(Cow::Borrowed(""))
     }
 
     /// Returns the link's url
-    pub(crate) fn get_url(&self) -> Cow<'a, str> {
-        if let Some(u) = &self.url {
-            u.clone()
-        } else {
-            Cow::from(String::new())
-        }
+    pub(crate) fn get_url(&self) -> Cow<'_, str> {
+        self.url
+            .as_deref()
+            .map(Cow::Borrowed)
+            .unwrap_or(Cow::Borrowed(""))
     }
 
     /// Returns the link's url (and title if present)
-    fn get_url_and_title(&self) -> Cow<'a, str> {
+    fn get_url_and_title(&self) -> Cow<'_, str> {
         if let Some(u) = &self.url {
             if let Some(t) = &self.title {
                 format!("{u} \"{t}\"").into()
             } else {
-                u.clone()
+                Cow::Borrowed(u.as_ref())
             }
         } else {
-            Cow::from(String::new())
+            Cow::Borrowed("")
         }
     }
 
     /// Returns the link's reference label, if it exists, or the
     /// kebab-cased link's text
-    fn get_label(&self) -> Cow<'a, str> {
+    fn get_label(&self) -> Cow<'_, str> {
         if let Some(label) = &self.label {
-            label.clone()
+            Cow::Borrowed(label.as_ref())
         } else if let Some(txt) = &self.text {
             txt.to_kebab_case().into()
         } else {
-            "".into()
+            Cow::Borrowed("")
         }
     }
 
     /// Return a Markdown inline link:
     /// [text](url) or [text](url "title")
-    pub(crate) fn to_inline_link(&self) -> Cow<'a, str> {
+    pub(crate) fn to_inline_link(&self) -> Cow<'_, str> {
         format!("[{}]( {} )", self.get_text(), self.get_url_and_title()).into()
     }
 
     /// Return a reference-style Markdown link:
     /// \[text\]\[label\] or \[text/label\]
-    pub(crate) fn to_reference_link(&self) -> Cow<'a, str> {
+    pub(crate) fn to_reference_link(&self) -> Cow<'_, str> {
         let txt: String = self.get_text().into();
         let label: String = self.get_label().into();
         if txt == label {
@@ -113,7 +115,7 @@ impl<'a> Link<'a> {
 
     /// Return a Markdown reference definition:
     /// \[label\]: url or \[label\]: url "title"
-    pub(crate) fn to_reference_definition(&self) -> Cow<'a, str> {
+    pub(crate) fn to_reference_definition(&self) -> Cow<'_, str> {
         format!("[{}]: {}", self.get_label(), self.get_url_and_title()).into()
     }
 
@@ -217,5 +219,100 @@ impl Hash for Link<'_> {
         self.label.hash(state);
         self.url.hash(state);
         self.title.hash(state);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_link_equality_and_hash() {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+
+        let link1 = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url1".into(),
+            "title1".into(),
+            "label1".into(),
+        )
+        .build();
+        let link2 = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url1".into(),
+            "title1".into(),
+            "label1".into(),
+        )
+        .build();
+        let link3 = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url2".into(),
+            "title1".into(),
+            "label1".into(),
+        )
+        .build();
+
+        assert_eq!(link1, link2);
+        assert_ne!(link1, link3);
+
+        let mut hasher1 = DefaultHasher::new();
+        link1.hash(&mut hasher1);
+        let hash1 = hasher1.finish();
+
+        let mut hasher2 = DefaultHasher::new();
+        link2.hash(&mut hasher2);
+        let hash2 = hasher2.finish();
+
+        assert_eq!(hash1, hash2);
+    }
+
+    #[test]
+    fn test_link_ordering() {
+        let link_a = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url".into(),
+            "title".into(),
+            "a".into(),
+        )
+        .build();
+        let link_b = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url".into(),
+            "title".into(),
+            "b".into(),
+        )
+        .build();
+        let link_a_url2 = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url2".into(),
+            "title".into(),
+            "a".into(),
+        )
+        .build();
+
+        assert!(link_a < link_b);
+        assert!(link_a < link_a_url2);
+    }
+
+    #[test]
+    fn test_to_reference_definition() {
+        let link = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url".into(),
+            "title".into(),
+            "label".into(),
+        )
+        .build();
+        assert_eq!(link.to_reference_definition(), "[label]: url \"title\"");
+
+        let link_no_title = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url".into(),
+            "".into(),
+            "label".into(),
+        )
+        .build();
+        assert_eq!(link_no_title.to_reference_definition(), "[label]: url");
     }
 }
