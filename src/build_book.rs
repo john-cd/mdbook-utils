@@ -13,14 +13,15 @@ use anyhow::anyhow;
 ///
 /// ```rust,ignore
 /// println!("Info: building the book...");
-/// let res = build_book(&root_path);
+/// let mdbook_path = std::path::PathBuf::from("mdbook");
+/// let res = build_book(&root_path, &mdbook_path);
 /// if let Err(ref e) = res {
 ///     println!("cargo:warning=ERROR: {e}");
 ///     return res;
 /// }
 /// ```
-pub(crate) fn build_book(root_path: &Path) -> Result<()> {
-    let output = Command::new("mdbook")
+pub(crate) fn build_book(root_path: &Path, mdbook_path: &Path) -> Result<()> {
+    let output = Command::new(mdbook_path)
         .args(["build"])
         .current_dir(root_path)
         .output()
