@@ -71,41 +71,113 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::fs;
     use tempfile::tempdir;
 
     #[test]
-    fn test_remove_includes_in_all_markdown_files_in() -> Result<()> {
+    fn test_remove_includes_in_all_markdown_files_in() -> anyhow::Result<()> {
         let dir = tempdir()?;
         let src_dir = dir.path().join("src");
         fs::create_dir(&src_dir)?;
 
-        let main_md_path = src_dir.join("main.md");
-        let main_content = r#"
-# Main
-{{#include include1.md}}
-Some text
-{{#include include2.md}}
-"#;
-        fs::write(&main_md_path, main_content)?;
+        // 1. Markdown file with single include
+        let md_file1 = src_dir.join("test1.md");
+        fs::write(
+            &md_file1,
+            r#"# Test 1
+Here is an include:
+{{#include file1.rs}}
+End.
+"#,
+        )?;
 
-        // Test with a replacement string
+        // 2. Markdown file with multiple includes, same line and different lines
+        let md_file2 = src_dir.join("test2.md");
+        fs::write(
+            &md_file2,
+            r#"# Test 2
+{{#include a.rs}} and {{#include b.rs}}
+Another line.
+{{#include c.rs}}
+"#,
+        )?;
+
+        // 3. Markdown file with no includes
+        let md_file3 = src_dir.join("test3.md");
+        fs::write(
+            &md_file3,
+            r#"# Test 3
+No includes here.
+"#,
+        )?;
+
+        // 4. Non-markdown file (should be ignored)
+        let txt_file = src_dir.join("test.txt");
+        fs::write(
+            &txt_file,
+            r#"# Test text
+{{#include ignore.rs}}
+"#,
+        )?;
+
+        // Run the function
         let modified = remove_includes_in_all_markdown_files_in(&src_dir, "REPLACED")?;
-        assert_eq!(modified.len(), 1);
-        assert_eq!(modified[0], main_md_path);
 
-        let updated_content = fs::read_to_string(&main_md_path)?;
-        assert!(!updated_content.contains("{{#include include1.md}}"));
-        assert!(!updated_content.contains("{{#include include2.md}}"));
-        assert_eq!(updated_content.matches("REPLACED").count(), 2);
+        // Check the returned list of modified files
+        assert_eq!(modified.len(), 2);
+        assert!(modified.contains(&md_file1));
+        assert!(modified.contains(&md_file2));
 
-        // Test with empty string
-        fs::write(&main_md_path, main_content)?;
-        let modified = remove_includes_in_all_markdown_files_in(&src_dir, "")?;
-        assert_eq!(modified.len(), 1);
-        let updated_content = fs::read_to_string(&main_md_path)?;
-        assert!(!updated_content.contains("{{#include"));
-        assert!(updated_content.contains("# Main"));
-        assert!(updated_content.contains("Some text"));
+        // Verify contents of md_file1
+        let content1 = fs::read_to_string(&md_file1)?;
+        assert_eq!(
+            content1,
+            r#"# Test 1
+Here is an include:
+REPLACED
+End.
+"#
+        );
+
+        // Verify contents of md_file2
+        let content2 = fs::read_to_string(&md_file2)?;
+        assert_eq!(
+            content2,
+            r#"# Test 2
+REPLACED and REPLACED
+Another line.
+REPLACED
+"#
+        );
+
+        // Verify contents of md_file3 are unchanged
+        let content3 = fs::read_to_string(&md_file3)?;
+        assert_eq!(
+            content3,
+            r#"# Test 3
+No includes here.
+"#
+        );
+
+        // Verify contents of txt_file are unchanged
+        let content_txt = fs::read_to_string(&txt_file)?;
+        assert_eq!(
+            content_txt,
+            r#"# Test text
+{{#include ignore.rs}}
+"#
+        );
+
+        // Test with empty replacement string
+        let md_file4 = src_dir.join("test4.md");
+        fs::write(&md_file4, "Hello {{#include something.rs}} World!")?;
+
+        let modified_empty = remove_includes_in_all_markdown_files_in(&src_dir, "")?;
+        assert_eq!(modified_empty.len(), 1);
+        assert!(modified_empty.contains(&md_file4));
+
+        let content4 = fs::read_to_string(&md_file4)?;
+        assert_eq!(content4, "Hello  World!");
 
         Ok(())
     }
