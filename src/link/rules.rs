@@ -2,6 +2,7 @@
 //! from a link URL
 #![allow(clippy::vec_init_then_push)]
 
+use regex::Regex;
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
@@ -14,6 +15,19 @@ pub(crate) struct Rule<'a> {
     pub(crate) badge_url_pattern: &'a str, /* optional pattern to build a
                              * badge link */
 }
+
+/// Globally compiled regexes for each rule.
+pub(crate) static COMPILED_RULES: Lazy<HashMap<&str, Regex>> = Lazy::new(|| {
+    GLOBAL_RULES
+        .iter()
+        .map(|(name, rule)| {
+            (
+                *name,
+                Regex::new(rule.re).unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name)),
+            )
+        })
+        .collect()
+});
 
 // TODO the Regexes need testing
 /// All rules that transform a URL to a label or badge URL.
@@ -265,23 +279,12 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
 #[cfg(test)]
 mod test {
     use super::*;
-    use regex::Regex;
-
-    // By using COMPILED_RULES here, the Lazy block executes exactly once
-    // and validates every single regex. This removes the regex compilation
-    // loop from the test case body entirely.
-    pub(crate) static COMPILED_RULES: Lazy<HashMap<&str, Regex>> = Lazy::new(|| {
-        let mut compiled = HashMap::new();
-        for (name, rule) in GLOBAL_RULES.iter() {
-            let re = Regex::new(rule.re)
-                .unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name));
-            compiled.insert(*name, re);
-        }
-        compiled
-    });
 
     #[test]
     fn test_global_rules() {
+        // By using COMPILED_RULES here, the Lazy block executes exactly once
+        // and validates every single regex. This removes the regex compilation
+        // loop from the test case body entirely.
         let compiled_rules = &*COMPILED_RULES;
 
         let category_re = compiled_rules.get("category").unwrap();
