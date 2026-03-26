@@ -32,8 +32,7 @@ pub(crate) struct Book {
     // Source files
     // [book]
     // src = "src"
-    src: Option<String>, /* TODO consider std::ffi::OsString - need a custom deserializer?
-                          * We don't care about the rest. */
+    src: Option<PathBuf>,
 }
 
 /// [build] table
@@ -43,7 +42,7 @@ pub(crate) struct Build {
     // [build]
     // build-dir = "book"
     #[serde(rename = "build-dir")]
-    build_dir: Option<String>,
+    build_dir: Option<PathBuf>,
     // We don't care about the rest.
 }
 
