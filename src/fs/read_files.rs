@@ -31,7 +31,7 @@ where
     let paths = super::find_markdown_files::find_markdown_files_in(markdown_root_dir_path)?;
 
     // Read all .md files into one big String
-    let mut buf = Vec::<String>::with_capacity(120);
+    let mut all_markdown = String::new();
     for p in paths {
         let s = fs::read_to_string(p.as_path()).with_context(|| {
             format!(
@@ -40,9 +40,8 @@ where
             )
         })?;
         // debug!("{p:?}: length = {}", s.len());
-        buf.push(s);
+        all_markdown.push_str(&s);
     }
-    let all_markdown = buf.concat(); // or .join("");
 
     Ok(Cow::from(all_markdown))
 }
