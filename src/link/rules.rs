@@ -2,6 +2,7 @@
 //! from a link URL
 #![allow(clippy::vec_init_then_push)]
 
+use regex::Regex;
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
@@ -15,6 +16,20 @@ pub(crate) struct Rule<'a> {
                              * badge link */
 }
 
+/// Globally compiled regexes for each rule.
+pub(crate) static COMPILED_RULES: Lazy<HashMap<&str, Regex>> = Lazy::new(|| {
+    GLOBAL_RULES
+        .iter()
+        .map(|(name, rule)| {
+            (
+                *name,
+                Regex::new(rule.re).unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name)),
+            )
+        })
+        .collect()
+});
+
+// TODO the Regexes need testing
 /// All rules that transform a URL to a label or badge URL.
 pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     let mut m = HashMap::new();
@@ -264,11 +279,9 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
 #[cfg(test)]
 mod test {
     use super::*;
-    use regex::Regex;
 
-    fn get_re(name: &str) -> Regex {
-        let rule = GLOBAL_RULES.get(name).unwrap();
-        Regex::new(rule.re).unwrap()
+    fn get_re(name: &str) -> &'static Regex {
+        COMPILED_RULES.get(name).unwrap()
     }
 
     #[test]
