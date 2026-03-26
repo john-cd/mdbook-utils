@@ -54,11 +54,8 @@ where
         info!("Looking into {p:?}");
         let buf = fs::read_to_string(p.as_path())?;
         if REGEX.is_match(&buf) {
-            let mut new_txt = buf.clone();
-            for cap in REGEX.captures_iter(&buf) {
-                new_txt = new_txt.replace(cap.get(0).unwrap().as_str(), contents_to_insert);
-            }
-            if new_txt != buf {
+            let new_txt = REGEX.replace_all(&buf, regex::NoExpand(contents_to_insert));
+            if let std::borrow::Cow::Owned(new_txt) = new_txt {
                 // tracing::debug!("modified: {}", p.display());
                 File::create(p.clone())?.write_all(new_txt.as_bytes())?;
                 modified.push(p);
@@ -68,12 +65,117 @@ where
     Ok(modified)
 }
 
-// TODO write tests
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_remove_includes_in_all_markdown_files_in() -> anyhow::Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        // 1. Markdown file with single include
+        let md_file1 = src_dir.join("test1.md");
+        fs::write(
+            &md_file1,
+            r#"# Test 1
+Here is an include:
+{{#include file1.rs}}
+End.
+"#,
+        )?;
+
+        // 2. Markdown file with multiple includes, same line and different lines
+        let md_file2 = src_dir.join("test2.md");
+        fs::write(
+            &md_file2,
+            r#"# Test 2
+{{#include a.rs}} and {{#include b.rs}}
+Another line.
+{{#include c.rs}}
+"#,
+        )?;
+
+        // 3. Markdown file with no includes
+        let md_file3 = src_dir.join("test3.md");
+        fs::write(
+            &md_file3,
+            r#"# Test 3
+No includes here.
+"#,
+        )?;
+
+        // 4. Non-markdown file (should be ignored)
+        let txt_file = src_dir.join("test.txt");
+        fs::write(
+            &txt_file,
+            r#"# Test text
+{{#include ignore.rs}}
+"#,
+        )?;
+
+        // Run the function
+        let modified = remove_includes_in_all_markdown_files_in(&src_dir, "REPLACED")?;
+
+        // Check the returned list of modified files
+        assert_eq!(modified.len(), 2);
+        assert!(modified.contains(&md_file1));
+        assert!(modified.contains(&md_file2));
+
+        // Verify contents of md_file1
+        let content1 = fs::read_to_string(&md_file1)?;
+        assert_eq!(
+            content1,
+            r#"# Test 1
+Here is an include:
+REPLACED
+End.
+"#
+        );
+
+        // Verify contents of md_file2
+        let content2 = fs::read_to_string(&md_file2)?;
+        assert_eq!(
+            content2,
+            r#"# Test 2
+REPLACED and REPLACED
+Another line.
+REPLACED
+"#
+        );
+
+        // Verify contents of md_file3 are unchanged
+        let content3 = fs::read_to_string(&md_file3)?;
+        assert_eq!(
+            content3,
+            r#"# Test 3
+No includes here.
+"#
+        );
+
+        // Verify contents of txt_file are unchanged
+        let content_txt = fs::read_to_string(&txt_file)?;
+        assert_eq!(
+            content_txt,
+            r#"# Test text
+{{#include ignore.rs}}
+"#
+        );
+
+        // Test with empty replacement string
+        let md_file4 = src_dir.join("test4.md");
+        fs::write(&md_file4, "Hello {{#include something.rs}} World!")?;
+
+        let modified_empty = remove_includes_in_all_markdown_files_in(&src_dir, "")?;
+        assert_eq!(modified_empty.len(), 1);
+        assert!(modified_empty.contains(&md_file4));
+
+        let content4 = fs::read_to_string(&md_file4)?;
+        assert_eq!(content4, "Hello  World!");
+
+        Ok(())
+    }
 }
