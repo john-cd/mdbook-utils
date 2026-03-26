@@ -6,7 +6,6 @@ use pulldown_cmark::Parser;
 use pulldown_cmark::Tag;
 use pulldown_cmark::TagEnd;
 use tracing::debug;
-use tracing::error;
 
 use super::super::link::Link;
 use super::super::link::LinkBuilder;
@@ -26,7 +25,6 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
     let mut state: Vec<(Where, LinkBuilder<'input>)> = Vec::new();
     let mut links: Vec<Link<'input>> = Vec::new();
 
-    // Retrieve and group all Link-related events
     for event in parser {
         match event {
             // Start of a link
@@ -51,6 +49,9 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             // End of the link
             ref e @ Event::End(TagEnd::Link) => {
                 debug!("{e:?}");
+                // We pop until we get the corresponding InLink?
+                // Wait, Start(Link) always pushes.
+                // End(Link) always pops. So they must be balanced if the parser works correctly.
                 let (whr, link_builder) = state.pop().unwrap(); // Start and End events are balanced
                 assert_eq!(whr, Where::InLink);
                 links.push(link_builder.build());
@@ -100,14 +101,25 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             Event::Code(c) if !state.is_empty() => {
                 debug!("code: {c}");
                 let (whr, link_builder) = state.pop().unwrap();
-                state.push((whr, link_builder.add_text(c.into())));
+                if whr == Where::InImageInLink {
+                    state.push((whr, link_builder.add_image_alt_text(c.into())));
+                } else {
+                    state.push((whr, link_builder.add_text(c.into())));
+                }
             }
 
-            // corner cases: Code within an Image, Link within an Image...
+            // To robustly handle nested structures like bold, italics, etc, we should simply
+            // ignore Start and End tags that aren't Link or Image while in state.
+            Event::Start(_) | Event::End(_) if !state.is_empty() => {
+                // Ignore nested formatting tags like Strong, Emphasis, etc.
+                debug!("Ignoring nested formatting tag");
+            }
+
             ref e if !state.is_empty() => {
-                // TODO: Robustly handle more complex nested structures in Markdown
-                // links/images.
-                error!("Unhandled event while 'in link': {e:?}");
+                // Ignore other nested things, like Rule, SoftBreak, HardBreak, Html.
+                // Or maybe SoftBreak/HardBreak should add a space? Text gets added normally.
+                // We shouldn't panic or error out here.
+                debug!("Ignored event while 'in link': {e:?}");
             }
 
             ref e => {
@@ -144,5 +156,18 @@ mod test {
         let link = &links[0];
         assert_eq!(link.get_url(), "url");
         // image alt text is not directly exposed in Link yet via getter
+    }
+
+    #[test]
+    fn test_extract_links_complex() {
+        let markdown = "[`code`](url) [![`image_code`](img_url)](url) [[link_in_link](url2)](url) [![[link_in_img](url2)](img_url)](url) [foo **bold**](url)";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 5);
+        assert_eq!(links[0].get_url(), "url");
+        assert_eq!(links[1].get_url(), "url");
+        assert_eq!(links[2].get_url(), "url2");
+        assert_eq!(links[3].get_url(), "url2");
+        assert_eq!(links[4].get_url(), "url");
     }
 }
