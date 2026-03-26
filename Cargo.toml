@@ -54,7 +54,7 @@ regex = "1.12.3"
 serde = { version = "1.0.228", features = ["derive"] }
 toml = { version = "1.0.3", features = ["parse"] }
 tracing = "0.1.44"
-tracing-subscriber = "0.3.22"
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 url = "2.5.8"
 walkdir = "2.5.0"
 
