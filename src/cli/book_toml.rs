@@ -32,8 +32,7 @@ pub(crate) struct Book {
     // Source files
     // [book]
     // src = "src"
-    src: Option<String>, /* TODO consider std::ffi::OsString - need a custom deserializer?
-                          * We don't care about the rest. */
+    src: Option<PathBuf>,
 }
 
 /// [build] table
@@ -43,7 +42,7 @@ pub(crate) struct Build {
     // [build]
     // build-dir = "book"
     #[serde(rename = "build-dir")]
-    build_dir: Option<String>,
+    build_dir: Option<PathBuf>,
     // We don't care about the rest.
 }
 
@@ -68,7 +67,7 @@ pub(crate) struct Output {
 /// Failure to open `book.toml` or to parse it returns an Error.
 pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     book_root_dir_path: P,
-) -> Result<(PathBuf, PathBuf, Option<PathBuf>)> {
+) -> Result<(PathBuf, Option<PathBuf>, Option<PathBuf>)> {
     let book_toml_path = book_root_dir_path.as_ref().join("book.toml");
     debug!(
         "try_parse_book_toml: book_toml_path: {}",
@@ -91,7 +90,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
             .unwrap_or("book".into()),
     );
 
-    let mut book_html_build_dir_path = book_build_dir_path.clone();
+    let mut book_html_build_dir_path = None;
     let mut book_markdown_build_dir_path = None;
 
     // mdBook places its output directly in the book directory if there is only one backend.
@@ -142,7 +141,7 @@ mod test {
 
         let (src, html, markdown) = try_parse_book_toml(dir.path())?;
         assert_eq!(src, dir.path().join("src"));
-        assert_eq!(html, dir.path().join("book"));
+        assert_eq!(html, Some(dir.path().join("book")));
         assert_eq!(markdown, None);
         Ok(())
     }
@@ -162,7 +161,7 @@ build-dir = "my_book"
 
         let (src, html, markdown) = try_parse_book_toml(dir.path())?;
         assert_eq!(src, dir.path().join("my_src"));
-        assert_eq!(html, dir.path().join("my_book"));
+        assert_eq!(html, Some(dir.path().join("my_book")));
         assert_eq!(markdown, None);
         Ok(())
     }
@@ -179,7 +178,7 @@ build-dir = "my_book"
         )?;
 
         let (_, html, markdown) = try_parse_book_toml(dir.path())?;
-        assert_eq!(html, dir.path().join("book").join("html"));
+        assert_eq!(html, Some(dir.path().join("book").join("html")));
         assert_eq!(markdown, Some(dir.path().join("book").join("markdown")));
         Ok(())
     }
@@ -195,7 +194,7 @@ build-dir = "my_book"
         )?;
 
         let (_, html, markdown) = try_parse_book_toml(dir.path())?;
-        assert_eq!(html, dir.path().join("book"));
+        assert_eq!(html, None);
         assert_eq!(markdown, Some(dir.path().join("book")));
         Ok(())
     }

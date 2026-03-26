@@ -163,8 +163,6 @@ where
 
 // LINKS
 
-// TODO need to remove internal links
-
 /// Parse Markdown from all .md files in a given source directory,
 /// write all inline links and autolinks (i.e., not written as
 /// reference-style links) found therein to a file.
@@ -211,6 +209,13 @@ where
 {
     helper(src_dir_path, dest_file_path, |parser, f| {
         let links: Vec<link::Link<'_>> = parser::extract_links(parser);
+        let links: Vec<_> = links
+            .into_iter()
+            .filter(|l| {
+                let url = l.get_url();
+                url.starts_with("http")
+            })
+            .collect();
         link::write_reference_style_links_to(links, f)?;
         Ok(())
     })?;
@@ -231,6 +236,13 @@ where
 {
     helper(src_dir_path, dest_file_path, |parser, f| {
         let links: Vec<link::Link<'_>> = parser::extract_links(parser);
+        let links: Vec<_> = links
+            .into_iter()
+            .filter(|l| {
+                let url = l.get_url();
+                url.starts_with("http")
+            })
+            .collect();
         let mut counts = std::collections::HashMap::new();
         for l in &links {
             *counts.entry(l.clone()).or_insert(0) += 1;
@@ -483,7 +495,7 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(
             // Remove any leading ./ or /
             let clean_url = url.trim_start_matches("./").trim_start_matches('/');
             let path = markdown_src_dir_path.join(clean_url);
-            if let Ok(canon) = path.canonicalize() {
+            if let Ok(canon) = fs::is_path_within(&markdown_src_dir_path, &path) {
                 files_in_summary.insert(canon);
             }
         }
@@ -502,8 +514,6 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(
 }
 
 /// Identify .rs examples not used in Markdown files
-// TODO: Support other ways of including/using .rs files beyond {{#include
-// ...}}.
 pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     markdown_src_dir_path: P1,
     code_dir_path: P2,
@@ -523,16 +533,15 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     let mut used_rs_files = std::collections::HashSet::new();
     let md_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
 
-    let re = regex::Regex::new(
-        r"\{\{#(?:rustdoc_include|playground_include|include)\s+(?P<path>\S+\.rs)\s*\}\}",
-    )?;
+    // TODO review vs previous commit 
+    let re = regex::Regex::new(r"(?P<path>[a-zA-Z0-9_.\-\/]+\.rs)")?;
 
     for md_file in md_files {
         let content = std::fs::read_to_string(&md_file)?;
         for cap in re.captures_iter(&content) {
-            let rel_path = &cap["path"];
+            let rel_path = Path::new(&cap["path"]);
             let abs_path = md_file.parent().unwrap().join(rel_path);
-            if let Ok(canon) = abs_path.canonicalize() {
+            if let Ok(canon) = fs::is_path_within(&code_dir_path, &abs_path) {
                 used_rs_files.insert(canon);
             }
         }
@@ -550,9 +559,146 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use std::fs;
 
-    // #[test]
-    // fn test() {
-    // }
+    use tempfile::tempdir;
+
+    #[test]
+    fn test_identify_files_not_in_summary_all_included() {
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path();
+
+        let root = markdown_src_dir_path.join("src");
+        fs::create_dir(&root).unwrap();
+
+        let summary_path = root.join("SUMMARY.md");
+        fs::write(&summary_path, "[Page 1](./page1.md)\n[Page 2](page2.md)").unwrap();
+
+        fs::write(root.join("page1.md"), "# Page 1").unwrap();
+        fs::write(root.join("page2.md"), "# Page 2").unwrap();
+
+        let missing = identify_files_not_in_summary(&root).unwrap();
+        assert!(missing.is_empty(), "Expected no missing files, but got {:?}", missing);
+    }
+
+    #[test]
+    fn test_identify_files_not_in_summary_some_missing() {
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path();
+
+        // Let's create a non-hidden sub directory, and use that as the root,
+        // since `tempdir` returns a hidden directory like `/tmp/.tmpxxx`.
+        let root = markdown_src_dir_path.join("src");
+        fs::create_dir(&root).unwrap();
+
+        let summary_path = root.join("SUMMARY.md");
+        fs::write(&summary_path, "[Page 1](./page1.md)").unwrap();
+
+        fs::write(root.join("page1.md"), "# Page 1").unwrap();
+        fs::write(root.join("page2.md"), "# Page 2").unwrap();
+
+        let missing = identify_files_not_in_summary(&root).unwrap();
+        assert_eq!(missing.len(), 1);
+        assert_eq!(missing[0].file_name().unwrap(), "page2.md");
+    }
+
+    #[test]
+    fn test_identify_files_not_in_summary_no_summary() {
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path();
+
+        let root = markdown_src_dir_path.join("src");
+        fs::create_dir(&root).unwrap();
+
+        fs::write(root.join("page1.md"), "# Page 1").unwrap();
+
+        let result = identify_files_not_in_summary(&root);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("SUMMARY.md not found in"));
+    }
+
+    #[test]
+    fn test_identify_files_not_in_summary_nested_files() {
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path();
+
+        let root = markdown_src_dir_path.join("src");
+        fs::create_dir(&root).unwrap();
+
+        let sub_dir = root.join("sub");
+        fs::create_dir(&sub_dir).unwrap();
+
+        let summary_path = root.join("SUMMARY.md");
+        fs::write(&summary_path, "[Page 1](./page1.md)\n[Sub Page](sub/page2.md)").unwrap();
+
+        fs::write(root.join("page1.md"), "# Page 1").unwrap();
+        fs::write(sub_dir.join("page2.md"), "# Page 2").unwrap();
+        fs::write(sub_dir.join("page3.md"), "# Page 3").unwrap(); // missing
+
+        let missing = identify_files_not_in_summary(&root).unwrap();
+        assert_eq!(missing.len(), 1);
+        assert_eq!(missing[0].file_name().unwrap(), "page3.md");
+    }
+
+
+    #[test]
+    fn test_generate_categories_happy_path() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md1 = src_dir.join("1.md");
+        fs::write(
+            &md1,
+            "Here is [category one](https://crates.io/categories/cat1) and [another](https://crates.io/categories/cat2?sort=recent) and [trailing slash](https://crates.io/categories/cat3/).",
+        )?;
+
+        let md2 = src_dir.join("2.md");
+        fs::write(
+            &md2,
+            "Duplicate [cat1](https://crates.io/categories/cat1), and an unrelated [link](https://example.com).",
+        )?;
+
+        let dest_file = dir.path().join("categories.md");
+        generate_categories(&src_dir, &dest_file)?;
+
+        let content = fs::read_to_string(&dest_file)?;
+        let expected = "# Categories\n\n- [cat1](https://crates.io/categories/cat1)\n- [cat2](https://crates.io/categories/cat2)\n- [cat3](https://crates.io/categories/cat3)\n";
+        assert_eq!(content, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_generate_categories_invalid_dir() {
+        let dir = tempdir().unwrap();
+        let src_dir = dir.path().join("non_existent_src");
+        let dest_file = dir.path().join("categories.md");
+
+        let result = generate_categories(&src_dir, &dest_file);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_generate_categories_edge_cases() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md1 = src_dir.join("1.md");
+        fs::write(
+            &md1,
+            "Here is [empty 1](https://crates.io/categories) and [empty 2](https://crates.io/categories/).",
+        )?;
+
+        let dest_file = dir.path().join("categories.md");
+        generate_categories(&src_dir, &dest_file)?;
+
+        let content = fs::read_to_string(&dest_file)?;
+        let expected = "# Categories\n\n";
+        assert_eq!(content, expected);
+
+        Ok(())
+    }
 }
