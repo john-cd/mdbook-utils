@@ -552,6 +552,7 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 mod test {
     use super::*;
     use std::fs;
+
     use tempfile::tempdir;
 
     #[test]
@@ -629,8 +630,8 @@ mod test {
         let missing = identify_files_not_in_summary(&root).unwrap();
         assert_eq!(missing.len(), 1);
         assert_eq!(missing[0].file_name().unwrap(), "page3.md");
-    use tempfile::tempdir;
-    use std::fs;
+    }
+
 
     #[test]
     fn test_generate_categories_happy_path() -> Result<()> {
