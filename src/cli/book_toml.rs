@@ -104,7 +104,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
 
         if num_backends > 1 {
             if output.extra.contains_key("html") {
-                book_html_build_dir_path = book_build_dir_path.join("html");
+                book_html_build_dir_path = Some(book_build_dir_path.join("html"));
             }
             if output.extra.contains_key("markdown") {
                 book_markdown_build_dir_path = Some(book_build_dir_path.join("markdown"));
@@ -112,9 +112,13 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
         } else if num_backends == 1 {
             if output.extra.contains_key("markdown") {
                 book_markdown_build_dir_path = Some(book_build_dir_path.clone());
+            } else if output.extra.contains_key("html") {
+                book_html_build_dir_path = Some(book_build_dir_path.clone());
             }
-            // if it's only html, it's already book_build_dir_path
         }
+    } else {
+        // default mdbook behavior is just HTML
+        book_html_build_dir_path = Some(book_build_dir_path.clone());
     }
     debug!(
         "try_parse_book_toml: markdown_dir_path: {markdown_dir_path:?}; book_build_dir_path: {book_html_build_dir_path:?}; book_markdown_build_dir_path: {book_markdown_build_dir_path:?}",
@@ -210,7 +214,7 @@ build-dir = "my_book"
         )?;
 
         let (_, html, markdown) = try_parse_book_toml(dir.path())?;
-        assert_eq!(html, dir.path().join("book"));
+        assert_eq!(html, None);
         assert_eq!(markdown, None);
         Ok(())
     }
