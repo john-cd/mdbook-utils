@@ -1,19 +1,7 @@
-//! Rules to create a reference label and/or a badge URL
-//! from a link URL
-#![allow(clippy::vec_init_then_push)]
-
+use once_cell::sync::Lazy;
 use std::collections::HashMap;
 
-use once_cell::sync::Lazy;
-
-#[derive(Debug, Default)]
-pub(crate) struct Rule<'a> {
-    pub(crate) re: &'a str, // Regex pattern to match the url
-    #[allow(dead_code)]
-    pub(crate) label_pattern: &'a str, // regex replacement pattern
-    pub(crate) badge_url_pattern: &'a str, /* optional pattern to build a
-                             * badge link */
-}
+use super::structs::Rule;
 
 // TODO the Regexes need testing
 /// All rules that transform a URL to a label or badge URL.
@@ -317,7 +305,7 @@ mod test {
                         panic!("github pages rule failed to match {}", url);
                     }
                 }
-                _ => {}
+                _ => {} // Other rules don't have specific matching checks here yet
             }
         }
     }

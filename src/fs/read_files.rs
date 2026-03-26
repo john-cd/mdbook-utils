@@ -57,6 +57,7 @@ where
 ///     println!("{line}"");
 /// }
 #[allow(dead_code)]
+#[tracing::instrument(skip(file_path))]
 pub(crate) fn read_lines<P>(file_path: P) -> Result<Vec<Cow<'static, str>>>
 where
     P: AsRef<Path>,
