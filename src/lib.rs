@@ -521,6 +521,7 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     let mut used_rs_files = std::collections::HashSet::new();
     let md_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
 
+    // TODO review vs previous commit 
     let re = regex::Regex::new(r"(?P<path>[a-zA-Z0-9_.\-\/]+\.rs)")?;
 
     for md_file in md_files {
