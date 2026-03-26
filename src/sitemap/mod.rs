@@ -42,9 +42,14 @@ where
     });
 
     // Separate links from errors and print errors if any
-    let (links, errors): (Vec<Result<_, _>>, Vec<Result<_, _>>) = ls.partition(Result::is_ok);
-    let mut links: Vec<String> = links.into_iter().map(|r| r.unwrap().to_string()).collect();
-    let errors: Vec<Error> = errors.into_iter().map(|r| r.unwrap_err().into()).collect();
+    let mut links: Vec<String> = Vec::new();
+    let mut errors: Vec<Error> = Vec::new();
+    for r in ls {
+        match r {
+            Ok(url) => links.push(url.to_string()),
+            Err(e) => errors.push(e.into()),
+        }
+    }
     // debug: tracing::debug!("Links: {links:?}");
     if !errors.is_empty() {
         tracing::error!("Errors: {errors:?}");
