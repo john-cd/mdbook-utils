@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use clap::Args;
 
 /// Destination file
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub(crate) struct DestFileArgs {
     /// Path of the file to create
     #[arg(short = 'o', long = "output", value_name = "FILE", value_hint = clap::ValueHint::FilePath)]
@@ -22,7 +22,7 @@ pub(crate) struct DestDirArgs {
 }
 
 /// Markdown source directory
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub(crate) struct MarkdownDirArgs {
     /// Source directory containing the source Markdown files
     #[arg(short = 'm', long = "markdown-dir", value_name = "DIR", value_hint = clap::ValueHint::DirPath)]
