@@ -36,8 +36,14 @@ where
         let parent_dir = p.parent().unwrap().to_string_lossy();
         let buf = fs::read_to_string(p.as_path())?;
         if INSERT_REGEX.is_match(&buf) {
-            let mut new_txt = buf.clone();
+            let mut new_txt = String::with_capacity(buf.len());
+            let mut last_match = 0;
+            let mut modified = false;
+
             for cap in INSERT_REGEX.captures_iter(&buf) {
+                let m = cap.get(0).unwrap();
+                new_txt.push_str(&buf[last_match..m.start()]);
+
                 let rel_file_path = cap.name("filepath").unwrap().as_str();
                 // debug!("relative file path: {rel_file_path:?}");
                 if !rel_file_path.ends_with("refs.md") {
@@ -45,13 +51,18 @@ where
                     info!("Insert {path_file_to_insert:?}");
                     let contents_to_insert = fs::read_to_string(path_file_to_insert)?;
                     // debug!("\n{}", contents_to_insert);
-                    // debug!("{}", cap.get(0).unwrap().as_str());
-                    new_txt = new_txt.replace(cap.get(0).unwrap().as_str(), &contents_to_insert);
+                    // debug!("{}", m.as_str());
+                    new_txt.push_str(&contents_to_insert);
+                    modified = true;
                 } else {
                     info!("Ignored");
+                    new_txt.push_str(m.as_str());
                 }
+                last_match = m.end();
             }
-            if new_txt != buf {
+            new_txt.push_str(&buf[last_match..]);
+
+            if modified {
                 // debug!("{}",  new_txt);
                 File::create(p)?.write_all(new_txt.as_bytes())?;
             }
