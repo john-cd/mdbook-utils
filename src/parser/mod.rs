@@ -71,7 +71,7 @@ impl<'input> BrokenLinkCallback<'input> for Handler {
             "Issue with the markdown: reference: {}, type: {:?}",
             link.reference, link.link_type,
         );
-        self.broken_links.lock().unwrap().push((
+        self.broken_links.lock().unwrap_or_else(|e| e.into_inner()).push((
             link.reference.into_string(),
             "".into(), // We don't have the full input here anymore without 'input
             format!("{:?}", link.link_type),
