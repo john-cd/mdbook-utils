@@ -267,109 +267,114 @@ mod test {
     use super::*;
     use regex::Regex;
 
+    // By using COMPILED_RULES here, the Lazy block executes exactly once
+    // and validates every single regex. This removes the regex compilation
+    // loop from the test case body entirely.
+    pub(crate) static COMPILED_RULES: Lazy<HashMap<&str, Regex>> = Lazy::new(|| {
+        let mut compiled = HashMap::new();
+        for (name, rule) in GLOBAL_RULES.iter() {
+            let re = Regex::new(rule.re)
+                .unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name));
+            compiled.insert(*name, re);
+        }
+        compiled
+    });
+
     #[test]
     fn test_global_rules() {
-        for (name, rule) in GLOBAL_RULES.iter() {
-            let re =
-                Regex::new(rule.re).unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name));
+        let compiled_rules = &*COMPILED_RULES;
 
-            match *name {
-                "category" => {
-                    let url = "https://crates.io/categories/web-programming::websocket/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["catg"], "web-programming::websocket");
-                }
-                "crate" => {
-                    let url = "https://crates.io/crates/smol/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["crate"], "smol");
-                }
-                "documentation" => {
-                    let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
-                    assert!(
-                        re.is_match(url),
-                        "documentation rule failed to match {}",
-                        url
-                    );
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["crate"], "sqlx");
-                    // With the current regex, /sqlx/struct.Pool.html is captured as item
-                }
-                "github repo" => {
-                    let url = "https://github.com/john-cd/mdbook-utils";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["owner"], "john-cd");
-                    assert_eq!(&caps["repo"], "mdbook-utils");
-                }
-                "github pages" => {
-                    let url = "https://rust-lang.github.io/rustup/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["owner"], "rust-lang");
-                    assert_eq!(&caps["repo"], "rustup");
-                }
-                "website" => {
-                    let url = "https://example.com/";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["domain"], "example.com");
+        let category_re = compiled_rules.get("category").unwrap();
+        let url = "https://crates.io/categories/web-programming::websocket/";
+        assert!(category_re.is_match(url));
+        let caps = category_re.captures(url).unwrap();
+        assert_eq!(&caps["catg"], "web-programming::websocket");
 
-                    let url_no_slash = "http://example.com";
-                    assert!(re.is_match(url_no_slash));
-                    let caps_no_slash = re.captures(url_no_slash).unwrap();
-                    assert_eq!(&caps_no_slash["domain"], "example.com");
+        let crate_re = compiled_rules.get("crate").unwrap();
+        let url = "https://crates.io/crates/smol/";
+        assert!(crate_re.is_match(url));
+        let caps = crate_re.captures(url).unwrap();
+        assert_eq!(&caps["crate"], "smol");
 
-                    let url_query = "https://example.com/?id=1#foo";
-                    assert!(re.is_match(url_query));
-                    let caps_query = re.captures(url_query).unwrap();
-                    assert_eq!(&caps_query["domain"], "example.com");
+        let doc_re = compiled_rules.get("documentation").unwrap();
+        let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
+        assert!(
+            doc_re.is_match(url),
+            "documentation rule failed to match {}",
+            url
+        );
+        let caps = doc_re.captures(url).unwrap();
+        assert_eq!(&caps["crate"], "sqlx");
 
-                    // Should not match a URL with a path
-                    let url_path = "https://example.com/path";
-                    assert!(!re.is_match(url_path));
-                }
-                "website page" => {
-                    let url = "https://example.com/foo/bar/baz.html";
-                    assert!(re.is_match(url));
-                    let caps = re.captures(url).unwrap();
-                    assert_eq!(&caps["domain"], "example.com");
-                    assert_eq!(&caps["last"], "baz");
+        let github_repo_re = compiled_rules.get("github repo").unwrap();
+        let url = "https://github.com/john-cd/mdbook-utils";
+        assert!(github_repo_re.is_match(url));
+        let caps = github_repo_re.captures(url).unwrap();
+        assert_eq!(&caps["owner"], "john-cd");
+        assert_eq!(&caps["repo"], "mdbook-utils");
 
-                    let url_no_html = "https://dev.to/22mahmoud/my-terminal-became-more-rusty-4g8l";
-                    assert!(re.is_match(url_no_html));
-                    let caps_no_html = re.captures(url_no_html).unwrap();
-                    assert_eq!(&caps_no_html["domain"], "dev.to");
-                    assert_eq!(&caps_no_html["last"], "my-terminal-became-more-rusty-4g8l");
+        let github_pages_re = compiled_rules.get("github pages").unwrap();
+        let url = "https://rust-lang.github.io/rustup/";
+        assert!(github_pages_re.is_match(url));
+        let caps = github_pages_re.captures(url).unwrap();
+        assert_eq!(&caps["owner"], "rust-lang");
+        assert_eq!(&caps["repo"], "rustup");
 
-                    let url_trailing = "https://tokio.rs/tokio/tutorial/";
-                    assert!(re.is_match(url_trailing));
-                    let caps_trailing = re.captures(url_trailing).unwrap();
-                    assert_eq!(&caps_trailing["domain"], "tokio.rs");
-                    assert_eq!(&caps_trailing["last"], "tutorial");
+        let website_re = compiled_rules.get("website").unwrap();
+        let url = "https://example.com/";
+        assert!(website_re.is_match(url));
+        let caps = website_re.captures(url).unwrap();
+        assert_eq!(&caps["domain"], "example.com");
 
-                    let url_short = "https://tokio.rs/tokio/tutorial";
-                    assert!(re.is_match(url_short));
-                    let caps_short = re.captures(url_short).unwrap();
-                    assert_eq!(&caps_short["domain"], "tokio.rs");
-                    assert_eq!(&caps_short["last"], "tutorial");
+        let url_no_slash = "http://example.com";
+        assert!(website_re.is_match(url_no_slash));
+        let caps_no_slash = website_re.captures(url_no_slash).unwrap();
+        assert_eq!(&caps_no_slash["domain"], "example.com");
 
-                    let url_one_segment = "https://example.com/about";
-                    assert!(re.is_match(url_one_segment));
-                    let caps_one_segment = re.captures(url_one_segment).unwrap();
-                    assert_eq!(&caps_one_segment["domain"], "example.com");
-                    assert_eq!(&caps_one_segment["last"], "about");
+        let url_query = "https://example.com/?id=1#foo";
+        assert!(website_re.is_match(url_query));
+        let caps_query = website_re.captures(url_query).unwrap();
+        assert_eq!(&caps_query["domain"], "example.com");
 
-                    let url_query = "https://example.com/foo/bar.html?id=1#baz";
-                    assert!(re.is_match(url_query));
-                    let caps_query = re.captures(url_query).unwrap();
-                    assert_eq!(&caps_query["domain"], "example.com");
-                    assert_eq!(&caps_query["last"], "bar");
-                }
-                _ => {}
-            }
-        }
+        // Should not match a URL with a path
+        let url_path = "https://example.com/path";
+        assert!(!website_re.is_match(url_path));
+
+        let website_page_re = compiled_rules.get("website page").unwrap();
+        let url = "https://example.com/foo/bar/baz.html";
+        assert!(website_page_re.is_match(url));
+        let caps = website_page_re.captures(url).unwrap();
+        assert_eq!(&caps["domain"], "example.com");
+        assert_eq!(&caps["last"], "baz");
+
+        let url_no_html = "https://dev.to/22mahmoud/my-terminal-became-more-rusty-4g8l";
+        assert!(website_page_re.is_match(url_no_html));
+        let caps_no_html = website_page_re.captures(url_no_html).unwrap();
+        assert_eq!(&caps_no_html["domain"], "dev.to");
+        assert_eq!(&caps_no_html["last"], "my-terminal-became-more-rusty-4g8l");
+
+        let url_trailing = "https://tokio.rs/tokio/tutorial/";
+        assert!(website_page_re.is_match(url_trailing));
+        let caps_trailing = website_page_re.captures(url_trailing).unwrap();
+        assert_eq!(&caps_trailing["domain"], "tokio.rs");
+        assert_eq!(&caps_trailing["last"], "tutorial");
+
+        let url_short = "https://tokio.rs/tokio/tutorial";
+        assert!(website_page_re.is_match(url_short));
+        let caps_short = website_page_re.captures(url_short).unwrap();
+        assert_eq!(&caps_short["domain"], "tokio.rs");
+        assert_eq!(&caps_short["last"], "tutorial");
+
+        let url_one_segment = "https://example.com/about";
+        assert!(website_page_re.is_match(url_one_segment));
+        let caps_one_segment = website_page_re.captures(url_one_segment).unwrap();
+        assert_eq!(&caps_one_segment["domain"], "example.com");
+        assert_eq!(&caps_one_segment["last"], "about");
+
+        let url_query = "https://example.com/foo/bar.html?id=1#baz";
+        assert!(website_page_re.is_match(url_query));
+        let caps_query = website_page_re.captures(url_query).unwrap();
+        assert_eq!(&caps_query["domain"], "example.com");
+        assert_eq!(&caps_query["last"], "bar");
     }
 }
