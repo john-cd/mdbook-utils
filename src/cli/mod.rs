@@ -83,12 +83,13 @@ pub(crate) struct GlobalOpts {
     pub(crate) log: Option<String>,
 }
 
-// TODO write tests
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use clap::CommandFactory;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn verify_cli() {
+        Cli::command().debug_assert();
+    }
 }

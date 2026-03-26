@@ -13,14 +13,15 @@ use anyhow::anyhow;
 ///
 /// ```rust,ignore
 /// println!("Info: building the book...");
-/// let res = build_book(&root_path);
+/// let mdbook_path = std::path::PathBuf::from("mdbook");
+/// let res = build_book(&root_path, &mdbook_path);
 /// if let Err(ref e) = res {
 ///     println!("cargo:warning=ERROR: {e}");
 ///     return res;
 /// }
 /// ```
-pub(crate) fn build_book(root_path: &Path) -> Result<()> {
-    let output = Command::new("mdbook")
+pub(crate) fn build_book(root_path: &Path, mdbook_path: &Path) -> Result<()> {
+    let output = Command::new(mdbook_path)
         .args(["build"])
         .current_dir(root_path)
         .output()
@@ -41,24 +42,24 @@ pub(crate) fn build_book(root_path: &Path) -> Result<()> {
     Ok(())
 }
 
-// // Tell Cargo to rerun the build.rs script, if the .md files
-// change.
-// See also: https://crates.io/crates/cargo-emit
+// // Tell Cargo to rerun the build.rs script, if the .md files change.
+// // See also: https://crates.io/crates/cargo-emit
 // fn build_rs_helper() -> Result<()> {
 //     let root_path = std::fs::canonicalize("..")
-//          .context("[build_rs_helper] Failed to locate the root path on disk.
-// Does it exist?")?;     let original_markdown_dir_path =
-// root_path.join("src/");     let original_markdown_paths =
-// WalkDir::new(original_markdown_dir_path).into_iter()
-//         .map(|p| p.unwrap().path().to_string_lossy().into_owned())
-// // DirEntry to String         .filter(|p| p.ends_with(".md"))
+//         .context("[build_rs_helper] Failed to locate the root path on disk. Does it exist?")?;
+//     let original_markdown_dir_path = root_path.join("src/");
+//     let original_markdown_paths = WalkDir::new(original_markdown_dir_path)
+//         .into_iter()
+//         .filter_map(|e| e.ok())
+//         .map(|p| p.path().to_string_lossy().into_owned()) // DirEntry to String
+//         .filter(|p| p.ends_with(".md"))
 //         .collect::<Vec<_>>();
-
+//
 //     for path in original_markdown_paths {
 //         println!("cargo:rerun-if-changed={path}");
 //         // println!("cargo:warning=DEBUG:{path}");
 //     }
-
+//
 //     Ok(())
 // }
 
