@@ -12,7 +12,7 @@ use pulldown_cmark::html;
 ///
 /// parser: Markdown parser.
 #[allow(dead_code)]
-pub(crate) fn write_html_to_stdout<'a, I>(parser: I)
+pub(crate) fn write_html_to_stdout<'a, I>(parser: I) -> std::io::Result<()>
 where
     I: Iterator<Item = Event<'a>>,
 {
@@ -20,8 +20,9 @@ where
     // `Write` trait e.g., a file or network socket.
     let stdout = std::io::stdout();
     let mut handle = stdout.lock();
-    handle.write_all(b"\nHTML output:\n").unwrap();
-    html::write_html_io(&mut handle, parser).unwrap();
+    handle.write_all(b"\nHTML output:\n")?;
+    html::write_html_io(&mut handle, parser)?;
+    Ok(())
 }
 
 /// Read from a Markdown parser and write HTML to bytes.
