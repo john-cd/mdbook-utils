@@ -35,11 +35,13 @@ mod sitemap;
 pub mod test_markdown;
 mod write_from_parser;
 
+pub use fs::{identify_files_not_in_summary, identify_unused_rs_examples};
+pub use generate::{generate_categories, generate_crates};
+
 use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
-use std::path::PathBuf;
 
 use anyhow::Context;
 use anyhow::Result;
