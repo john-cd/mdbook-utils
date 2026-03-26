@@ -90,9 +90,11 @@ pub fn generate_crates<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std:
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_generate_categories_happy_path() -> Result<()> {

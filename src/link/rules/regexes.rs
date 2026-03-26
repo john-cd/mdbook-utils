@@ -2,10 +2,10 @@
 //! from a link URL
 #![allow(clippy::vec_init_then_push)]
 
-use regex::Regex;
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
+use regex::Regex;
 
 #[derive(Debug, Default)]
 pub(crate) struct Rule<'a> {
@@ -310,7 +310,8 @@ mod test {
                     let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
                     if let Some(caps) = re.captures(url) {
                         assert_eq!(&caps["crate"], "sqlx");
-                        // With the current regex, /sqlx/struct.Pool.html is captured as item
+                        // With the current regex, /sqlx/struct.Pool.html is
+                        // captured as item
                     } else {
                         panic!("documentation rule failed to match {}", url);
                     }

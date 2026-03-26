@@ -142,9 +142,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_extract_code_from_all_markdown_files_in() -> anyhow::Result<()> {
@@ -199,9 +201,11 @@ fn main() {}
 }
 #[cfg(test)]
 mod additional_tests {
-    use super::*;
     use std::fs;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_extract_and_remove_multiple() -> anyhow::Result<()> {

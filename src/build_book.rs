@@ -46,13 +46,13 @@ pub(crate) fn build_book(root_path: &Path, mdbook_path: &Path) -> Result<()> {
 // // See also: https://crates.io/crates/cargo-emit
 // fn build_rs_helper() -> Result<()> {
 //     let root_path = std::fs::canonicalize("..")
-//         .context("[build_rs_helper] Failed to locate the root path on disk. Does it exist?")?;
-//     let original_markdown_dir_path = root_path.join("src/");
-//     let original_markdown_paths = WalkDir::new(original_markdown_dir_path)
-//         .into_iter()
+//         .context("[build_rs_helper] Failed to locate the root path on disk.
+// Does it exist?")?;     let original_markdown_dir_path =
+// root_path.join("src/");     let original_markdown_paths =
+// WalkDir::new(original_markdown_dir_path)         .into_iter()
 //         .filter_map(|e| e.ok())
-//         .map(|p| p.path().to_string_lossy().into_owned()) // DirEntry to String
-//         .filter(|p| p.ends_with(".md"))
+//         .map(|p| p.path().to_string_lossy().into_owned()) // DirEntry to
+// String         .filter(|p| p.ends_with(".md"))
 //         .collect::<Vec<_>>();
 //
 //     for path in original_markdown_paths {

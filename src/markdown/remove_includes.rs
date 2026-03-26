@@ -67,9 +67,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_remove_includes_in_all_markdown_files_in() -> anyhow::Result<()> {

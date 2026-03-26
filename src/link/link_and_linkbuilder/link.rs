@@ -229,7 +229,8 @@ mod test {
     #[test]
     fn test_link_equality_and_hash() {
         use std::collections::hash_map::DefaultHasher;
-        use std::hash::{Hash, Hasher};
+        use std::hash::Hash;
+        use std::hash::Hasher;
 
         let link1 = LinkBuilder::from_type_url_title(
             LinkType::Shortcut,

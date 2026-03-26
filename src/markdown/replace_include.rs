@@ -4,7 +4,8 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-use anyhow::{Result, bail};
+use anyhow::Result;
+use anyhow::bail;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use tracing::info;
@@ -99,8 +100,9 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_include_in_all_markdown_files_in() -> Result<()> {

@@ -51,7 +51,8 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 debug!("{e:?}");
                 // We pop until we get the corresponding InLink?
                 // Wait, Start(Link) always pushes.
-                // End(Link) always pops. So they must be balanced if the parser works correctly.
+                // End(Link) always pops. So they must be balanced if the parser works
+                // correctly.
                 let (whr, link_builder) = state.pop().unwrap(); // Start and End events are balanced
                 assert_eq!(whr, Where::InLink);
                 links.push(link_builder.build());
@@ -134,8 +135,9 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use pulldown_cmark::Parser;
+
+    use super::*;
 
     #[test]
     fn test_extract_links_simple() {
@@ -182,8 +184,7 @@ mod test {
         assert_eq!(link.get_url(), "link_url");
         assert_eq!(link.to_link_with_badge(), "[![badge alt][badge alt]][]");
     }
-  
-  
+
     #[test]
     fn test_extract_links_complex() {
         let markdown = "[`code`](url) [![`image_code`](img_url)](url) [[link_in_link](url2)](url) [![[link_in_img](url2)](img_url)](url) [foo **bold**](url)";

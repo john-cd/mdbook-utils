@@ -36,16 +36,16 @@ mod sitemap;
 pub mod test_markdown;
 mod write_from_parser;
 
-pub use fs::{identify_files_not_in_summary, identify_unused_rs_examples};
-pub use generate::{generate_categories, generate_crates};
-
-pub use api::*;
-
 use std::fs::File;
+use std::io::BufWriter;
+use std::io::Write;
 use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::bail;
+use pulldown_cmark::LinkType;
 use pulldown_cmark::Parser;
 
 /// Helper function:
@@ -102,7 +102,8 @@ where
     Ok(())
 }
 
-/// Test function that uses fake Markdown and writes events to `./book/temp/test.log`.
+/// Test function that uses fake Markdown and writes events to
+/// `./book/temp/test.log`.
 pub fn test() -> Result<()> {
     fs::create_dir("./book/temp/")?;
 
@@ -562,10 +563,12 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
     use std::io::Write;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_generate_categories() -> Result<()> {
@@ -577,8 +580,14 @@ mod test {
         let mut md_file = File::create(&md_file_path)?;
         writeln!(md_file, "This is a test file.")?;
         writeln!(md_file, "[parsing](https://crates.io/categories/parsing)")?;
-        writeln!(md_file, "Another category: [development-tools](https://crates.io/categories/development-tools/)")?;
-        writeln!(md_file, "Duplicate category: [parsing](https://crates.io/categories/parsing?sort=recent-updates)")?;
+        writeln!(
+            md_file,
+            "Another category: [development-tools](https://crates.io/categories/development-tools/)"
+        )?;
+        writeln!(
+            md_file,
+            "Duplicate category: [parsing](https://crates.io/categories/parsing?sort=recent-updates)"
+        )?;
         writeln!(md_file, "A crate: [serde](https://crates.io/crates/serde)")?;
 
         let dest_file_path = temp_dir.path().join("categories.md");
@@ -588,15 +597,24 @@ mod test {
         let content = fs::read_to_string(&dest_file_path)?;
 
         assert!(content.contains("# Categories"));
-        assert!(content.contains("- [development-tools](https://crates.io/categories/development-tools)"));
+        assert!(
+            content
+                .contains("- [development-tools](https://crates.io/categories/development-tools)")
+        );
         assert!(content.contains("- [parsing](https://crates.io/categories/parsing)"));
         assert!(!content.contains("- [serde]"));
 
         // Ensure they are sorted and deduplicated
         let lines: Vec<&str> = content.lines().filter(|l| l.starts_with("-")).collect();
         assert_eq!(lines.len(), 2);
-        assert_eq!(lines[0], "- [development-tools](https://crates.io/categories/development-tools)");
-        assert_eq!(lines[1], "- [parsing](https://crates.io/categories/parsing)");
+        assert_eq!(
+            lines[0],
+            "- [development-tools](https://crates.io/categories/development-tools)"
+        );
+        assert_eq!(
+            lines[1],
+            "- [parsing](https://crates.io/categories/parsing)"
+        );
 
         Ok(())
     }
@@ -611,9 +629,18 @@ mod test {
         let mut md_file = File::create(&md_file_path)?;
         writeln!(md_file, "This is a test file.")?;
         writeln!(md_file, "[serde](https://crates.io/crates/serde)")?;
-        writeln!(md_file, "Another crate: [anyhow](https://crates.io/crates/anyhow)")?;
-        writeln!(md_file, "Duplicate crate: [serde](https://crates.io/crates/serde)")?;
-        writeln!(md_file, "A category: [parsing](https://crates.io/categories/parsing)")?;
+        writeln!(
+            md_file,
+            "Another crate: [anyhow](https://crates.io/crates/anyhow)"
+        )?;
+        writeln!(
+            md_file,
+            "Duplicate crate: [serde](https://crates.io/crates/serde)"
+        )?;
+        writeln!(
+            md_file,
+            "A category: [parsing](https://crates.io/categories/parsing)"
+        )?;
 
         let dest_file_path = temp_dir.path().join("crates.md");
 
@@ -693,7 +720,11 @@ mod test {
         fs::write(root.join("page2.md"), "# Page 2").unwrap();
 
         let missing = identify_files_not_in_summary(&root).unwrap();
-        assert!(missing.is_empty(), "Expected no missing files, but got {:?}", missing);
+        assert!(
+            missing.is_empty(),
+            "Expected no missing files, but got {:?}",
+            missing
+        );
     }
 
     #[test]
@@ -729,7 +760,12 @@ mod test {
 
         let result = identify_files_not_in_summary(&root);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("SUMMARY.md not found in"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("SUMMARY.md not found in")
+        );
     }
 
     #[test]
@@ -744,7 +780,11 @@ mod test {
         fs::create_dir(&sub_dir).unwrap();
 
         let summary_path = root.join("SUMMARY.md");
-        fs::write(&summary_path, "[Page 1](./page1.md)\n[Sub Page](sub/page2.md)").unwrap();
+        fs::write(
+            &summary_path,
+            "[Page 1](./page1.md)\n[Sub Page](sub/page2.md)",
+        )
+        .unwrap();
 
         fs::write(root.join("page1.md"), "# Page 1").unwrap();
         fs::write(sub_dir.join("page2.md"), "# Page 2").unwrap();
@@ -754,7 +794,6 @@ mod test {
         assert_eq!(missing.len(), 1);
         assert_eq!(missing[0].file_name().unwrap(), "page3.md");
     }
-
 
     #[test]
     fn test_generate_categories_happy_path() -> Result<()> {

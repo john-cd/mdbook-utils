@@ -4,7 +4,9 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::{Context, Result, bail};
+use anyhow::Context;
+use anyhow::Result;
+use anyhow::bail;
 
 use crate::fs;
 use crate::parser;
@@ -107,9 +109,11 @@ pub fn identify_unused_rs_examples<
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_identify_files_not_in_summary_all_included() -> Result<()> {

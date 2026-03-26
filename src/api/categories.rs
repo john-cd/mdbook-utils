@@ -50,9 +50,11 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_generate_categories_happy_path() -> Result<()> {
