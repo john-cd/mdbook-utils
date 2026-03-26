@@ -14,7 +14,8 @@ pub(crate) enum RefDefsSubCommand {
     Write(MarkdownSrcDirAndDestFileArgs),
 
     /// Generate reference definitions
-    /// (e.g. badges for Github links or from the dependencies of the code examples)
+    /// (e.g. badges for Github links or from the dependencies of the code
+    /// examples)
     #[command(name = "generate")]
     Generate(GenerateArgs),
 }
@@ -26,7 +27,8 @@ pub(crate) struct GenerateArgs {
     #[arg(long)]
     pub(crate) badges: bool,
 
-    /// Generate reference definitions from the dependencies of the code examples
+    /// Generate reference definitions from the dependencies of the code
+    /// examples
     #[arg(long = "from-dependencies")]
     pub(crate) from_dependencies: bool,
 
@@ -60,8 +62,8 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             }
 
             if run_badges {
-                // If we also run dependencies, the output paths might clash if not explicitly set.
-                // We'll use "badge_refs.md" as the default name.
+                // If we also run dependencies, the output paths might clash if not explicitly
+                // set. We'll use "badge_refs.md" as the default name.
                 let markdown_src_dir_path =
                     config.markdown_src_dir_path(args.args.src.clone(), "./src/")?;
                 let refdef_dest_path =

@@ -23,6 +23,10 @@ static INSERT_REGEX: Lazy<Regex> =
 ///
 /// markdown_src_dir_path: path to the source directory containing the
 /// Markdown files.
+use anyhow::Context;
+
+/// Process files and replace include macros
+#[tracing::instrument(skip(markdown_src_dir_path))]
 pub fn include_in_all_markdown_files_in<P>(markdown_src_dir_path: P) -> Result<()>
 where
     P: AsRef<Path>,
@@ -35,7 +39,10 @@ where
     // Process each .md file
     for p in paths {
         info!("Looking into {p:?}");
-        let parent_dir = p.parent().unwrap().to_string_lossy();
+        let parent_dir = p
+            .parent()
+            .context("Expected parent directory")?
+            .to_string_lossy();
         let buf = fs::read_to_string(p.as_path())?;
         if INSERT_REGEX.is_match(&buf) {
             let mut new_txt = String::with_capacity(buf.len());
@@ -46,7 +53,10 @@ where
                 let m = cap.get(0).unwrap();
                 new_txt.push_str(&buf[last_match..m.start()]);
 
-                let rel_file_path = cap.name("filepath").unwrap().as_str();
+                let rel_file_path = cap
+                    .name("filepath")
+                    .context("Missing filepath capture")?
+                    .as_str();
                 if !rel_file_path.ends_with("refs.md") {
                     let path_file_to_insert = Path::new(parent_dir.as_ref()).join(rel_file_path);
                     let canonicalized_insert = path_file_to_insert.canonicalize()?;

@@ -22,6 +22,7 @@
 // #![doc(html_favicon_url = "https://example.com/favicon.ico")]
 // #![doc(html_logo_url = "https://example.com/logo.jpg")]
 
+pub mod api;
 mod build_book;
 mod dependencies;
 mod fs;
@@ -38,15 +39,13 @@ mod write_from_parser;
 pub use fs::{identify_files_not_in_summary, identify_unused_rs_examples};
 pub use generate::{generate_categories, generate_crates};
 
+pub use api::*;
+
 use std::fs::File;
-use std::io::BufWriter;
-use std::io::Write;
 use std::path::Path;
 
 use anyhow::Context;
 use anyhow::Result;
-use anyhow::bail;
-use pulldown_cmark::LinkType;
 use pulldown_cmark::Parser;
 
 /// Helper function:
@@ -444,6 +443,8 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {
+    use std::io::Write;
+
     fs::create_parent_dir_for(dest_file_path.as_ref())?;
     let mut f = File::create(dest_file_path).context("Failed to create crates file.")?;
     writeln!(f, "# Crates\n")?;
@@ -535,7 +536,7 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     let mut used_rs_files = std::collections::HashSet::new();
     let md_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
 
-    // TODO review vs previous commit 
+    // TODO review vs previous commit
     let re = regex::Regex::new(r"(?P<path>[a-zA-Z0-9_.\-\/]+\.rs)")?;
 
     for md_file in md_files {
@@ -630,6 +631,9 @@ mod test {
         assert_eq!(lines.len(), 2);
         assert_eq!(lines[0], "- [anyhow](https://crates.io/crates/anyhow)");
         assert_eq!(lines[1], "- [serde](https://crates.io/crates/serde)");
+    }
+
+    #[test]
     fn test_identify_unused_rs_examples() {
         let dir = tempdir().unwrap();
         let markdown_dir = dir.path().join("markdown");
