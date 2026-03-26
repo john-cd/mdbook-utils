@@ -54,11 +54,8 @@ where
         info!("Looking into {p:?}");
         let buf = fs::read_to_string(p.as_path())?;
         if REGEX.is_match(&buf) {
-            let mut new_txt = buf.clone();
-            for cap in REGEX.captures_iter(&buf) {
-                new_txt = new_txt.replace(cap.get(0).unwrap().as_str(), contents_to_insert);
-            }
-            if new_txt != buf {
+            let new_txt = REGEX.replace_all(&buf, regex::NoExpand(contents_to_insert));
+            if let std::borrow::Cow::Owned(new_txt) = new_txt {
                 // tracing::debug!("modified: {}", p.display());
                 File::create(p.clone())?.write_all(new_txt.as_bytes())?;
                 modified.push(p);
