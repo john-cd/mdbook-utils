@@ -287,13 +287,6 @@ impl Configuration {
     pub(crate) fn skip_confirm(&self) -> bool {
         self.global_opts.yes
     }
-
-    /// Returns the path to the `mdbook` binary, as provided by the
-    /// MDBOOK_PATH environment variable (if set), otherwise defaults to
-    /// "mdbook".
-    pub(crate) fn mdbook_path(&self) -> PathBuf {
-        self.mdbook_path.clone().unwrap_or_else(|| PathBuf::from("mdbook"))
-    }
 }
 
 #[cfg(test)]

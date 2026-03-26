@@ -57,9 +57,18 @@ mod test {
 
         assert_eq!(merged.len(), 3);
         // Sorted by label: label1, label2, label3
-        assert_eq!(merged[0].to_reference_definition(), "[label1]: url1 \"title1\"");
-        assert_eq!(merged[1].to_reference_definition(), "[label2]: url2 \"title2\"");
-        assert_eq!(merged[2].to_reference_definition(), "[label3]: url3 \"title3\"");
+        assert_eq!(
+            merged[0].to_reference_definition(),
+            "[label1]: url1 \"title1\""
+        );
+        assert_eq!(
+            merged[1].to_reference_definition(),
+            "[label2]: url2 \"title2\""
+        );
+        assert_eq!(
+            merged[2].to_reference_definition(),
+            "[label3]: url3 \"title3\""
+        );
     }
 
     #[test]

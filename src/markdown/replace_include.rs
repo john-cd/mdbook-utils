@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use tracing::info;
@@ -51,17 +51,21 @@ where
                     let path_file_to_insert = Path::new(parent_dir.as_ref()).join(rel_file_path);
                     let canonicalized_insert = path_file_to_insert.canonicalize()?;
                     if !canonicalized_insert.starts_with(&base_dir) {
-                        bail!("Path traversal detected: attempt to include file outside base directory");
+                        bail!(
+                            "Path traversal detected: attempt to include file outside base directory"
+                        );
                     }
                     info!("Insert {path_file_to_insert:?}");
-                    let contents_to_insert =
-                        match crate::fs::is_path_within(markdown_src_dir_path.as_ref(), &path_file_to_insert) {
-                            Ok(p) => fs::read_to_string(p)?,
-                            Err(e) => {
-                                tracing::error!("{e}");
-                                continue;
-                            }
-                        };
+                    let contents_to_insert = match crate::fs::is_path_within(
+                        markdown_src_dir_path.as_ref(),
+                        &path_file_to_insert,
+                    ) {
+                        Ok(p) => fs::read_to_string(p)?,
+                        Err(e) => {
+                            tracing::error!("{e}");
+                            continue;
+                        }
+                    };
                     // debug!("\n{}", contents_to_insert);
                     // debug!("{}", m.as_str());
                     new_txt.push_str(&contents_to_insert);

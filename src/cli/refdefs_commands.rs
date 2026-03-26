@@ -62,8 +62,10 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             if run_badges {
                 // If we also run dependencies, the output paths might clash if not explicitly set.
                 // We'll use "badge_refs.md" as the default name.
-                let markdown_src_dir_path = config.markdown_src_dir_path(args.args.src.clone(), "./src/")?;
-                let refdef_dest_path = config.dest_file_path(args.args.dest.clone(), "badge_refs.md");
+                let markdown_src_dir_path =
+                    config.markdown_src_dir_path(args.args.src.clone(), "./src/")?;
+                let refdef_dest_path =
+                    config.dest_file_path(args.args.dest.clone(), "badge_refs.md");
                 println!(
                     "Parsing markdown files in {} and writing new (github badge) reference definitions to {}...",
                     style(markdown_src_dir_path.display()).cyan(),
@@ -75,9 +77,11 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             }
 
             if run_deps {
-                let markdown_src_dir_path = config.markdown_src_dir_path(args.args.src, "./src/")?;
+                let markdown_src_dir_path =
+                    config.markdown_src_dir_path(args.args.src, "./src/")?;
                 let cargo_toml_dir_path = config.cargo_toml_dir_path(args.args.manifest)?;
-                let refdef_dest_file_path = config.dest_file_path(args.args.dest, "dependencies_refs.md");
+                let refdef_dest_file_path =
+                    config.dest_file_path(args.args.dest, "dependencies_refs.md");
                 println!(
                     "Creating reference definitions in {} from the manifest in {} and Markdown sources in {}...",
                     style(refdef_dest_file_path.display()).cyan(),

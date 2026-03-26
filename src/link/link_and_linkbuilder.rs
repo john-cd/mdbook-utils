@@ -408,9 +408,13 @@ mod test {
         .build();
         assert_eq!(link.to_reference_definition(), "[label]: url \"title\"");
 
-        let link_no_title =
-            LinkBuilder::from_type_url_title(LinkType::Shortcut, "url".into(), "".into(), "label".into())
-                .build();
+        let link_no_title = LinkBuilder::from_type_url_title(
+            LinkType::Shortcut,
+            "url".into(),
+            "".into(),
+            "label".into(),
+        )
+        .build();
         assert_eq!(link_no_title.to_reference_definition(), "[label]: url");
     }
 }
