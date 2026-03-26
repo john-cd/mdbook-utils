@@ -93,10 +93,10 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     let mut book_html_build_dir_path = None;
     let mut book_markdown_build_dir_path = None;
 
-    // mdBook places its output directly in the book directory if there is only one backend.
-    // If there is more than one backend, then each backend is placed in a separate directory
-    // underneath `build-dir` (e.g., `book/html` and `book/markdown`).
-    // https://rust-lang.github.io/mdBook/format/configuration/renderers.html
+    // mdBook places its output directly in the book directory if there is only one
+    // backend. If there is more than one backend, then each backend is placed
+    // in a separate directory underneath `build-dir` (e.g., `book/html` and
+    // `book/markdown`). https://rust-lang.github.io/mdBook/format/configuration/renderers.html
     debug!("{:?}", book_toml.output);
 
     if let Some(output) = book_toml.output {
@@ -133,9 +133,11 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::fs;
+
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_try_parse_book_toml_default() -> Result<()> {

@@ -1,104 +1,31 @@
-//! Internal models for a Markdown [Link] and [LinkBuilder]
 use std::borrow::Cow;
 use std::cmp::Ordering;
+use std::hash::Hash;
+use std::hash::Hasher;
 
 use heck::ToKebabCase;
 use pulldown_cmark::LinkType;
 
-/// Link builder that progressively construct a [Link]
-/// from pieces of information
-#[derive(Debug, Default)]
-pub(crate) struct LinkBuilder<'a> {
-    link: Link<'a>,
-}
+/// `Link` is a structure that collects all necessary information to
+/// write Markdown (inline or reference-style) links and reference
+/// definitions, including badges.
+#[derive(Debug, Default, Clone)]
+pub(crate) struct Link<'a> {
+    pub(crate) link_type: Option<LinkType>,
+    pub(crate) text: Option<Cow<'a, str>>,  // [text](...)
+    pub(crate) label: Option<Cow<'a, str>>, // [...][label] and [label]: ...
+    pub(crate) url: Option<Cow<'a, str>>,   // [...]: url or [...](url) or <url>
+    // parsed_url: Option<Url>, Url::parse( )?
+    pub(crate) title: Option<Cow<'a, str>>, // [...]: url "title" or [...](url "title")
 
-impl<'a> LinkBuilder<'a> {
-    pub(crate) fn from_type_url_title(
-        link_type: LinkType,
-        url: Cow<'a, str>,
-        title: Cow<'a, str>,
-        label: Cow<'a, str>,
-    ) -> Self {
-        Self {
-            link: Link {
-                link_type: Some(link_type),
-                url: if !url.is_empty() { Some(url) } else { None },
-                title: if !title.is_empty() { Some(title) } else { None },
-                label: if !label.is_empty() { Some(label) } else { None },
-                ..Link::default()
-            },
-        }
-    }
-
-    pub(crate) fn set_url(mut self, url: Cow<'a, str>) -> Self {
-        if !url.is_empty() {
-            self.link.url = Some(url);
-        }
-        self
-    }
-
-    pub(crate) fn add_text(mut self, text: Cow<'a, str>) -> Self {
-        if !text.is_empty() {
-            self.link.text = Some(format!("{}{text}", self.link.text.unwrap_or_default()).into());
-        }
-        self
-    }
-
-    pub(crate) fn set_label(mut self, label: Cow<'a, str>) -> Self {
-        if !label.is_empty() {
-            self.link.label = Some(label);
-        }
-        self
-    }
-
-    pub(crate) fn set_image(
-        self,
-        image_link_type: LinkType,
-        image_url: Cow<'a, str>,
-        image_title: Cow<'a, str>,
-        image_label: Cow<'a, str>,
-    ) -> Self {
-        Self {
-            link: Link {
-                image_link_type: Some(image_link_type),
-                image_url: if !image_url.is_empty() {
-                    Some(image_url)
-                } else {
-                    self.link.image_url
-                },
-                image_title: if !image_title.is_empty() {
-                    Some(image_title)
-                } else {
-                    self.link.image_title
-                },
-                image_label: if !image_label.is_empty() {
-                    Some(image_label)
-                } else {
-                    self.link.image_label
-                },
-                ..self.link
-            },
-        }
-    }
-
-    pub(crate) fn set_image_url(mut self, image_url: Cow<'a, str>) -> Self {
-        if !image_url.is_empty() {
-            self.link.image_url = Some(image_url);
-        }
-        self
-    }
-
-    pub(crate) fn add_image_alt_text(mut self, image_alt_text: Cow<'a, str>) -> Self {
-        if !image_alt_text.is_empty() {
-            self.link.image_alt_text =
-                Some(self.link.image_alt_text.unwrap_or_default() + image_alt_text)
-        }
-        self
-    }
-
-    pub(crate) fn build(self) -> Link<'a> {
-        self.link
-    }
+    // [![image_alt_text][image_label]][...]
+    // [image_label]: image_url "image_title"
+    #[allow(dead_code)]
+    pub(crate) image_link_type: Option<LinkType>,
+    pub(crate) image_alt_text: Option<Cow<'a, str>>,
+    pub(crate) image_label: Option<Cow<'a, str>>,
+    pub(crate) image_url: Option<Cow<'a, str>>,
+    pub(crate) image_title: Option<Cow<'a, str>>,
 }
 
 impl<'a> Link<'a> {
@@ -119,36 +46,7 @@ impl<'a> Link<'a> {
             image_title: self.image_title.as_ref().map(|c| Cow::Owned(c.to_string())),
         }
     }
-}
 
-// LINK -----------------------------
-
-use std::hash::Hash;
-use std::hash::Hasher;
-
-/// `Link` is a structure that collects all necessary information to
-/// write Markdown (inline or reference-style) links and reference
-/// definitions, including badges.
-#[derive(Debug, Default, Clone)]
-pub(crate) struct Link<'a> {
-    link_type: Option<LinkType>,
-    text: Option<Cow<'a, str>>,  // [text](...)
-    label: Option<Cow<'a, str>>, // [...][label] and [label]: ...
-    url: Option<Cow<'a, str>>,   // [...]: url or [...](url) or <url>
-    // parsed_url: Option<Url>, Url::parse( )?
-    title: Option<Cow<'a, str>>, // [...]: url "title" or [...](url "title")
-
-    // [![image_alt_text][image_label]][...]
-    // [image_label]: image_url "image_title"
-    #[allow(dead_code)]
-    image_link_type: Option<LinkType>,
-    image_alt_text: Option<Cow<'a, str>>,
-    image_label: Option<Cow<'a, str>>,
-    image_url: Option<Cow<'a, str>>,
-    image_title: Option<Cow<'a, str>>,
-}
-
-impl<'a> Link<'a> {
     // Methods that write Markdown directly
 
     /// Returns the link type

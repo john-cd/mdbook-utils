@@ -85,8 +85,9 @@ pub(crate) struct GlobalOpts {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use clap::CommandFactory;
+
+    use super::*;
 
     #[test]
     fn verify_cli() {
