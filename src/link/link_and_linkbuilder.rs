@@ -157,53 +157,55 @@ impl<'a> Link<'a> {
     }
 
     /// Return the link's text
-    fn get_text(&self) -> Cow<'a, str> {
-        self.text.clone().unwrap_or(Cow::from(""))
+    fn get_text(&self) -> Cow<'_, str> {
+        self.text
+            .as_deref()
+            .map(Cow::Borrowed)
+            .unwrap_or(Cow::Borrowed(""))
     }
 
     /// Returns the link's url
-    pub(crate) fn get_url(&self) -> Cow<'a, str> {
-        if let Some(u) = &self.url {
-            u.clone()
-        } else {
-            Cow::from(String::new())
-        }
+    pub(crate) fn get_url(&self) -> Cow<'_, str> {
+        self.url
+            .as_deref()
+            .map(Cow::Borrowed)
+            .unwrap_or(Cow::Borrowed(""))
     }
 
     /// Returns the link's url (and title if present)
-    fn get_url_and_title(&self) -> Cow<'a, str> {
+    fn get_url_and_title(&self) -> Cow<'_, str> {
         if let Some(u) = &self.url {
             if let Some(t) = &self.title {
                 format!("{u} \"{t}\"").into()
             } else {
-                u.clone()
+                Cow::Borrowed(u.as_ref())
             }
         } else {
-            Cow::from(String::new())
+            Cow::Borrowed("")
         }
     }
 
     /// Returns the link's reference label, if it exists, or the
     /// kebab-cased link's text
-    fn get_label(&self) -> Cow<'a, str> {
+    fn get_label(&self) -> Cow<'_, str> {
         if let Some(label) = &self.label {
-            label.clone()
+            Cow::Borrowed(label.as_ref())
         } else if let Some(txt) = &self.text {
             txt.to_kebab_case().into()
         } else {
-            "".into()
+            Cow::Borrowed("")
         }
     }
 
     /// Return a Markdown inline link:
     /// [text](url) or [text](url "title")
-    pub(crate) fn to_inline_link(&self) -> Cow<'a, str> {
+    pub(crate) fn to_inline_link(&self) -> Cow<'_, str> {
         format!("[{}]( {} )", self.get_text(), self.get_url_and_title()).into()
     }
 
     /// Return a reference-style Markdown link:
     /// \[text\]\[label\] or \[text/label\]
-    pub(crate) fn to_reference_link(&self) -> Cow<'a, str> {
+    pub(crate) fn to_reference_link(&self) -> Cow<'_, str> {
         let txt: String = self.get_text().into();
         let label: String = self.get_label().into();
         if txt == label {
@@ -215,7 +217,7 @@ impl<'a> Link<'a> {
 
     /// Return a Markdown reference definition:
     /// \[label\]: url or \[label\]: url "title"
-    pub(crate) fn to_reference_definition(&self) -> Cow<'a, str> {
+    pub(crate) fn to_reference_definition(&self) -> Cow<'_, str> {
         format!("[{}]: {}", self.get_label(), self.get_url_and_title()).into()
     }
 
