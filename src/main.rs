@@ -5,6 +5,7 @@ use anyhow::Context;
 use anyhow::Result;
 use console::style;
 use tracing::debug;
+use tracing_subscriber::EnvFilter;
 
 use crate::cli::Cli;
 use crate::cli::Command;
@@ -31,19 +32,15 @@ fn main() -> Result<()> {
         global_opts,
     } = cli::parse_arguments();
 
-    // Set RUST_LOG, if not present, and initialize logging
-    if let Some(ref log_level) = global_opts.log {
-        // SAFETY: This is called at the beginning of the program,
-        // although after some initializations.
-        unsafe {
-            env::set_var("RUST_LOG", log_level);
-        }
-    } else if env::var("RUST_LOG").is_err() {
-        unsafe {
-            env::set_var("RUST_LOG", "info");
-        }
-    }
-    tracing_subscriber::fmt::init();
+    // Set log level and initialize logging
+    let env_filter = if let Some(ref log_level) = global_opts.log {
+        EnvFilter::new(log_level)
+    } else if let Ok(env_log) = env::var("RUST_LOG") {
+        EnvFilter::new(env_log)
+    } else {
+        EnvFilter::new("info")
+    };
+    tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
     // Retrieves default configuration (from `book.toml`, env. vars,
     // or hard-coded defaults); also stores global_opts.
