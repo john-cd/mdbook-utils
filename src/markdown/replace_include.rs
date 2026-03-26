@@ -49,7 +49,14 @@ where
                 if !rel_file_path.ends_with("refs.md") {
                     let path_file_to_insert = Path::new(parent_dir.as_ref()).join(rel_file_path);
                     info!("Insert {path_file_to_insert:?}");
-                    let contents_to_insert = fs::read_to_string(path_file_to_insert)?;
+                    let contents_to_insert =
+                        match crate::fs::is_path_within(markdown_src_dir_path.as_ref(), &path_file_to_insert) {
+                            Ok(p) => fs::read_to_string(p)?,
+                            Err(e) => {
+                                tracing::error!("{e}");
+                                continue;
+                            }
+                        };
                     // debug!("\n{}", contents_to_insert);
                     // debug!("{}", m.as_str());
                     new_txt.push_str(&contents_to_insert);
