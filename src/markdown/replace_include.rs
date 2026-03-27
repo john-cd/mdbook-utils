@@ -60,11 +60,18 @@ where
                     .as_str();
                 if !rel_file_path.ends_with("refs.md") {
                     let path_file_to_insert = Path::new(parent_dir.as_ref()).join(rel_file_path);
-                    let canonicalized_insert = path_file_to_insert.canonicalize()?;
+                    let canonicalized_insert = match path_file_to_insert.canonicalize() {
+                        Ok(p) => p,
+                        Err(e) => {
+                            tracing::error!("Failed to canonicalize {:?}: {}", path_file_to_insert, e);
+                            continue;
+                        }
+                    };
                     if !canonicalized_insert.starts_with(&base_dir) {
-                        bail!(
+                        tracing::error!(
                             "Path traversal detected: attempt to include file outside base directory"
                         );
+                        continue;
                     }
                     info!("Insert {path_file_to_insert:?}");
                     let contents_to_insert = match crate::fs::is_path_within(
