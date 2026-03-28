@@ -71,14 +71,15 @@ impl<'input> BrokenLinkCallback<'input> for Handler {
             "Issue with the markdown: reference: {}, type: {:?}",
             link.reference, link.link_type,
         );
-        self.broken_links
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .push((
+        if let Ok(mut links) = self.broken_links.lock() {
+            links.push((
                 link.reference.into_string(),
                 "".into(), // We don't have the full input here anymore without 'input
                 format!("{:?}", link.link_type),
             ));
+        } else {
+            tracing::warn!("Failed to lock broken_links");
+        }
         None
     }
 }
