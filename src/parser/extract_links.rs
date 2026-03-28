@@ -53,9 +53,15 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 // Wait, Start(Link) always pushes.
                 // End(Link) always pops. So they must be balanced if the parser works
                 // correctly.
-                let (whr, link_builder) = state.pop().unwrap(); // Start and End events are balanced
-                assert_eq!(whr, Where::InLink);
-                links.push(link_builder.build());
+                if let Some((whr, link_builder)) = state.pop() {
+                    if whr == Where::InLink {
+                        links.push(link_builder.build());
+                    } else {
+                        tracing::warn!("Expected InLink state, found {:?}", whr);
+                    }
+                } else {
+                    tracing::warn!("Unbalanced Link End tag");
+                }
             }
 
             // Inspect events while in the link
@@ -68,44 +74,63 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 debug!(
                     "image: link type: {link_type:?}, image url: {dest_url}, image title: {title}, label: {id}",
                 );
-                let (whr, link_builder) = state.pop().unwrap();
-                assert_eq!(whr, Where::InLink);
-                state.push((
-                    Where::InImageInLink,
-                    link_builder.set_image(link_type, dest_url.into(), title.into(), id.into()),
-                ));
+                let (whr, link_builder) = state.pop().unwrap(); // state is not empty
+                if whr == Where::InLink {
+                    state.push((
+                        Where::InImageInLink,
+                        link_builder.set_image(link_type, dest_url.into(), title.into(), id.into()),
+                    ));
+                } else {
+                    tracing::warn!("Expected InLink state, found {:?}", whr);
+                    state.push((whr, link_builder)); // restore state
+                }
             }
 
             ref e @ Event::End(TagEnd::Image) if !state.is_empty() => {
                 debug!("{e:?}");
-                let (whr, link_builder) = state.pop().unwrap();
-                assert_eq!(whr, Where::InImageInLink);
-                state.push((Where::InLink, link_builder));
+                let (whr, link_builder) = state.pop().unwrap(); // state is not empty
+                if whr == Where::InImageInLink {
+                    state.push((Where::InLink, link_builder));
+                } else {
+                    tracing::warn!("Expected InImageInLink state, found {:?}", whr);
+                    state.push((whr, link_builder)); // restore state
+                }
             }
             // Text of an Image
             Event::Text(t)
                 if state.last().map_or(Where::Elsewhere, |s| s.0) == Where::InImageInLink =>
             {
                 debug!("Event::Text({t:?})");
-                let (whr, link_builder) = state.pop().unwrap();
-                assert_eq!(whr, Where::InImageInLink);
-                state.push((whr, link_builder.add_image_alt_text(Cow::from(t))));
+                let (whr, link_builder) = state.pop().unwrap(); // state is not empty because of the match guard
+                if whr == Where::InImageInLink {
+                    state.push((whr, link_builder.add_image_alt_text(Cow::from(t))));
+                } else {
+                    tracing::warn!("Expected InImageInLink state, found {:?}", whr);
+                    state.push((whr, link_builder)); // restore state
+                }
             }
             // Text of a Link
             Event::Text(t) if !state.is_empty() => {
                 debug!("Event::Text({t:?})");
-                let (whr, link_builder) = state.pop().unwrap();
-                assert_eq!(whr, Where::InLink);
-                state.push((whr, link_builder.add_text(Cow::from(t))));
+                let (whr, link_builder) = state.pop().unwrap(); // state is not empty
+                if whr == Where::InLink {
+                    state.push((whr, link_builder.add_text(Cow::from(t))));
+                } else {
+                    tracing::warn!("Expected InLink state, found {:?}", whr);
+                    state.push((whr, link_builder)); // restore state
+                }
             }
 
             Event::Code(c) if !state.is_empty() => {
                 debug!("code: {c}");
-                let (whr, link_builder) = state.pop().unwrap();
+                let (whr, link_builder) = state.pop().unwrap(); // state is not empty
                 if whr == Where::InImageInLink {
                     state.push((whr, link_builder.add_image_alt_text(c.into())));
-                } else {
+                } else if whr == Where::InLink {
                     state.push((whr, link_builder.add_text(c.into())));
+                } else {
+                    tracing::warn!("Expected InImageInLink or InLink state, found {:?}", whr);
+                    state.push((whr, link_builder)); // restore state
                 }
             }
 
