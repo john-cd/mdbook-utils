@@ -531,7 +531,13 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file() && e.path().extension().is_some_and(|ext| ext == "rs"))
     {
-        all_rs_files.push(entry.path().to_path_buf().canonicalize()?);
+        match entry.path().canonicalize() {
+            Ok(canon) => all_rs_files.push(canon),
+            Err(e) => {
+                tracing::warn!("Failed to canonicalize {:?}: {}", entry.path(), e);
+                continue;
+            }
+        }
     }
 
     let mut used_rs_files = std::collections::HashSet::new();
