@@ -126,3 +126,35 @@ where
 
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::fs;
+
+    #[test]
+    fn test_write_broken_links() -> Result<()> {
+        let temp_dir = tempfile::tempdir()?;
+        let src_dir = temp_dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md_file_path = src_dir.join("test.md");
+        fs::write(
+            &md_file_path,
+            "Here is a valid link: [valid](http://example.com)\n\nAnd here is a broken one: [broken reference]\n",
+        )?;
+
+        let dest_file_path = temp_dir.path().join("broken_links.md");
+
+        write_broken_links(&src_dir, &dest_file_path)?;
+
+        assert!(dest_file_path.exists());
+        let content = fs::read_to_string(&dest_file_path)?;
+
+        assert!(content.contains("# Broken Links"));
+        assert!(content.contains("- Reference: broken reference"));
+        assert!(content.contains("Type: ShortcutUnknown"));
+
+        Ok(())
+    }
+}
