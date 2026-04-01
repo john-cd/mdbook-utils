@@ -29,7 +29,6 @@ pub(crate) static COMPILED_RULES: Lazy<HashMap<&str, Regex>> = Lazy::new(|| {
         .collect()
 });
 
-// TODO the Regexes need testing
 /// All rules that transform a URL to a label or badge URL.
 pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     let mut m = HashMap::new();
@@ -245,7 +244,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         Rule {
             re: r"https://doc.rust-lang.org/cargo/(?<rest>[^/.]+)(?:\.html)?",
             label_pattern: "cargo-book-${rest}",
-            badge_url_pattern: "https://img.shields.io/badge/Cargo_Book-${last}-yellow?logo=mdbook",
+            badge_url_pattern: "https://img.shields.io/badge/Cargo_Book-${rest}-yellow?logo=mdbook",
         },
     );
 
@@ -281,62 +280,6 @@ mod test {
     fn get_re(name: &str) -> Regex {
         let rule = GLOBAL_RULES.get(name).unwrap();
         Regex::new(rule.re).unwrap()
-    }
-
-    #[test]
-    fn test_global_rules() {
-        for (name, rule) in GLOBAL_RULES.iter() {
-            let re =
-                Regex::new(rule.re).unwrap_or_else(|_| panic!("Invalid regex for rule: {}", name));
-
-            match *name {
-                "category" => {
-                    let url = "https://crates.io/categories/web-programming::websocket/";
-                    if let Some(caps) = re.captures(url) {
-                        assert_eq!(&caps["catg"], "web-programming::websocket");
-                    } else {
-                        panic!("category rule failed to match {}", url);
-                    }
-                }
-                "crate" => {
-                    let url = "https://crates.io/crates/smol/";
-                    if let Some(caps) = re.captures(url) {
-                        assert_eq!(&caps["crate"], "smol");
-                    } else {
-                        panic!("crate rule failed to match {}", url);
-                    }
-                }
-                "documentation" => {
-                    let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
-                    if let Some(caps) = re.captures(url) {
-                        assert_eq!(&caps["crate"], "sqlx");
-                        // With the current regex, /sqlx/struct.Pool.html is
-                        // captured as item
-                    } else {
-                        panic!("documentation rule failed to match {}", url);
-                    }
-                }
-                "github repo" => {
-                    let url = "https://github.com/john-cd/mdbook-utils";
-                    if let Some(caps) = re.captures(url) {
-                        assert_eq!(&caps["owner"], "john-cd");
-                        assert_eq!(&caps["repo"], "mdbook-utils");
-                    } else {
-                        panic!("github repo rule failed to match {}", url);
-                    }
-                }
-                "github pages" => {
-                    let url = "https://rust-lang.github.io/rustup/";
-                    if let Some(caps) = re.captures(url) {
-                        assert_eq!(&caps["owner"], "rust-lang");
-                        assert_eq!(&caps["repo"], "rustup");
-                    } else {
-                        panic!("github pages rule failed to match {}", url);
-                    }
-                }
-                _ => {} // Other rules don't have specific matching checks here yet
-            }
-        }
     }
 
     #[test]
@@ -377,6 +320,11 @@ mod test {
         assert!(re.is_match(url));
         let caps = re.captures(url).unwrap();
         assert_eq!(&caps["crate"], "sqlx");
+
+        let url_version = "https://docs.rs/sqlx/0.7.2/sqlx/struct.Pool.html";
+        assert!(re.is_match(url_version));
+        let caps = re.captures(url_version).unwrap();
+        assert_eq!(&caps["crate"], "sqlx");
     }
 
     #[test]
@@ -393,6 +341,12 @@ mod test {
         let caps = re.captures(url).unwrap();
         assert_eq!(&caps["lib"], "std");
         assert_eq!(&caps["rest"], "option");
+
+        let url_core = "https://doc.rust-lang.org/core/cell/struct.OnceCell.html";
+        assert!(re.is_match(url_core));
+        let caps = re.captures(url_core).unwrap();
+        assert_eq!(&caps["lib"], "core");
+        assert_eq!(&caps["rest"], "cell/struct.OnceCell");
     }
 
     #[test]
@@ -437,6 +391,12 @@ mod test {
         let caps = re.captures(url).unwrap();
         assert_eq!(&caps["owner"], "john-cd");
         assert_eq!(&caps["repo"], "mdbook-utils");
+
+        let url_deep = "https://github.com/amar-laksh/workstation/blob/master/src/main.rs";
+        assert!(re.is_match(url_deep));
+        let caps = re.captures(url_deep).unwrap();
+        assert_eq!(&caps["owner"], "amar-laksh");
+        assert_eq!(&caps["repo"], "workstation");
     }
 
     #[test]
@@ -471,6 +431,13 @@ mod test {
         assert!(re.is_match(url));
         let caps = re.captures(url).unwrap();
         assert_eq!(&caps["item"], "attributes");
+
+        let url_nightly =
+            "https://doc.rust-lang.org/nightly/reference/items/traits.html#object-safety";
+        assert!(re.is_match(url_nightly));
+        let caps = re.captures(url_nightly).unwrap();
+        assert_eq!(caps.name("chapter").map(|m| m.as_str()), Some("items"));
+        assert_eq!(&caps["item"], "traits");
     }
 
     #[test]
@@ -503,6 +470,11 @@ mod test {
         let url = "https://dev.to/";
         assert!(re.is_match(url));
         let caps = re.captures(url).unwrap();
+        assert_eq!(&caps["domain"], "dev.to");
+
+        let url_fragment = "https://dev.to/#main";
+        assert!(re.is_match(url_fragment));
+        let caps = re.captures(url_fragment).unwrap();
         assert_eq!(&caps["domain"], "dev.to");
     }
 
@@ -545,6 +517,26 @@ mod test {
         let caps = doc_re.captures(url).unwrap();
         assert_eq!(&caps["crate"], "sqlx");
 
+        let url_version = "https://docs.rs/sqlx/0.7.2/sqlx/struct.Pool.html";
+        assert!(doc_re.is_match(url_version));
+        let caps = doc_re.captures(url_version).unwrap();
+        assert_eq!(&caps["crate"], "sqlx");
+
+        let std_item_doc_re = compiled_rules.get("std item documentation").unwrap();
+        let url_core = "https://doc.rust-lang.org/core/cell/struct.OnceCell.html";
+        assert!(std_item_doc_re.is_match(url_core));
+        let caps = std_item_doc_re.captures(url_core).unwrap();
+        assert_eq!(&caps["lib"], "core");
+        assert_eq!(&caps["rest"], "cell/struct.OnceCell");
+
+        let rust_ref_re = compiled_rules.get("rust reference").unwrap();
+        let url_nightly =
+            "https://doc.rust-lang.org/nightly/reference/items/traits.html#object-safety";
+        assert!(rust_ref_re.is_match(url_nightly));
+        let caps = rust_ref_re.captures(url_nightly).unwrap();
+        assert_eq!(caps.name("chapter").map(|m| m.as_str()), Some("items"));
+        assert_eq!(&caps["item"], "traits");
+
         let github_repo_re = compiled_rules.get("github repo").unwrap();
         let url = "https://github.com/john-cd/mdbook-utils";
         assert!(github_repo_re.is_match(url));
@@ -552,12 +544,24 @@ mod test {
         assert_eq!(&caps["owner"], "john-cd");
         assert_eq!(&caps["repo"], "mdbook-utils");
 
+        let url_deep = "https://github.com/amar-laksh/workstation/blob/master/src/main.rs";
+        assert!(github_repo_re.is_match(url_deep));
+        let caps = github_repo_re.captures(url_deep).unwrap();
+        assert_eq!(&caps["owner"], "amar-laksh");
+        assert_eq!(&caps["repo"], "workstation");
+
         let github_pages_re = compiled_rules.get("github pages").unwrap();
         let url = "https://rust-lang.github.io/rustup/";
         assert!(github_pages_re.is_match(url));
         let caps = github_pages_re.captures(url).unwrap();
         assert_eq!(&caps["owner"], "rust-lang");
         assert_eq!(&caps["repo"], "rustup");
+
+        let cargo_book_re = compiled_rules.get("cargo book").unwrap();
+        let url_cargo = "https://doc.rust-lang.org/cargo/index.html";
+        assert!(cargo_book_re.is_match(url_cargo));
+        let caps = cargo_book_re.captures(url_cargo).unwrap();
+        assert_eq!(&caps["rest"], "index");
 
         let website_re = compiled_rules.get("website").unwrap();
         let url = "https://example.com/";
@@ -574,6 +578,11 @@ mod test {
         assert!(website_re.is_match(url_query));
         let caps_query = website_re.captures(url_query).unwrap();
         assert_eq!(&caps_query["domain"], "example.com");
+
+        let url_fragment = "https://dev.to/#main";
+        assert!(website_re.is_match(url_fragment));
+        let caps_fragment = website_re.captures(url_fragment).unwrap();
+        assert_eq!(&caps_fragment["domain"], "dev.to");
 
         // Should not match a URL with a path
         let url_path = "https://example.com/path";
@@ -610,10 +619,10 @@ mod test {
         assert_eq!(&caps_one_segment["domain"], "example.com");
         assert_eq!(&caps_one_segment["last"], "about");
 
-        let url_query = "https://example.com/foo/bar.html?id=1#baz";
-        assert!(website_page_re.is_match(url_query));
-        let caps_query = website_page_re.captures(url_query).unwrap();
-        assert_eq!(&caps_query["domain"], "example.com");
-        assert_eq!(&caps_query["last"], "bar");
+        let url_query_fragment = "https://example.com/foo/bar.html?id=1#baz";
+        assert!(website_page_re.is_match(url_query_fragment));
+        let caps_query_fragment = website_page_re.captures(url_query_fragment).unwrap();
+        assert_eq!(&caps_query_fragment["domain"], "example.com");
+        assert_eq!(&caps_query_fragment["last"], "bar");
     }
 }
