@@ -94,6 +94,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                     cargo_toml_dir_path,
                     markdown_src_dir_path,
                     refdef_dest_file_path,
+                    args.args.log_file.as_ref(),
                 )
                 .context("[run] Failed to generate reference definitions from dependencies.")?;
                 println!("{}", style("Done.").green());
