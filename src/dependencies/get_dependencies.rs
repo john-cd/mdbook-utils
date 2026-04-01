@@ -1,7 +1,6 @@
 //! Get the book's examples' dependencies
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
@@ -80,10 +79,17 @@ pub(crate) fn get_dependencies<P: AsRef<Path>>(
 
 /// Write e.g. stdout / stderr to a file.
 fn write_log(out: &[u8], err: &[u8]) -> Result<()> {
-    let mut buffer = BufWriter::new(File::create("dependencies.log")?);
+    let (file, path) = tempfile::Builder::new()
+        .prefix("mdbook-utils-dependencies-")
+        .suffix(".log")
+        .tempfile()?
+        .keep()?;
+
+    let mut buffer = BufWriter::new(file);
     buffer.write_all(out)?;
     buffer.write_all(err)?;
     buffer.flush()?;
+    tracing::debug!("Dependencies log written to {:?}", path);
     Ok(())
 }
 
