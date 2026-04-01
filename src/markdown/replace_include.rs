@@ -5,6 +5,7 @@ use std::io::Write;
 use std::path::Path;
 
 use anyhow::Result;
+use rayon::prelude::*;
 use anyhow::bail;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -38,7 +39,7 @@ where
     let paths = crate::fs::find_markdown_files_in(markdown_src_dir_path.as_ref())?;
 
     // Process each .md file
-    for p in paths {
+    paths.into_par_iter().try_for_each(|p| -> Result<()> {
         info!("Looking into {p:?}");
         let parent_dir = p
             .parent()
@@ -101,7 +102,8 @@ where
                 File::create(p)?.write_all(new_txt.as_bytes())?;
             }
         }
-    }
+        Ok(())
+    })?;
     Ok(())
 }
 
