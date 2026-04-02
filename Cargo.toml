@@ -50,6 +50,7 @@ pulldown-cmark = "0.13.3"
 # pulldown-cmark-to-cmark = "11"
 quick-xml = "0.39.2"
 rand = "0.9.2"
+rayon = "1.11.0"
 regex = "1.12.3"
 serde = { version = "1.0.228", features = ["derive"] }
 toml = { version = "1.0.6", features = ["parse"] }
