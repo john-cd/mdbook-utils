@@ -41,15 +41,8 @@ where
 {
     let modified = Mutex::new(Vec::new());
 
-    // Locate the Markdown files with the `src`` directory
+    // Locate the Markdown files with the `src` directory
     let paths = crate::fs::find_markdown_files_in(markdown_dir_path.as_ref())?;
-
-    // TODO LATER: consider inserting contents from a file
-    // path_file_to_insert: Option<P2>,
-    // let contents_to_insert = if let Some(to_insert) = path_file_to_insert {
-    //      fs::read_to_string(to_insert)?
-    // } else { String::new( )};
-    // // debug!("{}", contents_to_insert);
 
     // Process each .md file
     paths.into_par_iter().try_for_each(|p| -> Result<()> {
