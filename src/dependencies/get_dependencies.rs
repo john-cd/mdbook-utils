@@ -5,8 +5,11 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 use std::process::Command;
+use tempfile::Builder;
 
 use anyhow::Result;
+use tracing::debug;
+use tracing::warn;
 use anyhow::anyhow;
 use serde::Deserialize;
 
@@ -24,8 +27,9 @@ pub(crate) struct Dependency<'a> {
 /// crate name and package repository URL)
 ///
 /// dir_path: Path to the directory containing the Cargo.toml file.
-pub(crate) fn get_dependencies<P: AsRef<Path>>(
+pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
     cargo_toml_dir_path: P,
+    log_file_path: Option<Q>,
 ) -> Result<BTreeMap<Cow<'static, str>, Dependency<'static>>> {
     let output = Command::new("cargo")
         .args([
@@ -43,7 +47,11 @@ pub(crate) fn get_dependencies<P: AsRef<Path>>(
         .current_dir(cargo_toml_dir_path)
         .output()?; // returns if failed to execute Command
 
-    write_log(&output.stdout, &output.stderr)?;
+    write_log(
+        &output.stdout,
+        &output.stderr,
+        log_file_path.as_ref().map(|p| p.as_ref()),
+    )?;
 
     if !output.status.success() {
         return Err(anyhow!(
@@ -78,18 +86,48 @@ pub(crate) fn get_dependencies<P: AsRef<Path>>(
 }
 
 /// Write e.g. stdout / stderr to a file.
-fn write_log(out: &[u8], err: &[u8]) -> Result<()> {
-    let (file, path) = tempfile::Builder::new()
-        .prefix("mdbook-utils-dependencies-")
-        .suffix(".log")
-        .tempfile()?
-        .keep()?;
+fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()> {
+    let (file, actual_path) = match log_file_path {
+        Some(path) => match File::create(path) {
+            Ok(f) => (f, path.to_path_buf()),
+            Err(e) => {
+                warn!("Failed to create log file {}: {}", path.display(), e);
+                return Ok(());
+            }
+        },
+        None => match Builder::new()
+            .prefix("mdbook-utils-dependencies-")
+            .suffix(".log")
+            .tempfile()
+        {
+            Ok(tf) => match tf.keep() {
+                Ok((f, p)) => (f, p),
+                Err(e) => {
+                    warn!("Failed to keep temporary log file: {}", e);
+                    return Ok(());
+                }
+            },
+            Err(e) => {
+                warn!("Failed to create temporary log file: {}", e);
+                return Ok(());
+            }
+        },
+    };
 
     let mut buffer = BufWriter::new(file);
-    buffer.write_all(out)?;
-    buffer.write_all(err)?;
-    buffer.flush()?;
-    tracing::debug!("Dependencies log written to {:?}", path);
+    if let Err(e) = buffer
+        .write_all(out)
+        .and_then(|_| buffer.write_all(err))
+        .and_then(|_| buffer.flush())
+    {
+        warn!(
+            "Failed to write to log file {}: {}",
+            actual_path.display(),
+            e
+        );
+    } else {
+        debug!("Dependencies log written to {}", actual_path.display());
+    }
     Ok(())
 }
 
