@@ -1,7 +1,6 @@
 //! Get the book's examples' dependencies
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;

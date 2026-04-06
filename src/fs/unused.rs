@@ -217,4 +217,63 @@ mod test {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_identify_unused_rs_examples_invalid_markdown_dir() {
+        let dir = tempdir().unwrap();
+        let markdown_dir = dir.path().join("non_existent_markdown");
+        let code_dir = dir.path().join("code");
+        fs::create_dir(&code_dir).unwrap();
+
+        let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("should be a folder and exist on disk!"));
+    }
+
+    #[test]
+    fn test_identify_unused_rs_examples_invalid_code_dir() {
+        let dir = tempdir().unwrap();
+        let markdown_dir = dir.path().join("markdown");
+        fs::create_dir(&markdown_dir).unwrap();
+        let code_dir = dir.path().join("non_existent_code");
+
+        let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("should be a folder and exist on disk!"));
+    }
+
+    #[test]
+    fn test_identify_unused_rs_examples_happy_path() -> Result<()> {
+        let dir = tempdir()?;
+        let markdown_dir = dir.path().join("markdown");
+        let code_dir = dir.path().join("code");
+
+        fs::create_dir(&markdown_dir)?;
+        fs::create_dir(&code_dir)?;
+
+        // Create Rust files
+        let used_rs = code_dir.join("used.rs");
+        let unused_rs = code_dir.join("unused.rs");
+        fs::write(&used_rs, "fn main() {}")?;
+        fs::write(&unused_rs, "fn main() {}")?;
+
+        // Create Markdown file using the used Rust file
+        let md_file = markdown_dir.join("test.md");
+        // Using a relative path that points into code_dir
+        fs::write(&md_file, "Check this: ../code/used.rs")?;
+
+        let unused_files = identify_unused_rs_examples(&markdown_dir, &code_dir)?;
+
+        assert_eq!(unused_files.len(), 1);
+        let canon_unused = unused_rs.canonicalize()?;
+        assert_eq!(unused_files[0], canon_unused);
+
+        Ok(())
+    }
 }
