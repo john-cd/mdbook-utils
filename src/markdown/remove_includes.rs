@@ -7,8 +7,10 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use std::sync::Mutex;
 
 use anyhow::Result;
+use rayon::prelude::*;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use tracing::info;
@@ -37,20 +39,13 @@ pub fn remove_includes_in_all_markdown_files_in<P>(
 where
     P: AsRef<Path>,
 {
-    let mut modified = Vec::new();
+    let modified = Mutex::new(Vec::new());
 
-    // Locate the Markdown files with the `src`` directory
+    // Locate the Markdown files with the `src` directory
     let paths = crate::fs::find_markdown_files_in(markdown_dir_path.as_ref())?;
 
-    // TODO LATER: consider inserting contents from a file
-    // path_file_to_insert: Option<P2>,
-    // let contents_to_insert = if let Some(to_insert) = path_file_to_insert {
-    //      fs::read_to_string(to_insert)?
-    // } else { String::new( )};
-    // // debug!("{}", contents_to_insert);
-
     // Process each .md file
-    for p in paths {
+    paths.into_par_iter().try_for_each(|p| -> Result<()> {
         info!("Looking into {p:?}");
         let buf = fs::read_to_string(p.as_path())?;
         if REGEX.is_match(&buf) {
@@ -58,11 +53,12 @@ where
             if let std::borrow::Cow::Owned(new_txt) = new_txt {
                 // tracing::debug!("modified: {}", p.display());
                 File::create(p.clone())?.write_all(new_txt.as_bytes())?;
-                modified.push(p);
+                modified.lock().unwrap().push(p);
             }
         }
-    }
-    Ok(modified)
+        Ok(())
+    })?;
+    Ok(modified.into_inner().unwrap())
 }
 
 #[cfg(test)]
