@@ -18,9 +18,13 @@ use tracing::info;
 static EXTRACT_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?s)```rust.*?\n(?<code>.*?)```").unwrap());
 
-/// Regex to remove "# " from the beginning of lines in Rust code blocks.
-/// These lines are hidden in the rendered mdBook but should be included in the
-/// extracted .rs files.
+/// Regex to match hidden lines in Rust code blocks.
+///
+/// In mdBook, lines starting with `# ` (pound sign followed by a space) are
+/// hidden in the rendered output but remain part of the code. This pattern
+/// matches such lines and captures the rest of the line (after `# `) in the
+/// named group `rest`, so they can be included verbatim in extracted `.rs`
+/// files.
 static REG: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)^(?:#\s)(?<rest>.*)$").unwrap());
 
 /// Extract code examples from all Markdown files within a source
@@ -94,7 +98,18 @@ where
     Ok(())
 }
 
-/// Regex to identify Rust code blocks for replacement by includes.
+/// Regex to match and capture entire Rust code blocks, including their
+/// boundaries and content.
+///
+/// Uses the `(?s)` (DOTALL) flag so that `.` matches newlines, allowing the
+/// pattern to span multiple lines. It captures three named groups:
+/// - `first`: the opening fence line (e.g. `` ```rust ``) up to and including
+///   the newline.
+/// - `code`: the body of the code block.
+/// - `last`: the closing `` ``` `` fence.
+///
+/// This is used to locate complete code blocks when replacing inline code with
+/// `{{#include ...}}` directives.
 static REG2: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.*?\n)(?<last>```)").unwrap());
 
