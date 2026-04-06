@@ -82,6 +82,10 @@ pub(crate) struct DependenciesDirAndDestFileArgs {
     /// Path to the file to create
     #[command(flatten)]
     pub(crate) dest: DestFileArgs,
+
+    /// Path to the log file for dependencies
+    #[arg(long = "log-file", value_name = "FILE", value_hint = clap::ValueHint::FilePath)]
+    pub(crate) log_file: Option<PathBuf>,
 }
 
 /// Markdown source directory and destination directory

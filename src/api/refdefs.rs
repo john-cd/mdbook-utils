@@ -64,18 +64,23 @@ where
 ///
 /// refdef_dest_file_path: path to the file to create and
 /// write into.
-pub fn generate_refdefs_to<P1, P2, P3>(
+///
+/// log_file_path: optional path to a log file where the output of `cargo tree`
+/// will be written.
+pub fn generate_refdefs_to<P1, P2, P3, P4>(
     cargo_toml_dir_path: P1,
     markdown_dir_path: P2,
     refdef_dest_file_path: P3,
+    log_file_path: Option<P4>,
 ) -> Result<()>
 where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
     P3: AsRef<Path>,
+    P4: AsRef<Path>,
 {
     // Generate ref defs from dependencies
-    let deps = dependencies::get_dependencies(&cargo_toml_dir_path)?;
+    let deps = dependencies::get_dependencies(&cargo_toml_dir_path, log_file_path)?;
     // for (_, d) in &deps {
     //     tracing::info!("{d:?}");
     // }
