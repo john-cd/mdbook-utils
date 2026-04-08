@@ -1,5 +1,6 @@
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::LazyLock;
 
 use anyhow::Result;
 use anyhow::bail;
@@ -82,13 +83,17 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     let mut used_rs_files = std::collections::HashSet::new();
     let md_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
 
-    let re = regex::Regex::new(
-        r"\{\{#(?:rustdoc_include|playground_include|include)\s+(?P<path>\S+\.rs)\s*\}\}",
-    )?;
+    /// Regex to match include directives in Markdown
+    static RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(
+            r"\{\{#(?:rustdoc_include|playground_include|include)\s+(?P<path>\S+\.rs)\s*\}\}",
+        )
+        .unwrap()
+    });
 
     for md_file in md_files {
         let content = std::fs::read_to_string(&md_file)?;
-        for cap in re.captures_iter(&content) {
+        for cap in RE.captures_iter(&content) {
             let rel_path = &cap["path"];
             if let Some(parent) = md_file.parent() {
                 let abs_path = parent.join(rel_path);
