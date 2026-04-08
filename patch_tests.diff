@@ -1,0 +1,58 @@
+--- src/generate/crates.rs
++++ src/generate/crates.rs
+@@ -165,6 +165,25 @@
+         Ok(())
+     }
+
++    #[test]
++    fn test_generate_categories_injection() -> Result<()> {
++        let dir = tempdir()?;
++        let src_dir = dir.path().join("src");
++        fs::create_dir(&src_dir)?;
++
++        let md1 = src_dir.join("1.md");
++        fs::write(
++            &md1,
++            "Malicious [injection](https://crates.io/categories/cat1])(javascript:alert(1)) and [valid](https://crates.io/categories/cat2).",
++        )?;
++
++        let dest_file = dir.path().join("categories.md");
++        generate_categories(&src_dir, &dest_file)?;
++
++        let content = fs::read_to_string(&dest_file)?;
++        let expected = "# Categories\n\n- [cat2](https://crates.io/categories/cat2)\n";
++        assert_eq!(content, expected);
++
++        Ok(())
++    }
++
+     #[test]
+     fn test_generate_crates_happy_path() -> Result<()> {
+         let dir = tempdir()?;
+@@ -220,5 +239,24 @@
+
+         Ok(())
+     }
++
++    #[test]
++    fn test_generate_crates_injection() -> Result<()> {
++        let dir = tempdir()?;
++        let src_dir = dir.path().join("src");
++        fs::create_dir(&src_dir)?;
++
++        let md1 = src_dir.join("1.md");
++        fs::write(
++            &md1,
++            "Malicious [injection](https://crates.io/crates/crate1])(javascript:alert(1)) and [valid](https://crates.io/crates/crate2).",
++        )?;
++
++        let dest_file = dir.path().join("crates.md");
++        generate_crates(&src_dir, &dest_file)?;
++
++        let content = std::fs::read_to_string(&dest_file)?;
++        let expected = "# Crates\n\n- [crate2](https://crates.io/crates/crate2)\n";
++        assert_eq!(content, expected);
++
++        Ok(())
++    }
+ }
