@@ -11,6 +11,10 @@ use anyhow::Result;
 use crate::fs;
 use crate::parser;
 
+fn is_valid_name(name: &str) -> bool {
+    name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+}
+
 /// Generate a category index and write to a Markdown file.
 #[tracing::instrument]
 pub fn generate_categories<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std::fmt::Debug>(
