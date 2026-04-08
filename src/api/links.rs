@@ -12,8 +12,6 @@ use crate::parser;
 
 // LINKS
 
-// TODO need to remove internal links
-
 /// Parse Markdown from all .md files in a given source directory,
 /// write all inline links and autolinks (i.e., not written as
 /// reference-style links) found therein to a file.
@@ -60,6 +58,13 @@ where
 {
     helper(src_dir_path, dest_file_path, |parser, f| {
         let links: Vec<link::Link<'_>> = parser::extract_links(parser);
+        let links: Vec<_> = links
+            .into_iter()
+            .filter(|l| {
+                let url = l.get_url();
+                url.starts_with("http")
+            })
+            .collect();
         link::write_reference_style_links_to(links, f)?;
         Ok(())
     })?;
@@ -80,6 +85,13 @@ where
 {
     helper(src_dir_path, dest_file_path, |parser, f| {
         let links: Vec<link::Link<'_>> = parser::extract_links(parser);
+        let links: Vec<_> = links
+            .into_iter()
+            .filter(|l| {
+                let url = l.get_url();
+                url.starts_with("http")
+            })
+            .collect();
         let mut counts = std::collections::HashMap::new();
         for l in &links {
             *counts.entry(l.clone()).or_insert(0) += 1;
