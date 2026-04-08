@@ -41,6 +41,7 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::LazyLock;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -548,12 +549,13 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
     let mut used_rs_files = std::collections::HashSet::new();
     let md_files = fs::find_markdown_files_in(&markdown_src_dir_path)?;
 
-    // TODO review vs previous commit
-    let re = regex::Regex::new(r"(?P<path>[a-zA-Z0-9_.\-\/]+\.rs)")?;
+    /// Regex to match Rust files in Markdown
+    static RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r"(?P<path>[a-zA-Z0-9_.\-\/]+\.rs)").unwrap());
 
     for md_file in md_files {
         let content = std::fs::read_to_string(&md_file)?;
-        for cap in re.captures_iter(&content) {
+        for cap in RE.captures_iter(&content) {
             let rel_path = Path::new(&cap["path"]);
             let abs_path = md_file.parent().unwrap().join(rel_path);
             if let Ok(canon) = fs::is_path_within(&code_dir_path, &abs_path) {
