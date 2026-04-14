@@ -233,28 +233,6 @@ mod test {
     }
 
     #[test]
-    fn test_generate_categories_injection() -> Result<()> {
-        let dir = tempdir()?;
-        let src_dir = dir.path().join("src");
-        fs::create_dir(&src_dir)?;
-
-        let md1 = src_dir.join("1.md");
-        fs::write(
-            &md1,
-            "Malicious [link](https://crates.io/categories/cat1\\\");alert(1);(\\\"\\\")",
-        )?;
-
-        let dest_file = dir.path().join("categories.md");
-        generate_categories(&src_dir, &dest_file)?;
-
-        let content = fs::read_to_string(&dest_file)?;
-        let expected = "# Categories\n\n";
-        assert_eq!(content, expected);
-
-        Ok(())
-    }
-
-    #[test]
     fn test_generate_crates_injection() -> Result<()> {
         let dir = tempdir()?;
         let src_dir = dir.path().join("src");
@@ -263,14 +241,39 @@ mod test {
         let md1 = src_dir.join("1.md");
         fs::write(
             &md1,
-            "Malicious [link](https://crates.io/crates/crate1\\\");alert(1);(\\\"\\\")",
+            "Malicious crate: [crate](https://crates.io/crates/mycrate](javascript:alert(1))/).",
         )?;
 
         let dest_file = dir.path().join("crates.md");
         generate_crates(&src_dir, &dest_file)?;
 
-        let content = std::fs::read_to_string(&dest_file)?;
+        let content = fs::read_to_string(&dest_file)?;
+        // If vulnerable, it would contain: - [mycrate](javascript:alert(1))](https://crates.io/crates/mycrate](javascript:alert(1)))
+        // After fix, it should skip it or sanitize it.
+        // Given our planned fix is to skip it, we expect no crates.
         let expected = "# Crates\n\n";
+        assert_eq!(content, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_generate_categories_injection() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md1 = src_dir.join("1.md");
+        fs::write(
+            &md1,
+            "Malicious category: [cat](https://crates.io/categories/mycat](javascript:alert(1))/).",
+        )?;
+
+        let dest_file = dir.path().join("categories.md");
+        generate_categories(&src_dir, &dest_file)?;
+
+        let content = fs::read_to_string(&dest_file)?;
+        let expected = "# Categories\n\n";
         assert_eq!(content, expected);
 
         Ok(())
