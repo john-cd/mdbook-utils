@@ -40,7 +40,7 @@ pub fn extract_code_from_all_markdown_files_in<P1, P2>(
 ) -> Result<()>
 where
     P1: AsRef<Path>,
-    P2: AsRef<Path>,
+    P2: AsRef<Path> + std::marker::Sync,
 {
     // Locate the Markdown files with the e.g. src/ directory
     let markdown_file_paths = crate::fs::find_markdown_files_in(markdown_src_dir_path.as_ref())?;
@@ -126,7 +126,7 @@ pub fn remove_code_from_all_markdown_files_in<P1, P2>(
 ) -> Result<()>
 where
     P1: AsRef<Path>,
-    P2: AsRef<Path>,
+    P2: AsRef<Path> + std::marker::Sync,
 {
     // Locate the Markdown files with the src directory
     let markdown_file_paths = crate::fs::find_markdown_files_in(markdown_src_dir_path)?;
