@@ -1,0 +1,31 @@
+--- src/generate/crates.rs
++++ src/generate/crates.rs
+@@ -11,6 +11,10 @@
+ use crate::fs;
+ use crate::parser;
+
++fn is_valid_name(name: &str) -> bool {
++    name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
++}
++
+ /// Generate a category index and write to a Markdown file.
+ #[tracing::instrument]
+ pub fn generate_categories<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std::fmt::Debug>(
+@@ -37,7 +41,7 @@
+                 path = &path[..path.len() - 1];
+             }
+             if let Some(name) = path.split('/').next_back() {
+-                if !name.is_empty() && name != "categories" {
++                if !name.is_empty() && name != "categories" && is_valid_name(name) {
+                     categories.insert(name.to_string());
+                 }
+             }
+@@ -75,7 +79,7 @@
+                 path = &path[..path.len() - 1];
+             }
+             if let Some(name) = path.split('/').next_back() {
+-                if !name.is_empty() && name != "crates" {
++                if !name.is_empty() && name != "crates" && is_valid_name(name) {
+                     crates.insert(name.to_string());
+                 }
+             }
