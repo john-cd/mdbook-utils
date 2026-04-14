@@ -225,6 +225,7 @@ impl Hash for Link<'_> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::link::LinkBuilder;
 
     #[test]
     fn test_link_equality_and_hash() {
