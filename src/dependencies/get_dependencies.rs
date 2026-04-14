@@ -5,6 +5,7 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 use std::process::Command;
+use std::fs::File;
 use tempfile::Builder;
 
 use anyhow::Result;
@@ -100,11 +101,14 @@ fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()>
             .suffix(".log")
             .tempfile()
         {
-            Ok(tf) => match tf.keep() {
-                Ok((f, p)) => (f, p),
-                Err(e) => {
-                    warn!("Failed to keep temporary log file: {}", e);
-                    return Ok(());
+            Ok(tf) => {
+                let actual_path = tf.path().to_path_buf();
+                match tf.keep() {
+                    Ok((f, _p)) => (f, actual_path),
+                    Err(e) => {
+                        warn!("Failed to keep temporary log file: {}", e);
+                        return Ok(());
+                    }
                 }
             },
             Err(e) => {

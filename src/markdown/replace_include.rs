@@ -31,7 +31,7 @@ use anyhow::Context;
 #[tracing::instrument(skip(markdown_src_dir_path))]
 pub fn include_in_all_markdown_files_in<P>(markdown_src_dir_path: P) -> Result<()>
 where
-    P: AsRef<Path>,
+    P: AsRef<Path> + std::marker::Sync,
 {
     let base_dir = markdown_src_dir_path.as_ref().canonicalize()?;
 
