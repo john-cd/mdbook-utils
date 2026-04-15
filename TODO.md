@@ -15,7 +15,6 @@
 - [ ] Handle multiple Rust code blocks in a single file during replacement (extract_code.rs)
 - [ ] Make 'intro.md' -> 'index.md' replacement in sitemap configurable
 - [ ] Support custom shields.io styles for GitHub badges
-- [ ] Re-evaluate `pulldown-cmark-to-cmark` dependency
 - [ ] move common functionality to separate library?
 - [ ] move cli to src/bin folder? or create a cargo workspace?
 - [ ] change port used by mdbook serve ./user_guide/
