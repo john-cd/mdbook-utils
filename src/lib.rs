@@ -928,11 +928,13 @@ mod test {
 
     #[test]
     fn test_generate_sitemap_invalid_base_url() {
-        use std::path::PathBuf;
         use url::Url;
-        let markdown_src_dir_path = PathBuf::from("non_existent_src");
+
+        let dir = tempdir().unwrap();
+        let markdown_src_dir_path = dir.path().join("src");
+        fs::create_dir(&markdown_src_dir_path).unwrap();
         let base_url = Url::parse("mailto:test@example.com").unwrap();
-        let sitemap_dest_file_path = PathBuf::from("sitemap.xml");
+        let sitemap_dest_file_path = dir.path().join("sitemap.xml");
         let map_index = None;
 
         let result = generate_sitemap(
