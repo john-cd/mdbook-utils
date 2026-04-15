@@ -925,4 +925,27 @@ mod test {
 
         Ok(())
     }
+
+    #[test]
+    fn test_generate_sitemap_invalid_base_url() {
+        use std::path::PathBuf;
+        use url::Url;
+        let markdown_src_dir_path = PathBuf::from("non_existent_src");
+        let base_url = Url::parse("mailto:test@example.com").unwrap();
+        let sitemap_dest_file_path = PathBuf::from("sitemap.xml");
+        let map_index = None;
+
+        let result = generate_sitemap(
+            markdown_src_dir_path,
+            base_url,
+            sitemap_dest_file_path,
+            map_index,
+        );
+
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Invalid URL - cannot be a base"));
+    }
 }
