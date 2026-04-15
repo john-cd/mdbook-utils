@@ -5,6 +5,7 @@ use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
+use std::io::Read;
 use std::path::Path;
 
 use anyhow::Context;
@@ -31,16 +32,20 @@ where
     let paths = super::find_markdown_files::find_markdown_files_in(markdown_root_dir_path)?;
 
     // Read all .md files into one big String
-    let mut all_markdown = String::new();
+    let mut all_markdown = String::with_capacity(1024 * 1024);
     for p in paths {
-        let s = fs::read_to_string(p.as_path()).with_context(|| {
+        let mut file = File::open(p.as_path()).with_context(|| {
+            format!(
+                "[read_to_string_all_markdown_files_in] Could not open {}. Does the file exist?",
+                p.display()
+            )
+        })?;
+        file.read_to_string(&mut all_markdown).with_context(|| {
             format!(
                 "[read_to_string_all_markdown_files_in] Could not read {}. Does the file exist?",
                 p.display()
             )
         })?;
-        // debug!("{p:?}: length = {}", s.len());
-        all_markdown.push_str(&s);
     }
 
     Ok(Cow::from(all_markdown))
