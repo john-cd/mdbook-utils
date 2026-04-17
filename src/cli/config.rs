@@ -58,6 +58,13 @@ pub(crate) struct Configuration {
     /// e.g. https://example.com/mybook/
     /// It is used to build sitemaps.
     base_url: String,
+    /// SITEMAP_MAP_INDEX environment variable:
+    /// Map a filename to another (e.g., 'intro.md' to 'index.md')
+    sitemap_map_index: Option<String>,
+    /// MDBOOK_PATH environment variable:
+    /// Path to the `mdbook` binary
+    /// typically `mdbook`
+    mdbook_path: Option<PathBuf>,
 
     /// Global options that apply to all (sub)commands.
     #[serde(skip)]
@@ -75,6 +82,8 @@ impl Default for Configuration {
             cargo_toml_dir_path: None,
             default_dest_dir_path: None,
             base_url: String::from("http://example.com/mybook/"),
+            sitemap_map_index: Some("intro.md:index.md".to_string()),
+            mdbook_path: None,
             global_opts: GlobalOpts::default(),
         }
     }
@@ -237,6 +246,20 @@ impl Configuration {
         ))
     }
 
+    /// Returns the sitemap index file mapping
+    pub(crate) fn sitemap_map_index(&self, map_index: Option<String>) -> Option<(String, String)> {
+        map_index
+            .or_else(|| self.sitemap_map_index.clone())
+            .and_then(|s| {
+                let parts: Vec<&str> = s.split(':').collect();
+                if parts.len() == 2 {
+                    Some((parts[0].to_string(), parts[1].to_string()))
+                } else {
+                    None
+                }
+            })
+    }
+
     /// Returns the sitemap output file path, as provided by
     /// the command-line argument (if set); or {path}/sitemap.xml,
     /// where the HTML output path is retrieved from `book.toml`, if possible,
@@ -249,7 +272,7 @@ impl Configuration {
                 d.clone()
             } else {
                 match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
-                    Ok((_, html_output_dir, _)) => {
+                    Ok((_, Some(html_output_dir), _)) => {
                         // `book.toml`` exists, is parseable and build.build-dir is defined
                         html_output_dir
                     }
@@ -268,9 +291,313 @@ impl Configuration {
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use super::*;
+    use anyhow::Result;
+    use std::fs;
+    use tempfile::tempdir;
 
-    // #[test]
-    // fn test() {
-    // }
+    #[test]
+    fn test_configuration_default() {
+        let config = Configuration::default();
+        assert_eq!(config.book_root_dir_path, PathBuf::from("."));
+        assert_eq!(config.base_url, "http://example.com/mybook/");
+        assert_eq!(
+            config.sitemap_map_index,
+            Some("intro.md:index.md".to_string())
+        );
+    }
+
+    #[test]
+    fn test_markdown_src_dir_path() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let mut config = Configuration::default();
+        config.book_root_dir_path = dir.path().to_path_buf();
+
+        // 1. Default case
+        let args = MarkdownDirArgs {
+            markdown_dir_path: None,
+        };
+        let path = config.markdown_src_dir_path(args, src_dir.to_str().unwrap())?;
+        assert_eq!(path, src_dir.canonicalize()?);
+
+        // 2. Environment variable case
+        let env_src = dir.path().join("env_src");
+        fs::create_dir(&env_src)?;
+        config.markdown_dir_path = Some(env_src.clone());
+        let args = MarkdownDirArgs {
+            markdown_dir_path: None,
+        };
+        let path = config.markdown_src_dir_path(args, "src")?;
+        assert_eq!(path, env_src.canonicalize()?);
+
+        // 3. Argument case
+        let arg_src = dir.path().join("arg_src");
+        fs::create_dir(&arg_src)?;
+        let args = MarkdownDirArgs {
+            markdown_dir_path: Some(arg_src.clone()),
+        };
+        let path = config.markdown_src_dir_path(args, "src")?;
+        assert_eq!(path, arg_src.canonicalize()?);
+
+        // 4. book.toml case
+        config.markdown_dir_path = None;
+        let toml_src = dir.path().join("toml_src");
+        fs::create_dir(&toml_src)?;
+        fs::write(
+            dir.path().join("book.toml"),
+            r#"[book]
+src = "toml_src"
+"#,
+        )?;
+        let args = MarkdownDirArgs {
+            markdown_dir_path: None,
+        };
+        let path = config.markdown_src_dir_path(args, "src")?;
+        assert_eq!(path, toml_src.canonicalize()?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_book_markdown_build_dir_path() -> Result<()> {
+        let dir = tempdir()?;
+        let build_dir = dir.path().join("book").join("markdown");
+        fs::create_dir_all(&build_dir)?;
+
+        let mut config = Configuration::default();
+        config.book_root_dir_path = dir.path().to_path_buf();
+
+        // 1. Default case
+        let args = MarkdownDirArgs {
+            markdown_dir_path: None,
+        };
+        let path = config.book_markdown_build_dir_path(args, build_dir.to_str().unwrap())?;
+        assert_eq!(path, build_dir.canonicalize()?);
+
+        // 2. Environment variable case
+        let env_build = dir.path().join("env_build");
+        fs::create_dir(&env_build)?;
+        config.book_markdown_build_dir_path = Some(env_build.clone());
+        let args = MarkdownDirArgs {
+            markdown_dir_path: None,
+        };
+        let path = config.book_markdown_build_dir_path(args, "book/markdown")?;
+        assert_eq!(path, env_build.canonicalize()?);
+
+        // 3. Argument case
+        let arg_build = dir.path().join("arg_build");
+        fs::create_dir(&arg_build)?;
+        let args = MarkdownDirArgs {
+            markdown_dir_path: Some(arg_build.clone()),
+        };
+        let path = config.book_markdown_build_dir_path(args, "book/markdown")?;
+        assert_eq!(path, arg_build.canonicalize()?);
+
+        // 4. book.toml case
+        config.book_markdown_build_dir_path = None;
+        let toml_build = dir.path().join("book");
+        fs::create_dir_all(&toml_build)?;
+        fs::write(
+            dir.path().join("book.toml"),
+            r#"[output.markdown]
+"#,
+        )?;
+        let args = MarkdownDirArgs {
+            markdown_dir_path: None,
+        };
+        let path = config.book_markdown_build_dir_path(args, "book/markdown")?;
+        assert_eq!(path, toml_build.canonicalize()?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_dest_dir_path() {
+        let mut config = Configuration::default();
+        let root = if cfg!(windows) { r"C:\root" } else { "/root" };
+        let env_dest = if cfg!(windows) { r"C:\env_dest" } else { "/env_dest" };
+        let arg_dest = if cfg!(windows) { r"C:\arg_dest" } else { "/arg_dest" };
+
+        config.book_root_dir_path = PathBuf::from(root);
+
+        // 1. Default
+        let args = DestDirArgs { dir_path: None };
+        assert_eq!(config.dest_dir_path(args), PathBuf::from(root));
+
+        // 2. Environment
+        config.default_dest_dir_path = Some(PathBuf::from(env_dest));
+        let args = DestDirArgs { dir_path: None };
+        assert_eq!(config.dest_dir_path(args), PathBuf::from(env_dest));
+
+        // 3. Argument
+        let args = DestDirArgs {
+            dir_path: Some(PathBuf::from(arg_dest)),
+        };
+        assert_eq!(config.dest_dir_path(args), PathBuf::from(arg_dest));
+    }
+
+    #[test]
+    fn test_dest_file_path() {
+        let mut config = Configuration::default();
+        let root = if cfg!(windows) { r"C:\root" } else { "/root" };
+        let arg_file = if cfg!(windows) { r"C:\arg\file.txt" } else { "/arg/file.txt" };
+
+        config.book_root_dir_path = PathBuf::from(root);
+
+        // 1. Default
+        let args = DestFileArgs { file_path: None };
+        assert_eq!(
+            config.dest_file_path(args, "test.txt"),
+            PathBuf::from(root).join("test.txt")
+        );
+
+        // 2. Argument
+        let args = DestFileArgs {
+            file_path: Some(PathBuf::from(arg_file)),
+        };
+        assert_eq!(
+            config.dest_file_path(args, "test.txt"),
+            PathBuf::from(arg_file)
+        );
+    }
+
+    #[test]
+    fn test_cargo_toml_dir_path() -> Result<()> {
+        let dir = tempdir()?;
+        let root_dir = dir.path().to_path_buf();
+        let mut config = Configuration::default();
+        config.book_root_dir_path = root_dir.clone();
+
+        // 1. Default
+        let args = CargoTomlDirArgs {
+            cargo_toml_dir_path: None,
+        };
+        assert_eq!(config.cargo_toml_dir_path(args)?, root_dir.canonicalize()?);
+
+        // 2. Environment
+        let env_dir = dir.path().join("env");
+        fs::create_dir(&env_dir)?;
+        config.cargo_toml_dir_path = Some(env_dir.clone());
+        let args = CargoTomlDirArgs {
+            cargo_toml_dir_path: None,
+        };
+        assert_eq!(config.cargo_toml_dir_path(args)?, env_dir.canonicalize()?);
+
+        // 3. Argument
+        let arg_dir = dir.path().join("arg");
+        fs::create_dir(&arg_dir)?;
+        let args = CargoTomlDirArgs {
+            cargo_toml_dir_path: Some(arg_dir.clone()),
+        };
+        assert_eq!(config.cargo_toml_dir_path(args)?, arg_dir.canonicalize()?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_base_url() -> Result<()> {
+        let config = Configuration::default();
+
+        // 1. Default
+        let args = UrlArgs { url: None };
+        assert_eq!(config.base_url(args)?.as_str(), "http://example.com/mybook/");
+
+        // 2. Argument
+        let arg_url = url::Url::parse("https://test.com/")?;
+        let args = UrlArgs {
+            url: Some(arg_url.clone()),
+        };
+        assert_eq!(config.base_url(args)?, arg_url);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_sitemap_map_index() {
+        let mut config = Configuration::default();
+
+        // 1. Default
+        assert_eq!(
+            config.sitemap_map_index(None),
+            Some(("intro.md".into(), "index.md".into()))
+        );
+
+        // 2. Argument
+        assert_eq!(
+            config.sitemap_map_index(Some("a.md:b.md".into())),
+            Some(("a.md".into(), "b.md".into()))
+        );
+
+        // 3. Invalid format
+        assert_eq!(config.sitemap_map_index(Some("invalid".into())), None);
+
+        // 4. Configuration override
+        config.sitemap_map_index = Some("conf.md:idx.md".into());
+        assert_eq!(
+            config.sitemap_map_index(None),
+            Some(("conf.md".into(), "idx.md".into()))
+        );
+    }
+
+    #[test]
+    fn test_sitemap_file_path() -> Result<()> {
+        let dir = tempdir()?;
+        let mut config = Configuration::default();
+        config.book_root_dir_path = dir.path().to_path_buf();
+
+        // 1. Argument
+        let args = DestFileArgs {
+            file_path: Some(PathBuf::from("arg_sitemap.xml")),
+        };
+        assert_eq!(
+            config.sitemap_file_path(args),
+            PathBuf::from("arg_sitemap.xml")
+        );
+
+        // 2. Environment (book_html_build_dir_path)
+        let env_html = PathBuf::from("env_html");
+        config.book_html_build_dir_path = Some(env_html.clone());
+        let args = DestFileArgs { file_path: None };
+        assert_eq!(
+            config.sitemap_file_path(args),
+            env_html.join("sitemap.xml")
+        );
+
+        // 3. book.toml
+        config.book_html_build_dir_path = None;
+        fs::write(
+            dir.path().join("book.toml"),
+            r#"[build]
+build-dir = "toml_book"
+"#,
+        )?;
+        let args = DestFileArgs { file_path: None };
+        assert_eq!(
+            config.sitemap_file_path(args),
+            dir.path().join("toml_book").join("sitemap.xml")
+        );
+
+        // 4. Default
+        fs::remove_file(dir.path().join("book.toml"))?;
+        let args = DestFileArgs { file_path: None };
+        // The default in the code is hardcoded as PathBuf::from("./book").join("sitemap.xml")
+        // when try_parse_book_toml fails.
+        assert_eq!(
+            config.sitemap_file_path(args),
+            PathBuf::from("./book").join("sitemap.xml")
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_skip_confirm() {
+        let mut config = Configuration::default();
+        assert!(!config.skip_confirm());
+        config.global_opts.yes = true;
+        assert!(config.skip_confirm());
+    }
 }

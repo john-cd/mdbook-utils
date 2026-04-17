@@ -20,6 +20,7 @@ pub(crate) fn generate_sitemap<W>(
     links: Vec<crate::link::Link<'_>>,
     base_url: url::Url,
     w: &mut W,
+    map_index: Option<(String, String)>,
 ) -> Result<()>
 where
     W: Write,
@@ -31,20 +32,24 @@ where
         .filter(|l| !exclude.iter().any(|&ex| l.get_url().ends_with(ex)));
     // debug: let l = l.map(|l| { tracing::debug!("{l:?}"); l });
 
-    // Change the extension and replace intro.html by index.html
+    // Change the extension and replace index file if requested
     let ls = ls.map(|l| {
-        base_url.join(
-            l.get_url()
-                .replace("intro.md", "index.md")
-                .replace(".md", ".html")
-                .as_str(),
-        )
+        let mut url = l.get_url().to_string();
+        if let Some((from, to)) = &map_index {
+            url = url.replace(from, to);
+        }
+        base_url.join(url.replace(".md", ".html").as_str())
     });
 
     // Separate links from errors and print errors if any
-    let (links, errors): (Vec<Result<_, _>>, Vec<Result<_, _>>) = ls.partition(Result::is_ok);
-    let mut links: Vec<String> = links.into_iter().map(|r| r.unwrap().to_string()).collect();
-    let errors: Vec<Error> = errors.into_iter().map(|r| r.unwrap_err().into()).collect();
+    let mut links: Vec<String> = Vec::new();
+    let mut errors: Vec<Error> = Vec::new();
+    for r in ls {
+        match r {
+            Ok(url) => links.push(url.to_string()),
+            Err(e) => errors.push(e.into()),
+        }
+    }
     // debug: tracing::debug!("Links: {links:?}");
     if !errors.is_empty() {
         tracing::error!("Errors: {errors:?}");

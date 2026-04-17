@@ -10,7 +10,6 @@
 mod args;
 mod book_toml;
 pub(crate) mod config;
-// mod interact;
 pub(crate) mod links_commands;
 pub(crate) mod markdown_commands;
 pub(crate) mod refdefs_commands;
@@ -78,13 +77,20 @@ pub(crate) struct GlobalOpts {
     /// Automatically answer `yes` to any user confirmation request.
     #[clap(long, short = 'y', global = true)]
     pub(crate) yes: bool,
+
+    /// Set the logging level (error, warn, info, debug, trace).
+    #[clap(long, global = true, env = "RUST_LOG")]
+    pub(crate) log: Option<String>,
 }
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use clap::CommandFactory;
 
-    // #[test]
-    // fn test() {
-    // }
+    use super::*;
+
+    #[test]
+    fn verify_cli() {
+        Cli::command().debug_assert();
+    }
 }

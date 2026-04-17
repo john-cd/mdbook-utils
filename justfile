@@ -81,7 +81,7 @@ _builddoc:
 
 # Display the user guide
 serve:
-  mdbook serve ./user_guide/
+  mdbook serve ./user_guide/ -p 3001
 
 # Run all the steps required before pushing code to GitHub
 prep: fmt clean build clippy test _builddoc

@@ -32,8 +32,7 @@ pub(crate) struct Book {
     // Source files
     // [book]
     // src = "src"
-    src: Option<String>, /* TODO consider std::ffi::OsString - need a custom deserializer?
-                          * We don't care about the rest. */
+    src: Option<PathBuf>,
 }
 
 /// [build] table
@@ -43,7 +42,7 @@ pub(crate) struct Build {
     // [build]
     // build-dir = "book"
     #[serde(rename = "build-dir")]
-    build_dir: Option<String>,
+    build_dir: Option<PathBuf>,
     // We don't care about the rest.
 }
 
@@ -68,7 +67,7 @@ pub(crate) struct Output {
 /// Failure to open `book.toml` or to parse it returns an Error.
 pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     book_root_dir_path: P,
-) -> Result<(PathBuf, PathBuf, Option<PathBuf>)> {
+) -> Result<(PathBuf, Option<PathBuf>, Option<PathBuf>)> {
     let book_toml_path = book_root_dir_path.as_ref().join("book.toml");
     debug!(
         "try_parse_book_toml: book_toml_path: {}",
@@ -91,25 +90,35 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
             .unwrap_or("book".into()),
     );
 
-    let mut book_html_build_dir_path = book_build_dir_path.clone();
+    let mut book_html_build_dir_path = None;
     let mut book_markdown_build_dir_path = None;
 
-    // If there is only one [output.*] backend in `book.toml`, `mdbook` places
-    // its output directly in the book directory (see `build.build-dir`).
-    // If there is more than one backend, then each backend is
-    // placed in a separate directory underneath `build-dir`
-    // - for example, directories `book/html` and `book/markdown`.
-    // https://rust-lang.github.io/mdBook/format/configuration/renderers.html
+    // mdBook places its output directly in the book directory if there is only one
+    // backend. If there is more than one backend, then each backend is placed
+    // in a separate directory underneath `build-dir` (e.g., `book/html` and
+    // `book/markdown`). https://rust-lang.github.io/mdBook/format/configuration/renderers.html
     debug!("{:?}", book_toml.output);
 
     if let Some(output) = book_toml.output {
-        if output.extra.len() >= 2 {
-            book_html_build_dir_path = book_html_build_dir_path.join("html");
+        let num_backends = output.extra.len();
+
+        if num_backends > 1 {
+            if output.extra.contains_key("html") {
+                book_html_build_dir_path = Some(book_build_dir_path.join("html"));
+            }
+            if output.extra.contains_key("markdown") {
+                book_markdown_build_dir_path = Some(book_build_dir_path.join("markdown"));
+            }
+        } else if num_backends == 1 {
+            if output.extra.contains_key("markdown") {
+                book_markdown_build_dir_path = Some(book_build_dir_path.clone());
+            } else if output.extra.contains_key("html") {
+                book_html_build_dir_path = Some(book_build_dir_path.clone());
+            }
         }
-        // [output.markdown] is defined in `book.toml`.
-        if output.extra.contains_key("markdown") {
-            book_markdown_build_dir_path = Some(book_build_dir_path.join("markdown"));
-        }
+    } else {
+        // default mdbook behavior is just HTML
+        book_html_build_dir_path = Some(book_build_dir_path.clone());
     }
     debug!(
         "try_parse_book_toml: markdown_dir_path: {markdown_dir_path:?}; book_build_dir_path: {book_html_build_dir_path:?}; book_markdown_build_dir_path: {book_markdown_build_dir_path:?}",
@@ -124,9 +133,91 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use std::fs;
 
-    // #[test]
-    // fn test() {
-    // }
+    use tempfile::tempdir;
+
+    use super::*;
+
+    #[test]
+    fn test_try_parse_book_toml_default() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(book_toml_path, "[book]\ntitle = \"test\"")?;
+
+        let (src, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(src, dir.path().join("src"));
+        assert_eq!(html, Some(dir.path().join("book")));
+        assert_eq!(markdown, None);
+        Ok(())
+    }
+
+    #[test]
+    fn test_try_parse_book_toml_custom_dirs() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(
+            book_toml_path,
+            r#"[book]
+src = "my_src"
+[build]
+build-dir = "my_book"
+"#,
+        )?;
+
+        let (src, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(src, dir.path().join("my_src"));
+        assert_eq!(html, Some(dir.path().join("my_book")));
+        assert_eq!(markdown, None);
+        Ok(())
+    }
+
+    #[test]
+    fn test_try_parse_book_toml_multiple_outputs() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(
+            book_toml_path,
+            r#"[output.html]
+[output.markdown]
+"#,
+        )?;
+
+        let (_, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(html, Some(dir.path().join("book").join("html")));
+        assert_eq!(markdown, Some(dir.path().join("book").join("markdown")));
+        Ok(())
+    }
+
+    #[test]
+    fn test_try_parse_book_toml_only_markdown_output() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(
+            book_toml_path,
+            r#"[output.markdown]
+"#,
+        )?;
+
+        let (_, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(html, None);
+        assert_eq!(markdown, Some(dir.path().join("book")));
+        Ok(())
+    }
+
+    #[test]
+    fn test_try_parse_book_toml_only_other_output() -> Result<()> {
+        let dir = tempdir()?;
+        let book_toml_path = dir.path().join("book.toml");
+        fs::write(
+            book_toml_path,
+            r#"[output.pdf]
+"#,
+        )?;
+
+        let (_, html, markdown) = try_parse_book_toml(dir.path())?;
+        assert_eq!(html, None);
+        assert_eq!(markdown, None);
+        Ok(())
+    }
 }

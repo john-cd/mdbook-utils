@@ -12,7 +12,7 @@ use pulldown_cmark::html;
 ///
 /// parser: Markdown parser.
 #[allow(dead_code)]
-pub(crate) fn write_html_to_stdout<'a, I>(parser: I)
+pub(crate) fn write_html_to_stdout<'a, I>(parser: I) -> std::io::Result<()>
 where
     I: Iterator<Item = Event<'a>>,
 {
@@ -20,8 +20,9 @@ where
     // `Write` trait e.g., a file or network socket.
     let stdout = std::io::stdout();
     let mut handle = stdout.lock();
-    handle.write_all(b"\nHTML output:\n").unwrap();
-    html::write_html_io(&mut handle, parser).unwrap();
+    handle.write_all(b"\nHTML output:\n")?;
+    html::write_html_io(&mut handle, parser)?;
+    Ok(())
 }
 
 /// Read from a Markdown parser and write HTML to bytes.
@@ -52,58 +53,3 @@ where
     html_output
 }
 
-// MARKDOWN
-
-// TODO use write_to_markdown
-// let markdown_input_length = markdown_input.as_ref().len();
-// write_markdown_to(parser, markdown_input_length, f).context("")?;
-
-// /// Read from a Markdown parser and write Markdown to a writer (e.g.
-// /// File).
-// ///
-// /// parser: Markdown parser.
-// ///
-// /// w: writer e.g. File to write to.
-// #[allow(dead_code)]
-// pub(crate) fn write_markdown_to<'a, I, E, W>(
-//     parser: I,
-//     markdown_input_length: usize,
-//     w: &mut W,
-// ) -> Result<()>
-// where
-//     I: Iterator<Item = E>,
-//     E: std::borrow::Borrow<pulldown_cmark::Event<'a>>,
-//     W: Write,
-// {
-//     let mut buf = String::with_capacity(markdown_input_length + 128);
-//     let options = pulldown_cmark_to_cmark::Options {
-//         // newlines_after_headline:,
-//         // newlines_after_paragraph:,
-//         // newlines_after_codeblock:,
-//         // newlines_after_table:,
-//         // newlines_after_rule:,
-//         // newlines_after_list:,
-//         // newlines_after_blockquote:,
-//         // newlines_after_rest:,
-//         // code_block_token_count:,
-//         // code_block_token: '',
-//         // list_token: '',
-//         // ordered_list_token: '',
-//         // increment_ordered_list_bullets: true,
-//         // emphasis_token: '',
-//         // strong_token: "",
-//         ..pulldown_cmark_to_cmark::Options::default()
-//     };
-//     pulldown_cmark_to_cmark::cmark_with_options(parser, &mut buf, options)?;
-//     w.write_all(buf.as_bytes())?;
-//     Ok(())
-// }
-
-#[cfg(test)]
-mod test {
-    // use super::*;
-
-    // #[test]
-    // fn test() {
-    // }
-}

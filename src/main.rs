@@ -5,6 +5,7 @@ use anyhow::Context;
 use anyhow::Result;
 use console::style;
 use tracing::debug;
+use tracing_subscriber::EnvFilter;
 
 use crate::cli::Cli;
 use crate::cli::Command;
@@ -16,15 +17,6 @@ fn main() -> Result<()> {
     // parents), if it exists. If variables with the same names already exist in
     // the environment, their values are preserved.
     let dotenv = dotenvy::dotenv();
-
-    // Set RUST_LOG, if not present, and initialize logging
-    let key = "RUST_LOG";
-    if env::var(key).is_err() {
-        unsafe {
-            env::set_var(key, "info"); // TODO
-        }
-    }
-    tracing_subscriber::fmt::init();
 
     match dotenv {
         Ok(pb) => {
@@ -39,6 +31,16 @@ fn main() -> Result<()> {
         command: cmd,
         global_opts,
     } = cli::parse_arguments();
+
+    // Set log level and initialize logging
+    let env_filter = if let Some(ref log_level) = global_opts.log {
+        EnvFilter::new(log_level)
+    } else if let Ok(env_log) = env::var("RUST_LOG") {
+        EnvFilter::new(env_log)
+    } else {
+        EnvFilter::new("info")
+    };
+    tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
     // Retrieves default configuration (from `book.toml`, env. vars,
     // or hard-coded defaults); also stores global_opts.
@@ -59,14 +61,20 @@ fn main() -> Result<()> {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let base_url = config.base_url(args.base)?;
             let sitemap_dest_file_path = config.sitemap_file_path(args.dest);
+            let map_index = config.sitemap_map_index(args.map_index);
 
             println!(
                 "Generating {} from the list of Markdown files in {}...",
                 style(sitemap_dest_file_path.display()).cyan(),
                 style(markdown_src_dir_path.display()).cyan(),
             );
-            mdbook_utils::generate_sitemap(markdown_src_dir_path, base_url, sitemap_dest_file_path)
-                .context("[main] Failed to generate the sitemap.")?;
+            mdbook_utils::generate_sitemap(
+                markdown_src_dir_path,
+                base_url,
+                sitemap_dest_file_path,
+                map_index,
+            )
+            .context("[main] Failed to generate the sitemap.")?;
             println!("{}", style("Done.").green());
         }
         Command::Debug(args) => {

@@ -6,7 +6,6 @@ use pulldown_cmark::Parser;
 use pulldown_cmark::Tag;
 use pulldown_cmark::TagEnd;
 use tracing::debug;
-use tracing::error;
 
 use super::super::link::Link;
 use super::super::link::LinkBuilder;
@@ -26,7 +25,6 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
     let mut state: Vec<(Where, LinkBuilder<'input>)> = Vec::new();
     let mut links: Vec<Link<'input>> = Vec::new();
 
-    // Retrieve and group all Link-related events
     for event in parser {
         match event {
             // Start of a link
@@ -51,9 +49,19 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             // End of the link
             ref e @ Event::End(TagEnd::Link) => {
                 debug!("{e:?}");
-                let (whr, link_builder) = state.pop().unwrap(); // Start and End events are balanced
-                assert_eq!(whr, Where::InLink);
-                links.push(link_builder.build());
+                // We pop until we get the corresponding InLink?
+                // Wait, Start(Link) always pushes.
+                // End(Link) always pops. So they must be balanced if the parser works
+                // correctly.
+                if let Some((whr, link_builder)) = state.pop() {
+                    if whr == Where::InLink {
+                        links.push(link_builder.build());
+                    } else {
+                        tracing::warn!("Expected InLink state, found {:?}", whr);
+                    }
+                } else {
+                    tracing::warn!("Unbalanced Link End tag");
+                }
             }
 
             // Inspect events while in the link
@@ -66,46 +74,83 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 debug!(
                     "image: link type: {link_type:?}, image url: {dest_url}, image title: {title}, label: {id}",
                 );
-                let (whr, link_builder) = state.pop().unwrap();
-                assert_eq!(whr, Where::InLink);
-                state.push((
-                    Where::InImageInLink,
-                    link_builder.set_image(link_type, dest_url.into(), title.into(), id.into()),
-                ));
+                if let Some((whr, link_builder)) = state.pop() {
+                    if whr == Where::InLink {
+                        state.push((
+                            Where::InImageInLink,
+                            link_builder.set_image(link_type, dest_url.into(), title.into(), id.into()),
+                        ));
+                    } else {
+                        tracing::warn!("Expected InLink state, found {:?}", whr);
+                        state.push((whr, link_builder)); // restore state
+                    }
+                }
             }
 
             ref e @ Event::End(TagEnd::Image) if !state.is_empty() => {
                 debug!("{e:?}");
-                let (whr, link_builder) = state.pop().unwrap();
-                assert_eq!(whr, Where::InImageInLink);
-                state.push((Where::InLink, link_builder));
+                if let Some((whr, link_builder)) = state.pop() {
+                    if whr == Where::InImageInLink {
+                        state.push((Where::InLink, link_builder));
+                    } else {
+                        tracing::warn!("Expected InImageInLink state, found {:?}", whr);
+                        state.push((whr, link_builder)); // restore state
+                    }
+                }
             }
             // Text of an Image
             Event::Text(t)
                 if state.last().map_or(Where::Elsewhere, |s| s.0) == Where::InImageInLink =>
             {
                 debug!("Event::Text({t:?})");
-                let (whr, link_builder) = state.pop().unwrap();
-                assert_eq!(whr, Where::InImageInLink);
-                state.push((whr, link_builder.add_image_alt_text(Cow::from(t))));
+                if let Some((whr, link_builder)) = state.pop() {
+                    if whr == Where::InImageInLink {
+                        state.push((whr, link_builder.add_image_alt_text(Cow::from(t))));
+                    } else {
+                        tracing::warn!("Expected InImageInLink state, found {:?}", whr);
+                        state.push((whr, link_builder)); // restore state
+                    }
+                }
             }
             // Text of a Link
             Event::Text(t) if !state.is_empty() => {
                 debug!("Event::Text({t:?})");
-                let (whr, link_builder) = state.pop().unwrap();
-                assert_eq!(whr, Where::InLink);
-                state.push((whr, link_builder.add_text(Cow::from(t))));
+                if let Some((whr, link_builder)) = state.pop() {
+                    if whr == Where::InLink {
+                        state.push((whr, link_builder.add_text(Cow::from(t))));
+                    } else {
+                        tracing::warn!("Expected InLink state, found {:?}", whr);
+                        state.push((whr, link_builder)); // restore state
+                    }
+                }
             }
 
             Event::Code(c) if !state.is_empty() => {
                 debug!("code: {c}");
-                let (whr, link_builder) = state.pop().unwrap();
-                state.push((whr, link_builder.add_text(c.into())));
+                if let Some((whr, link_builder)) = state.pop() {
+                    if whr == Where::InImageInLink {
+                        state.push((whr, link_builder.add_image_alt_text(c.into())));
+                    } else if whr == Where::InLink {
+                        state.push((whr, link_builder.add_text(c.into())));
+                    } else {
+                        tracing::warn!("Expected InImageInLink or InLink state, found {:?}", whr);
+                        state.push((whr, link_builder)); // restore state
+                    }
+                }
             }
 
-            // corner cases: Code within an Image, Link within an Image...
+            // To robustly handle nested structures like bold, italics, etc, we should simply
+            // ignore Start and End tags that aren't Link or Image while in state.
+            Event::Start(_) | Event::End(_) if !state.is_empty() => {
+                // Ignore nested formatting tags like Strong, Emphasis, etc.
+                debug!("Ignoring nested formatting tag");
+            }
+
             ref e if !state.is_empty() => {
-                error!("Unhandled event while 'in link': {e:?}");
+                // Ignore other nested things, like Rule, SoftBreak, HardBreak, Html.
+                // Or maybe SoftBreak/HardBreak should add a space? Text gets added normally.
+                // We shouldn't panic or error out here.
+                debug!("Ignored event while 'in link': {e:?}");
             }
 
             ref e => {
@@ -113,16 +158,76 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             }
         }
     }
-    assert!(state.is_empty());
+
+    if !state.is_empty() {
+        tracing::warn!("State was not empty at end of parsing. Unbalanced markdown tags detected.");
+    }
 
     links
 }
 
 #[cfg(test)]
 mod test {
-    // use super::*;
+    use pulldown_cmark::Parser;
 
-    // #[test]
-    // fn test() {
-    // }
+    use super::*;
+
+    #[test]
+    fn test_extract_links_simple() {
+        let markdown = "[text](url \"title\")";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 1);
+        let link = &links[0];
+        assert_eq!(link.get_url(), "url");
+    }
+
+    #[test]
+    fn test_extract_links_with_image() {
+        let markdown = "[![alt](img_url)](url)";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 1);
+        let link = &links[0];
+        assert_eq!(link.get_url(), "url");
+        // image alt text is not directly exposed in Link yet via getter
+    }
+
+    #[test]
+    fn test_extract_links_with_nested_formatting() {
+        let markdown = "[**bold text** and `code` in link](url \"title\")";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 1);
+        let link = &links[0];
+        assert_eq!(link.get_url(), "url");
+        assert_eq!(
+            link.to_inline_link(),
+            "[bold text and code in link]( url \"title\" )"
+        );
+    }
+
+    #[test]
+    fn test_extract_links_with_image_and_nested_formatting() {
+        let markdown = "[![**badge** alt](badge_url)](link_url)";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 1);
+        let link = &links[0];
+        assert_eq!(link.get_url(), "link_url");
+        assert_eq!(link.to_link_with_badge(), "[![badge alt][badge alt]][]");
+    }
+
+    #[test]
+    fn test_extract_links_complex() {
+        let markdown = "[`code`](url) [![`image_code`](img_url)](url) [[link_in_link](url2)](url) [![[link_in_img](url2)](img_url)](url) [foo **bold**](url)";
+        let mut parser = Parser::new(markdown);
+        let links = extract_links(&mut parser);
+        assert_eq!(links.len(), 5);
+        assert_eq!(links[0].get_url(), "url");
+        assert_eq!(links[1].get_url(), "url");
+        assert_eq!(links[2].get_url(), "url2");
+        assert_eq!(links[3].get_url(), "url2");
+        assert_eq!(links[4].get_url(), "url");
+    }
 }

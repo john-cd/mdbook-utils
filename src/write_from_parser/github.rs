@@ -5,16 +5,17 @@ use std::io::Write;
 
 use anyhow::Result;
 use pulldown_cmark::Parser;
-use regex::Regex;
 use tracing::debug;
 
 use crate::link::Link;
 use crate::link::LinkBuilder;
 use crate::link::write_badge_refdefs_and_links_to_two;
 
-// TODO
-// - handle - and _ in github repo names (shields.io conventions)
-// - set the image alt-text
+// TODO:
+// - Handle '-' and '_' in GitHub repo names to comply with shields.io
+//   conventions.
+// - Implement setting the image alt-text dynamically.
+// - Support custom shields.io styles (e.g., flat, flat-square, for-the-badge).
 //
 // [![github][github-badge]][github]
 // [github]: https://github.com/john-cd/mdbook-utils
@@ -37,7 +38,7 @@ where
     let sorted_refdefs: BTreeMap<_, _> = parser.reference_definitions().iter().collect();
 
     let rule = &crate::link::GLOBAL_RULES["github repo"];
-    let re = Regex::new(rule.re).unwrap();
+    let re = &crate::link::COMPILED_RULES["github repo"];
 
     let mut links = Vec::new();
 

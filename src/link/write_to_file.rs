@@ -46,6 +46,42 @@ where
     Ok(())
 }
 
+/// Write duplicate links to a writer
+pub(crate) fn write_duplicate_links_to<W>(links: Vec<Link<'_>>, link_writer: &mut W) -> Result<()>
+where
+    W: Write,
+{
+    writeln!(link_writer, "# Duplicate Links\n")
+        .context("[write_duplicate_links_to] Failed to write duplicate links.")?;
+
+    let link_flags = LinkWrite::ReferenceLink | LinkWrite::ReferenceDefinition;
+    for l in links.iter() {
+        write(l, &link_flags, link_writer)?;
+        writeln!(link_writer)?
+    }
+    Ok(())
+}
+
+/// Write broken links to a writer
+pub(crate) fn write_broken_links_to<W>(
+    broken_links: Vec<(String, String, String)>,
+    link_writer: &mut W,
+) -> Result<()>
+where
+    W: Write,
+{
+    writeln!(link_writer, "# Broken Links\n")
+        .context("[write_broken_links_to] Failed to write broken links.")?;
+
+    for (reference, text, link_type) in broken_links {
+        writeln!(link_writer, "- Reference: {reference}")?;
+        writeln!(link_writer, "  Text: {text}")?;
+        writeln!(link_writer, "  Type: {link_type}")?;
+        writeln!(link_writer)?;
+    }
+    Ok(())
+}
+
 // /// Write reference definitions and links to a writer (e.g. file)
 // pub(crate) fn write_refdefs_and_links_to<W>(links: Vec<Link<'_>>, writer:
 // &mut W) -> Result<()> where

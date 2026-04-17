@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use clap::Args;
 
 /// Destination file
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub(crate) struct DestFileArgs {
     /// Path of the file to create
     #[arg(short = 'o', long = "output", value_name = "FILE", value_hint = clap::ValueHint::FilePath)]
@@ -22,7 +22,7 @@ pub(crate) struct DestDirArgs {
 }
 
 /// Markdown source directory
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub(crate) struct MarkdownDirArgs {
     /// Source directory containing the source Markdown files
     #[arg(short = 'm', long = "markdown-dir", value_name = "DIR", value_hint = clap::ValueHint::DirPath)]
@@ -82,6 +82,10 @@ pub(crate) struct DependenciesDirAndDestFileArgs {
     /// Path to the file to create
     #[command(flatten)]
     pub(crate) dest: DestFileArgs,
+
+    /// Path to the log file for dependencies
+    #[arg(long = "log-file", value_name = "FILE", value_hint = clap::ValueHint::FilePath)]
+    pub(crate) log_file: Option<PathBuf>,
 }
 
 /// Markdown source directory and destination directory
@@ -110,6 +114,10 @@ pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {
     /// Path to the file to create
     #[command(flatten)]
     pub(crate) dest: DestFileArgs,
+
+    /// Map a filename to another (e.g., 'intro.md' to 'index.md')
+    #[arg(long = "map-index", value_name = "FROM:TO")]
+    pub(crate) map_index: Option<String>,
 }
 
 #[cfg(test)]

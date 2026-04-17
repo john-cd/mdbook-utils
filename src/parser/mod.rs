@@ -38,25 +38,26 @@ fn get_options() -> Options {
 
 // BROKEN REFERENCES -----------------------------------
 
+use std::sync::Arc;
+use std::sync::Mutex;
+
 /// Handler for broken references
-#[derive(Debug)]
-pub(crate) struct Handler<'input> {
-    markdown_input: &'input str,
-    pub broken_links: Vec<(String, String, String)>,
+#[derive(Debug, Clone, Default)]
+pub(crate) struct Handler {
+    /// List of broken links found
+    pub broken_links: Arc<Mutex<Vec<(String, String, String)>>>,
 }
 
-impl<'input> Handler<'input> {
-    fn new(markdown_input: &'input str) -> Self {
-        let broken_links = Vec::new();
+impl Handler {
+    pub(crate) fn new() -> Self {
         Self {
-            markdown_input,
-            broken_links,
+            broken_links: Arc::new(Mutex::new(Vec::new())),
         }
     }
 }
 
 /// Implement the trait required by `new_with_broken_link_callback`
-impl<'input> BrokenLinkCallback<'input> for Handler<'input> {
+impl<'input> BrokenLinkCallback<'input> for Handler {
     /// In case the parser encounters any potential links that have a broken
     /// reference (e.g \[foo\] when there is no \[foo\]:  entry at the bottom)
     /// the provided callback will be called with the reference name, and
@@ -66,40 +67,35 @@ impl<'input> BrokenLinkCallback<'input> for Handler<'input> {
         &mut self,
         link: BrokenLink<'input>,
     ) -> Option<(CowStr<'input>, CowStr<'input>)> {
-        let txt: &str = self.markdown_input.get(link.span).unwrap_or("");
         warn!(
-            "Issue with the markdown: reference: {}, `{txt}`, type: {:?}",
+            "Issue with the markdown: reference: {}, type: {:?}",
             link.reference, link.link_type,
         );
-        self.broken_links.push((
-            link.reference.into_string(),
-            txt.into(),
-            format!("{:?}", link.link_type),
-        ));
-        Some(("http://TODO".into(), ":BROKEN_LINK:".into()))
-        // or simply return None
+        if let Ok(mut links) = self.broken_links.lock() {
+            links.push((
+                link.reference.into_string(),
+                "".into(), // We don't have the full input here anymore without 'input
+                format!("{:?}", link.link_type),
+            ));
+        } else {
+            tracing::warn!("Failed to lock broken_links");
+        }
+        None
     }
 }
 
-// TODO use this function
 /// Return a parser with suitable options and a broken link handler.
 ///
 /// markdown_input: the Markdown contents to parse
-#[allow(dead_code)]
 pub(crate) fn get_parser_with_broken_links_handler<'input>(
     markdown_input: &'input str,
-) -> Parser<'input, Handler<'input>> {
-    Parser::<'input, Handler<'input>>::new_with_broken_link_callback(
+    handler: Handler,
+) -> Parser<'input, Handler> {
+    Parser::<'input, Handler>::new_with_broken_link_callback(
         markdown_input,
         get_options(),
-        Some(Handler::<'input>::new(markdown_input)),
+        Some(handler),
     )
-    // Alternative with a closure:
-    // let parser = Parser::new_with_broken_link_callback(
-    //     markdown_input.as_ref(),
-    //     get_options(),
-    //     Some(&mut |broken_link: BrokenLink| { callback(broken_link,
-    // markdown_input.as_ref()) }), )
 }
 
 // Example using `new_with_broken_link_callback` from https://github.com/raphlinus/pulldown-cmark/blob/1a5e54546b40d79eec8001d4e268b436571a78bb/pulldown-cmark/src/main.rs#L33
