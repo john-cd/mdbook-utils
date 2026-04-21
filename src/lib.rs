@@ -391,7 +391,7 @@ where
 
     let summary_md_path = markdown_src_dir_path.join("SUMMARY.md");
     tracing::debug!("SUMMARY.md path: {}", summary_md_path.display());
-    let markdown = std::fs::read_to_string(summary_md_path.clone()).with_context(|| {
+    let markdown = std::fs::read_to_string(&summary_md_path).with_context(|| {
         format!(
             "[generate_sitemap] Could not read {}. Does the file exist?",
             summary_md_path.display()
