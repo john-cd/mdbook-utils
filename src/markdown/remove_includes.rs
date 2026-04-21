@@ -37,7 +37,7 @@ pub fn remove_includes_in_all_markdown_files_in<P>(
     contents_to_insert: &str,
 ) -> Result<Vec<std::path::PathBuf>>
 where
-    P: AsRef<Path>,
+    P: AsRef<Path> + std::marker::Sync,
 {
     let modified = Mutex::new(Vec::new());
 
