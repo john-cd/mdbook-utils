@@ -81,10 +81,6 @@ where
                 );
                 let code_path = code_dest_dir_path.as_ref().join(code_filename);
 
-                // create the file before canonicalizing the full path, otherwise canonicalize fails
-                if !code_path.exists() {
-                    File::create(&code_path)?;
-                }
                 if crate::fs::is_path_within(&code_dest_canon, &code_path).is_err() {
                     anyhow::bail!("Path traversal detected: attempt to write file outside destination directory");
                 }
