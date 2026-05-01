@@ -10,3 +10,4 @@ pub(crate) use dir::*;
 pub(crate) use find_markdown_files::*;
 pub(crate) use path_validation::*;
 pub(crate) use read_files::*;
+pub(crate) use std::fs::write;
