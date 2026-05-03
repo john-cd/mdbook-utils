@@ -84,7 +84,7 @@ pub(crate) struct GlobalOpts {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use clap::CommandFactory;
 
     use super::*;

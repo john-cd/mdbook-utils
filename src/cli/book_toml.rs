@@ -132,7 +132,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;

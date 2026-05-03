@@ -10,8 +10,8 @@ use std::path::Path;
 use std::sync::Mutex;
 
 use anyhow::Result;
-use rayon::prelude::*;
 use once_cell::sync::Lazy;
+use rayon::prelude::*;
 use regex::Regex;
 use tracing::info;
 
@@ -62,7 +62,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;

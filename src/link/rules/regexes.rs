@@ -274,7 +274,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
 });
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     fn get_re(name: &str) -> &'static Regex {
@@ -518,5 +518,4 @@ mod test {
             assert_eq!(&caps["last"], last);
         }
     }
-
 }

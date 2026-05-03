@@ -5,9 +5,8 @@ use std::io::Write;
 use std::path::Path;
 
 use anyhow::Result;
-use rayon::prelude::*;
-use anyhow::bail;
 use once_cell::sync::Lazy;
+use rayon::prelude::*;
 use regex::Regex;
 use tracing::info;
 
@@ -108,7 +107,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use tempfile::tempdir;
 
     use super::*;

@@ -7,10 +7,10 @@ use std::path::PathBuf;
 use std::sync::LazyLock;
 
 use anyhow::Result;
-use rayon::prelude::*;
 use once_cell::sync::Lazy;
 use rand::distr::Alphanumeric;
 use rand::distr::SampleString;
+use rayon::prelude::*;
 use regex::Regex;
 use tracing::info;
 
@@ -173,7 +173,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;

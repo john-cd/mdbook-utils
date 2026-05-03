@@ -132,7 +132,11 @@ where
     // We need to consume the parser to trigger the callbacks
     for _ in parser {}
 
-    let broken_links = handler.broken_links.lock().unwrap_or_else(|e| e.into_inner()).clone();
+    let broken_links = handler
+        .broken_links
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone();
 
     link::write_broken_links_to(broken_links, &mut f)?;
 
@@ -140,9 +144,10 @@ where
 }
 
 #[cfg(test)]
-mod test {
-    use super::*;
+mod tests {
     use std::fs;
+
+    use super::*;
 
     #[test]
     fn test_write_broken_links() -> Result<()> {

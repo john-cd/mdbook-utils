@@ -121,7 +121,7 @@ pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     // use super::*;
 
     // #[test]

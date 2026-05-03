@@ -50,7 +50,7 @@ pub(crate) fn parse_cargo_toml<P: AsRef<Path>>(
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     // use super::*;
 
     // #[test]
