@@ -71,10 +71,12 @@ where
 }
 
 #[cfg(test)]
-mod test {
-    use super::*;
-    use url::Url;
+mod tests {
     use std::path::PathBuf;
+
+    use url::Url;
+
+    use super::*;
 
     #[test]
     fn test_generate_sitemap_invalid_base_url() {
@@ -91,6 +93,11 @@ mod test {
         );
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Invalid URL - cannot be a base"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Invalid URL - cannot be a base")
+        );
     }
 }

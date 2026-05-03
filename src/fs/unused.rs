@@ -117,7 +117,7 @@ pub fn identify_unused_rs_examples<
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;
@@ -230,10 +230,12 @@ mod test {
 
         let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("should be a folder and exist on disk!"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("should be a folder and exist on disk!")
+        );
     }
 
     #[test]
@@ -245,10 +247,12 @@ mod test {
 
         let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("should be a folder and exist on disk!"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("should be a folder and exist on disk!")
+        );
     }
 
     #[test]

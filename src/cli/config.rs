@@ -119,7 +119,6 @@ impl Configuration {
                 );
                 PathBuf::from(default_dir_path.as_ref())
             });
-
         let p = p.canonicalize()
             .with_context(|| format!("[markdown_dir_path] The Markdown source directory {} does not exist or cannot be resolved.", p.display()))?;
 
@@ -290,11 +289,13 @@ impl Configuration {
 }
 
 #[cfg(test)]
-mod test {
-    use super::*;
-    use anyhow::Result;
+mod tests {
     use std::fs;
+
+    use anyhow::Result;
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn test_configuration_default() {
@@ -418,8 +419,16 @@ src = "toml_src"
     fn test_dest_dir_path() {
         let mut config = Configuration::default();
         let root = if cfg!(windows) { r"C:\root" } else { "/root" };
-        let env_dest = if cfg!(windows) { r"C:\env_dest" } else { "/env_dest" };
-        let arg_dest = if cfg!(windows) { r"C:\arg_dest" } else { "/arg_dest" };
+        let env_dest = if cfg!(windows) {
+            r"C:\env_dest"
+        } else {
+            "/env_dest"
+        };
+        let arg_dest = if cfg!(windows) {
+            r"C:\arg_dest"
+        } else {
+            "/arg_dest"
+        };
 
         config.book_root_dir_path = PathBuf::from(root);
 
@@ -440,10 +449,13 @@ src = "toml_src"
     }
 
     #[test]
-    fn test_dest_file_path() {
         let mut config = Configuration::default();
         let root = if cfg!(windows) { r"C:\root" } else { "/root" };
-        let arg_file = if cfg!(windows) { r"C:\arg\file.txt" } else { "/arg/file.txt" };
+        let arg_file = if cfg!(windows) {
+            r"C:\arg\file.txt"
+        } else {
+            "/arg/file.txt"
+        };
 
         config.book_root_dir_path = PathBuf::from(root);
 
@@ -503,7 +515,10 @@ src = "toml_src"
 
         // 1. Default
         let args = UrlArgs { url: None };
-        assert_eq!(config.base_url(args)?.as_str(), "http://example.com/mybook/");
+        assert_eq!(
+            config.base_url(args)?.as_str(),
+            "http://example.com/mybook/"
+        );
 
         // 2. Argument
         let arg_url = url::Url::parse("https://test.com/")?;
@@ -561,10 +576,7 @@ src = "toml_src"
         let env_html = PathBuf::from("env_html");
         config.book_html_build_dir_path = Some(env_html.clone());
         let args = DestFileArgs { file_path: None };
-        assert_eq!(
-            config.sitemap_file_path(args),
-            env_html.join("sitemap.xml")
-        );
+        assert_eq!(config.sitemap_file_path(args), env_html.join("sitemap.xml"));
 
         // 3. book.toml
         config.book_html_build_dir_path = None;
@@ -583,8 +595,9 @@ build-dir = "toml_book"
         // 4. Default
         fs::remove_file(dir.path().join("book.toml"))?;
         let args = DestFileArgs { file_path: None };
-        // The default in the code is hardcoded as PathBuf::from("./book").join("sitemap.xml")
-        // when try_parse_book_toml fails.
+        // The default in the code is hardcoded as
+        // PathBuf::from("./book").join("sitemap.xml") when try_parse_book_toml
+        // fails.
         assert_eq!(
             config.sitemap_file_path(args),
             PathBuf::from("./book").join("sitemap.xml")

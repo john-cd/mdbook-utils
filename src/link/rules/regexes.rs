@@ -274,7 +274,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
 });
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     fn get_re(name: &str) -> &'static Regex {
@@ -316,7 +316,11 @@ mod test {
     fn test_documentation_rule() {
         let re = get_re("documentation");
         let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
-        assert!(re.is_match(url), "documentation rule failed to match {}", url);
+        assert!(
+            re.is_match(url),
+            "documentation rule failed to match {}",
+            url
+        );
         let caps = re.captures(url).unwrap();
         assert_eq!(&caps["crate"], "sqlx");
 
@@ -535,5 +539,4 @@ mod test {
         assert_eq!(&caps_query_fragment["domain"], "example.com");
         assert_eq!(&caps_query_fragment["last"], "bar");
     }
-
 }

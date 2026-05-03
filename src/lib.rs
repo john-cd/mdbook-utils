@@ -430,13 +430,14 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
             if path.ends_with('/') {
                 path = &path[..path.len() - 1];
             }
-            if let Some(name) = path.split('/').next_back() {
-                if !name.is_empty()
-                    && name != "categories"
-                    && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-                {
-                    categories.insert(name.to_string());
-                }
+            if let Some(name) = path.split('/').next_back()
+                && !name.is_empty()
+                && name != "categories"
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                categories.insert(name.to_string());
             }
         }
     }
@@ -472,13 +473,14 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
             if path.ends_with('/') {
                 path = &path[..path.len() - 1];
             }
-            if let Some(name) = path.split('/').next_back() {
-                if !name.is_empty()
-                    && name != "crates"
-                    && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-                {
-                    crates.insert(name.to_string());
-                }
+            if let Some(name) = path.split('/').next_back()
+                && !name.is_empty()
+                && name != "crates"
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                crates.insert(name.to_string());
             }
         }
     }
@@ -525,10 +527,11 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(
 
     let mut missing = Vec::new();
     for f in all_files {
-        if let Ok(canon) = f.canonicalize() {
-            if !files_in_summary.contains(&canon) && f.file_name().unwrap() != "SUMMARY.md" {
-                missing.push(f);
-            }
+        if let Ok(canon) = f.canonicalize()
+            && !files_in_summary.contains(&canon)
+            && f.file_name().unwrap() != "SUMMARY.md"
+        {
+            missing.push(f);
         }
     }
 
@@ -587,7 +590,7 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
     use std::io::Write;
 
@@ -729,7 +732,6 @@ mod test {
 
         Ok(())
     }
-
 
     #[test]
     fn test_identify_unused_rs_examples() {
@@ -945,9 +947,11 @@ mod test {
         );
 
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("Invalid URL - cannot be a base"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Invalid URL - cannot be a base")
+        );
     }
 }

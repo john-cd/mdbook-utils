@@ -43,13 +43,11 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(
 
     let mut missing = Vec::new();
     for f in all_files {
-        if let Ok(canon) = f.canonicalize() {
-            if let Some(file_name) = f.file_name() {
-                if !files_in_summary.contains(&canon) && file_name != "SUMMARY.md" {
+        if let Ok(canon) = f.canonicalize()
+            && let Some(file_name) = f.file_name()
+                && !files_in_summary.contains(&canon) && file_name != "SUMMARY.md" {
                     missing.push(f);
                 }
-            }
-        }
     }
 
     Ok(missing)
@@ -115,7 +113,7 @@ pub fn identify_unused_rs_examples<P1: AsRef<Path>, P2: AsRef<Path>>(
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;

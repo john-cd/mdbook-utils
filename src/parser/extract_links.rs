@@ -78,7 +78,12 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                     if whr == Where::InLink {
                         state.push((
                             Where::InImageInLink,
-                            link_builder.set_image(link_type, dest_url.into(), title.into(), id.into()),
+                            link_builder.set_image(
+                                link_type,
+                                dest_url.into(),
+                                title.into(),
+                                id.into(),
+                            ),
                         ));
                     } else {
                         tracing::warn!("Expected InLink state, found {:?}", whr);
@@ -167,7 +172,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use pulldown_cmark::Parser;
 
     use super::*;

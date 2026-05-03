@@ -61,7 +61,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;

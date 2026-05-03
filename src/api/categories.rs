@@ -33,14 +33,15 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
             if path.ends_with('/') {
                 path = &path[..path.len() - 1];
             }
-            if let Some(name) = path.split('/').next_back() {
-                if !name.is_empty()
+            if let Some(name) = path.split('/').next_back()
+                && !name.is_empty()
                     && name != "categories"
-                    && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+                    && name
+                        .chars()
+                        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
                 {
                     categories.insert(name.to_string());
                 }
-            }
         }
     }
 
@@ -52,7 +53,7 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;
@@ -186,14 +187,15 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
             if path.ends_with('/') {
                 path = &path[..path.len() - 1];
             }
-            if let Some(name) = path.split('/').next_back() {
-                if !name.is_empty()
+            if let Some(name) = path.split('/').next_back()
+                && !name.is_empty()
                     && name != "crates"
-                    && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+                    && name
+                        .chars()
+                        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
                 {
                     crates.insert(name.to_string());
                 }
-            }
         }
     }
 

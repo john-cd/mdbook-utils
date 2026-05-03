@@ -189,7 +189,7 @@ fn write<W: Write>(l: &Link<'_>, flags: &BitFlags<LinkWrite>, w: &mut W) -> Resu
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     // use super::*;
 
     // #[test]

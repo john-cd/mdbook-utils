@@ -1,7 +1,6 @@
 //! Read one or multiple files into a string or vector of strings
 
 use std::borrow::Cow;
-use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
@@ -81,7 +80,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     // use super::*;
 
     // #[test]

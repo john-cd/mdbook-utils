@@ -64,7 +64,7 @@ pub(crate) fn build_book(root_path: &Path, mdbook_path: &Path) -> Result<()> {
 // }
 
 #[cfg(test)]
-mod test {
+mod tests {
     // use super::*;
 
     // #[test]

@@ -19,7 +19,7 @@ pub(crate) fn merge_links<'a>(
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use pulldown_cmark::LinkType;
 
     use super::*;

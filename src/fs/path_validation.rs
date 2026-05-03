@@ -8,8 +8,8 @@ use anyhow::bail;
 /// Returns the canonicalized path if it is within the canonicalized base_dir.
 /// Otherwise returns an error.
 ///
-/// This function handles non-existent files by validating their parent directory.
-/// Dangling symlinks are rejected for security.
+/// This function handles non-existent files by validating their parent
+/// directory. Dangling symlinks are rejected for security.
 pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
     let base_dir_canon = base_dir.canonicalize()?;
 
@@ -59,14 +59,17 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
                     }
                 }
             }
-            bail!("Path traversal detected: {:?} has no existing ancestor within base directory", path);
+            bail!(
+                "Path traversal detected: {:?} has no existing ancestor within base directory",
+                path
+            );
         }
         Err(e) => Err(e.into()),
     }
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;
@@ -99,7 +102,8 @@ mod test {
         let non_existent_unsafe = dir.path().join("new_unsafe.txt");
         assert!(is_path_within(&base_dir, &non_existent_unsafe).is_err());
 
-        // Negative case: dangling symlink (even if it points to a safe location, we reject it)
+        // Negative case: dangling symlink (even if it points to a safe location, we
+        // reject it)
         #[cfg(unix)]
         {
             let dangling = base_dir.join("dangling.lnk");

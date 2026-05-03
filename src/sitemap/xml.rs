@@ -44,7 +44,7 @@ pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Resu
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::io::Cursor;
 
     use super::*;
