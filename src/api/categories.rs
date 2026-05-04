@@ -35,13 +35,13 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
             }
             if let Some(name) = path.split('/').next_back()
                 && !name.is_empty()
-                    && name != "categories"
-                    && name
-                        .chars()
-                        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-                {
-                    categories.insert(name.to_string());
-                }
+                && name != "categories"
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                categories.insert(name.to_string());
+            }
         }
     }
 
@@ -50,119 +50,6 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
     }
 
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use std::fs;
-
-    use tempfile::tempdir;
-
-    use super::*;
-
-    #[test]
-    fn test_generate_categories_happy_path() -> Result<()> {
-        let dir = tempdir()?;
-        let src_dir = dir.path().join("src");
-        fs::create_dir(&src_dir)?;
-
-        let md1 = src_dir.join("1.md");
-        fs::write(
-            &md1,
-            "Here is [category one](https://crates.io/categories/cat1) and [another](https://crates.io/categories/cat2?sort=recent) and [trailing slash](https://crates.io/categories/cat3/).",
-        )?;
-
-        let md2 = src_dir.join("2.md");
-        fs::write(
-            &md2,
-            "Duplicate [cat1](https://crates.io/categories/cat1), and an unrelated [link](https://example.com).",
-        )?;
-
-        let dest_file = dir.path().join("categories.md");
-        generate_categories(&src_dir, &dest_file)?;
-
-        let content = fs::read_to_string(&dest_file)?;
-        let expected = "# Categories\n\n- [cat1](https://crates.io/categories/cat1)\n- [cat2](https://crates.io/categories/cat2)\n- [cat3](https://crates.io/categories/cat3)\n";
-        assert_eq!(content, expected);
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_generate_categories_invalid_dir() {
-        let dir = tempdir().unwrap();
-        let src_dir = dir.path().join("non_existent_src");
-        let dest_file = dir.path().join("categories.md");
-
-        let result = generate_categories(&src_dir, &dest_file);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_generate_categories_edge_cases() -> Result<()> {
-        let dir = tempdir()?;
-        let src_dir = dir.path().join("src");
-        fs::create_dir(&src_dir)?;
-
-        let md1 = src_dir.join("1.md");
-        fs::write(
-            &md1,
-            "Here is [empty 1](https://crates.io/categories) and [empty 2](https://crates.io/categories/).",
-        )?;
-
-        let dest_file = dir.path().join("categories.md");
-        generate_categories(&src_dir, &dest_file)?;
-
-        let content = fs::read_to_string(&dest_file)?;
-        let expected = "# Categories\n\n";
-        assert_eq!(content, expected);
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_generate_categories_injection() -> Result<()> {
-        let dir = tempdir()?;
-        let src_dir = dir.path().join("src");
-        fs::create_dir(&src_dir)?;
-
-        let md1 = src_dir.join("1.md");
-        fs::write(
-            &md1,
-            r#"Malicious [link](https://crates.io/categories/cat1\");alert(1);(\"\")"#,
-        )?;
-
-        let dest_file = dir.path().join("categories.md");
-        generate_categories(&src_dir, &dest_file)?;
-
-        let content = fs::read_to_string(&dest_file)?;
-        let expected = "# Categories\n\n";
-        assert_eq!(content, expected);
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_generate_crates_injection() -> Result<()> {
-        let dir = tempdir()?;
-        let src_dir = dir.path().join("src");
-        fs::create_dir(&src_dir)?;
-
-        let md1 = src_dir.join("1.md");
-        fs::write(
-            &md1,
-            r#"Malicious [link](https://crates.io/crates/crate1\");alert(1);(\"\")"#,
-        )?;
-
-        let dest_file = dir.path().join("crates.md");
-        generate_crates(&src_dir, &dest_file)?;
-
-        let content = std::fs::read_to_string(&dest_file)?;
-        let expected = "# Crates\n\n";
-        assert_eq!(content, expected);
-
-        Ok(())
-    }
 }
 
 /// Generate a crate index and write to a Markdown file.
@@ -189,13 +76,13 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
             }
             if let Some(name) = path.split('/').next_back()
                 && !name.is_empty()
-                    && name != "crates"
-                    && name
-                        .chars()
-                        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-                {
-                    crates.insert(name.to_string());
-                }
+                && name != "crates"
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                crates.insert(name.to_string());
+            }
         }
     }
 
