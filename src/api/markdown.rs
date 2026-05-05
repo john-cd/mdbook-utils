@@ -45,9 +45,11 @@ pub fn identify_files_not_in_summary<P: AsRef<Path>>(
     for f in all_files {
         if let Ok(canon) = f.canonicalize()
             && let Some(file_name) = f.file_name()
-                && !files_in_summary.contains(&canon) && file_name != "SUMMARY.md" {
-                    missing.push(f);
-                }
+            && !files_in_summary.contains(&canon)
+            && file_name != "SUMMARY.md"
+        {
+            missing.push(f);
+        }
     }
 
     Ok(missing)
