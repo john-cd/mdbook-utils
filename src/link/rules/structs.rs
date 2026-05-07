@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[derive(Debug, Default)]
 pub(crate) struct Rule<'a> {
     pub(crate) re: &'a str, // Regex pattern to match the url

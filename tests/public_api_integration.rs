@@ -26,10 +26,12 @@ fn integration_generate_categories_and_crates() -> anyhow::Result<()> {
     let categories = fs::read_to_string(categories_dest)?;
     let crates = fs::read_to_string(crates_dest)?;
 
-    assert!(categories.contains("- [development-tools](https://crates.io/categories/development-tools)"));
+    assert!(
+        categories
+            .contains("- [development-tools](https://crates.io/categories/development-tools)")
+    );
     assert!(categories.contains("- [parsing](https://crates.io/categories/parsing)"));
     assert!(crates.contains("- [rayon](https://crates.io/crates/rayon)"));
     assert!(crates.contains("- [serde](https://crates.io/crates/serde)"));
     Ok(())
 }
-

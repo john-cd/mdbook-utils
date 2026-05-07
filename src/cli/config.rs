@@ -473,7 +473,10 @@ src = "toml_src"
         let args = DestFileArgs {
             file_path: Some(PathBuf::from(arg_file)),
         };
-        assert_eq!(config.dest_file_path(args, "test.txt"), PathBuf::from(arg_file));
+        assert_eq!(
+            config.dest_file_path(args, "test.txt"),
+            PathBuf::from(arg_file)
+        );
     }
 
     #[test]

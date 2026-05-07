@@ -14,8 +14,8 @@ use crate::generate::index::write_index;
 use crate::parser;
 
 /// Generate a category index and write to a Markdown file.
-#[tracing::instrument]
-pub fn generate_categories<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std::fmt::Debug>(
+#[tracing::instrument(skip_all)]
+pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {
@@ -34,8 +34,8 @@ pub fn generate_categories<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + 
 }
 
 /// Generate a crate index and write to a Markdown file.
-#[tracing::instrument]
-pub fn generate_crates<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std::fmt::Debug>(
+#[tracing::instrument(skip_all)]
+pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {

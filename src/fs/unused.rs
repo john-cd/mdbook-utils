@@ -55,7 +55,10 @@ pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
         }
     }
 
-    tracing::debug!(count = missing.len(), "identified markdown files not referenced in SUMMARY.md");
+    tracing::debug!(
+        count = missing.len(),
+        "identified markdown files not referenced in SUMMARY.md"
+    );
     Ok(missing)
 }
 
