@@ -52,4 +52,3 @@ where
     pulldown_cmark::html::push_html(&mut html_output, parser);
     html_output
 }
-

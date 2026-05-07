@@ -223,7 +223,7 @@ impl Hash for Link<'_> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 

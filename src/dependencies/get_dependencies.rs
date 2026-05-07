@@ -1,18 +1,18 @@
 //! Get the book's examples' dependencies
 use std::borrow::Cow;
 use std::collections::BTreeMap;
+use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 use std::process::Command;
-use std::fs::File;
-use tempfile::Builder;
 
 use anyhow::Result;
-use tracing::debug;
-use tracing::warn;
 use anyhow::anyhow;
 use serde::Deserialize;
+use tempfile::Builder;
+use tracing::debug;
+use tracing::warn;
 
 /// Stores a dependency to a crate
 #[derive(Debug, Deserialize)]
@@ -110,7 +110,7 @@ fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()>
                         return Ok(());
                     }
                 }
-            },
+            }
             Err(e) => {
                 warn!("Failed to create temporary log file: {}", e);
                 return Ok(());
@@ -136,7 +136,7 @@ fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()>
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     // use super::*;
 
     // #[test]

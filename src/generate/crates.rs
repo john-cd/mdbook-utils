@@ -11,12 +11,15 @@ use anyhow::Result;
 use crate::fs;
 use crate::parser;
 
+#[allow(dead_code)] // TODO
 fn is_valid_name(name: &str) -> bool {
-    name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    name.chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
 }
 
 /// Generate a category index and write to a Markdown file.
 #[tracing::instrument]
+#[allow(dead_code)] // TODO
 pub fn generate_categories<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std::fmt::Debug>(
     src_dir_path: P1,
     dest_file_path: P2,
@@ -39,15 +42,14 @@ pub fn generate_categories<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + 
             if path.ends_with('/') {
                 path = &path[..path.len() - 1];
             }
-            if let Some(name) = path.split('/').next_back() {
-                if !name.is_empty()
-                    && name != "categories"
-                    && name
-                        .chars()
-                        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-                {
-                    categories.insert(name.to_string());
-                }
+            if let Some(name) = path.split('/').next_back()
+                && !name.is_empty()
+                && name != "categories"
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                categories.insert(name.to_string());
             }
         }
     }
@@ -61,6 +63,7 @@ pub fn generate_categories<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + 
 
 /// Generate a crate index and write to a Markdown file.
 #[tracing::instrument]
+#[allow(dead_code)] // TODO
 pub fn generate_crates<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std::fmt::Debug>(
     src_dir_path: P1,
     dest_file_path: P2,
@@ -82,15 +85,14 @@ pub fn generate_crates<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std:
             if path.ends_with('/') {
                 path = &path[..path.len() - 1];
             }
-            if let Some(name) = path.split('/').next_back() {
-                if !name.is_empty()
-                    && name != "crates"
-                    && name
-                        .chars()
-                        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-                {
-                    crates.insert(name.to_string());
-                }
+            if let Some(name) = path.split('/').next_back()
+                && !name.is_empty()
+                && name != "crates"
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                crates.insert(name.to_string());
             }
         }
     }
@@ -103,7 +105,7 @@ pub fn generate_crates<P1: AsRef<Path> + std::fmt::Debug, P2: AsRef<Path> + std:
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;

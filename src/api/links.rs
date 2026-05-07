@@ -132,7 +132,11 @@ where
     // We need to consume the parser to trigger the callbacks
     for _ in parser {}
 
-    let broken_links = handler.broken_links.lock().unwrap_or_else(|e| e.into_inner()).clone();
+    let broken_links = handler
+        .broken_links
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone();
 
     link::write_broken_links_to(broken_links, &mut f)?;
 
@@ -140,9 +144,10 @@ where
 }
 
 #[cfg(test)]
-mod test {
-    use super::*;
+mod tests {
     use std::fs;
+
+    use super::*;
 
     #[test]
     fn test_write_broken_links() -> Result<()> {
@@ -166,6 +171,42 @@ mod test {
         assert!(content.contains("# Broken Links"));
         assert!(content.contains("- Reference: broken reference"));
         assert!(content.contains("Type: ShortcutUnknown"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_write_duplicate_links() -> Result<()> {
+        let temp_dir = tempfile::tempdir()?;
+        let src_dir = temp_dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+
+        let md_file_path1 = src_dir.join("test1.md");
+        fs::write(
+            &md_file_path1,
+            "Link 1: [example1](http://example.com/1)\nLink 2: [example2](http://example.com/2)\n",
+        )?;
+
+        let md_file_path2 = src_dir.join("test2.md");
+        fs::write(
+            &md_file_path2,
+            "Link 1 again: [example1](http://example.com/1)\nLink 3: [example3](http://example.com/3)\n",
+        )?;
+
+        let dest_file_path = temp_dir.path().join("duplicate_links.md");
+
+        write_duplicate_links(&src_dir, &dest_file_path)?;
+
+        assert!(dest_file_path.exists());
+        let content = fs::read_to_string(&dest_file_path)?;
+
+        assert!(content.contains("# Duplicate Links"));
+
+        let occurrences = content.matches("http://example.com/1").count();
+        assert_eq!(occurrences, 2);
+
+        assert!(!content.contains("http://example.com/2"));
+        assert!(!content.contains("http://example.com/3"));
 
         Ok(())
     }

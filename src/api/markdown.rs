@@ -3,7 +3,7 @@ pub use crate::fs::unused::identify_files_not_in_summary;
 pub use crate::fs::unused::identify_unused_rs_examples;
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
     use std::path::Path;
 

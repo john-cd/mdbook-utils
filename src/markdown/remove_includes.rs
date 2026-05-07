@@ -10,8 +10,8 @@ use std::path::Path;
 use std::sync::Mutex;
 
 use anyhow::Result;
-use rayon::prelude::*;
 use once_cell::sync::Lazy;
+use rayon::prelude::*;
 use regex::Regex;
 use tracing::info;
 
@@ -37,7 +37,7 @@ pub fn remove_includes_in_all_markdown_files_in<P>(
     contents_to_insert: &str,
 ) -> Result<Vec<std::path::PathBuf>>
 where
-    P: AsRef<Path>,
+    P: AsRef<Path> + std::marker::Sync,
 {
     let modified = Mutex::new(Vec::new());
 
@@ -62,7 +62,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;

@@ -14,6 +14,7 @@ use crate::parser;
 
 /// Identify .md files not in SUMMARY.md
 // TODO: Handle nested directories more accurately in SUMMARY.md link parsing.
+#[allow(dead_code)] // TODO
 #[tracing::instrument]
 pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
     markdown_src_dir_path: P,
@@ -60,6 +61,7 @@ pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
 }
 
 /// Identify .rs examples not used in Markdown files
+#[allow(dead_code)] // TODO
 #[tracing::instrument]
 pub fn identify_unused_rs_examples<
     P1: AsRef<Path> + std::fmt::Debug,
@@ -117,7 +119,7 @@ pub fn identify_unused_rs_examples<
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
 
     use tempfile::tempdir;
@@ -230,10 +232,12 @@ mod test {
 
         let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("should be a folder and exist on disk!"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("should be a folder and exist on disk!")
+        );
     }
 
     #[test]
@@ -245,10 +249,12 @@ mod test {
 
         let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("should be a folder and exist on disk!"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("should be a folder and exist on disk!")
+        );
     }
 
     #[test]

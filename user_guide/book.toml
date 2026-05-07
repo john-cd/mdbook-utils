@@ -6,7 +6,7 @@ language = "en"
 multilingual = false
 
 [rust]
-edition = "2021"
+edition = "2024"
 
 [build]
 create-missing = false
@@ -25,4 +25,4 @@ enable = true     # include support for printable output
 page-break = true # insert page-break after each chapter
 
 [output.html.playground]
-editable = true         # allows editing the source code
+editable = true # allows editing the source code

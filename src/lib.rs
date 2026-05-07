@@ -391,7 +391,7 @@ where
 
     let summary_md_path = markdown_src_dir_path.join("SUMMARY.md");
     tracing::debug!("SUMMARY.md path: {}", summary_md_path.display());
-    let markdown = std::fs::read_to_string(summary_md_path.clone()).with_context(|| {
+    let markdown = std::fs::read_to_string(&summary_md_path).with_context(|| {
         format!(
             "[generate_sitemap] Could not read {}. Does the file exist?",
             summary_md_path.display()
@@ -430,13 +430,14 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
             if path.ends_with('/') {
                 path = &path[..path.len() - 1];
             }
-            if let Some(name) = path.split('/').next_back() {
-                if !name.is_empty()
-                    && name != "categories"
-                    && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-                {
-                    categories.insert(name.to_string());
-                }
+            if let Some(name) = path.split('/').next_back()
+                && !name.is_empty()
+                && name != "categories"
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                categories.insert(name.to_string());
             }
         }
     }
@@ -472,13 +473,14 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
             if path.ends_with('/') {
                 path = &path[..path.len() - 1];
             }
-            if let Some(name) = path.split('/').next_back() {
-                if !name.is_empty()
-                    && name != "crates"
-                    && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-                {
-                    crates.insert(name.to_string());
-                }
+            if let Some(name) = path.split('/').next_back()
+                && !name.is_empty()
+                && name != "crates"
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                crates.insert(name.to_string());
             }
         }
     }
@@ -494,7 +496,7 @@ pub use api::identify_files_not_in_summary;
 pub use api::identify_unused_rs_examples;
 
 #[cfg(test)]
-mod test {
+mod tests {
     use std::fs;
     use std::io::Write;
 
@@ -636,7 +638,6 @@ mod test {
 
         Ok(())
     }
-
 
     #[test]
     fn test_identify_unused_rs_examples() {
@@ -852,9 +853,11 @@ mod test {
         );
 
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("Invalid URL - cannot be a base"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Invalid URL - cannot be a base")
+        );
     }
 }

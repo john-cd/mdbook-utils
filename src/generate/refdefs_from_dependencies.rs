@@ -66,7 +66,7 @@ fn generate_refdefs_for_one_library(
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     // use super::*;
 
     // #[test]
