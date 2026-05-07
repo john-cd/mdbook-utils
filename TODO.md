@@ -28,6 +28,17 @@
 - [ ] use test_book in automated (integration) tests
 - [ ] make more functions fully public
 
+## Suggested improvements from this review
+
+- [ ] Fix the two currently failing tests in the baseline suite:
+  - `api::links::tests::test_write_broken_links`
+  - `link::rules::regexes::tests::test_std_item_documentation_rule`
+- [ ] Remove duplicate API tests between `src/lib.rs` and module-level test files to keep ownership of behavior checks clear
+- [ ] Add CLI integration tests for `mdbook-utils markdown` and `mdbook-utils links` command paths
+- [ ] Add snapshot-style tests for generated sitemap and index markdown outputs
+- [ ] Expand tracing coverage in CLI command handlers to include selected paths and command outcomes
+- [ ] Add CI checks for `cargo fmt --check` and `cargo clippy --all-targets -- -D warnings`
+
 ## Later
 
 - [ ] review [markdown-gen][c-markdown_gen]
@@ -50,7 +61,7 @@
 - links
   - [x] write-all (write all existing links to a Markdown file)
   - [x] write-inline (write all existing inline / autolinks to a Markdown file)
-    - TODO: add "link format" option to output links in reference, inline, autolink formats
+    - follow-up: add a "link format" option to output links in reference, inline, autolink formats
   - [x] duplicate-links (identify duplicate links / labels)
   - [x] broken-links (identify broken links)
 - markdown

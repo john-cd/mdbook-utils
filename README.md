@@ -1,6 +1,6 @@
 # mdBook Utilities
 
-TODO update
+Project status and roadmap are actively maintained.
 
 This is a **Work In Progress**. The command-line interface (CLI) and underlying API are subject to change. A summary of recently released changes is found in [RELEASES.md](./RELEASES.md). You may also consult [TODO.md](./TODO.md).
 

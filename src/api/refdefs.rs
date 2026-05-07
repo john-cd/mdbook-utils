@@ -79,14 +79,13 @@ where
     P3: AsRef<Path>,
     P4: AsRef<Path>,
 {
+    tracing::debug!("loading dependencies from Cargo.toml");
     // Generate ref defs from dependencies
     let deps = dependencies::get_dependencies(&cargo_toml_dir_path, log_file_path)?;
-    // for (_, d) in &deps {
-    //     tracing::info!("{d:?}");
-    // }
     let mut new_links = generate::generate_refdefs_from(deps);
 
-    // TODO can we read just the *-refs.md files?
+    // Reads all markdown files in the source directory, then merges existing
+    // definitions with newly generated dependency definitions.
     helper(
         markdown_dir_path,
         refdef_dest_file_path,

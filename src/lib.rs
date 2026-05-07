@@ -40,8 +40,6 @@ use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
-use std::path::PathBuf;
-use std::sync::LazyLock;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -327,7 +325,8 @@ where
     // }
     let mut new_links = generate::generate_refdefs_from(deps);
 
-    // TODO can we read just the *-refs.md files?
+    // Reads all markdown files in the source directory, then merges existing
+    // definitions with newly generated dependency definitions.
     helper(
         markdown_dir_path,
         refdef_dest_file_path,
@@ -413,40 +412,7 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {
-    fs::create_parent_dir_for(dest_file_path.as_ref())?;
-    let mut f = File::create(dest_file_path).context("Failed to create categories file.")?;
-    writeln!(f, "# Categories\n")?;
-
-    let src_dir_path = fs::check_is_dir(src_dir_path)?;
-    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
-    let mut parser = parser::get_parser(all_markdown.as_ref());
-    let links = parser::extract_links(&mut parser);
-
-    let mut categories = std::collections::BTreeSet::new();
-    for l in links {
-        let url = l.get_url();
-        if url.contains("crates.io/categories/") {
-            let mut path = url.split('?').next().unwrap_or("");
-            if path.ends_with('/') {
-                path = &path[..path.len() - 1];
-            }
-            if let Some(name) = path.split('/').next_back()
-                && !name.is_empty()
-                && name != "categories"
-                && name
-                    .chars()
-                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-            {
-                categories.insert(name.to_string());
-            }
-        }
-    }
-
-    for c in categories {
-        writeln!(f, "- [{c}](https://crates.io/categories/{c})")?;
-    }
-
-    Ok(())
+    api::generate_categories(src_dir_path, dest_file_path)
 }
 
 /// Generate a crate index and write to a Markdown file.
@@ -454,42 +420,7 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {
-    use std::io::Write;
-
-    fs::create_parent_dir_for(dest_file_path.as_ref())?;
-    let mut f = File::create(dest_file_path).context("Failed to create crates file.")?;
-    writeln!(f, "# Crates\n")?;
-
-    let src_dir_path = fs::check_is_dir(src_dir_path)?;
-    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
-    let mut parser = parser::get_parser(all_markdown.as_ref());
-    let links = parser::extract_links(&mut parser);
-
-    let mut crates = std::collections::BTreeSet::new();
-    for l in links {
-        let url = l.get_url();
-        if url.contains("crates.io/crates/") {
-            let mut path = url.split('?').next().unwrap_or("");
-            if path.ends_with('/') {
-                path = &path[..path.len() - 1];
-            }
-            if let Some(name) = path.split('/').next_back()
-                && !name.is_empty()
-                && name != "crates"
-                && name
-                    .chars()
-                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-            {
-                crates.insert(name.to_string());
-            }
-        }
-    }
-
-    for c in crates {
-        writeln!(f, "- [{c}](https://crates.io/crates/{c})")?;
-    }
-
-    Ok(())
+    api::generate_crates(src_dir_path, dest_file_path)
 }
 
 pub use api::identify_files_not_in_summary;

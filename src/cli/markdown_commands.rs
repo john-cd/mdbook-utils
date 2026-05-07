@@ -32,7 +32,6 @@ pub(crate) enum MarkdownSubCommand {
 
     /// Generate a crate index and write to a Markdown file
     GenerateCrates(MarkdownSrcDirAndDestFileArgs),
-    // TODO autoreplace autolinks / inline links by ref links
     /// Identify .md files not in SUMMARY.md
     IdentifyFilesNotInSummary(MarkdownDirArgs),
 

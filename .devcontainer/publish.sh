@@ -39,7 +39,7 @@ echo "Version in crates.io: ${CRATES_IO_VERSION}"
 # GIT_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
 # echo "Git tag: ${GIT_TAG}"
 
-## TODO check that the last commit has been tagged, that the tag corresponds to the version in Cargo.toml,
+## Check that the last commit has been tagged, that the tag corresponds to the version in Cargo.toml,
 ## and that the version number is larger than the one in crates.io.
 # https://stackoverflow.com/questions/1474115/how-to-find-the-tag-associated-with-a-given-git-commit
 # https://stackoverflow.com/questions/1404796/how-can-i-get-the-latest-tag-name-in-current-branch-in-git

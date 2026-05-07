@@ -5,7 +5,6 @@ pub use crate::fs::unused::identify_unused_rs_examples;
 #[cfg(test)]
 mod tests {
     use std::fs;
-    use std::path::Path;
 
     use anyhow::Result;
     use tempfile::tempdir;
