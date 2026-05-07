@@ -13,8 +13,6 @@ use crate::fs;
 use crate::parser;
 
 /// Identify .md files not in SUMMARY.md
-// TODO: Handle nested directories more accurately in SUMMARY.md link parsing.
-#[allow(dead_code)] // TODO
 #[tracing::instrument]
 pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
     markdown_src_dir_path: P,
@@ -57,11 +55,14 @@ pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
         }
     }
 
+    tracing::debug!(
+        count = missing.len(),
+        "identified markdown files not referenced in SUMMARY.md"
+    );
     Ok(missing)
 }
 
 /// Identify .rs examples not used in Markdown files
-#[allow(dead_code)] // TODO
 #[tracing::instrument]
 pub fn identify_unused_rs_examples<
     P1: AsRef<Path> + std::fmt::Debug,
@@ -115,6 +116,7 @@ pub fn identify_unused_rs_examples<
         }
     }
 
+    tracing::debug!(count = unused.len(), "identified unused rust example files");
     Ok(unused)
 }
 
