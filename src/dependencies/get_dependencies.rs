@@ -89,13 +89,27 @@ pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
 /// Write e.g. stdout / stderr to a file.
 fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()> {
     let (file, actual_path) = match log_file_path {
-        Some(path) => match File::create(path) {
-            Ok(f) => (f, path.to_path_buf()),
-            Err(e) => {
-                warn!("Failed to create log file {}: {}", path.display(), e);
+        Some(path) => {
+            let current_dir = match std::env::current_dir() {
+                Ok(dir) => dir,
+                Err(e) => {
+                    warn!("Failed to get current directory for path validation: {}", e);
+                    return Ok(());
+                }
+            };
+            if let Err(e) = crate::fs::is_path_within(&current_dir, path) {
+                warn!("Path traversal detected or invalid path for log file {}: {}", path.display(), e);
                 return Ok(());
             }
-        },
+
+            match File::create(path) {
+                Ok(f) => (f, path.to_path_buf()),
+                Err(e) => {
+                    warn!("Failed to create log file {}: {}", path.display(), e);
+                    return Ok(());
+                }
+            }
+        }
         None => match Builder::new()
             .prefix("mdbook-utils-dependencies-")
             .suffix(".log")
