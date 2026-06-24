@@ -1,4 +1,3 @@
-use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
@@ -6,7 +5,6 @@ use std::path::Path;
 use anyhow::Context;
 use anyhow::Result;
 
-use crate::fs;
 use crate::helper;
 use crate::parser;
 use crate::test_markdown;
@@ -34,14 +32,16 @@ where
 }
 
 /// Test function that uses fake Markdown and writes events to
-/// `./book/temp/test.log`.
+/// a secure temporary file.
 pub fn test() -> Result<()> {
-    fs::create_dir("./book/temp/")?;
+    let tf = tempfile::Builder::new()
+        .prefix("mdbook-utils-test-")
+        .suffix(".log")
+        .tempfile()?;
 
-    let dest_file_path = "./book/temp/test.log";
-    let mut f = BufWriter::new(File::create(dest_file_path).context(
-        "[test] Failed to create the destination file. Does the full directory path exist?",
-    )?);
+    tracing::info!("Writing test log to {}", tf.path().display());
+
+    let mut f = BufWriter::new(tf.as_file());
 
     let test_markdown = test_markdown::get_test_markdown();
     let mut parser = parser::get_parser(test_markdown.as_ref());
