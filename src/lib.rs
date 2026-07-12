@@ -102,14 +102,14 @@ where
 }
 
 /// Test function that uses fake Markdown and writes events to
-/// `./book/temp/test.log`.
+/// a temporary log file.
 pub fn test() -> Result<()> {
-    fs::create_dir("./book/temp/")?;
+    let temp_file = tempfile::Builder::new()
+        .prefix("mdbook-utils-test-")
+        .suffix(".log")
+        .tempfile()?;
 
-    let dest_file_path = "./book/temp/test.log";
-    let mut f = BufWriter::new(File::create(dest_file_path).context(
-        "[test] Failed to create the destination file. Does the full directory path exist?",
-    )?);
+    let mut f = BufWriter::new(temp_file);
 
     let test_markdown = test_markdown::get_test_markdown();
     let mut parser = parser::get_parser(test_markdown.as_ref());
