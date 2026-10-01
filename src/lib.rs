@@ -104,18 +104,22 @@ where
 /// Test function that uses fake Markdown and writes events to
 /// a temporary log file.
 pub fn test() -> Result<()> {
-    let temp_file = tempfile::Builder::new()
+    let tf = tempfile::Builder::new()
         .prefix("mdbook-utils-test-")
         .suffix(".log")
         .tempfile()?;
 
-    let mut f = BufWriter::new(temp_file);
+    // Convert NamedTempFile to a standard File before dropping to keep it
+    let (file, path) = tf.keep()?;
+    let mut f = BufWriter::new(file);
 
     let test_markdown = test_markdown::get_test_markdown();
     let mut parser = parser::get_parser(test_markdown.as_ref());
     write_from_parser::write_raw_to(&mut parser, &mut f)?;
     f.flush()
         .context("Not all bytes could be written due to I/O errors or EOF being reached.")?;
+
+    println!("Test log written to: {}", path.display());
     Ok(())
 }
 
