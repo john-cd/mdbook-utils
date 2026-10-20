@@ -11,7 +11,7 @@ Use `mdbook-utils <command> <subcommand> --help` or `help <command> <subcommand>
 The following illustrates options for `mdbook-utils sitemap`:
 
 ```txt
-Generate a sitemap.xml file from the list of Markdown files in a source directory
+Generate a sitemap.xml file from published HTML pages linked in SUMMARY.md
 
 Usage: mdbook-utils sitemap [OPTIONS]
 
@@ -22,5 +22,10 @@ Options:
   -y, --yes                 Automatically answer `yes` to any user confirmation request
   -h, --help                Print help
 ```
+
+The sitemap destination must be inside an existing HTML renderer output
+directory, such as the configured mdBook build directory. A page is listed only
+when it appears in SUMMARY.md and its rendered HTML file exists in that output
+directory.
 
 {{#include ../refs.md}}

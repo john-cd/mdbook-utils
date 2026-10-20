@@ -56,8 +56,7 @@ pub(crate) enum Command {
     #[command(subcommand)]
     Markdown(MarkdownSubCommand),
 
-    /// Generate a sitemap.xml file from the list of Markdown files
-    /// in a source directory
+    /// Generate a sitemap.xml file from published HTML pages in SUMMARY.md
     #[command(name = "sitemap")]
     SiteMap(MarkdownSrcDirUrlAndDestFileArgs),
 
