@@ -3,7 +3,6 @@ title = "mdbook-utils User Guide"
 authors = ["John CD"]
 description = "The user guide for the `mdbook-utils` tool."
 language = "en"
-multilingual = false
 
 [rust]
 edition = "2024"
@@ -15,7 +14,7 @@ use-default-preprocessors = true
 [output.html]
 no-section-label = true
 git-repository-url = "https://github.com/john-cd/mdbook-utils"
-git-repository-icon = "fa-github"
+git-repository-icon = "fab-github"
 edit-url-template = "https://github.com/john-cd/mdbook-utils/edit/master/guide/{path}"
 site-url = "/mdbook-utils/"
 # cname = "john-cd.com"

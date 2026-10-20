@@ -1,0 +1,59 @@
+name: Rust CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install mdBook
+        run: cargo install mdbook --locked
+
+      - name: Check all targets
+        run: cargo check --all-targets --locked
+
+      - name: Build all targets
+        run: cargo build --all-targets --locked
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Run tests
+        run: cargo test --all-targets --locked
+
+      - name: Run doctests
+        run: cargo test --doc --locked
+
+      - name: Build API documentation
+        run: cargo doc --no-deps --locked
+
+      - name: Build and test mdBooks
+        run: |
+          mdbook build ./user_guide
+          mdbook test ./user_guide
+          mdbook build ./test_book
+          mdbook test ./test_book
