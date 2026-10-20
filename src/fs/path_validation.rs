@@ -26,8 +26,8 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
             }
         }
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            // If the path doesn't exist, it might be a dangling symlink or a new file.
-            // Check if it's a dangling symlink.
+            // If the path doesn't exist, it might be a dangling symlink or a
+            // new file. Check if it's a dangling symlink.
             if path.symlink_metadata().is_ok() {
                 bail!("Path traversal detected: {:?} is a dangling symlink", path);
             }
@@ -36,7 +36,8 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
             let mut ancestor = path;
             while let Some(parent) = ancestor.parent() {
                 ancestor = parent;
-                // If parent is empty string (relative path in current dir), use "."
+                // If parent is empty string (relative path in current dir), use
+                // "."
                 let effective_ancestor = if ancestor.as_os_str().is_empty() {
                     Path::new(".")
                 } else {
@@ -46,9 +47,11 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
                 if let Ok(ancestor_canon) = effective_ancestor.canonicalize() {
                     if ancestor_canon.starts_with(&base_dir_canon) {
                         // The ancestor is safe.
-                        // We return the path as is if it's within base_dir_canon.
-                        // Note: starts_with on non-canonicalized paths can be tricked,
-                        // but here we are just validating safety.
+                        // We return the path as is if it's within
+                        // base_dir_canon.
+                        // Note: starts_with on non-canonicalized paths can be
+                        // tricked, but here we are just
+                        // validating safety.
                         return Ok(path.to_path_buf());
                     } else {
                         bail!(
@@ -102,8 +105,8 @@ mod tests {
         let non_existent_unsafe = dir.path().join("new_unsafe.txt");
         assert!(is_path_within(&base_dir, &non_existent_unsafe).is_err());
 
-        // Negative case: dangling symlink (even if it points to a safe location, we
-        // reject it)
+        // Negative case: dangling symlink (even if it points to a safe
+        // location, we reject it)
         #[cfg(unix)]
         {
             let dangling = base_dir.join("dangling.lnk");
