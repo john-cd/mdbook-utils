@@ -272,7 +272,8 @@ impl Configuration {
             } else {
                 match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
                     Ok((_, Some(html_output_dir), _)) => {
-                        // `book.toml`` exists, is parseable and build.build-dir is defined
+                        // `book.toml`` exists, is parseable and build.build-dir
+                        // is defined
                         html_output_dir
                     }
                     _ => "./book".into(),
