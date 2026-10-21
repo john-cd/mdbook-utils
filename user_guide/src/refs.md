@@ -1,3 +1,4 @@
+<!-- TODO Reviewed ??-??-2026 -->
 [awesome-badges]: https://github.com/badges/awesome-badges
 [cargo]: https://doc.rust-lang.org/cargo
 [cargo-layout]: https://doc.rust-lang.org/cargo/guide/project-layout.html

@@ -1,3 +1,4 @@
+<!-- TODO Reviewed ??-??-2026 -->
 # Public API
 
 To use the library in your code, add the crate to  your `Cargo.toml` as usual:

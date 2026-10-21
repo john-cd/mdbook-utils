@@ -1,3 +1,4 @@
+<!-- TODO Reviewed ??-??-2026 -->
 ## YYYY-MM-DD - Arbitrary File Overwrite via Unvalidated Paths
 **Vulnerability:** In `src/dependencies/get_dependencies.rs`, the `write_log` function accepted an optional `log_file_path` but passed it directly to `File::create(path)` without performing any boundary checks. This allowed path traversal to overwrite arbitrary files on the system if `log_file_path` was influenced by external input.
 **Learning:** Blindly trusting explicitly provided output file paths for logs or build artifacts without validating them against an expected base directory (such as the current working directory) creates a critical risk of arbitrary file overwrite.

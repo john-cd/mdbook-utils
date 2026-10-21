@@ -1,3 +1,4 @@
+// TODO Reviewed ??-??-2026
 //! Read one or multiple files into a string or vector of strings
 
 use std::borrow::Cow;
