@@ -15,8 +15,12 @@ alias p := prep
 set shell := ["bash", "-uc"]
 set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
+worktree_name := env("MDBOOK_UTILS_WORKTREE_NAME", "main")
+export CARGO_TARGET_DIR := join("D:/target/mdbook-utils", worktree_name)
+export CARGO_BUILD_BUILD_DIR := join("C:/code_build/mdbook-utils", worktree_name)
+
 bin_dir := clean(join(source_directory(), "..", "bin"))
-target_dir := clean(join(source_directory(), "..", "target", "mdbook-utils"))
+target_dir := clean(join("D:/target/mdbook-utils", worktree_name))
 
 set quiet
 

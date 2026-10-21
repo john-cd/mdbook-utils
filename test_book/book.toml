@@ -3,7 +3,6 @@ title = "Example book"
 authors = ["John Doe"]
 description = "The example book covers examples."
 language = "en"
-multilingual = false
 src = "src"                                       # the source files
 
 [rust]
