@@ -86,7 +86,8 @@ End.
 "#,
         )?;
 
-        // 2. Markdown file with multiple includes, same line and different lines
+        // 2. Markdown file with multiple includes, same line and different
+        //    lines
         let md_file2 = src_dir.join("test2.md");
         fs::write(
             &md_file2,

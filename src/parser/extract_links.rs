@@ -51,8 +51,8 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 debug!("{e:?}");
                 // We pop until we get the corresponding InLink?
                 // Wait, Start(Link) always pushes.
-                // End(Link) always pops. So they must be balanced if the parser works
-                // correctly.
+                // End(Link) always pops. So they must be balanced if the parser
+                // works correctly.
                 if let Some((whr, link_builder)) = state.pop() {
                     if whr == Where::InLink {
                         links.push(link_builder.build());
@@ -152,8 +152,9 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             }
 
             ref e if !state.is_empty() => {
-                // Ignore other nested things, like Rule, SoftBreak, HardBreak, Html.
-                // Or maybe SoftBreak/HardBreak should add a space? Text gets added normally.
+                // Ignore other nested things, like Rule, SoftBreak, HardBreak,
+                // Html. Or maybe SoftBreak/HardBreak should add
+                // a space? Text gets added normally.
                 // We shouldn't panic or error out here.
                 debug!("Ignored event while 'in link': {e:?}");
             }

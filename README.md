@@ -15,7 +15,7 @@ The `mdbook-utils` command-line tool manages _links_, _reference definitions_, a
 - identify duplicate or broken links,
 - identify Markdown files not listed in `SUMMARY.md`,
 - identify unused Rust code examples,
-- generate a sitemap file for your book or website,
+- generate a sitemap from pages listed in SUMMARY.md and present in the selected HTML renderer output,
 - extract fenced code bocks embedded into the Markdown to separate files for easier formatting, debugging and testing,
 - replace code examples by mdBook [`#include`][mdbook-include] statements,
 - conversely replace mdBook includes by the file contents.
