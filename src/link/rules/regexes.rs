@@ -104,7 +104,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "std item documentation",
         Rule {
-            re: r"https://doc.rust-lang.org/(?<lib>std|core)/(?<rest>[^/]+(?:/[^/]+)*?)(?:/|\.html)?",
+            re: r"https://doc.rust-lang.org/(?<lib>std|core)/(?<rest>[^/?#]+?(?:/[^/?#]+?)*?)(?:/|\.html|[?#]|$)(?:[?#].*)?$",
             label_pattern: "${lib}-${rest}",
             ..Rule::default()
         },
@@ -349,6 +349,11 @@ mod tests {
         assert!(re.is_match(url_core));
         let caps = re.captures(url_core).unwrap();
         assert_eq!(&caps["lib"], "core");
+        assert_eq!(&caps["rest"], "cell/struct.OnceCell");
+
+        let url_core_item_method =
+            "https://doc.rust-lang.org/core/cell/struct.OnceCell.html#method.get";
+        let caps = re.captures(url_core_item_method).unwrap();
         assert_eq!(&caps["rest"], "cell/struct.OnceCell");
     }
 

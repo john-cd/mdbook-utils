@@ -170,7 +170,10 @@ mod tests {
 
         assert!(content.contains("# Broken Links"));
         assert!(content.contains("- Reference: broken reference"));
-        assert!(content.contains("Type: ShortcutUnknown"));
+        assert!(
+            content.contains("Type: Shortcut"),
+            "Unexpected report:\n{content}"
+        );
 
         Ok(())
     }

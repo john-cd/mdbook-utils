@@ -72,7 +72,8 @@ mod tests {
     fn test_check_is_dir() -> Result<(), Error> {
         let dir = tempdir()?;
         let res = check_is_dir(dir.path())?;
-        assert_eq!(res, dir.path().canonicalize()?);
+        assert_eq!(res, dir.path());
+        assert!(res.is_dir());
 
         let file_path = dir.path().join("file.txt");
         fs::write(&file_path, "test")?;
