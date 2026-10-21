@@ -13,9 +13,9 @@ mod cli;
 
 /// Entrypoint of the command-line interface.
 fn main() -> Result<()> {
-    // Load environment variables from a `.env` file (in the current directory
-    // or parents), if it exists. If variables with the same names already
-    // exist in the environment, their values are preserved.
+    // Load environment variables from a `.env` file (in the current directory or
+    // parents), if it exists. If variables with the same names already exist in
+    // the environment, their values are preserved.
     let dotenv = dotenvy::dotenv();
 
     match dotenv {

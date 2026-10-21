@@ -33,6 +33,13 @@ jobs:
       - name: Install mdBook
         run: cargo install mdbook --locked
 
+      - name: Set portable build directories on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          echo "CARGO_TARGET_DIR=${RUNNER_TEMP}/mdbook-utils-target" >> "$GITHUB_ENV"
+          echo "CARGO_BUILD_BUILD_DIR=${RUNNER_TEMP}/mdbook-utils-build" >> "$GITHUB_ENV"
+
       - name: Check all targets
         run: cargo check --all-targets --locked
 

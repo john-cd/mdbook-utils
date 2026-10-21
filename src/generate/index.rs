@@ -85,8 +85,9 @@ pub(crate) fn write_index<W: Write>(
 mod tests {
     use std::borrow::Cow;
 
-    use super::*;
     use crate::link::LinkBuilder;
+
+    use super::*;
 
     fn link(url: &str) -> Link<'_> {
         LinkBuilder::default()
