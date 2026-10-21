@@ -1,3 +1,4 @@
+<!-- TODO Reviewed ??-??-2026 -->
 # Installation
 
 Install the command-line tool using [`cargo`][cargo]:

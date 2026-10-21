@@ -1,3 +1,4 @@
+<!-- TODO Reviewed ??-??-2026 -->
 ## Command-line options
 
 Command-line options vary by subcommand and include `-o` to set the path of the output file; `-m` to set the path of the source Markdown directory (`./src` or `./drafts` by default, depending on the subcommand); `-c` to set the path to the directory containing the `Cargo.toml` that declares the dependencies (Rust crates) used in your book; and `-t` to set the path to the destination directory.

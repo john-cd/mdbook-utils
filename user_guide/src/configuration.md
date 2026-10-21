@@ -1,3 +1,4 @@
+<!-- TODO Reviewed ??-??-2026 -->
 # Configuration
 
 Each subcommand uses defaults that are overwritten by values in `book.toml` (if present), by environment variables (if set), or command-line options (the latter trumps the former).

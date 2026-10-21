@@ -1,3 +1,4 @@
+<!-- TODO Reviewed ??-??-2026 -->
 ## Images and badges
 
 _Images_ can be inserted using `![Image alternative text](link/to/image.png)` or, reference-style, `![Image][1]` followed by a _reference definition_ `[1]: <http://url/b.jpg>`.

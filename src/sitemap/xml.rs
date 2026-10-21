@@ -1,3 +1,4 @@
+// TODO Reviewed ??-??-2026
 //! Write links to sitemap.xml
 //!
 //! Inspired by <https://github.com/rxdn/mdbook-sitemap-generator/tree/master>

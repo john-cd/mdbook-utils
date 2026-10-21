@@ -1,3 +1,4 @@
+<!-- TODO Reviewed ??-??-2026 -->
 ## Build and test the code and user guide
 
 The [`just`][just] command runner is configured to simplify compilation and testing.
