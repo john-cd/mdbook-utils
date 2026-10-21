@@ -3,24 +3,21 @@ use std::path::Path;
 
 use anyhow::Context;
 use anyhow::Result;
-use anyhow::bail;
 
 use crate::fs;
 use crate::link;
 use crate::parser;
 use crate::sitemap as sitemap_mod;
 
-// SITEMAP
-
-/// Create a sitemap.xml file from the list of Markdown files in a
-/// source directory.
+/// Create a sitemap from published HTML pages linked in SUMMARY.md.
 ///
-/// src_dir_path: path to the source directory.
+/// The parent directory of sitemap_dest_file_path must be the existing output
+/// directory for the selected HTML renderer, such as book/html.
 ///
-/// domain: base URL e.g. <https://john-cd.com/rust_howto/>.
-///
-/// dest_file_path: the path to the destination file e.g.
-/// book/html/sitemap.xml.
+/// Pages are included only when their Markdown source exists and the matching
+/// HTML file is present in that renderer output. Unrendered chapters and
+/// shared source fragments are omitted. URLs in base_url are rooted at the
+/// hosted book directory, for example https://john-cd.com/rust_howto/.
 pub fn generate_sitemap<P1, P2>(
     markdown_src_dir_path: P1,
     base_url: url::Url,
@@ -31,28 +28,15 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    // Returns an error whether the base URL is a 'cannot-be-a-base' URL,
-    // meaning that parsing a relative URL string with this URL
-    // as the base will return an error.
-    if base_url.cannot_be_a_base() {
-        bail!("Invalid URL - cannot be a base: {base_url}");
-    }
-
-    // Verify source path.
+    let base_url = sitemap_mod::normalize_base_url(base_url)?;
     let markdown_src_dir_path = fs::check_is_dir(markdown_src_dir_path)?;
-
-    // Create the parent folders of the destination file, if needed.
-    fs::create_parent_dir_for(sitemap_dest_file_path.as_ref())?;
-
-    // Create the `sitemap.xml` file.
-    // `File::create` will create a file if it does not exist,
-    // and will truncate it if it does.
-    let mut f = File::create(sitemap_dest_file_path.as_ref()).with_context(|| {
-        format!(
-            "Failed to create the sitemap file {}. The full directory path may not exist or required permissions may be missing.",
-            sitemap_dest_file_path.as_ref().display()
-        )
-    })?;
+    let sitemap_dest_file_path = sitemap_dest_file_path.as_ref();
+    let rendered_root = sitemap_dest_file_path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."));
+    let rendered_root = fs::check_is_dir(rendered_root)
+        .context("The sitemap destination must be inside an existing renderer output directory")?;
 
     let summary_md_path = markdown_src_dir_path.join("SUMMARY.md");
     tracing::debug!("SUMMARY.md path: {}", summary_md_path.display());
@@ -64,16 +48,30 @@ where
     })?;
     let mut parser = parser::get_parser(markdown.as_str());
     let links: Vec<link::Link<'_>> = parser::extract_links(&mut parser);
+    let page_urls = sitemap_mod::collect_page_urls(
+        links,
+        &markdown_src_dir_path,
+        &rendered_root,
+        base_url,
+        map_index,
+    )?;
 
-    sitemap_mod::generate_sitemap(links, base_url, &mut f, map_index)?;
-
+    let mut f = File::create(sitemap_dest_file_path).with_context(|| {
+        format!(
+            "Failed to create the sitemap file {}. The full directory path may not exist or required permissions may be missing.",
+            sitemap_dest_file_path.display()
+        )
+    })?;
+    sitemap_mod::write_sitemap(page_urls, &mut f)?;
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
     use std::path::PathBuf;
 
+    use tempfile::tempdir;
     use url::Url;
 
     use super::*;
@@ -83,13 +81,12 @@ mod tests {
         let markdown_src_dir_path = PathBuf::from("non_existent_src");
         let base_url = Url::parse("mailto:test@example.com").unwrap();
         let sitemap_dest_file_path = PathBuf::from("sitemap.xml");
-        let map_index = None;
 
         let result = generate_sitemap(
             markdown_src_dir_path,
             base_url,
             sitemap_dest_file_path,
-            map_index,
+            None,
         );
 
         assert!(result.is_err());
@@ -97,7 +94,39 @@ mod tests {
             result
                 .unwrap_err()
                 .to_string()
-                .contains("Invalid URL - cannot be a base")
+                .contains("Invalid sitemap base URL")
         );
+    }
+
+    #[test]
+    fn sitemap_uses_the_selected_custom_renderer_directory() -> Result<()> {
+        let temp = tempdir()?;
+        let source = temp.path().join("src");
+        let custom_html = temp.path().join("custom-build").join("rendered-html");
+        let other_html = temp.path().join("default-build").join("html");
+        fs::create_dir_all(&source)?;
+        fs::create_dir_all(&custom_html)?;
+        fs::create_dir_all(&other_html)?;
+        fs::write(
+            source.join("SUMMARY.md"),
+            "[Home](index.md) [Missing](missing.md)",
+        )?;
+        fs::write(source.join("index.md"), "# Home")?;
+        fs::write(source.join("missing.md"), "# Missing")?;
+        fs::write(custom_html.join("index.html"), "custom build")?;
+        fs::write(other_html.join("missing.html"), "other renderer")?;
+
+        let sitemap_path = custom_html.join("sitemap.xml");
+        generate_sitemap(
+            &source,
+            Url::parse("https://example.com/book")?,
+            &sitemap_path,
+            None,
+        )?;
+
+        let sitemap = fs::read_to_string(sitemap_path)?;
+        assert!(sitemap.contains("<loc>https://example.com/book/index.html</loc>"));
+        assert!(!sitemap.contains("missing.html"));
+        Ok(())
     }
 }

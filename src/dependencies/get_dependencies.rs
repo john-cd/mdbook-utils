@@ -98,7 +98,11 @@ fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()>
                 }
             };
             if let Err(e) = crate::fs::is_path_within(&current_dir, path) {
-                warn!("Path traversal detected or invalid path for log file {}: {}", path.display(), e);
+                warn!(
+                    "Path traversal detected or invalid path for log file {}: {}",
+                    path.display(),
+                    e
+                );
                 return Ok(());
             }
 

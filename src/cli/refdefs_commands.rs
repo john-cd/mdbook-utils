@@ -62,8 +62,9 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             }
 
             if run_badges {
-                // If we also run dependencies, the output paths might clash if not explicitly
-                // set. We'll use "badge_refs.md" as the default name.
+                // If we also run dependencies, the output paths might clash if
+                // not explicitly set. We'll use "badge_refs.md"
+                // as the default name.
                 let markdown_src_dir_path =
                     config.markdown_src_dir_path(args.args.src.clone(), "./src/")?;
                 let refdef_dest_path =

@@ -11,7 +11,7 @@ Commands:
   refdefs   Manage reference definitions
   links     Manage links
   markdown  Manage code blocks (embedded examples) and includes
-  sitemap   Generate a sitemap.xml file from the list of Markdown files in a source directory
+  sitemap   Generate a sitemap.xml file from published HTML pages linked in SUMMARY.md
   debug     Parse the entire Markdown code as events and write them to a file
   help      Print this message or the help of the given subcommand(s)
 

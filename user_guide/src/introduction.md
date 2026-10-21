@@ -9,7 +9,7 @@ The `mdbook-utils` command-line tool manages _links_, _reference definitions_, a
 - centralize all reference definitions in one file to make Markdown files more readable and ease link maintenance,
 - replace simple Markdown links by badges,
 - identify duplicate or broken links,
-- generate a sitemap file for your book or website,
+- generate a sitemap from published pages listed in SUMMARY.md,
 - extract fenced code bocks embedded into the Markdown to separate files for easier formatting, debugging and testing,
 - replace code examples by mdbook [`#include`][mdbook-include] statements,
 - conversely replace includes by the file contents.
