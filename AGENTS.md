@@ -1,5 +1,9 @@
 # mdbook-utils instructions
 
+## Branches
+
+`develop` is the default integration branch and the primary checkout branch. `main` starts with an empty root commit and has independent history. Keep the existing `main` build-cache directory identity across branch renames to reuse compiled artifacts.
+
 ## Build outputs
 
 Cargo target artifacts are stored outside the source checkout in `D:\target\mdbook-utils\<worktree name>`. Cargo intermediate build files are stored in `C:\code_build\mdbook-utils\<worktree name>`.
