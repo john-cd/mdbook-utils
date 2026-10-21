@@ -2,8 +2,9 @@ name: Rust CI
 
 on:
   pull_request:
+    branches: [develop]
   push:
-    branches: [main]
+    branches: [develop]
   workflow_dispatch:
 
 permissions:
