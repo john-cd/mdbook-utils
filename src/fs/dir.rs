@@ -71,6 +71,7 @@ mod tests {
 
     use super::*;
 
+    /// Accepts directories and rejects files.
     #[test]
     fn test_check_is_dir() -> Result<(), Error> {
         let dir = tempdir()?;
@@ -84,6 +85,7 @@ mod tests {
         Ok(())
     }
 
+    /// Creates missing parent directories.
     #[test]
     fn test_create_parent_dir_for() -> Result<(), Error> {
         let dir = tempdir()?;
@@ -93,6 +95,7 @@ mod tests {
         Ok(())
     }
 
+    /// Creates a directory and tolerates an existing one.
     #[test]
     fn test_create_dir() -> Result<(), Error> {
         let dir = tempdir()?;

@@ -302,6 +302,7 @@ mod tests {
 
     use super::*;
 
+    /// Expands includes in every Markdown file.
     #[test]
     fn test_include_in_all_markdown_files_in() -> Result<()> {
         let dir = tempdir()?;
@@ -340,6 +341,7 @@ mod tests {
         Ok(())
     }
 
+    /// A missing include leaves the source file untouched.
     #[test]
     fn failed_include_expansion_preserves_the_source_file() -> Result<()> {
         for content in [
@@ -361,6 +363,7 @@ mod tests {
         Ok(())
     }
 
+    /// Relative include paths resolve against the including file.
     #[test]
     fn nested_include_paths_resolve_from_the_including_chapter() -> Result<()> {
         let dir = tempdir()?;
@@ -377,6 +380,7 @@ mod tests {
         Ok(())
     }
 
+    /// Expands nested includes and refuses cycles without writing.
     #[test]
     fn recursively_expands_nested_includes_and_rejects_cycles_without_writes() -> Result<()> {
         let dir = tempdir()?;
@@ -407,6 +411,7 @@ mod tests {
         Ok(())
     }
 
+    /// Line ranges and anchors are expanded with their original line endings.
     #[test]
     fn expands_line_ranges_and_named_anchors_without_normalizing_line_endings() -> Result<()> {
         let dir = tempdir()?;

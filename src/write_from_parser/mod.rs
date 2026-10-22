@@ -6,7 +6,6 @@
 mod github;
 mod write_raw_to;
 mod write_refdefs;
-mod write_whole;
 
 pub(crate) use github::*;
 pub(crate) use write_raw_to::*;

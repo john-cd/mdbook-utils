@@ -256,6 +256,7 @@ mod tests {
         parser::extract_links(&mut parser)
     }
 
+    /// URLs come from the rendered pages, are normalized and appear once.
     #[test]
     fn sitemap_urls_follow_rendered_inventory_and_are_normalized_and_deduplicated() -> Result<()> {
         let temp = tempdir()?;
@@ -335,6 +336,7 @@ mod tests {
         Ok(())
     }
 
+    /// Malformed URLs and pages missing from the output are reported.
     #[test]
     fn malformed_urls_and_missing_summary_pages_are_reported() -> Result<()> {
         let temp = tempdir()?;
@@ -365,6 +367,7 @@ mod tests {
         Ok(())
     }
 
+    /// The index mapping rewrites only a matching final path component.
     #[test]
     fn index_mapping_changes_only_the_matching_file_component() -> Result<()> {
         let temp = tempdir()?;

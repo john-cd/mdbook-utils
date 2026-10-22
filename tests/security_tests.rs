@@ -10,6 +10,7 @@ use mdbook_utils::identify_unused_rs_examples;
 use mdbook_utils::markdown::replace_include::include_in_all_markdown_files_in;
 use tempfile::tempdir;
 
+/// Does not follow references that escape the code directory.
 #[test]
 fn test_path_traversal_identify_unused_rs_examples() -> anyhow::Result<()> {
     let dir = tempdir()?;
@@ -57,6 +58,7 @@ fn test_path_traversal_identify_unused_rs_examples() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Does not expand includes that escape the source directory.
 #[test]
 fn test_path_traversal_include_in_all_markdown_files_in() -> anyhow::Result<()> {
     let dir = tempdir()?;
@@ -92,6 +94,7 @@ fn test_path_traversal_include_in_all_markdown_files_in() -> anyhow::Result<()> 
     Ok(())
 }
 
+/// A failed include exits non-zero and leaves the source unchanged.
 #[test]
 fn include_expansion_failure_returns_nonzero_and_preserves_source() -> anyhow::Result<()> {
     let dir = tempdir()?;
@@ -124,6 +127,7 @@ fn include_expansion_failure_returns_nonzero_and_preserves_source() -> anyhow::R
     Ok(())
 }
 
+/// Does not follow `SUMMARY.md` entries that escape the source directory.
 #[test]
 fn test_path_traversal_identify_files_not_in_summary() -> anyhow::Result<()> {
     let dir = tempdir()?;

@@ -116,6 +116,7 @@ mod tests {
             .build()
     }
 
+    /// Keeps one entry per valid crate name and drops malformed URLs.
     #[test]
     fn test_extract_index_names_skips_invalid_and_duplicates() {
         let links = vec![
@@ -161,6 +162,7 @@ mod tests {
         );
     }
 
+    /// Writes the header followed by one link per name.
     #[test]
     fn test_write_index_writes_header_and_links() -> anyhow::Result<()> {
         let mut out = Vec::new();

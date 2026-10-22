@@ -81,6 +81,7 @@ mod tests {
 
     use super::*;
 
+    /// Removes `{{#include}}` directives from every Markdown file.
     #[test]
     fn test_remove_includes_in_all_markdown_files_in() -> anyhow::Result<()> {
         let dir = tempdir()?;

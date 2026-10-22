@@ -39,6 +39,7 @@ mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 
+    /// Adds new definitions and keeps existing ones.
     #[test]
     fn test_merge_links() {
         let link1 = LinkBuilder::from_type_url_title(
@@ -85,6 +86,7 @@ mod tests {
         );
     }
 
+    /// Merging two empty lists yields an empty list.
     #[test]
     fn test_merge_links_empty() {
         let existing = vec![];

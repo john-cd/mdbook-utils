@@ -310,6 +310,7 @@ mod tests {
 
     use super::*;
 
+    /// Checks the built-in defaults.
     #[test]
     fn test_configuration_default() {
         let config = Configuration::default();
@@ -321,6 +322,8 @@ mod tests {
         );
     }
 
+    /// Resolves the Markdown source directory from the default, the environment
+    /// and the argument.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -380,6 +383,8 @@ src = "toml_src"
         Ok(())
     }
 
+    /// Resolves the Markdown build directory from the default, the environment
+    /// and the argument.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -438,6 +443,8 @@ src = "toml_src"
         Ok(())
     }
 
+    /// Prefers the argument over the environment, then the book root, for the
+    /// destination directory.
     #[test]
     fn test_dest_dir_path() {
         let mut config = Configuration::default();
@@ -471,6 +478,8 @@ src = "toml_src"
         assert_eq!(config.dest_dir_path(args), PathBuf::from(arg_dest));
     }
 
+    /// Prefers the argument over the environment, then the book root, for the
+    /// destination file.
     #[test]
     fn test_dest_file_path() {
         let mut config = Configuration::default();
@@ -500,6 +509,7 @@ src = "toml_src"
         );
     }
 
+    /// Resolves the directory that holds `Cargo.toml`.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -537,6 +547,7 @@ src = "toml_src"
         Ok(())
     }
 
+    /// Parses the base URL from the argument or the default.
     #[test]
     fn test_base_url() -> Result<()> {
         let config = Configuration::default();
@@ -565,6 +576,7 @@ src = "toml_src"
         Ok(())
     }
 
+    /// Parses the `from:to` index mapping from the argument or the default.
     #[test]
     fn test_sitemap_map_index() {
         let mut config = Configuration::default();
@@ -592,6 +604,7 @@ src = "toml_src"
         );
     }
 
+    /// Resolves the sitemap output path.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -695,6 +708,7 @@ build-dir = "toml_book"
         Ok(())
     }
 
+    /// Skips confirmation only when `--yes` is set.
     #[test]
     fn test_skip_confirm() {
         let mut config = Configuration::default();
