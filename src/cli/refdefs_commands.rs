@@ -2,7 +2,6 @@
 //!
 //! TODO Reviewed ??-??-2026
 
-use anyhow::Context as _;
 use anyhow::Result;
 use clap::Subcommand;
 use console::style;
@@ -10,8 +9,7 @@ use mdbook_utils::api::BadgeStyle;
 
 use super::args::{DependenciesDirAndDestFileArgs, MarkdownSrcDirAndDestFileArgs};
 use super::config::Configuration;
-use super::log_command_outcome;
-use super::log_command_paths;
+use super::run_logged;
 
 /// Command-line subcommands to handle reference definitions
 #[derive(Subcommand, Debug)]
@@ -26,6 +24,36 @@ pub(crate) enum RefDefsSubCommand {
     Generate(GenerateArgs),
 }
 
+/// Shields.io badge style, as accepted on the command line.
+#[derive(Debug, Clone, Copy, Default, clap::ValueEnum)]
+pub(crate) enum BadgeStyleArg {
+    /// The standard flat style used by Shields.io by default.
+    #[default]
+    Flat,
+    /// A flat style with square corners.
+    #[value(name = "flat-square")]
+    FlatSquare,
+    /// A style with a glossy appearance.
+    Plastic,
+    /// A wider style with uppercase text.
+    #[value(name = "for-the-badge")]
+    ForTheBadge,
+    /// The social style with a larger logo.
+    Social,
+}
+
+impl From<BadgeStyleArg> for BadgeStyle {
+    fn from(style: BadgeStyleArg) -> Self {
+        match style {
+            BadgeStyleArg::Flat => Self::Flat,
+            BadgeStyleArg::FlatSquare => Self::FlatSquare,
+            BadgeStyleArg::Plastic => Self::Plastic,
+            BadgeStyleArg::ForTheBadge => Self::ForTheBadge,
+            BadgeStyleArg::Social => Self::Social,
+        }
+    }
+}
+
 /// Arguments for generating reference definitions
 #[derive(Debug, clap::Args)]
 pub(crate) struct GenerateArgs {
@@ -35,7 +63,7 @@ pub(crate) struct GenerateArgs {
 
     /// Select a Shields.io style and generate GitHub badges.
     #[arg(long = "badge-style", value_enum, value_name = "STYLE")]
-    pub(crate) badge_style: Option<BadgeStyle>,
+    pub(crate) badge_style: Option<BadgeStyleArg>,
 
     /// Generate reference definitions from the dependencies of the code
     /// examples
@@ -53,22 +81,20 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
         RefDefsSubCommand::Write(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let refdef_dest_path = config.dest_file_path(args.dest, "existing_refs.md");
-            let paths = [
-                ("markdown_source", markdown_src_dir_path.as_path()),
-                ("destination", refdef_dest_path.as_path()),
-            ];
-            log_command_paths("refdefs write", &paths);
-            println!(
-                "Parsing markdown files in {} and writing existing reference definitions to {}...",
-                style(markdown_src_dir_path.display()).cyan(),
-                style(refdef_dest_path.display()).cyan()
-            );
-            let result =
-                mdbook_utils::api::write_refdefs_to(&markdown_src_dir_path, &refdef_dest_path)
-                    .context("[run] Failed to write reference definitions to a file.");
-            log_command_outcome("refdefs write", &paths, &result);
-            result?;
-            println!("{}", style("Done.").green());
+            run_logged(
+                "refdefs write",
+                &[
+                    ("markdown_source", markdown_src_dir_path.as_path()),
+                    ("destination", refdef_dest_path.as_path()),
+                ],
+                &format!(
+                    "Parsing markdown files in {} and writing existing reference definitions to {}...",
+                    style(markdown_src_dir_path.display()).cyan(),
+                    style(refdef_dest_path.display()).cyan()
+                ),
+                "[run] Failed to write reference definitions to a file.",
+                || mdbook_utils::api::write_refdefs_to(&markdown_src_dir_path, &refdef_dest_path),
+            )?;
         }
         RefDefsSubCommand::Generate(args) => {
             let badge_style = args.badge_style.unwrap_or_default();
@@ -89,25 +115,26 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                     config.markdown_src_dir_path(args.args.src.clone(), "./src/")?;
                 let refdef_dest_path =
                     config.dest_file_path(args.args.dest.clone(), "badge_refs.md");
-                let paths = [
-                    ("markdown_source", markdown_src_dir_path.as_path()),
-                    ("destination", refdef_dest_path.as_path()),
-                ];
-                log_command_paths("refdefs generate-badges", &paths);
-                println!(
-                    "Parsing markdown files in {} and writing new (github badge) reference definitions to {}...",
-                    style(markdown_src_dir_path.display()).cyan(),
-                    style(refdef_dest_path.display()).cyan()
-                );
-                let result = mdbook_utils::api::generate_badges_with_style(
-                    &markdown_src_dir_path,
-                    &refdef_dest_path,
-                    badge_style,
-                )
-                .context("[run] Failed to generate badges.");
-                log_command_outcome("refdefs generate-badges", &paths, &result);
-                result?;
-                println!("{}", style("Done.").green());
+                run_logged(
+                    "refdefs generate-badges",
+                    &[
+                        ("markdown_source", markdown_src_dir_path.as_path()),
+                        ("destination", refdef_dest_path.as_path()),
+                    ],
+                    &format!(
+                        "Parsing markdown files in {} and writing new (github badge) reference definitions to {}...",
+                        style(markdown_src_dir_path.display()).cyan(),
+                        style(refdef_dest_path.display()).cyan()
+                    ),
+                    "[run] Failed to generate badges.",
+                    || {
+                        mdbook_utils::api::generate_badges_with_style(
+                            &markdown_src_dir_path,
+                            &refdef_dest_path,
+                            badge_style.into(),
+                        )
+                    },
+                )?;
             }
 
             if run_deps {
@@ -124,23 +151,25 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                 if let Some(log_file_path) = args.args.log_file.as_deref() {
                     paths.push(("cargo_log", log_file_path));
                 }
-                log_command_paths("refdefs generate-from-dependencies", &paths);
-                println!(
-                    "Creating reference definitions in {} from the manifest in {} and Markdown sources in {}...",
-                    style(refdef_dest_file_path.display()).cyan(),
-                    style(cargo_toml_dir_path.display()).cyan(),
-                    style(markdown_src_dir_path.display()).cyan(),
-                );
-                let result = mdbook_utils::api::generate_refdefs_to(
-                    &cargo_toml_dir_path,
-                    &markdown_src_dir_path,
-                    &refdef_dest_file_path,
-                    args.args.log_file.as_ref(),
-                )
-                .context("[run] Failed to generate reference definitions from dependencies.");
-                log_command_outcome("refdefs generate-from-dependencies", &paths, &result);
-                result?;
-                println!("{}", style("Done.").green());
+                run_logged(
+                    "refdefs generate-from-dependencies",
+                    &paths,
+                    &format!(
+                        "Creating reference definitions in {} from the manifest in {} and Markdown sources in {}...",
+                        style(refdef_dest_file_path.display()).cyan(),
+                        style(cargo_toml_dir_path.display()).cyan(),
+                        style(markdown_src_dir_path.display()).cyan(),
+                    ),
+                    "[run] Failed to generate reference definitions from dependencies.",
+                    || {
+                        mdbook_utils::api::generate_refdefs_to(
+                            &cargo_toml_dir_path,
+                            &markdown_src_dir_path,
+                            &refdef_dest_file_path,
+                            args.args.log_file.as_ref(),
+                        )
+                    },
+                )?;
             }
         }
     }
