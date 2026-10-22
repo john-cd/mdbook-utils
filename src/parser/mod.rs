@@ -112,3 +112,67 @@ pub(crate) fn get_parser_with_broken_links_handler<'input>(
 //     let count = p.count();
 //     println!("{count} events");
 // }
+
+#[cfg(test)]
+mod tests {
+    use pulldown_cmark::Event;
+    use pulldown_cmark::Tag;
+
+    use super::*;
+
+    /// The parser enables strikethrough, tables, and footnotes.
+    #[test]
+    fn parser_enables_strikethrough_tables_and_footnotes() {
+        let md = "~~gone~~\n\n| a |\n|---|\n| b |\n\nNote[^1]\n\n[^1]: text\n";
+        let events: Vec<_> = get_parser(md).collect();
+
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, Event::Start(Tag::Strikethrough)))
+        );
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, Event::Start(Tag::Table(_))))
+        );
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, Event::FootnoteReference(_)))
+        );
+    }
+
+    /// Unresolved references are recorded with their label and link type;
+    /// resolved ones are not.
+    #[test]
+    fn handler_records_only_unresolved_references() {
+        let handler = Handler::new();
+        let md = "[missing] and [ok]\n\n[ok]: https://example.com\n";
+        for _ in get_parser_with_broken_links_handler(md, handler.clone()) {}
+
+        let broken = handler
+            .broken_links
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone();
+        assert_eq!(
+            broken,
+            vec![("missing".to_string(), String::new(), "Shortcut".to_string())]
+        );
+    }
+
+    /// A new handler starts with no broken links.
+    #[test]
+    fn new_handler_is_empty() {
+        let handler = Handler::new();
+
+        assert!(
+            handler
+                .broken_links
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .is_empty()
+        );
+    }
+}

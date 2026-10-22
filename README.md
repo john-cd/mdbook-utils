@@ -29,8 +29,7 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
 
 - `refdefs`: Manage reference definitions.
     - `write`: Write existing reference definitions to a file.
-    - `badges`: Generate badges for GitHub links.
-    - `from-dependencies`: Generate reference definitions from `Cargo.toml` dependencies.
+    - `generate`: Generate reference definitions: GitHub badges (`--badges`, `--badge-style <STYLE>`) or definitions from the `Cargo.toml` dependencies of the code examples (`--from-dependencies`).
 - `links`: Manage links.
     - `write-all`: Write all existing links to a Markdown file.
     - `write-inline`: Write all existing inline/autolinks to a Markdown file.
@@ -40,10 +39,15 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
     - `extract-code-examples`: Extract Rust code examples to separate files.
     - `replace-code-examples-by-includes`: Replace code examples with `{{#include}}` statements.
     - `replace-includes-by-contents`: Resolve `{{#include}}` statements.
+    - `remove-includes`: Remove `{{#include}}` statements.
     - `identify-files-not-in-summary`: Find `.md` files missing from `SUMMARY.md`.
     - `identify-unused-rs-examples`: Find `.rs` files not included in any `.md` file.
-    - `generate-crates`: Generate a list of crates used in the book.
-- `sitemap`: Generate a `sitemap.xml` file.
+    - `generate-crates`: Generate an index of the crates linked from the book.
+    - `generate-categories`: Generate an index of the crates.io categories linked from the book.
+- `sitemap`: Generate a `sitemap.xml` file (`--base-url`, `--map-index FROM:TO`).
+- `debug`: Write the Markdown parser events to a file.
+
+Run `mdbook-utils <command> --help` for the options of each command.
 
 ### Environment Variables
 
@@ -63,6 +67,10 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
 For a path with a command-line option, the precedence is command-line option, matching environment variable, `book.toml`, then that command's default. A missing `book.toml` is optional; an unreadable or malformed file produces an error when resolution reaches it. mdBook enables HTML when no renderer tables are configured. One renderer writes directly to `build.build-dir`; with multiple renderers, each writes to a renderer-named subdirectory such as `html` or `markdown`.
 
 `book.toml` is the only TOML configuration source. There is no separate `mdbook-utils` TOML file.
+
+## Development and Testing
+
+`just test` runs the unit, integration, and doc tests, and the mdBook tests of the user guide and `test_book`. For the Rust tests alone, run `cargo test --all-targets --locked`. Unit tests live next to the code in `src/`; the `tests/` directory holds integration tests that run the compiled binary and the public API against temporary directories and the fixtures in `tests/fixtures/`. See the user guide's contributing section for details.
 
 ## Public API
 
