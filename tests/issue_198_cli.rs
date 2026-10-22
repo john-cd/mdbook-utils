@@ -168,8 +168,8 @@ fn sitemap_cli_output_matches_exact_xml_on_repeated_runs() -> Result<()> {
         book_root.join("book.toml"),
         "[book]\nsrc = \"chapters\"\n[build]\nbuild-dir = \"dist\"\n[output.html]\n",
     )?;
-    fs::write(source.join("SUMMARY.md"), "[Intro](intro.md)\n")?;
-    fs::write(source.join("intro.md"), "# Intro\n")?;
+    fs::write(source.join("SUMMARY.md"), "[Intro](README.md)\n")?;
+    fs::write(source.join("README.md"), "# Intro\n")?;
     fs::write(rendered.join("index.html"), "<h1>Intro</h1>")?;
 
     let run_sitemap = || {
