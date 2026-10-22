@@ -281,8 +281,8 @@ mod tests {
         assert_eq!(links[4].get_url(), "url");
     }
 
-    /// Extracts `CommonMark` destinations while preserving code and mdBook helper
-    /// text.
+    /// Extracts `CommonMark` destinations while preserving code and mdBook
+    /// helper text.
     #[test]
     fn test_extract_links_commonmark_url_edge_cases_and_code_fences() {
         let markdown = r"

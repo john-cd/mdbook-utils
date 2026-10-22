@@ -7,7 +7,8 @@ use clap::Subcommand;
 use console::style;
 use mdbook_utils::api::BadgeStyle;
 
-use super::args::{DependenciesDirAndDestFileArgs, MarkdownSrcDirAndDestFileArgs};
+use super::args::DependenciesDirAndDestFileArgs;
+use super::args::MarkdownSrcDirAndDestFileArgs;
 use super::config::Configuration;
 use super::run_logged;
 

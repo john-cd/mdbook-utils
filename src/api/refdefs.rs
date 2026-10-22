@@ -128,8 +128,8 @@ where
 /// `refdef_dest_file_path`: path to the file to create and
 /// write into.
 ///
-/// `log_file_path`: optional path to a log file where the output of `cargo tree`
-/// will be written.
+/// `log_file_path`: optional path to a log file where the output of `cargo
+/// tree` will be written.
 ///
 /// # Errors
 ///
