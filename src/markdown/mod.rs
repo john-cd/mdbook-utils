@@ -4,6 +4,7 @@
 pub mod extract_code;
 pub mod remove_includes;
 pub mod replace_include;
+mod rust_blocks;
 
 #[doc(inline)]
 pub use extract_code::*;
