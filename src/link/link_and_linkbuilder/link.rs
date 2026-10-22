@@ -102,6 +102,13 @@ impl<'a> Link<'a> {
         format!("[{}]( {} )", self.get_text(), self.get_url_and_title()).into()
     }
 
+    /// Return a Markdown autolink: \<url\>
+    ///
+    /// Link text and title cannot be expressed in this form and are dropped.
+    pub(crate) fn to_autolink(&self) -> Cow<'_, str> {
+        format!("<{}>", self.get_url()).into()
+    }
+
     /// Return a reference-style Markdown link:
     /// \[text\]\[label\] or \[text/label\]
     pub(crate) fn to_reference_link(&self) -> Cow<'_, str> {

@@ -9,13 +9,19 @@ use pulldown_cmark::LinkType;
 use crate::fs;
 use crate::helper;
 use crate::link;
+pub use crate::link::LinkFormat;
 use crate::parser;
 
 // LINKS
 
 /// Parse Markdown from all .md files in a given source directory,
 /// write all inline links and autolinks (i.e., not written as
-/// reference-style links) found therein to a file.
+/// reference-style links) to external sites found therein to a file,
+/// as reference-style links and definitions.
+///
+/// Internal links (relative paths, fragments, and non-HTTP schemes) are
+/// excluded. See [`write_inline_links_with_format`] to choose the output
+/// format.
 ///
 /// src_dir_path: path to the source directory.
 ///
@@ -30,25 +36,50 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
+    write_inline_links_with_format(src_dir_path, dest_file_path, LinkFormat::Reference)
+}
+
+/// Same as [`write_inline_links`], but writes the external inline links and
+/// autolinks in the requested [`LinkFormat`].
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
+pub fn write_inline_links_with_format<P1, P2>(
+    src_dir_path: P1,
+    dest_file_path: P2,
+    format: LinkFormat,
+) -> Result<()>
+where
+    P1: AsRef<Path>,
+    P2: AsRef<Path>,
+{
     helper(src_dir_path, dest_file_path, |parser, f| {
         let links: Vec<link::Link<'_>> = parser::extract_links(parser);
         let links: Vec<_> = links
             .into_iter()
             .filter(|l| {
-                [LinkType::Inline, LinkType::Autolink]
-                    .iter()
-                    .any(|&x| l.get_link_type().unwrap() == x)
+                matches!(
+                    l.get_link_type(),
+                    Some(LinkType::Inline | LinkType::Autolink)
+                )
             })
-            .filter(|l| {
-                let url = l.get_url();
-                url.starts_with("http")
-            })
+            .filter(|l| is_external_url(&l.get_url()))
             .collect();
-        link::write_reference_style_links_to(links, f)?;
+        link::write_links_in_format_to(links, format, f)?;
         Ok(())
     })?;
 
     Ok(())
+}
+
+/// Returns true if the destination is an absolute `http` or `https` URL,
+/// i.e. a link to an external site rather than a relative path, fragment,
+/// or other scheme.
+fn is_external_url(url: &str) -> bool {
+    let lower = url.trim().to_ascii_lowercase();
+    lower.starts_with("http://") || lower.starts_with("https://")
 }
 
 /// Parse Markdown from all .md files in a given source directory,
@@ -196,6 +227,67 @@ mod tests {
             "Unexpected report:\n{content}"
         );
 
+        Ok(())
+    }
+
+    /// Writes a fixture with external, internal, fragment and reference links.
+    fn write_inline_fixture(src_dir: &std::path::Path) -> Result<()> {
+        fs::create_dir(src_dir)?;
+        fs::write(
+            src_dir.join("page.md"),
+            "[ext](https://example.com/a \"T\") <https://example.org/b>\n\n\
+             [rel](other.md) [frag](#section) [up](../x.md#y) [mail](mailto:a@b.c)\n\n\
+             [ref][r]\n\n[r]: https://example.net/\n",
+        )?;
+        Ok(())
+    }
+
+    /// Internal links and reference links are excluded from inline output.
+    #[test]
+    fn test_write_inline_links_excludes_internal_links() -> Result<()> {
+        let temp_dir = tempfile::tempdir()?;
+        let src_dir = temp_dir.path().join("src");
+        write_inline_fixture(&src_dir)?;
+        let dest = temp_dir.path().join("inline.md");
+        write_inline_links(&src_dir, &dest)?;
+        let content = fs::read_to_string(&dest)?;
+        assert!(content.contains("https://example.com/a"));
+        assert!(content.contains("https://example.org/b"));
+        for excluded in ["other.md", "#section", "../x.md", "mailto:", "example.net"] {
+            assert!(!content.contains(excluded), "{excluded} in:\n{content}");
+        }
+        Ok(())
+    }
+
+    /// The inline format writes `[text](url)` lines only.
+    #[test]
+    fn test_write_inline_links_inline_format() -> Result<()> {
+        let temp_dir = tempfile::tempdir()?;
+        let src_dir = temp_dir.path().join("src");
+        write_inline_fixture(&src_dir)?;
+        let dest = temp_dir.path().join("inline.md");
+        write_inline_links_with_format(&src_dir, &dest, LinkFormat::Inline)?;
+        let content = fs::read_to_string(&dest)?;
+        assert!(
+            content.contains("[ext]( https://example.com/a \"T\" )"),
+            "{content}"
+        );
+        assert!(!content.contains("]: "), "{content}");
+        Ok(())
+    }
+
+    /// The autolink format writes `<url>` lines only.
+    #[test]
+    fn test_write_inline_links_autolink_format() -> Result<()> {
+        let temp_dir = tempfile::tempdir()?;
+        let src_dir = temp_dir.path().join("src");
+        write_inline_fixture(&src_dir)?;
+        let dest = temp_dir.path().join("inline.md");
+        write_inline_links_with_format(&src_dir, &dest, LinkFormat::Autolink)?;
+        let content = fs::read_to_string(&dest)?;
+        assert!(content.contains("<https://example.com/a>"), "{content}");
+        assert!(content.contains("<https://example.org/b>"), "{content}");
+        assert!(!content.contains("other.md"), "{content}");
         Ok(())
     }
 
