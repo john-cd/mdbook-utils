@@ -6,7 +6,7 @@ use std::io::Write;
 use crate::link::Link;
 
 /// Kind of crates.io index to generate.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum IndexKind {
     /// Index of crates.io categories.
     Categories,
@@ -31,17 +31,8 @@ impl IndexKind {
         }
     }
 
-    /// Returns the URL path segment that precedes a name of this kind.
-    fn segment_prefix(self) -> &'static str {
-        match self {
-            Self::Categories => "crates.io/categories/",
-            Self::Crates => "crates.io/crates/",
-        }
-    }
-
-    /// Returns the final path segment that is a listing page rather than a
-    /// name.
-    fn segment_exclusion(self) -> &'static str {
+    /// First path segment of a crates.io URL that introduces this kind of name.
+    fn path_prefix(self) -> &'static str {
         match self {
             Self::Categories => "categories",
             Self::Crates => "crates",
@@ -49,38 +40,46 @@ impl IndexKind {
     }
 }
 
-/// Returns true if the name contains only ASCII alphanumerics, `-`, and `_`.
-fn is_valid_name(name: &str) -> bool {
-    name.chars()
-        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+/// Return whether `name` is a plausible crate or category name
+/// (categories use `::` between a category and its subcategory).
+fn is_valid_name(name: &str, kind: IndexKind) -> bool {
+    !name.is_empty()
+        && name.chars().all(|c| {
+            c.is_ascii_alphanumeric()
+                || c == '-'
+                || c == '_'
+                || (kind == IndexKind::Categories && c == ':')
+        })
+}
+
+/// Return the crate or category name of a crates.io URL, if it has one.
+///
+/// Only the segment right after `/crates/` or `/categories/` counts, so
+/// `https://crates.io/crates/serde/versions` yields `serde`.
+fn name_from_url(url: &str, kind: IndexKind) -> Option<String> {
+    let url = url::Url::parse(url).ok()?;
+    if !matches!(url.host_str(), Some("crates.io" | "www.crates.io")) {
+        return None;
+    }
+    let mut segments = url.path_segments()?;
+    if segments.next()? != kind.path_prefix() {
+        return None;
+    }
+    let name = segments.next()?;
+    is_valid_name(name, kind).then(|| name.to_string())
 }
 
 /// Collects the sorted, deduplicated names of the given kind from crates.io
-/// link URLs, ignoring query strings, trailing slashes, listing pages, and
-/// invalid names.
+/// link URLs, ignoring query strings, trailing slashes, deeper pages, listing
+/// pages, other hosts and invalid names.
 pub(crate) fn extract_index_names<'a>(
     links: impl IntoIterator<Item = Link<'a>>,
     kind: IndexKind,
 ) -> BTreeSet<String> {
-    let mut names = BTreeSet::new();
-    for link in links {
-        let url = link.get_url();
-        if !url.contains(kind.segment_prefix()) {
-            continue;
-        }
-        let mut path = url.split('?').next().unwrap_or("");
-        if path.ends_with('/') {
-            path = &path[..path.len() - 1];
-        }
-        if let Some(name) = path.split('/').next_back()
-            && !name.is_empty()
-            && name != kind.segment_exclusion()
-            && is_valid_name(name)
-        {
-            names.insert(name.to_string());
-        }
-    }
-    names
+    links
+        .into_iter()
+        .filter_map(|link| name_from_url(&link.get_url(), kind))
+        .collect()
 }
 
 /// Writes a Markdown heading followed by one list item linking each name to
@@ -129,6 +128,32 @@ mod tests {
         let names = extract_index_names(links, IndexKind::Crates);
         let expected = BTreeSet::from(["anyhow".to_string(), "serde".to_string()]);
         assert_eq!(names, expected);
+    }
+
+    /// Only the segment after `/crates/` is a crate name; deeper pages and
+    /// other hosts that merely contain the string are ignored.
+    #[test]
+    fn test_crate_name_is_the_segment_after_crates() {
+        let links = vec![
+            link("https://crates.io/crates/serde/versions"),
+            link("https://crates.io/crates/tokio/1.0.0"),
+            link("https://notcrates.io/crates/fake"),
+        ];
+        let names = extract_index_names(links, IndexKind::Crates);
+        assert_eq!(names, BTreeSet::from(["serde".to_string(), "tokio".to_string()]));
+    }
+
+    /// Subcategories such as `web-programming::websocket` are kept.
+    #[test]
+    fn test_subcategories_are_kept() {
+        let links = vec![link(
+            "https://crates.io/categories/web-programming::websocket",
+        )];
+        let names = extract_index_names(links, IndexKind::Categories);
+        assert_eq!(
+            names,
+            BTreeSet::from(["web-programming::websocket".to_string()])
+        );
     }
 
     #[test]

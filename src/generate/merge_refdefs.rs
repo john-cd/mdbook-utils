@@ -9,6 +9,14 @@ pub(crate) fn merge_links<'a>(
     existing_links: Vec<Link<'a>>,
     new_links: &mut Vec<Link<'a>>,
 ) -> Vec<Link<'a>> {
+    // A label can have only one definition (CommonMark keeps the first), so
+    // generated definitions never override an existing label.
+    let existing_labels: std::collections::HashSet<_> = existing_links
+        .iter()
+        .filter_map(|link| link.label.clone())
+        .collect();
+    new_links.retain(|link| link.label.as_ref().is_none_or(|l| !existing_labels.contains(l)));
+
     let mut buf = existing_links.clone();
     buf.append(new_links);
 
@@ -78,5 +86,27 @@ mod tests {
         let mut new = vec![];
         let merged = merge_links(existing, &mut new);
         assert!(merged.is_empty());
+    }
+
+    /// Builds a definition with a label and URL.
+    fn definition(label: &str, url: &str) -> Link<'static> {
+        LinkBuilder::default()
+            .set_label(label.to_string().into())
+            .set_url(url.to_string().into())
+            .build()
+    }
+
+    /// A generated definition does not duplicate an existing label.
+    #[test]
+    fn existing_label_wins_over_generated_definition() {
+        let existing = vec![definition("serde", "https://docs.rs/serde/")];
+        let mut generated = vec![
+            definition("serde", "https://docs.rs/serde"),
+            definition("serde-crate", "https://crates.io/crates/serde"),
+        ];
+        let merged = merge_links(existing, &mut generated);
+        let labels: Vec<_> = merged.iter().filter_map(|l| l.label.as_deref()).collect();
+        assert_eq!(labels, ["serde", "serde-crate"]);
+        assert_eq!(merged[0].get_url(), "https://docs.rs/serde/");
     }
 }
