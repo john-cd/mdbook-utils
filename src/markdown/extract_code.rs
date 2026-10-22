@@ -224,26 +224,6 @@ fn write_generated_file(path: &Path, contents: &[u8]) -> Result<()> {
     }
 }
 
-/// Replace an existing file after its complete new contents have been staged.
-fn replace_file(path: &Path, contents: &[u8]) -> Result<()> {
-    let parent = path
-        .parent()
-        .context("Expected source file parent directory")?;
-    let mut staged = NamedTempFile::new_in(parent)
-        .with_context(|| format!("Failed to stage replacement for {}", path.display()))?;
-    staged
-        .write_all(contents)
-        .with_context(|| format!("Failed to write staged replacement for {}", path.display()))?;
-    staged
-        .flush()
-        .with_context(|| format!("Failed to flush staged replacement for {}", path.display()))?;
-    staged
-        .persist(path)
-        .map(|_| ())
-        .map_err(|error| error.error)
-        .with_context(|| format!("Failed to replace {}", path.display()))
-}
-
 /// Extract code examples from all Markdown files within a source
 /// directory and write them to separate files.
 ///
@@ -438,7 +418,7 @@ where
     let mut planned: Vec<PlannedFile> = planned?.into_iter().flatten().collect();
     planned.sort_by(|left, right| left.path.cmp(&right.path));
     for source in planned {
-        replace_file(&source.path, &source.contents)?;
+        crate::fs::write_atomically(&source.path, &source.contents)?;
     }
     Ok(())
 }

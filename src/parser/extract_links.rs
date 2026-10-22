@@ -215,7 +215,7 @@ mod tests {
         assert_eq!(link.get_url(), "url");
         assert_eq!(
             link.to_inline_link(),
-            "[bold text and code in link]( url \"title\" )"
+            "[bold text and code in link](url \"title\")"
         );
     }
 

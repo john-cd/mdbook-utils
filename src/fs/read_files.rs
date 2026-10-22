@@ -46,6 +46,10 @@ where
                 p.display()
             )
         })?;
+        // Keep the last line of a file from merging with the next file.
+        if !all_markdown.is_empty() && !all_markdown.ends_with('\n') {
+            all_markdown.push('\n');
+        }
     }
 
     Ok(Cow::from(all_markdown))
@@ -82,9 +86,16 @@ where
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
-    // #[test]
-    // fn test() {
-    // }
+    /// A file without a trailing newline does not merge with the next file.
+    #[test]
+    fn separates_files_that_lack_a_trailing_newline() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        std::fs::write(dir.path().join("a.md"), "see [a]")?;
+        std::fs::write(dir.path().join("b.md"), "[a]: http://x.com\n")?;
+        let all = read_to_string_all_markdown_files_in(dir.path())?;
+        assert_eq!(all, "see [a]\n[a]: http://x.com\n");
+        Ok(())
+    }
 }

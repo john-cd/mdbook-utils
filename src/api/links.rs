@@ -1,9 +1,7 @@
 // TODO Reviewed ??-??-2026
 //! Public operations that write reports about the links in Markdown sources.
-use std::fs::File;
 use std::path::Path;
 
-use anyhow::Context;
 use anyhow::Result;
 use pulldown_cmark::LinkType;
 
@@ -169,20 +167,10 @@ where
     P2: AsRef<Path>,
 {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
-    fs::create_parent_dir_for(dest_file_path.as_ref())?;
-
-    let mut f = File::create(dest_file_path.as_ref()).with_context(|| {
-        format!(
-            "[write_broken_links] Could not create file {}",
-            dest_file_path.as_ref().display()
-        )
-    })?;
-
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
     let handler = parser::Handler::new();
     let parser = parser::get_parser_with_broken_links_handler(&all_markdown, handler.clone());
 
-    // We need to consume the parser to trigger the callbacks
     for _ in parser {}
 
     let broken_links = handler
@@ -191,7 +179,9 @@ where
         .unwrap_or_else(|e| e.into_inner())
         .clone();
 
-    link::write_broken_links_to(broken_links, &mut f)?;
+    let mut buffer = Vec::new();
+    link::write_broken_links_to(broken_links, &mut buffer)?;
+    fs::write_atomically(dest_file_path.as_ref(), &buffer)?;
 
     Ok(())
 }
@@ -270,7 +260,7 @@ mod tests {
         write_inline_links_with_format(&src_dir, &dest, LinkFormat::Inline)?;
         let content = fs::read_to_string(&dest)?;
         assert!(
-            content.contains("[ext]( https://example.com/a \"T\" )"),
+            content.contains("[ext](https://example.com/a \"T\")"),
             "{content}"
         );
         assert!(!content.contains("]: "), "{content}");
@@ -289,6 +279,20 @@ mod tests {
         assert!(content.contains("<https://example.com/a>"), "{content}");
         assert!(content.contains("<https://example.org/b>"), "{content}");
         assert!(!content.contains("other.md"), "{content}");
+        Ok(())
+    }
+
+    /// A failing run keeps an existing destination file.
+    #[test]
+    fn test_failed_run_keeps_existing_destination() -> Result<()> {
+        let temp_dir = tempfile::tempdir()?;
+        let dest = temp_dir.path().join("out.md");
+        fs::write(&dest, "previous")?;
+        let missing = temp_dir.path().join("missing");
+
+        assert!(write_all_links(&missing, &dest).is_err());
+        assert!(write_broken_links(&missing, &dest).is_err());
+        assert_eq!(fs::read_to_string(&dest)?, "previous");
         Ok(())
     }
 

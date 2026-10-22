@@ -35,42 +35,31 @@ mod parser;
 mod sitemap;
 mod write_from_parser;
 
-use std::fs::File;
 use std::path::Path;
 
-use anyhow::Context;
 use anyhow::Result;
 use pulldown_cmark::Parser;
 
 /// Helper function:
 ///
 /// Checks if the source directory exists,
-/// create the destination directory if it doesn't exist,
-/// create the destination file,
-/// parse all the Markdown files in the source directory,
-/// and invoke a closure that uses the parser to write to the file.
+/// parses all the Markdown files in the source directory,
+/// invokes a closure that uses the parser to write to an in-memory buffer,
+/// and atomically writes the buffer to the destination file (creating its
+/// parent directories). The destination is untouched if any step fails.
 fn helper<P1, P2, F>(src_dir_path: P1, dest_file_path: P2, func: F) -> Result<()>
 where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
-    F: for<'a, 'b> FnOnce(&'a mut Parser<'a>, &'b mut File) -> Result<()>,
+    F: for<'a, 'b> FnOnce(&'a mut Parser<'a>, &'b mut Vec<u8>) -> Result<()>,
 {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
-
-    fs::create_parent_dir_for(dest_file_path.as_ref())?;
-
-    let mut f = File::create(dest_file_path.as_ref()).with_context(|| {
-        format!(
-            "[helper] Could not create file {}",
-            dest_file_path.as_ref().display()
-        )
-    })?;
-
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
     let mut parser = parser::get_parser(all_markdown.as_ref());
 
-    func(&mut parser, &mut f)?;
-    Ok(())
+    let mut buffer = Vec::new();
+    func(&mut parser, &mut buffer)?;
+    fs::write_atomically(dest_file_path.as_ref(), &buffer)
 }
 
 /// Flat re-exports of the grouped operations in the [`api`] module.
