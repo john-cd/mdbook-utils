@@ -18,20 +18,30 @@ set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
 worktree_name := env("MDBOOK_UTILS_WORKTREE_NAME", "main")
 cache_home := env("XDG_CACHE_HOME", join(home_directory(), ".cache"))
-export CARGO_TARGET_DIR := join("D:/target/mdbook-utils", worktree_name)
-export CARGO_BUILD_BUILD_DIR := join("C:/code_build/mdbook-utils", worktree_name)
-export RUSTC_WRAPPER := "sccache"
+# Out-of-tree build outputs. Windows defaults can be overridden with
+# `MDBOOK_UTILS_TARGET_ROOT` / `MDBOOK_UTILS_BUILD_ROOT`; elsewhere Cargo's
+# `target/` is used unless those variables are set.
+target_root := env("MDBOOK_UTILS_TARGET_ROOT", if os_family() == "windows" { "D:/target/mdbook-utils" } else { join(cache_home, "mdbook-utils/target") })
+build_root := env("MDBOOK_UTILS_BUILD_ROOT", if os_family() == "windows" { "C:/code_build/mdbook-utils" } else { join(cache_home, "mdbook-utils/build") })
+export CARGO_TARGET_DIR := join(target_root, worktree_name)
+export CARGO_BUILD_BUILD_DIR := join(build_root, worktree_name)
+export RUSTC_WRAPPER := env("RUSTC_WRAPPER", "sccache")
 export CARGO_INCREMENTAL := "0"
 export SCCACHE_DIR := env("SCCACHE_DIR", if os_family() == "windows" { "D:/sccache" } else { join(cache_home, "sccache") })
 
 bin_dir := clean(join(source_directory(), "..", "bin"))
-target_dir := clean(join("D:/target/mdbook-utils", worktree_name))
+target_dir := clean(join(target_root, worktree_name))
 
 set quiet
 
 [no-exit-message]
 _default:
   @just --list --unsorted
+
+# Run any cargo command with this justfile's target/build dirs, e.g. `just cargo tree`
+[positional-arguments]
+cargo *args:
+  cargo "$@"
 
 # Clean Cargo's `target` and mdbook's `book` folders
 clean:
