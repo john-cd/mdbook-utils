@@ -30,6 +30,7 @@ pub(crate) struct Link<'a> {
     // [![image_alt_text][image_label]][...]
     // [image_label]: image_url "image_title"
     /// Link type of the image, if the link text is an image.
+    #[expect(dead_code, reason = "recorded for image links; no consumer yet")]
     pub(crate) image_link_type: Option<LinkType>,
     /// Image alt text.
     pub(crate) image_alt_text: Option<Cow<'a, str>>,
@@ -42,25 +43,6 @@ pub(crate) struct Link<'a> {
 }
 
 impl<'a> Link<'a> {
-    /// Returns a copy that owns all of its text.
-    pub(crate) fn to_static(&self) -> Link<'static> {
-        Link {
-            link_type: self.link_type,
-            text: self.text.as_ref().map(|c| Cow::Owned(c.to_string())),
-            label: self.label.as_ref().map(|c| Cow::Owned(c.to_string())),
-            url: self.url.as_ref().map(|c| Cow::Owned(c.to_string())),
-            title: self.title.as_ref().map(|c| Cow::Owned(c.to_string())),
-            image_link_type: self.image_link_type,
-            image_alt_text: self
-                .image_alt_text
-                .as_ref()
-                .map(|c| Cow::Owned(c.to_string())),
-            image_label: self.image_label.as_ref().map(|c| Cow::Owned(c.to_string())),
-            image_url: self.image_url.as_ref().map(|c| Cow::Owned(c.to_string())),
-            image_title: self.image_title.as_ref().map(|c| Cow::Owned(c.to_string())),
-        }
-    }
-
     // Methods that write Markdown directly
 
     /// Returns the link type
