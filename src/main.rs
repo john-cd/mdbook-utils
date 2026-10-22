@@ -46,7 +46,7 @@ fn main() -> Result<()> {
     // Retrieves default configuration (from `book.toml`, env. vars,
     // or hard-coded defaults); also stores global_opts.
     let config = cli::config::init(global_opts)?;
-    debug!("{config:?}");
+    debug!("CLI configuration initialized");
 
     match cmd {
         Command::RefDefs(subcmd) => {
@@ -63,31 +63,45 @@ fn main() -> Result<()> {
             let base_url = config.base_url(args.base)?;
             let sitemap_dest_file_path = config.sitemap_file_path(args.dest);
             let map_index = config.sitemap_map_index(args.map_index);
+            let paths = [
+                ("markdown_source", markdown_src_dir_path.as_path()),
+                ("destination", sitemap_dest_file_path.as_path()),
+            ];
+            cli::log_command_paths("sitemap", &paths);
 
             println!(
                 "Generating {} from the list of Markdown files in {}...",
                 style(sitemap_dest_file_path.display()).cyan(),
                 style(markdown_src_dir_path.display()).cyan(),
             );
-            mdbook_utils::api::generate_sitemap(
-                markdown_src_dir_path,
+            let result = mdbook_utils::api::generate_sitemap(
+                &markdown_src_dir_path,
                 base_url,
-                sitemap_dest_file_path,
+                &sitemap_dest_file_path,
                 map_index,
             )
-            .context("[main] Failed to generate the sitemap.")?;
+            .context("[main] Failed to generate the sitemap.");
+            cli::log_command_outcome("sitemap", &paths, &result);
+            result?;
             println!("{}", style("Done.").green());
         }
         Command::Debug(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let log_dest_path = config.dest_file_path(args.dest, "debug.log");
+            let paths = [
+                ("markdown_source", markdown_src_dir_path.as_path()),
+                ("destination", log_dest_path.as_path()),
+            ];
+            cli::log_command_paths("debug", &paths);
             println!(
                 "Parsing Markdown files in {} and writing raw events to {}...",
                 style(markdown_src_dir_path.display()).cyan(),
                 style(log_dest_path.display()).cyan()
             );
-            mdbook_utils::api::debug_parse_to(markdown_src_dir_path, log_dest_path)
-                .context("[main] Failed to generate the debug log.")?;
+            let result = mdbook_utils::api::debug_parse_to(&markdown_src_dir_path, &log_dest_path)
+                .context("[main] Failed to generate the debug log.");
+            cli::log_command_outcome("debug", &paths, &result);
+            result?;
             println!("{}", style("Done.").green());
         } /* Add more subcommands here: Some(args::Commands::...) => { ... }
            * _ => {

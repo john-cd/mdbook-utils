@@ -16,8 +16,11 @@ pub(crate) fn generate_refdefs_from(
     dependencies: BTreeMap<Cow<'_, str>, Dependency<'_>>,
 ) -> Vec<Link<'static>> {
     let mut buf = Vec::new();
+    info!(
+        dependency_count = dependencies.len(),
+        "generating dependency references"
+    );
     for (_, dep) in dependencies {
-        info!("{dep:?}");
         buf.push(generate_refdefs_for_one_library(
             &dep.library_name,
             dep.package_repo_url.as_deref(),
