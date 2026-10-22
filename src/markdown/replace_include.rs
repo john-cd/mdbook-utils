@@ -17,16 +17,29 @@ use tracing::info;
 static INSERT_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"\{\{#include (?<filepath>\S+?\.md)(?<selector>:[^}\s]+)?\}\}").unwrap()
 });
+/// Matches the `ANCHOR: name` line that opens a named section of an included
+/// file.
 static ANCHOR_START_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"ANCHOR:\s*(?<name>[\w_-]+)").unwrap());
+/// Matches the `ANCHOR_END: name` line that closes a named section of an
+/// included file.
 static ANCHOR_END_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"ANCHOR_END:\s*(?<name>[\w_-]+)").unwrap());
 
+/// A Markdown file rewrite, planned before any write.
 struct PlannedReplacement {
+    /// Path of the file to replace.
     path: PathBuf,
+    /// New contents of the file.
     contents: Vec<u8>,
 }
 
+/// Returns the part of `content` chosen by an include selector (anchor or line
+/// range), or all of it without one.
+///
+/// # Errors
+///
+/// Returns an error if the selector is malformed or does not match.
 fn selected_contents<'a>(content: &'a str, selector: Option<&str>, path: &Path) -> Result<&'a str> {
     let Some(selector) = selector else {
         return Ok(content);
@@ -122,6 +135,13 @@ fn selected_contents<'a>(content: &'a str, selector: Option<&str>, path: &Path) 
     );
 }
 
+/// Recursively expands `{{#include}}` directives in a file, tracking active
+/// includes to reject cycles.
+///
+/// # Errors
+///
+/// Returns an error if an included file cannot be read, a selector fails, or an
+/// include cycle is found.
 fn expand_includes(
     path: &Path,
     selector: Option<&str>,
@@ -206,6 +226,12 @@ fn expand_includes(
     Ok((new_txt, modified))
 }
 
+/// Replaces a file by writing a temporary sibling and renaming it over the
+/// original.
+///
+/// # Errors
+///
+/// Returns an error if the temporary file cannot be written or renamed.
 fn replace_file_atomically(path: &Path, contents: &[u8]) -> Result<()> {
     let parent_dir = path
         .parent()

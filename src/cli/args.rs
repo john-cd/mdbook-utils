@@ -101,6 +101,8 @@ pub(crate) struct MarkdownSrcDirAndDestDirArgs {
     pub(crate) dest: DestDirArgs,
 }
 
+/// Markdown source directory, base URL, destination file, and an optional index
+/// file mapping.
 #[derive(Debug, Args)]
 #[command(flatten_help = true)]
 pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {

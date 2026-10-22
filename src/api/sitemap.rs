@@ -1,4 +1,5 @@
 // TODO Reviewed ??-??-2026
+//! Public operation that generates a `sitemap.xml` for a book.
 use std::fs::File;
 use std::path::Path;
 
