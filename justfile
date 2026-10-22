@@ -51,7 +51,7 @@ clean:
 
 # Format all code
 fmt:
-  cargo +nightly fmt --all
+  cargo +nightly-2026-10-22 fmt --all
   echo "DONE"
 
 # Check whether the code can compile
@@ -107,7 +107,7 @@ prep: fmt clean build clippy test _builddoc
 
 @release:
   echo "Build the tools in $(pwd) in release mode and copy to ../bin"
-  cargo +nightly build --bins --locked --all-features --release -Z unstable-options --artifact-dir "{{bin_dir}}"
+  cargo +nightly-2026-10-22 build --bins --locked --all-features --release -Z unstable-options --artifact-dir "{{bin_dir}}"
 
 ## Utilities --------------------------------------
 

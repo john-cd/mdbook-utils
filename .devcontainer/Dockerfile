@@ -28,8 +28,8 @@ RUN apt-get update \
 ## Install nightly fmt
 RUN rustup update \
     && rustup component add clippy \
-    && rustup toolchain install nightly \
-    && rustup component add rustfmt --toolchain nightly
+    && rustup toolchain install nightly-2026-10-22 \
+    && rustup component add rustfmt --toolchain nightly-2026-10-22
 
 ARG MDBOOK_VERSION
 
