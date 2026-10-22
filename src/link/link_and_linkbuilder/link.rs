@@ -77,7 +77,7 @@ impl<'a> Link<'a> {
 
     /// Returns the link's reference label, if it exists, or the
     /// kebab-cased link's text
-    fn get_label(&self) -> Cow<'_, str> {
+    pub(crate) fn get_label(&self) -> Cow<'_, str> {
         if let Some(label) = &self.label {
             Cow::Borrowed(label.as_ref())
         } else if let Some(txt) = &self.text {

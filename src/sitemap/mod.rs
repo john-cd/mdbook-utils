@@ -72,6 +72,14 @@ pub(crate) fn collect_page_urls(
         }
 
         let mut rendered_relative_path = source_relative_path;
+        // mdBook renders `README.md` as `index.html`.
+        if rendered_relative_path
+            .file_name()
+            .and_then(|name| name.to_str())
+            == Some("README.md")
+        {
+            rendered_relative_path.set_file_name("index.md");
+        }
         if let Some((from, to)) = &map_index
             && rendered_relative_path
                 .file_name()
@@ -394,6 +402,36 @@ mod tests {
             [
                 "https://example.com/book/index.html",
                 "https://example.com/book/my-intro.html",
+                "https://example.com/book/nested/index.html",
+            ]
+        );
+        Ok(())
+    }
+
+    /// `README.md` is rendered as `index.html` without any configured mapping.
+    #[test]
+    fn readme_is_rendered_as_index() -> Result<()> {
+        let temp = tempdir()?;
+        let source = temp.path().join("src");
+        let html = temp.path().join("html");
+        fs::create_dir_all(source.join("nested"))?;
+        fs::create_dir_all(html.join("nested"))?;
+        fs::write(source.join("README.md"), "# Home")?;
+        fs::write(source.join("nested").join("README.md"), "# Nested")?;
+        fs::write(html.join("index.html"), "index")?;
+        fs::write(html.join("nested").join("index.html"), "nested index")?;
+
+        let urls = collect_page_urls(
+            links("[Home](README.md) [Nested](nested/README.md)"),
+            &source,
+            &html,
+            Url::parse("https://example.com/book/")?,
+            None,
+        )?;
+        assert_eq!(
+            urls,
+            [
+                "https://example.com/book/index.html",
                 "https://example.com/book/nested/index.html",
             ]
         );

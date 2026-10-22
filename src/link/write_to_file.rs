@@ -26,11 +26,45 @@ where
         .context("[write_reference_style_links_to] Failed to write links.")?;
 
     let link_flags = LinkWrite::ReferenceLink | LinkWrite::ReferenceDefinition;
-    for l in &links {
+    for l in &with_unique_labels(links) {
         write(l, &link_flags, link_writer)?;
         writeln!(link_writer)?;
     }
     Ok(())
+}
+
+/// Give every link a label that identifies a single destination.
+///
+/// Labels default to the kebab-cased link text, so two links with the same
+/// text but different URLs would share one label (`CommonMark` keeps only the
+/// first definition). The later ones get a numeric suffix: `docs`, `docs-2`.
+/// Links with the same label, URL and title keep that label.
+fn with_unique_labels(links: Vec<Link<'_>>) -> Vec<Link<'_>> {
+    let mut destinations: std::collections::HashMap<String, (String, Option<String>)> =
+        std::collections::HashMap::new();
+    let mut labelled = Vec::with_capacity(links.len());
+    for mut link in links {
+        let wanted = link.get_label().into_owned();
+        let destination = (
+            link.get_url().into_owned(),
+            link.title.as_deref().map(str::to_owned),
+        );
+        let mut label = wanted.clone();
+        let mut n = 1;
+        while destinations
+            .get(&label)
+            .is_some_and(|existing| *existing != destination)
+        {
+            n += 1;
+            label = format!("{wanted}-{n}");
+        }
+        destinations.insert(label.clone(), destination);
+        if label != wanted {
+            link.label = Some(label.into());
+        }
+        labelled.push(link);
+    }
+    labelled
 }
 
 /// Write links to a writer (e.g. file) in the requested [`LinkFormat`].
@@ -327,6 +361,29 @@ mod tests {
 
         assert!(links.contains("[![serde][serde-badge]][serde]"), "{links}");
         assert!(refdefs.contains("[serde]: https://serde.rs"), "{refdefs}");
+        Ok(())
+    }
+
+    /// Same text with different URLs gets distinct labels; the same
+    /// destination keeps its label.
+    #[test]
+    fn colliding_labels_get_numeric_suffixes() -> Result<()> {
+        let links = vec![
+            link("Docs", "", "https://a.example/"),
+            link("Docs", "", "https://b.example/"),
+            link("Docs", "", "https://a.example/"),
+        ];
+        let mut out = Vec::new();
+        write_reference_style_links_to(links, &mut out)?;
+        let text = String::from_utf8(out)?;
+        assert!(text.contains("[docs]: https://a.example/"), "{text}");
+        assert!(text.contains("[Docs][docs-2]"), "{text}");
+        assert!(text.contains("[docs-2]: https://b.example/"), "{text}");
+        assert_eq!(
+            text.matches("[docs]: https://a.example/").count(),
+            2,
+            "{text}"
+        );
         Ok(())
     }
 }

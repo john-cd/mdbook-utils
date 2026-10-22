@@ -265,7 +265,7 @@ fn remove_includes_requires_confirmation_and_replaces_includes() -> Result<()> {
 
     let declined = run(&[])?;
     assert!(!declined.status.success());
-    assert!(String::from_utf8_lossy(&declined.stderr).contains("confirmation"));
+    assert!(String::from_utf8_lossy(&declined.stderr).contains("rerun with --yes"));
     assert_eq!(fs::read_to_string(&chapter)?, original);
 
     let confirmed = run(&["--yes"])?;
@@ -280,5 +280,46 @@ fn remove_includes_requires_confirmation_and_replaces_includes() -> Result<()> {
         fs::read_to_string(&chapter)?,
         "# T\n\n```rust\n// MISSING INCLUDE FILE\nfn main() {}\n```\n"
     );
+    Ok(())
+}
+
+/// Every command that modifies Markdown refuses to run without `--yes` when
+/// there is no terminal, and leaves the files untouched.
+#[test]
+fn modifying_commands_fail_without_terminal_or_yes() -> Result<()> {
+    let dir = tempdir()?;
+    let drafts = dir.path().join("drafts");
+    fs::create_dir(&drafts)?;
+    let chapter = drafts.join("ch.md");
+    let original = "# T\n\n```rust\nfn main() {}\n```\n";
+    fs::write(&chapter, original)?;
+
+    for subcommand in [
+        "replace-code-examples-by-includes",
+        "replace-includes-by-contents",
+        "remove-includes",
+    ] {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"));
+        command
+            .args(["markdown", subcommand, "--markdown-dir"])
+            .arg(&drafts);
+        if subcommand == "replace-code-examples-by-includes" {
+            command.arg("--target-dir").arg(dir.path().join("code"));
+        }
+        let output = command
+            .current_dir(dir.path())
+            .stdin(std::process::Stdio::null())
+            .env_remove("BOOK_ROOT_DIR_PATH")
+            .env_remove("MARKDOWN_DIR_PATH")
+            .env("RUST_LOG", "off")
+            .output()?;
+        assert!(!output.status.success(), "{subcommand} succeeded");
+        assert!(
+            String::from_utf8_lossy(&output.stderr).contains("rerun with --yes"),
+            "{subcommand}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert_eq!(fs::read_to_string(&chapter)?, original, "{subcommand}");
+    }
     Ok(())
 }

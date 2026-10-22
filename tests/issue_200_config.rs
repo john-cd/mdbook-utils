@@ -116,9 +116,9 @@ fn sitemap_uses_renderer_output_path_and_reports_invalid_config() -> Result<()> 
     )?;
     fs::write(
         markdown_src.join("SUMMARY.md"),
-        "# Summary\n\n[Intro](intro.md)\n",
+        "# Summary\n\n[Intro](README.md)\n",
     )?;
-    fs::write(markdown_src.join("intro.md"), "# Intro\n")?;
+    fs::write(markdown_src.join("README.md"), "# Intro\n")?;
     fs::write(html_output.join("index.html"), "<h1>Intro</h1>")?;
 
     let output = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))

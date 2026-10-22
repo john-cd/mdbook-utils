@@ -6,11 +6,10 @@ use anyhow::Context as _;
 use anyhow::Result;
 use clap::Subcommand;
 use console::style;
-use dialoguer::Confirm;
-use dialoguer::theme::ColorfulTheme;
 
 use super::args::{MarkdownDirArgs, MarkdownSrcDirAndDestDirArgs, MarkdownSrcDirAndDestFileArgs};
 use super::config::Configuration;
+use super::confirm;
 use super::log_command_cancelled;
 use super::log_command_outcome;
 use super::log_command_paths;
@@ -83,14 +82,10 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 style(markdown_drafts_dir_path.display()).cyan(),
                 style(code_dir_path.display()).cyan()
             );
-            let confirmation = config.skip_confirm()
-                || Confirm::with_theme(&ColorfulTheme::default())
-                    .with_prompt(
-                        "This command will modify your Markdown files. Do you want to continue?",
-                    )
-                    .default(false)
-                    .interact()
-                    .context("Failed to obtain user confirmation.")?;
+            let confirmation = confirm(
+                &config,
+                "This command will modify your Markdown files. Do you want to continue?",
+            )?;
             if confirmation {
                 let result = mdbook_utils::markdown::remove_code_from_all_markdown_files_in(
                     &markdown_drafts_dir_path,
@@ -117,14 +112,10 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 "About to parse Markdown files in {} and replace any {{{{#include <file>.md}}}} statements by the corresponding file contents (excluding includes of *refs.md files)...",
                 style(markdown_src_dir_path.display()).cyan()
             );
-            let confirmation = config.skip_confirm()
-                || Confirm::with_theme(&ColorfulTheme::default())
-                    .with_prompt(
-                        "This command will modify your Markdown files. Do you want to continue?",
-                    )
-                    .default(false)
-                    .interact()
-                    .context("Failed to obtain user confirmation.")?;
+            let confirmation = confirm(
+                &config,
+                "This command will modify your Markdown files. Do you want to continue?",
+            )?;
             if confirmation {
                 let result = mdbook_utils::markdown::include_in_all_markdown_files_in(
                     &markdown_src_dir_path,
@@ -147,14 +138,10 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 "About to parse Markdown files in {} and remove any left-over {{{{#include ...}}}} statements...",
                 style(book_markdown_build_dir_path.display()).cyan()
             );
-            let confirmation = config.skip_confirm()
-                || Confirm::with_theme(&ColorfulTheme::default())
-                    .with_prompt(
-                        "This command will modify your Markdown files. Do you want to continue?",
-                    )
-                    .default(false)
-                    .interact()
-                    .context("Failed to obtain user confirmation.")?;
+            let confirmation = confirm(
+                &config,
+                "This command will modify your Markdown files. Do you want to continue?",
+            )?;
             if confirmation {
                 let contents_to_insert = "// MISSING INCLUDE FILE\nfn main() {}";
                 let result = mdbook_utils::markdown::remove_includes_in_all_markdown_files_in(

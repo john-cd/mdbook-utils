@@ -72,6 +72,34 @@ pub(crate) fn run_logged(
     Ok(())
 }
 
+/// Ask the user to confirm a command that modifies files.
+///
+/// `--yes` answers yes without asking. Without `--yes`, a terminal is
+/// required: when standard input is not a terminal the command fails instead
+/// of guessing, so a script never modifies files by accident.
+///
+/// # Errors
+///
+/// Returns an error when no terminal is available or the prompt fails.
+pub(crate) fn confirm(config: &config::Configuration, prompt: &str) -> anyhow::Result<bool> {
+    use std::io::IsTerminal as _;
+
+    use anyhow::Context as _;
+
+    if config.skip_confirm() {
+        return Ok(true);
+    }
+    anyhow::ensure!(
+        std::io::stdin().is_terminal(),
+        "Confirmation is required but standard input is not a terminal; rerun with --yes to proceed."
+    );
+    dialoguer::Confirm::with_theme(&dialoguer::theme::ColorfulTheme::default())
+        .with_prompt(prompt)
+        .default(false)
+        .interact()
+        .context("Failed to obtain user confirmation.")
+}
+
 /// Log that a user declined a command after its paths were selected.
 pub(crate) fn log_command_cancelled(
     command: &'static str,

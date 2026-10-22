@@ -17,13 +17,58 @@ use super::args::DestFileArgs;
 use super::args::MarkdownDirArgs;
 use super::args::UrlArgs;
 
+/// Prefix of the environment variables that configure `mdbook-utils`.
+const ENV_PREFIX: &str = "MDBOOK_UTILS_";
+
+/// Unprefixed names read before the prefix was introduced; still accepted,
+/// with a deprecation warning, when the prefixed variable is not set.
+const LEGACY_ENV_NAMES: [&str; 9] = [
+    "BOOK_ROOT_DIR_PATH",
+    "MARKDOWN_DIR_PATH",
+    "BOOK_HTML_BUILD_DIR_PATH",
+    "BOOK_MARKDOWN_BUILD_DIR_PATH",
+    "CARGO_TOML_DIR_PATH",
+    "DEFAULT_DEST_DIR_PATH",
+    "BASE_URL",
+    "SITEMAP_MAP_INDEX",
+    "MDBOOK_PATH",
+];
+
 /// Stores environment variables into a Configuration struct.
 /// Defaults apply if not present.
 pub(crate) fn init(global_opts: GlobalOpts) -> Result<Configuration> {
+    let (vars, deprecated) = with_legacy_names(std::env::vars());
+    for name in deprecated {
+        tracing::warn!(
+            variable = name,
+            replacement = format!("{ENV_PREFIX}{name}"),
+            "environment variable without the MDBOOK_UTILS_ prefix is deprecated"
+        );
+    }
     // Serialize environment variables into the Configuration struct
-    let mut c = envy::from_env::<Configuration>()?;
+    let mut c = envy::prefixed(ENV_PREFIX).from_iter::<_, Configuration>(vars)?;
     c.global_opts = global_opts;
     Ok(c)
+}
+
+/// Add the prefixed form of each legacy variable that is set while its
+/// prefixed form is not. Returns the variables and the legacy names used.
+fn with_legacy_names(
+    vars: impl Iterator<Item = (String, String)>,
+) -> (Vec<(String, String)>, Vec<&'static str>) {
+    let mut vars: Vec<(String, String)> = vars.collect();
+    let mut deprecated = Vec::new();
+    for name in LEGACY_ENV_NAMES {
+        let prefixed = format!("{ENV_PREFIX}{name}");
+        if vars.iter().any(|(key, _)| *key == prefixed) {
+            continue;
+        }
+        if let Some((_, value)) = vars.iter().find(|(key, _)| key == name).cloned() {
+            vars.push((prefixed, value));
+            deprecated.push(name);
+        }
+    }
+    (vars, deprecated)
 }
 
 /// Application configuration and environment variables
@@ -84,7 +129,7 @@ impl Default for Configuration {
             cargo_toml_dir_path: None,
             default_dest_dir_path: None,
             base_url: None,
-            sitemap_map_index: Some("intro.md:index.md".to_owned()),
+            sitemap_map_index: None,
             mdbook_path: None,
             global_opts: GlobalOpts::default(),
         }
@@ -316,10 +361,7 @@ mod tests {
         let config = Configuration::default();
         assert_eq!(config.book_root_dir_path, PathBuf::from("."));
         assert_eq!(config.base_url, None);
-        assert_eq!(
-            config.sitemap_map_index,
-            Some("intro.md:index.md".to_owned())
-        );
+        assert_eq!(config.sitemap_map_index, None);
     }
 
     /// Resolves the Markdown source directory from the default, the environment
@@ -581,11 +623,9 @@ src = "toml_src"
     fn test_sitemap_map_index() {
         let mut config = Configuration::default();
 
-        // 1. Default
-        assert_eq!(
-            config.sitemap_map_index(None),
-            Some(("intro.md".into(), "index.md".into()))
-        );
+        // 1. No default mapping: mdBook renders `README.md` as `index.html`
+        // by itself, and other first chapters keep their own page.
+        assert_eq!(config.sitemap_map_index(None), None);
 
         // 2. Argument
         assert_eq!(
@@ -715,5 +755,24 @@ build-dir = "toml_book"
         assert!(!config.skip_confirm());
         config.global_opts.yes = true;
         assert!(config.skip_confirm());
+    }
+
+    /// Prefixed variables win; unprefixed ones are accepted and reported.
+    #[test]
+    fn legacy_environment_names_are_still_accepted() {
+        let env = [
+            ("BASE_URL", "https://old.example/"),
+            ("MARKDOWN_DIR_PATH", "old-src"),
+            ("MDBOOK_UTILS_MARKDOWN_DIR_PATH", "new-src"),
+            ("UNRELATED", "x"),
+        ]
+        .map(|(k, v)| (k.to_owned(), v.to_owned()));
+        let (vars, deprecated) = with_legacy_names(env.into_iter());
+        assert_eq!(deprecated, ["BASE_URL"]);
+        let config: Configuration = envy::prefixed(ENV_PREFIX)
+            .from_iter(vars)
+            .expect("variables should deserialize");
+        assert_eq!(config.base_url.as_deref(), Some("https://old.example/"));
+        assert_eq!(config.markdown_dir_path, Some(PathBuf::from("new-src")));
     }
 }
