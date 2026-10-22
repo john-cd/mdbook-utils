@@ -9,6 +9,8 @@
 # space_example = ["run", "--release", "--", "\"command list\""]
 
 [build]
+rustc-wrapper = "sccache"
+incremental = false
 # jobs = 1                      # number of parallel jobs, defaults to # of CPUs
 # rustc = "rustc"               # the rust compiler tool
 # rustc-wrapper = "…"           # run this wrapper instead of `rustc`
@@ -19,6 +21,10 @@
 ## Keep Cargo target artifacts outside the source checkout.
 target-dir = "D:/target/mdbook-utils/main"
 build-dir = "C:/code_build/mdbook-utils/main"
+
+[env]
+# Just and Cargo share the persistent local compiler cache; process overrides remain supported.
+SCCACHE_DIR = "D:/sccache"
 # rustflags = ["…", "…"]        # custom flags to pass to all compiler invocations
 # rustflags = ["-C", "link-arg=-fuse-ld=lld"]
 # rustdocflags = ["…", "…"]     # custom flags to pass to rustdoc

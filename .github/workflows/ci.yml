@@ -19,6 +19,8 @@ jobs:
   validate:
     name: Validate (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    env:
+      SCCACHE_DIR: ${{ runner.temp }}/sccache
     strategy:
       fail-fast: false
       matrix:
@@ -29,6 +31,20 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+
+      - name: Install cargo-binstall (Linux)
+        if: runner.os == 'Linux'
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install cargo-binstall (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Set-ExecutionPolicy Unrestricted -Scope Process; iex (iwr "https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.ps1").Content
+
+      - name: Install sccache
+        env:
+          RUSTC_WRAPPER: ''
+        run: cargo binstall --version 0.18.0 --no-confirm --secure sccache
 
       - uses: Swatinem/rust-cache@v2
 
