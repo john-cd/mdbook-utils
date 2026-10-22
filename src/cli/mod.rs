@@ -23,6 +23,53 @@ use links_commands::LinksSubCommand;
 use markdown_commands::MarkdownSubCommand;
 use refdefs_commands::RefDefsSubCommand;
 
+/// Log the paths selected for a CLI command without logging file contents.
+pub(crate) fn log_command_paths(command: &'static str, paths: &[(&'static str, &std::path::Path)]) {
+    tracing::debug!(
+        command,
+        paths = ?format_command_paths(paths),
+        "selected command paths"
+    );
+}
+
+/// Log whether a CLI operation succeeded without exposing its error contents.
+pub(crate) fn log_command_outcome<T>(
+    command: &'static str,
+    paths: &[(&'static str, &std::path::Path)],
+    result: &anyhow::Result<T>,
+) {
+    let paths = format_command_paths(paths);
+    match result {
+        Ok(_) => {
+            tracing::info!(command, paths = ?paths, outcome = "success", "CLI command completed")
+        }
+        Err(_) => {
+            tracing::error!(command, paths = ?paths, outcome = "failure", "CLI command failed")
+        }
+    }
+}
+
+/// Log that a user declined a command after its paths were selected.
+pub(crate) fn log_command_cancelled(
+    command: &'static str,
+    paths: &[(&'static str, &std::path::Path)],
+) {
+    tracing::info!(
+        command,
+        paths = ?format_command_paths(paths),
+        outcome = "cancelled",
+        "CLI command cancelled"
+    );
+}
+
+/// Format named paths for structured tracing fields.
+fn format_command_paths(paths: &[(&'static str, &std::path::Path)]) -> Vec<String> {
+    paths
+        .iter()
+        .map(|(name, path)| format!("{name}={}", path.display()))
+        .collect()
+}
+
 /// Parse command-line arguments
 pub(crate) fn parse_arguments() -> Cli {
     Cli::parse()

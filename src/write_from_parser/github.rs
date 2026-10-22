@@ -46,13 +46,12 @@ where
     // Iterate through all ref defs
     for (lbl, linkdef) in sorted_refdefs {
         // if the URL is a github repo...
-        if let Some(capture) = re.captures(linkdef.dest.as_ref()) {
-            debug!("dest_url: {} -> {capture:?}", linkdef.dest);
+        if re.captures(linkdef.dest.as_ref()).is_some() {
+            debug!("matched a GitHub repository reference");
 
             // ...create the URL for the badge...
             let badge_image_url: Cow<'_, str> =
                 re.replace(linkdef.dest.as_ref(), rule.badge_url_pattern);
-            debug!("badge_image_url: {badge_image_url}");
 
             let link: Link<'input> = LinkBuilder::default()
                 .set_label(Cow::from(lbl))

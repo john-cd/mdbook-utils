@@ -83,7 +83,7 @@ pub(crate) fn collect_page_urls(
             .with_context(|| format!("Invalid rendered path for SUMMARY.md entry: {url}"))?;
         if !rendered_path.is_file() {
             tracing::warn!(
-                summary_url = %url,
+                page = "local SUMMARY entry",
                 rendered_path = %rendered_path.display(),
                 "Skipping SUMMARY.md page absent from the selected renderer output"
             );

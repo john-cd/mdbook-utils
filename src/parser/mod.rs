@@ -69,8 +69,8 @@ impl<'input> BrokenLinkCallback<'input> for Handler {
         link: BrokenLink<'input>,
     ) -> Option<(CowStr<'input>, CowStr<'input>)> {
         warn!(
-            "Issue with the markdown: reference: {}, type: {:?}",
-            link.reference, link.link_type,
+            link_type = ?link.link_type,
+            "Markdown contains an unresolved reference"
         );
         if let Ok(mut links) = self.broken_links.lock() {
             links.push((

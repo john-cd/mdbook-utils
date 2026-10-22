@@ -105,23 +105,22 @@ impl Configuration {
         args: MarkdownDirArgs,
         default_dir_path: S,
     ) -> Result<PathBuf> {
-        let p = args
-            .markdown_dir_path
-            .unwrap_or(if let Some(ref mdp) = self.markdown_dir_path {
-                debug!("MARKDOWN_DIR_PATH set: {}", mdp.display());
-                mdp.clone()
-            } else if let Some(p) = self.get_markdown_dir_path_from_book_toml() {
-                debug!("markdown_dir_path set from `book.toml`: {}", p.display());
-                p
-            } else {
-                debug!(
-                    "markdown_dir_path set to default: {:?}",
-                    default_dir_path.as_ref()
-                );
-                PathBuf::from(default_dir_path.as_ref())
-            });
+        let (p, source) = if let Some(path) = args.markdown_dir_path {
+            (path, "command-line")
+        } else if let Some(path) = &self.markdown_dir_path {
+            (path.clone(), "environment")
+        } else if let Some(path) = self.get_markdown_dir_path_from_book_toml() {
+            (path, "book.toml")
+        } else {
+            (PathBuf::from(default_dir_path.as_ref()), "default")
+        };
         let p = p.canonicalize()
             .with_context(|| format!("[markdown_dir_path] The Markdown source directory {} does not exist or cannot be resolved.", p.display()))?;
+        debug!(
+            source,
+            selected_path = %p.display(),
+            "selected Markdown source directory"
+        );
 
         Ok(p)
     }
@@ -134,11 +133,10 @@ impl Configuration {
         match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
             // `book.toml` exists and is parseable
             Ok((src, _, _)) => Some(src),
-            Err(e) => {
+            Err(_) => {
                 debug!(
-                    "`book.toml` does not exist in {} or is not parseable. Error: {}",
+                    "`book.toml` does not exist in {} or is not parseable",
                     self.book_root_dir_path.display(),
-                    e
                 );
                 None
             }
@@ -163,45 +161,26 @@ impl Configuration {
         args: MarkdownDirArgs,
         default_dir_path: S,
     ) -> Result<PathBuf> {
-        let p = args.markdown_dir_path.unwrap_or(
-            if let Some(ref mdp) = self.book_markdown_build_dir_path {
-                debug!("BOOK_MARKDOWN_BUILD_DIR_PATH set: {}", mdp.display());
-                mdp.clone()
-            } else {
-                match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
-                    Ok((_, _, Some(p))) => {
-                        debug!(
-                            "book_markdown_build_dir_path set from `book.toml`: {}",
-                            p.display()
-                        );
-                        p
-                    }
-                    _ => {
-                        debug!(
-                            "book_markdown_build_dir_path set to default: {:?}",
-                            default_dir_path.as_ref()
-                        );
-                        PathBuf::from(default_dir_path.as_ref())
-                    }
-                }
-            },
-        );
+        let (p, source) = if let Some(path) = args.markdown_dir_path {
+            (path, "command-line")
+        } else if let Some(path) = &self.book_markdown_build_dir_path {
+            (path.clone(), "environment")
+        } else {
+            match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
+                Ok((_, _, Some(path))) => (path, "book.toml"),
+                _ => (PathBuf::from(default_dir_path.as_ref()), "default"),
+            }
+        };
 
         let p = p.canonicalize()
             .with_context(|| format!("[book_markdown_build_dir_path] The Markdown output (build) directory {} does not exist or cannot be resolved. Try `mdbook build`.", p.display()))?;
+        debug!(
+            source,
+            selected_path = %p.display(),
+            "selected expanded Markdown directory"
+        );
 
         Ok(p)
-    }
-
-    /// Returns the default destination directory where to store mdbook-utils
-    /// outputs, as provided by the DEFAULT_DEST_DIR_PATH environment variable
-    /// (if set), otherwise the book root directory (which defaults to '.').
-    fn default_dest_dir_path(&self) -> PathBuf {
-        if let Some(ref pb) = self.default_dest_dir_path {
-            pb.into()
-        } else {
-            self.book_root_dir_path.clone()
-        }
     }
 
     /// Returns the destination directory where to store mdbook-utils
@@ -209,15 +188,30 @@ impl Configuration {
     /// the DEFAULT_DEST_DIR_PATH environment variable (if set),
     /// or the current working directory otherwise.
     pub(crate) fn dest_dir_path(&self, args: DestDirArgs) -> PathBuf {
-        args.dir_path.unwrap_or(self.default_dest_dir_path())
+        let (path, source) = if let Some(path) = args.dir_path {
+            (path, "command-line")
+        } else if let Some(path) = &self.default_dest_dir_path {
+            (path.clone(), "environment")
+        } else {
+            (self.book_root_dir_path.clone(), "book root")
+        };
+        debug!(source, selected_path = %path.display(), "selected destination directory");
+        path
     }
 
     /// Returns the destination file path, as provided by
     /// the command-line argument (if set) or the default destination path and
     /// default filename otherwise (see `default_dest_dir_path`).
     pub(crate) fn dest_file_path(&self, args: DestFileArgs, filename: &str) -> PathBuf {
-        args.file_path
-            .unwrap_or_else(|| self.default_dest_dir_path().join(filename))
+        let (path, source) = if let Some(path) = args.file_path {
+            (path, "command-line")
+        } else if let Some(directory) = &self.default_dest_dir_path {
+            (directory.join(filename), "environment")
+        } else {
+            (self.book_root_dir_path.join(filename), "book root")
+        };
+        debug!(source, selected_path = %path.display(), "selected destination file");
+        path
     }
 
     /// Returns the directory where `Cargo.toml` may be found,
@@ -225,14 +219,19 @@ impl Configuration {
     /// the CARGO_TOML_DIR_PATH environment variable (if set),
     /// or BOOK_ROOT_DIR_PATH (which defaults to '.') otherwise.
     pub(crate) fn cargo_toml_dir_path(&self, args: CargoTomlDirArgs) -> Result<PathBuf> {
-        let p =
-            args.cargo_toml_dir_path
-                .unwrap_or(if let Some(ref ctdp) = self.cargo_toml_dir_path {
-                    ctdp.clone()
-                } else {
-                    self.book_root_dir_path.clone()
-                });
+        let (p, source) = if let Some(path) = args.cargo_toml_dir_path {
+            (path, "command-line")
+        } else if let Some(path) = &self.cargo_toml_dir_path {
+            (path.clone(), "environment")
+        } else {
+            (self.book_root_dir_path.clone(), "book root")
+        };
         let p = p.canonicalize().with_context(|| format!("[cargo_toml_dir_path] The directory {} where `Cargo.toml` may be found does not exist or cannot be resolved.", p.display()))?;
+        debug!(
+            source,
+            selected_path = %p.display(),
+            "selected Cargo manifest directory"
+        );
         Ok(p)
     }
 
@@ -265,23 +264,25 @@ impl Configuration {
     /// where the HTML output path is retrieved from `book.toml`, if possible,
     /// or the default (`./book`) otherwise.
     pub(crate) fn sitemap_file_path(&self, args: DestFileArgs) -> PathBuf {
-        if let Some(file_path) = args.file_path {
-            file_path
+        let (path, source) = if let Some(file_path) = args.file_path {
+            (file_path, "command-line")
         } else {
-            let dir: PathBuf = if let Some(ref d) = self.book_html_build_dir_path {
-                d.clone()
+            let (dir, source) = if let Some(dir) = &self.book_html_build_dir_path {
+                (dir.clone(), "environment")
             } else {
                 match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
                     Ok((_, Some(html_output_dir), _)) => {
                         // `book.toml`` exists, is parseable and build.build-dir
                         // is defined
-                        html_output_dir
+                        (html_output_dir, "book.toml")
                     }
-                    _ => "./book".into(),
+                    _ => ("./book".into(), "default"),
                 }
             };
-            dir.join("sitemap.xml")
-        }
+            (dir.join("sitemap.xml"), source)
+        };
+        debug!(source, selected_path = %path.display(), "selected sitemap file");
+        path
     }
 
     /// if true, skip confirmation prompts

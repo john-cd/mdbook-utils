@@ -35,7 +35,12 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 title,
                 id,
             }) => {
-                debug!("Link: link_type: {link_type:?}, url: {dest_url}, title: {title}, id: {id}");
+                debug!(
+                    ?link_type,
+                    has_title = !title.is_empty(),
+                    has_reference_label = !id.is_empty(),
+                    "parsed link event"
+                );
                 state.push((
                     Where::InLink,
                     LinkBuilder::from_type_url_title(
@@ -48,8 +53,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             }
 
             // End of the link
-            ref e @ Event::End(TagEnd::Link) => {
-                debug!("{e:?}");
+            Event::End(TagEnd::Link) => {
                 // We pop until we get the corresponding InLink?
                 // Wait, Start(Link) always pushes.
                 // End(Link) always pops. So they must be balanced if the parser
@@ -73,7 +77,10 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 id,
             }) if !state.is_empty() => {
                 debug!(
-                    "image: link type: {link_type:?}, image url: {dest_url}, image title: {title}, label: {id}",
+                    ?link_type,
+                    has_title = !title.is_empty(),
+                    has_reference_label = !id.is_empty(),
+                    "parsed image inside link"
                 );
                 if let Some((whr, link_builder)) = state.pop() {
                     if whr == Where::InLink {
@@ -93,8 +100,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 }
             }
 
-            ref e @ Event::End(TagEnd::Image) if !state.is_empty() => {
-                debug!("{e:?}");
+            Event::End(TagEnd::Image) if !state.is_empty() => {
                 if let Some((whr, link_builder)) = state.pop() {
                     if whr == Where::InImageInLink {
                         state.push((Where::InLink, link_builder));
@@ -108,7 +114,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             Event::Text(t)
                 if state.last().map_or(Where::Elsewhere, |s| s.0) == Where::InImageInLink =>
             {
-                debug!("Event::Text({t:?})");
+                debug!(byte_length = t.len(), "read image alternative text");
                 if let Some((whr, link_builder)) = state.pop() {
                     if whr == Where::InImageInLink {
                         state.push((whr, link_builder.add_image_alt_text(Cow::from(t))));
@@ -120,7 +126,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             }
             // Text of a Link
             Event::Text(t) if !state.is_empty() => {
-                debug!("Event::Text({t:?})");
+                debug!(byte_length = t.len(), "read link text");
                 if let Some((whr, link_builder)) = state.pop() {
                     if whr == Where::InLink {
                         state.push((whr, link_builder.add_text(Cow::from(t))));
@@ -132,7 +138,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
             }
 
             Event::Code(c) if !state.is_empty() => {
-                debug!("code: {c}");
+                debug!(byte_length = c.len(), "read code inside link");
                 if let Some((whr, link_builder)) = state.pop() {
                     if whr == Where::InImageInLink {
                         state.push((whr, link_builder.add_image_alt_text(c.into())));
@@ -152,17 +158,13 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
                 debug!("Ignoring nested formatting tag");
             }
 
-            ref e if !state.is_empty() => {
+            _ if !state.is_empty() => {
                 // Ignore other nested things, like Rule, SoftBreak, HardBreak,
                 // Html. Or maybe SoftBreak/HardBreak should add
                 // a space? Text gets added normally.
                 // We shouldn't panic or error out here.
-                debug!("Ignored event while 'in link': {e:?}");
             }
-
-            ref e => {
-                debug!("Ignored: {e:?}");
-            }
+            _ => {}
         }
     }
 

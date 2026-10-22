@@ -98,10 +98,10 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     // one backend. If there is more than one backend, then each backend is
     // placed in a separate directory underneath `build-dir` (e.g.,
     // `book/html` and `book/markdown`). https://rust-lang.github.io/mdBook/format/configuration/renderers.html
-    debug!("{:?}", book_toml.output);
-
     if let Some(output) = book_toml.output {
         let num_backends = output.extra.len();
+        let renderers: Vec<_> = output.extra.keys().map(String::as_str).collect();
+        debug!(renderer_count = num_backends, renderers = ?renderers, "mdBook renderers configured");
 
         if num_backends > 1 {
             if output.extra.contains_key("html") {
