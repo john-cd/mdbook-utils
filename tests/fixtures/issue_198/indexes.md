@@ -1,0 +1,6 @@
+[serde](https://crates.io/crates/serde)
+[rayon](https://crates.io/crates/rayon?sort=downloads)
+[parsing](https://crates.io/categories/parsing)
+[tools](https://crates.io/categories/development-tools/)
+[parsing updates](https://crates.io/categories/parsing?sort=recent-updates)
+[serde downloads](https://crates.io/crates/serde?sort=downloads)
