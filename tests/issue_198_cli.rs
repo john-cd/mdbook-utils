@@ -111,12 +111,12 @@ fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
     let markdown_stdout = String::from_utf8_lossy(&markdown_output.stdout);
     assert!(markdown_stdout.contains("Files not in SUMMARY.md:"));
     for file in [
-        "chapter_2\\incl.md",
-        "included.md",
-        "wont-be-included-refs.md",
+        format!("chapter_2{}incl.md", std::path::MAIN_SEPARATOR),
+        "included.md".to_string(),
+        "wont-be-included-refs.md".to_string(),
     ] {
         assert!(
-            markdown_stdout.contains(file),
+            markdown_stdout.contains(&file),
             "missing fixture {file} in output"
         );
     }
