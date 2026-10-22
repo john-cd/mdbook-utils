@@ -118,6 +118,10 @@ where
 /// Parse Markdown from all .md files in a given source directory,
 /// write duplicated links found therein to a file.
 ///
+/// Two links are duplicates when they have the same label, URL and title.
+/// Inline links and autolinks have no label, so they are duplicates when they
+/// point to the same URL, whatever their text.
+///
 /// src_dir_path: path to the source directory.
 ///
 /// dest_file_path: path to the file to create and write into.
@@ -169,9 +173,9 @@ where
     P2: AsRef<Path>,
 {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
-    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let sources = fs::read_markdown_sources_in(src_dir_path)?;
     let handler = parser::Handler::new();
-    let parser = parser::get_parser_with_broken_links_handler(&all_markdown, handler.clone());
+    let parser = parser::get_parser_with_broken_links_handler(&sources.text, handler.clone());
 
     for _ in parser {}
 
@@ -179,7 +183,15 @@ where
         .broken_links
         .lock()
         .unwrap_or_else(|e| e.into_inner())
-        .clone();
+        .iter()
+        .map(|broken| {
+            let location = sources
+                .locate(broken.offset)
+                .map(|(path, line)| format!("{}:{line}", path.display()))
+                .unwrap_or_default();
+            (broken.reference.clone(), location, broken.link_type.clone())
+        })
+        .collect();
 
     let mut buffer = Vec::new();
     link::write_broken_links_to(broken_links, &mut buffer)?;
@@ -215,6 +227,7 @@ mod tests {
 
         assert!(content.contains("# Broken Links"));
         assert!(content.contains("- Reference: broken reference"));
+        assert!(content.contains("test.md:3"), "{content}");
         assert!(
             content.contains("Type: Shortcut"),
             "Unexpected report:\n{content}"

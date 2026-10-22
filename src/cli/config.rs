@@ -59,7 +59,7 @@ pub(crate) struct Configuration {
     /// Base url of the website where the book will be deployed
     /// e.g. https://example.com/mybook/
     /// It is used to build sitemaps.
-    base_url: String,
+    base_url: Option<String>,
     /// SITEMAP_MAP_INDEX environment variable:
     /// Map a filename to another (e.g., 'intro.md' to 'index.md')
     sitemap_map_index: Option<String>,
@@ -83,7 +83,7 @@ impl Default for Configuration {
             book_markdown_build_dir_path: None,
             cargo_toml_dir_path: None,
             default_dest_dir_path: None,
-            base_url: String::from("http://example.com/mybook/"),
+            base_url: None,
             sitemap_map_index: Some("intro.md:index.md".to_string()),
             mdbook_path: None,
             global_opts: GlobalOpts::default(),
@@ -235,16 +235,27 @@ impl Configuration {
     }
 
     /// Returns the base url of the website where the book will be deployed
-    /// (used to build sitemaps), as provided by the BASE_URL environment
-    /// variable (if set), otherwise the default value.
+    /// (used to build sitemaps): the command-line option, otherwise the BASE_URL
+    /// environment variable, otherwise `output.html.site-url` in `book.toml`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if none of them is set, or the URL cannot be parsed.
     pub(crate) fn base_url(&self, args: UrlArgs) -> Result<url::Url> {
-        Ok(args.url.unwrap_or(
-            url::Url::parse(&self.base_url)
-                .context("[base_url] Could not parse the base url provided.")?,
-        ))
+        if let Some(url) = args.url {
+            return Ok(url);
+        }
+        let configured = match &self.base_url {
+            Some(url) => Some(url.clone()),
+            None => super::book_toml::try_parse_book_toml(&self.book_root_dir_path)?
+                .and_then(|paths| paths.site_url),
+        };
+        let configured = configured.context(
+            "[base_url] No base URL: pass --base-url, set BASE_URL, or set output.html.site-url in book.toml.",
+        )?;
+        url::Url::parse(&configured).context("[base_url] Could not parse the base url provided.")
     }
 
-    /// Returns the sitemap index file mapping
     pub(crate) fn sitemap_map_index(&self, map_index: Option<String>) -> Option<(String, String)> {
         map_index
             .or_else(|| self.sitemap_map_index.clone())
@@ -309,7 +320,7 @@ mod tests {
     fn test_configuration_default() {
         let config = Configuration::default();
         assert_eq!(config.book_root_dir_path, PathBuf::from("."));
-        assert_eq!(config.base_url, "http://example.com/mybook/");
+        assert_eq!(config.base_url, None);
         assert_eq!(
             config.sitemap_map_index,
             Some("intro.md:index.md".to_string())
@@ -525,11 +536,18 @@ src = "toml_src"
     fn test_base_url() -> Result<()> {
         let config = Configuration::default();
 
-        // 1. Default
+        // 1. Nothing configured: an error instead of a placeholder URL
         let args = UrlArgs { url: None };
+        assert!(config.base_url(args).is_err());
+
+        // 1b. Environment value
+        let configured = Configuration {
+            base_url: Some("https://env.example/book/".into()),
+            ..Configuration::default()
+        };
         assert_eq!(
-            config.base_url(args)?.as_str(),
-            "http://example.com/mybook/"
+            configured.base_url(UrlArgs { url: None })?.as_str(),
+            "https://env.example/book/"
         );
 
         // 2. Argument

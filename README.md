@@ -57,7 +57,7 @@ Run `mdbook-utils <command> --help` for the options of each command.
 - `BOOK_MARKDOWN_BUILD_DIR_PATH`: Path where the Markdown renderer writes expanded Markdown.
 - `CARGO_TOML_DIR_PATH`: Directory where a `Cargo.toml` can be found.
 - `DEFAULT_DEST_DIR_PATH`: Default directory for generated `mdbook-utils` files.
-- `BASE_URL`: Base URL for sitemap generation.
+- `BASE_URL`: Base URL for sitemap generation (defaults to `output.html.site-url` in `book.toml`; there is no placeholder default).
 - `RUST_LOG`: Logging level (error, warn, info, debug, trace).
 
 ### Configuration via `book.toml`

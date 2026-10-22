@@ -29,6 +29,16 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
             }
         }
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            // `..` in a path that does not exist cannot be resolved by the
+            // filesystem, so it could climb out of the base directory after
+            // the check below.
+            if path.components().any(|c| c == std::path::Component::ParentDir) {
+                bail!(
+                    "Path traversal detected: {:?} does not exist and contains `..`",
+                    path
+                );
+            }
+
             // If the path doesn't exist, it might be a dangling symlink or a
             // new file. Check if it's a dangling symlink.
             if path.symlink_metadata().is_ok() {
@@ -117,6 +127,17 @@ mod tests {
             assert!(is_path_within(&base_dir, &dangling).is_err());
         }
 
+        Ok(())
+    }
+
+    /// A not-yet-existing path may not use `..` to leave the base directory.
+    #[test]
+    fn rejects_parent_components_in_missing_paths() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        let base = dir.path().join("base");
+        std::fs::create_dir(&base)?;
+        assert!(is_path_within(&base, &base.join("new/../../escape.txt")).is_err());
+        assert!(is_path_within(&base, &base.join("new/ok.txt")).is_ok());
         Ok(())
     }
 }

@@ -37,7 +37,8 @@ pub(crate) enum LinksSubCommand {
     /// written as reference-style links) to a Markdown file
     WriteInline(WriteInlineArgs),
 
-    /// Identify duplicate links / labels and write to a Markdown file
+    /// Identify links that repeat the same label, URL and title (inline links:
+    /// the same URL) and write them to a Markdown file
     DuplicateLinks(MarkdownSrcDirAndDestFileArgs),
 
     /// Identify broken links (i.e. without reference definition) and
