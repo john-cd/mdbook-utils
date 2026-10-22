@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Path validation utilities
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::path::Path;
 use std::path::PathBuf;
 

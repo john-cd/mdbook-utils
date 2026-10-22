@@ -1,6 +1,8 @@
-// TODO Reviewed ??-??-2026
 //! Functions that use the filesystem: create or check existence of
 //! directories, read multiple files from a directory, etc.
+//!
+//! TODO Reviewed ??-??-2026
+
 mod dir;
 mod find_markdown_files;
 mod path_validation;

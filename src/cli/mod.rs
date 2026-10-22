@@ -1,4 +1,3 @@
-// TODO Reviewed ??-??-2026
 //! Command-line argument parser
 //!
 //! Useful links:
@@ -7,6 +6,8 @@
 //! <https://docs.rs/clap/latest/clap/_derive/_cookbook/index.html>
 //!
 //! <https://github.com/clap-rs/clap/tree/master/examples>
+//!
+//! TODO Reviewed ??-??-2026
 
 mod args;
 mod book_toml;

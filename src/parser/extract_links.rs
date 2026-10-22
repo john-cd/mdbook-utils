@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Use a Markdown parser to extract links
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::borrow::Cow;
 
 use pulldown_cmark::Event;

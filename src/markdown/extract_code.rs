@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Extract Rust code examples from Markdown
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::fs;
 use std::io::Write;
 use std::path::Component;

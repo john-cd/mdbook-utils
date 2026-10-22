@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Command-line subcommands to handle links
+//!
+//! TODO Reviewed ??-??-2026
+
 use anyhow::Context;
 use anyhow::Result;
 use clap::Args;
