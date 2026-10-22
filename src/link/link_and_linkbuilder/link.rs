@@ -30,7 +30,6 @@ pub(crate) struct Link<'a> {
     // [![image_alt_text][image_label]][...]
     // [image_label]: image_url "image_title"
     /// Link type of the image, if the link text is an image.
-    #[allow(dead_code)]
     pub(crate) image_link_type: Option<LinkType>,
     /// Image alt text.
     pub(crate) image_alt_text: Option<Cow<'a, str>>,

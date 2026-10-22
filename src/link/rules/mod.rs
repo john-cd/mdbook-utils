@@ -3,8 +3,6 @@
 //!
 //! TODO Reviewed ??-??-2026
 
-#![allow(clippy::vec_init_then_push)]
-
 mod regexes;
 
 pub(crate) use regexes::*;

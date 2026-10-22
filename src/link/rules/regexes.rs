@@ -3,8 +3,6 @@
 //!
 //! TODO Reviewed ??-??-2026
 
-#![allow(clippy::vec_init_then_push)]
-
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
@@ -15,9 +13,6 @@ use regex::Regex;
 pub(crate) struct Rule<'a> {
     /// Regex pattern that matches the URL.
     pub(crate) re: &'a str, // Regex pattern to match the url
-    /// Replacement pattern that builds the reference label.
-    #[allow(dead_code)]
-    pub(crate) label_pattern: &'a str, // regex replacement pattern
     /// Optional replacement pattern that builds a badge image URL.
     pub(crate) badge_url_pattern: &'a str, /* optional pattern to build a
                                             * badge link */
@@ -48,7 +43,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "category",
         Rule {
             re: r"https://crates.io/categories/(?<catg>[^/?]+)/?(?:\?\S+)?",
-            label_pattern: "cat-${catg}",
             badge_url_pattern: "https://badge-cache.kominick.com/badge/${catg}--x.svg?style=social",
         },
     );
@@ -59,7 +53,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "crates.io",
         Rule {
             re: r"https://crates.io(?:/crates)?/?",
-            label_pattern: "crates-io",
             ..Rule::default()
         },
     );
@@ -68,7 +61,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     // [smol-crate]: https://crates.io/crates/smol/
     m.insert("crate", Rule {
         re: r"https://crates.io/crates/(?<crate>[^/?]+)/?",
-        label_pattern: "crate-${crate}",
         badge_url_pattern: "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}",
     });
 
@@ -77,7 +69,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "docs.rs",
         Rule {
             re: r"https://docs.rs/?",
-            label_pattern: "docs-rs",
             ..Rule::default()
         },
     );
@@ -89,7 +80,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     // [spawn-blocking]: https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html
     m.insert("documentation", Rule {
         re: r"https://docs.rs/(?<crate>[^/]+)(?:/(?:latest|[^/]+))?(?<item>(?:/[^/]+)+)?/?(?:index\.html)?",
-        label_pattern: "${crate}${item}",
         badge_url_pattern: "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}",
     });
 
@@ -100,7 +90,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "std",
         Rule {
             re: r"https://doc.rust-lang.org/std/?",
-            label_pattern: "std",
             badge_url_pattern: "https://badge-cache.kominick.com/badge/std-1.75.0-blue.svg",
         },
     );
@@ -112,7 +101,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "std item documentation",
         Rule {
             re: r"https://doc.rust-lang.org/(?<lib>std|core)/(?<rest>[^/?#]+?(?:/[^/?#]+?)*?)(?:/|\.html|[?#]|$)(?:[?#].*)?$",
-            label_pattern: "${lib}-${rest}",
             ..Rule::default()
         },
     );
@@ -123,7 +111,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "lib.rs",
         Rule {
             re: r"https://lib.rs/?",
-            label_pattern: "lib-rs",
             ..Rule::default()
         },
     );
@@ -132,7 +119,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "crate on lib.rs",
         Rule {
             re: r"https://lib.rs/crates/(?<crate>[^/]+)/?",
-            label_pattern: "lib-rs-${crate}",
             ..Rule::default()
         },
     );
@@ -143,7 +129,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "github repo wiki",
         Rule {
             re: r"https://github.com/(?<owner>\S*?)/(?<repo>\S*?)/wiki/(?:\S+?)",
-            label_pattern: "${repo}-wiki",
             ..Rule::default()
         },
     );
@@ -156,7 +141,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "github.com/john-cd",
         Rule {
             re: r"https://github.com/john-cd/rust_howto/(?:\S+?/)*(?<last>\S*)(?:/|.md)?",
-            label_pattern: "rust-howto-${last}",
             ..Rule::default()
         },
     );
@@ -167,7 +151,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "github repo",
         Rule {
             re: r"https://github.com/(?<owner>[^/]+?)/(?<repo>[^/]+)/?.*",
-            label_pattern: "${repo}-github",
             badge_url_pattern: "https://img.shields.io/badge/${repo}-steelblue?logo=github",
         },
     );
@@ -179,7 +162,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "github pages",
         Rule {
             re: r"https://(?<owner>[^.]+)\.github\.io/(?<repo>[^/]+)/?.*",
-            label_pattern: "${repo}-github-pages",
             badge_url_pattern: "https://img.shields.io/badge/${repo}-red?logo=githubpages",
         },
     );
@@ -193,7 +175,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "rust book",
         Rule {
             re: r"https://doc.rust-lang.org/book/?",
-            label_pattern: "rust-book",
             badge_url_pattern: "https://img.shields.io/badge/Rust_Book-blue?logo=mdbook",
         },
     );
@@ -204,7 +185,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "rust book item",
         Rule {
             re: r"https://doc.rust-lang.org/book/ch\d{2}-\d{2}-(?<item>[^.]+)\.html",
-            label_pattern: "rust-book-${item}",
             badge_url_pattern: "https://img.shields.io/badge/${item}-blue?logo=mdbook",
         },
     );
@@ -216,7 +196,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     // [conditional-compilation]: https://doc.rust-lang.org/reference/conditional-compilation.html#the-cfg-attribute
     m.insert("rust reference", Rule {
         re: r"https://doc.rust-lang.org(?:/nightly)?/reference/(?:(?<chapter>[^/]+)/)?(?<item>[^/]+)\.html(?:#\S+)?",
-        label_pattern: "rust-reference-book-${chapter}-${item}",
         badge_url_pattern: "https://img.shields.io/badge/${item}-green?logo=mdbook",
     });
 
@@ -227,7 +206,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "rust by example book",
         Rule {
             re: r"https://doc.rust-lang.org/rust-by-example/?",
-            label_pattern: "rust-by-example",
             badge_url_pattern: "https://img.shields.io/badge/Rust_by_example-violet?logo=mdbook",
         },
     );
@@ -238,7 +216,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "rust by example chapter",
         Rule {
             re: r"https://doc.rust-lang.org/rust-by-example/(?:[^/]+/)*(?<last>[^/.]+)(?:\.html)?",
-            label_pattern: "rust-by-example-${last}",
             badge_url_pattern:
                 "https://img.shields.io/badge/Rust_by_example-${last}-violet?logo=mdbook",
         },
@@ -250,7 +227,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "cargo book",
         Rule {
             re: r"https://doc.rust-lang.org/cargo/(?<rest>[^/.]+)(?:\.html)?",
-            label_pattern: "cargo-book-${rest}",
             badge_url_pattern: "https://img.shields.io/badge/Cargo_Book-${rest}-yellow?logo=mdbook",
         },
     );
@@ -260,7 +236,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "website",
         Rule {
             re: r"^https?://(?<domain>[^/?#\s]+)/?(?:[?#][^\s]*)?$",
-            label_pattern: "${domain}-website",
             ..Rule::default()
         },
     );
@@ -272,7 +247,6 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
         "website page",
         Rule {
             re: r"^https?://(?<domain>[^/?#\s]+)/(?:[^\s?#]*/)*(?<last>[^/?#\s]+?)(?:\.html|/)?(?:[?#][^\s]*)?$",
-            label_pattern: "${domain}-${last}",
             ..Rule::default()
         },
     );

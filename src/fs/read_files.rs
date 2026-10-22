@@ -4,8 +4,6 @@
 
 use std::borrow::Cow;
 use std::fs::File;
-use std::io;
-use std::io::BufRead;
 use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
@@ -86,35 +84,6 @@ where
     P: AsRef<Path>,
 {
     Ok(Cow::from(read_markdown_sources_in(markdown_root_dir_path)?.text))
-}
-
-/// Read a file line by line into a vector of strings.
-///
-/// Returns an error if the file does not exist or cannot be read.
-/// # Example
-/// ```ignore
-/// let lines = read_lines("test.txt").unwrap();
-/// for line in lines {
-///     println!("{line}"");
-/// }
-#[allow(dead_code)]
-#[tracing::instrument(skip(file_path))]
-pub(crate) fn read_lines<P>(file_path: P) -> Result<Vec<Cow<'static, str>>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(file_path.as_ref()).with_context(|| {
-        format!(
-            "[read_lines] Could not open {}. Does the file exist?",
-            file_path.as_ref().display()
-        )
-    })?;
-    // Returns an Iterator to the Reader of the lines of the file.
-    Ok(io::BufReader::new(file)
-        .lines()
-        .map_while(Result::ok)
-        .map(Cow::from)
-        .collect())
 }
 
 #[cfg(test)]

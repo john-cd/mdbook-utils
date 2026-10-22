@@ -328,7 +328,7 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(clippy::field_reassign_with_default)]
     fn test_markdown_src_dir_path() -> Result<()> {
         let dir = tempdir()?;
         let src_dir = dir.path().join("src");
@@ -383,7 +383,7 @@ src = "toml_src"
     }
 
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(clippy::field_reassign_with_default)]
     fn test_book_markdown_build_dir_path() -> Result<()> {
         let dir = tempdir()?;
         let build_dir = dir.path().join("book").join("markdown");
@@ -499,7 +499,7 @@ src = "toml_src"
     }
 
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(clippy::field_reassign_with_default)]
     fn test_cargo_toml_dir_path() -> Result<()> {
         let dir = tempdir()?;
         let root_dir = dir.path().to_path_buf();
@@ -588,7 +588,7 @@ src = "toml_src"
     }
 
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(clippy::field_reassign_with_default)]
     fn test_sitemap_file_path() -> Result<()> {
         let dir = tempdir()?;
         let mut config = Configuration::default();
@@ -641,7 +641,7 @@ build-dir = "toml_book"
     /// Verifies malformed configuration fails unless the sitemap destination is
     /// explicit.
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(clippy::field_reassign_with_default)]
     fn test_sitemap_file_path_reports_malformed_book_toml_unless_overridden() -> Result<()> {
         let dir = tempdir()?;
         fs::write(dir.path().join("book.toml"), "[build\nbuild-dir = 7")?;
@@ -667,7 +667,7 @@ build-dir = "toml_book"
     /// Verifies the sitemap requires an HTML renderer when no destination is
     /// overridden.
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(clippy::field_reassign_with_default)]
     fn test_sitemap_file_path_requires_html_when_config_disables_it() -> Result<()> {
         let dir = tempdir()?;
         fs::write(dir.path().join("book.toml"), "[output.markdown]\n")?;
