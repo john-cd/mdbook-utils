@@ -161,11 +161,9 @@ where
         refdef_dest_file_path,
         move |parser, f| {
             // Read existing ref defs
-            let existing_links: Vec<link::Link<'_>> = parser::extract_links(parser);
-            let existing_links_static: Vec<link::Link<'static>> =
-                existing_links.into_iter().map(|l| l.to_static()).collect();
+            let existing_links = parser::extract_reference_definitions(parser);
 
-            let links = generate::merge_links(existing_links_static, &mut new_links);
+            let links = generate::merge_links(existing_links, &mut new_links);
             link::write_refdefs_to(links, f)?;
             Ok(())
         },

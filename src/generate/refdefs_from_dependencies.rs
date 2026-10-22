@@ -24,6 +24,7 @@ pub(crate) fn generate_refdefs_from(
     for (_, dep) in dependencies {
         buf.push(generate_refdefs_for_one_library(
             &dep.library_name,
+            dep.package_name(),
             dep.package_repo_url.as_deref(),
         ));
     }
@@ -35,6 +36,7 @@ pub(crate) fn generate_refdefs_from(
 /// and the associated badge URLs
 fn generate_refdefs_for_one_library(
     library_name: &str,
+    package_name: &str,
     package_repo_url: Option<&str>,
 ) -> Vec<Link<'static>> {
     let mut buf = Vec::new();
@@ -72,9 +74,27 @@ fn generate_refdefs_for_one_library(
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
-    // #[test]
-    // fn test() {
-    // }
+    /// URLs use the package name; labels use the library name.
+    #[test]
+    fn urls_use_the_package_name() {
+        let links = generate_refdefs_for_one_library(
+            "md5",
+            "md-5",
+            Some("https://github.com/RustCrypto/hashes"),
+        );
+        let got: Vec<_> = links
+            .iter()
+            .map(|l| (l.label.as_deref().unwrap_or(""), l.get_url().to_string()))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                ("md5", "https://docs.rs/md-5".to_string()),
+                ("md5-crate", "https://crates.io/crates/md-5".to_string()),
+                ("md5-github", "https://github.com/RustCrypto/hashes".to_string()),
+            ]
+        );
+    }
 }
