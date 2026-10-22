@@ -44,25 +44,27 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
     - `identify-unused-rs-examples`: Find `.rs` files not included in any `.md` file.
     - `generate-crates`: Generate an index of the crates linked from the book.
     - `generate-categories`: Generate an index of the crates.io categories linked from the book.
-- `sitemap`: Generate a `sitemap.xml` file (`--base-url`, `--map-index FROM:TO`).
+- `sitemap`: Generate a `sitemap.xml` file (`--base-url`, `--map-index FROM:TO`). `README.md` pages are listed as `index.html`, as mdBook renders them; use `--map-index` for any other renamed page.
 - `debug`: Write the Markdown parser events to a file.
 
 Run `mdbook-utils <command> --help` for the options of each command.
 
 ### Environment Variables
 
-- `MARKDOWN_DIR_PATH`: Path to the Markdown source directory (default: `./src/`).
-- `BOOK_ROOT_DIR_PATH`: Path to the book's root directory containing `book.toml` (default: `.`).
-- `BOOK_HTML_BUILD_DIR_PATH`: Path where `mdbook` outputs HTML (usually `./book/` for one renderer or `./book/html/` for multiple renderers).
-- `BOOK_MARKDOWN_BUILD_DIR_PATH`: Path where the Markdown renderer writes expanded Markdown.
-- `CARGO_TOML_DIR_PATH`: Directory where a `Cargo.toml` can be found.
-- `DEFAULT_DEST_DIR_PATH`: Default directory for generated `mdbook-utils` files.
-- `BASE_URL`: Base URL for sitemap generation (defaults to `output.html.site-url` in `book.toml`; there is no placeholder default).
+- `MDBOOK_UTILS_MARKDOWN_DIR_PATH`: Path to the Markdown source directory (default: `./src/`).
+- `MDBOOK_UTILS_BOOK_ROOT_DIR_PATH`: Path to the book's root directory containing `book.toml` (default: `.`).
+- `MDBOOK_UTILS_BOOK_HTML_BUILD_DIR_PATH`: Path where `mdbook` outputs HTML (usually `./book/` for one renderer or `./book/html/` for multiple renderers).
+- `MDBOOK_UTILS_BOOK_MARKDOWN_BUILD_DIR_PATH`: Path where the Markdown renderer writes expanded Markdown.
+- `MDBOOK_UTILS_CARGO_TOML_DIR_PATH`: Directory where a `Cargo.toml` can be found.
+- `MDBOOK_UTILS_DEFAULT_DEST_DIR_PATH`: Default directory for generated `mdbook-utils` files.
+- `MDBOOK_UTILS_BASE_URL`: Base URL for sitemap generation (defaults to `output.html.site-url` in `book.toml`; there is no placeholder default).
 - `RUST_LOG`: Logging level (error, warn, info, debug, trace).
+
+The unprefixed names used before (for example `BASE_URL`) still work when the prefixed variable is not set, with a deprecation warning.
 
 ### Configuration via `book.toml`
 
-`mdbook-utils` uses mdBook's [`book.toml` configuration][mdbook-config] for the Markdown source directory (`book.src`) and renderer output directories (`build.build-dir` and `[output.*]`). Relative paths are resolved from the directory containing `book.toml`, selected by `BOOK_ROOT_DIR_PATH`.
+`mdbook-utils` uses mdBook's [`book.toml` configuration][mdbook-config] for the Markdown source directory (`book.src`) and renderer output directories (`build.build-dir` and `[output.*]`). Relative paths are resolved from the directory containing `book.toml`, selected by `MDBOOK_UTILS_BOOK_ROOT_DIR_PATH`.
 
 For a path with a command-line option, the precedence is command-line option, matching environment variable, `book.toml`, then that command's default. A missing `book.toml` is optional; an unreadable or malformed file produces an error when resolution reaches it. mdBook enables HTML when no renderer tables are configured. One renderer writes directly to `build.build-dir`; with multiple renderers, each writes to a renderer-named subdirectory such as `html` or `markdown`.
 
