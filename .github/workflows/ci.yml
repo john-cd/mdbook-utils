@@ -32,6 +32,12 @@ jobs:
         with:
           components: clippy
 
+      - name: Install pinned nightly rustfmt
+        run: rustup toolchain install nightly-2026-10-21 --profile minimal --component rustfmt
+
+      - name: Check formatting
+        run: cargo +nightly-2026-10-21 fmt --all -- --check
+
       - name: Install cargo-binstall (Linux)
         if: runner.os == 'Linux'
         run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
