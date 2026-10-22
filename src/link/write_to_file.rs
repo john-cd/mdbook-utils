@@ -108,10 +108,10 @@ where
     writeln!(link_writer, "# Broken Links\n")
         .context("[write_broken_links_to] Failed to write broken links.")?;
 
-    for (reference, text, link_type) in broken_links {
+    for (reference, location, link_type) in broken_links {
         writeln!(link_writer, "- Reference: {reference}")?;
-        if !text.is_empty() {
-            writeln!(link_writer, "  Text: {text}")?;
+        if !location.is_empty() {
+            writeln!(link_writer, "  Location: {location}")?;
         }
         writeln!(link_writer, "  Type: {link_type}")?;
         writeln!(link_writer)?;
@@ -293,13 +293,13 @@ mod tests {
     fn writes_broken_links_list() -> Result<()> {
         let mut out = Vec::new();
         write_broken_links_to(
-            vec![("ref".into(), "txt".into(), "Shortcut".into())],
+            vec![("ref".into(), "a.md:3".into(), "Shortcut".into())],
             &mut out,
         )?;
 
         assert_eq!(
             String::from_utf8(out)?,
-            "# Broken Links\n\n- Reference: ref\n  Text: txt\n  Type: Shortcut\n\n"
+            "# Broken Links\n\n- Reference: ref\n  Location: a.md:3\n  Type: Shortcut\n\n"
         );
         Ok(())
     }

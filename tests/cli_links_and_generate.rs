@@ -161,3 +161,77 @@ fn missing_source_directory_fails_without_writing() -> Result<()> {
     }
     Ok(())
 }
+
+/// Every command that writes an output file fails on a missing source
+/// directory with a nonzero status and leaves an existing output untouched.
+#[test]
+fn failed_runs_keep_the_existing_output_file() -> Result<()> {
+    let commands: &[&[&str]] = &[
+        &["links", "write-all"],
+        &["links", "write-inline"],
+        &["links", "duplicate-links"],
+        &["links", "broken-links"],
+        &["refdefs", "write"],
+        &["debug"],
+        &["markdown", "generate-crates"],
+        &["markdown", "generate-categories"],
+    ];
+    let f = fixture("# Page\n")?;
+    fs::create_dir_all(f.out.parent().expect("output has a parent"))?;
+    let missing = f.dir.path().join("missing");
+
+    for args in commands {
+        fs::write(&f.out, "previous")?;
+        let output = run_with_src(&f, args, &missing)?;
+        assert!(!output.status.success(), "{args:?} succeeded");
+        assert_eq!(fs::read_to_string(&f.out)?, "previous", "{args:?}");
+    }
+    Ok(())
+}
+
+/// Extracting then replacing Rust code blocks through the CLI keeps the
+/// surrounding Markdown, and a second replacement changes nothing.
+#[test]
+fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
+    let dir = tempdir()?;
+    let drafts = dir.path().join("drafts");
+    let code = dir.path().join("code");
+    fs::create_dir(&drafts)?;
+    let chapter = drafts.join("ch.md");
+    fs::write(
+        &chapter,
+        "# T\n\n```rust\n```\n\ntext\n\n```rust\nfn main() {}\n```\n",
+    )?;
+    let run = |args: &[&str]| -> Result<Output> {
+        Ok(Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
+            .args(args)
+            .arg("--yes")
+            .arg("--markdown-dir")
+            .arg(&drafts)
+            .arg("--target-dir")
+            .arg(&code)
+            .current_dir(dir.path())
+            .env_remove("BOOK_ROOT_DIR_PATH")
+            .env_remove("MARKDOWN_DIR_PATH")
+            .env("RUST_LOG", "off")
+            .output()?)
+    };
+
+    assert!(run(&["markdown", "extract-code-examples"])?.status.success());
+    assert!(
+        run(&["markdown", "replace-code-examples-by-includes"])?
+            .status
+            .success()
+    );
+    let first = fs::read_to_string(&chapter)?;
+    assert!(first.contains("\ntext\n"), "{first}");
+    assert_eq!(first.matches("{{#include").count(), 2, "{first}");
+
+    assert!(
+        run(&["markdown", "replace-code-examples-by-includes"])?
+            .status
+            .success()
+    );
+    assert_eq!(fs::read_to_string(&chapter)?, first);
+    Ok(())
+}

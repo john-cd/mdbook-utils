@@ -34,7 +34,8 @@ export CARGO_TOML_DIR_PATH=./test_book/book/code/
 export DEFAULT_DEST_DIR_PATH=./test_book/temp/
 
 # Base url of the website where the book will be deployed
-# (used to build sitemaps)
+# (used to build sitemaps). Optional if `book.toml` sets
+# `output.html.site-url`; `sitemap` fails when no base URL is configured.
 export BASE_URL=http://myexample.com/some_book/
 ```
 

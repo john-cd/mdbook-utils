@@ -44,11 +44,22 @@ fn get_options() -> Options {
 use std::sync::Arc;
 use std::sync::Mutex;
 
+/// A reference-style link that has no definition.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct BrokenReference {
+    /// The undefined reference label.
+    pub(crate) reference: String,
+    /// The kind of link, as reported by the parser (for example `Shortcut`).
+    pub(crate) link_type: String,
+    /// Byte offset of the link in the parsed text.
+    pub(crate) offset: usize,
+}
+
 /// Handler for broken references
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Handler {
-    /// List of broken links found
-    pub broken_links: Arc<Mutex<Vec<(String, String, String)>>>,
+    /// List of broken references found
+    pub broken_links: Arc<Mutex<Vec<BrokenReference>>>,
 }
 
 impl Handler {
@@ -76,11 +87,11 @@ impl<'input> BrokenLinkCallback<'input> for Handler {
             "Markdown contains an unresolved reference"
         );
         if let Ok(mut links) = self.broken_links.lock() {
-            links.push((
-                link.reference.into_string(),
-                "".into(), // We don't have the full input here anymore without 'input
-                format!("{:?}", link.link_type),
-            ));
+            links.push(BrokenReference {
+                offset: link.span.start,
+                link_type: format!("{:?}", link.link_type),
+                reference: link.reference.into_string(),
+            });
         } else {
             tracing::warn!("Failed to lock broken_links");
         }
@@ -161,7 +172,11 @@ mod tests {
             .clone();
         assert_eq!(
             broken,
-            vec![("missing".to_string(), String::new(), "Shortcut".to_string())]
+            vec![BrokenReference {
+                reference: "missing".to_string(),
+                link_type: "Shortcut".to_string(),
+                offset: 0,
+            }]
         );
     }
 

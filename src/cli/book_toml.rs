@@ -75,6 +75,8 @@ pub(crate) struct BookTomlPaths {
     /// Directory containing expanded Markdown, when the Markdown renderer is
     /// enabled.
     pub(crate) markdown_output: Option<PathBuf>,
+    /// `output.html.site-url`: the path or URL where the book is hosted.
+    pub(crate) site_url: Option<String>,
 }
 
 /// Parse an optional mdBook `book.toml` and resolve its configured paths.
@@ -115,6 +117,13 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
             .unwrap_or("book".into()),
     );
 
+    let site_url = book_toml
+        .output
+        .as_ref()
+        .and_then(|output| output.extra.get("html"))
+        .and_then(|html| html.get("site-url"))
+        .and_then(Value::as_str)
+        .map(str::to_string);
     let mut html_output = None;
     let mut markdown_output = None;
 
@@ -160,6 +169,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
         markdown_src,
         html_output,
         markdown_output,
+        site_url,
     }))
 }
 
@@ -304,6 +314,19 @@ build-dir = "my_book"
 
         let error = try_parse_book_toml(dir.path()).expect_err("invalid TOML must fail");
         assert!(format!("{error:#}").contains("book.toml"));
+        Ok(())
+    }
+
+    /// `output.html.site-url` is exposed to callers.
+    #[test]
+    fn test_try_parse_book_toml_site_url() -> Result<()> {
+        let dir = tempdir()?;
+        fs::write(
+            dir.path().join("book.toml"),
+            "[output.html]\nsite-url = \"https://example.org/book/\"\n",
+        )?;
+        let paths = try_parse_book_toml(dir.path())?.expect("book.toml was created");
+        assert_eq!(paths.site_url.as_deref(), Some("https://example.org/book/"));
         Ok(())
     }
 }
