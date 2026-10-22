@@ -30,9 +30,6 @@ static REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
 ///
 /// `contents_to_insert`: replacement of {{#include ...}} statements (same value
 /// for all statements). Can be "".
-/// Within each mdBook-style Markdown file in a source directory,
-/// remove any left-over {{#include file.md}} statements
-/// (and replace by a hard-coded string).
 ///
 /// # Errors
 ///

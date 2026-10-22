@@ -48,6 +48,11 @@ use pulldown_cmark::Parser;
 /// invokes a closure that uses the parser to write to an in-memory buffer,
 /// and atomically writes the buffer to the destination file (creating its
 /// parent directories). The destination is untouched if any step fails.
+///
+/// The closure borrows the parser for exactly its own lifetime
+/// (`&'a mut Parser<'a>`) because some writers, such as the GitHub badge
+/// writer, take the parser by that same signature; all I/O stays in this
+/// function, so the closures only format into the buffer.
 fn helper<P1, P2, F>(src_dir_path: P1, dest_file_path: P2, func: F) -> Result<()>
 where
     P1: AsRef<Path>,
