@@ -40,6 +40,7 @@ pub(crate) struct GenerateArgs {
     #[arg(long = "from-dependencies")]
     pub(crate) from_dependencies: bool,
 
+    /// Source, manifest, destination, and log-file paths.
     #[command(flatten)]
     pub(crate) args: DependenciesDirAndDestFileArgs,
 }

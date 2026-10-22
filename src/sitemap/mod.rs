@@ -14,6 +14,8 @@ use percent_encoding::percent_decode_str;
 use tracing::info;
 use url::Url;
 
+/// Placeholder origin used to resolve source paths without touching the real
+/// base URL.
 const SOURCE_ROOT_URL: &str = "https://mdbook-utils.invalid/__mdbook_source__/";
 
 /// Return the published page URLs referenced by SUMMARY.md.
@@ -96,12 +98,23 @@ pub(crate) fn collect_page_urls(
     Ok(page_urls.into_iter().collect())
 }
 
+/// Writes the page URLs as a `sitemap.xml` document.
+///
+/// # Errors
+///
+/// Returns an error if the XML cannot be written.
 pub(crate) fn write_sitemap<W: std::io::Write>(page_urls: Vec<String>, w: &mut W) -> Result<()> {
     xml::write_xml(page_urls, w).context("[generate_sitemap] Failed to write the XML.")?;
     info!("sitemap.xml created.");
     Ok(())
 }
 
+/// Validates the sitemap base URL and ensures its path ends with `/`.
+///
+/// # Errors
+///
+/// Returns an error unless the URL is an HTTP(S) directory URL without query or
+/// fragment.
 pub(crate) fn normalize_base_url(mut base_url: Url) -> Result<Url> {
     if base_url.cannot_be_a_base() || !matches!(base_url.scheme(), "http" | "https") {
         bail!("Invalid sitemap base URL; expected an HTTP or HTTPS directory URL: {base_url}");
@@ -117,6 +130,11 @@ pub(crate) fn normalize_base_url(mut base_url: Url) -> Result<Url> {
     Ok(base_url)
 }
 
+/// Checks that an index mapping, if any, names plain file names.
+///
+/// # Errors
+///
+/// Returns an error if a name is empty or contains path components.
 fn validate_index_mapping(map_index: Option<&(String, String)>) -> Result<()> {
     if let Some((from, to)) = map_index {
         for name in [from, to] {
@@ -133,6 +151,12 @@ fn validate_index_mapping(map_index: Option<&(String, String)>) -> Result<()> {
     Ok(())
 }
 
+/// Maps a link destination to the Markdown source path it points to, or `None`
+/// for external or non-source links.
+///
+/// # Errors
+///
+/// Returns an error if the destination cannot be resolved against the base URL.
 fn source_markdown_path(raw_url: &str, base_url: &Url) -> Result<Option<PathBuf>> {
     let source_root = Url::parse(SOURCE_ROOT_URL).expect("constant source URL is valid");
     let target = match Url::parse(raw_url) {
@@ -191,6 +215,11 @@ fn source_markdown_path(raw_url: &str, base_url: &Url) -> Result<Option<PathBuf>
     Ok(Some(relative_path))
 }
 
+/// Builds the published URL of a page from the base URL and its relative path.
+///
+/// # Errors
+///
+/// Returns an error if the base URL cannot accept path segments.
 fn hosted_page_url(base_url: &Url, relative_path: &Path) -> Result<String> {
     let mut url = base_url.clone();
     {

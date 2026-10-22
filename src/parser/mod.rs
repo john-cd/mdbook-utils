@@ -50,6 +50,7 @@ pub(crate) struct Handler {
 }
 
 impl Handler {
+    /// Creates a handler with an empty list of broken links.
     pub(crate) fn new() -> Self {
         Self {
             broken_links: Arc::new(Mutex::new(Vec::new())),

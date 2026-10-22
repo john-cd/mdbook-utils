@@ -1,4 +1,5 @@
 // TODO Reviewed ??-??-2026
+//! Builder for [`Link`](super::Link).
 use std::borrow::Cow;
 
 use pulldown_cmark::LinkType;
@@ -9,10 +10,14 @@ use super::link::Link;
 /// from pieces of information
 #[derive(Debug, Default)]
 pub(crate) struct LinkBuilder<'a> {
+    /// Accumulates the parts of a [`Link`] while the Markdown event stream is
+    /// read.
     link: Link<'a>,
 }
 
 impl<'a> LinkBuilder<'a> {
+    /// Starts a builder from a link's type, destination URL, title, and
+    /// reference label; empty values are left unset.
     pub(crate) fn from_type_url_title(
         link_type: LinkType,
         url: Cow<'a, str>,
@@ -30,6 +35,7 @@ impl<'a> LinkBuilder<'a> {
         }
     }
 
+    /// Sets the destination URL; an empty URL is ignored.
     pub(crate) fn set_url(mut self, url: Cow<'a, str>) -> Self {
         if !url.is_empty() {
             self.link.url = Some(url);
@@ -37,6 +43,7 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
+    /// Appends to the link text; empty text is ignored.
     pub(crate) fn add_text(mut self, text: Cow<'a, str>) -> Self {
         if !text.is_empty() {
             self.link.text = Some(format!("{}{text}", self.link.text.unwrap_or_default()).into());
@@ -44,6 +51,7 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
+    /// Sets the reference label; an empty label is ignored.
     pub(crate) fn set_label(mut self, label: Cow<'a, str>) -> Self {
         if !label.is_empty() {
             self.link.label = Some(label);
@@ -51,6 +59,8 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
+    /// Sets the image type, URL, title, and label of a badge-style link whose
+    /// text is an image.
     pub(crate) fn set_image(
         self,
         image_link_type: LinkType,
@@ -81,6 +91,7 @@ impl<'a> LinkBuilder<'a> {
         }
     }
 
+    /// Sets the image URL; an empty URL is ignored.
     pub(crate) fn set_image_url(mut self, image_url: Cow<'a, str>) -> Self {
         if !image_url.is_empty() {
             self.link.image_url = Some(image_url);
@@ -88,6 +99,7 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
+    /// Appends to the image alt text; empty text is ignored.
     pub(crate) fn add_image_alt_text(mut self, image_alt_text: Cow<'a, str>) -> Self {
         if !image_alt_text.is_empty() {
             self.link.image_alt_text =
@@ -96,6 +108,7 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
+    /// Returns the accumulated [`Link`].
     pub(crate) fn build(self) -> Link<'a> {
         self.link
     }

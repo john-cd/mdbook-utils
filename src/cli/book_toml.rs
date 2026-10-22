@@ -21,11 +21,14 @@ use tracing::debug;
 #[derive(Deserialize, Debug)]
 pub(crate) struct BookToml {
     // [book] table
+    /// Optional `[book]` table.
     book: Option<Book>,
     // [build] table
+    /// Optional `[build]` table.
     build: Option<Build>,
 
     // [output.*] tables
+    /// Optional `[output.*]` tables.
     output: Option<Output>,
 }
 
@@ -35,6 +38,7 @@ pub(crate) struct Book {
     // Source files
     // [book]
     // src = "src"
+    /// Markdown source directory, relative to the book root; `src` when unset.
     src: Option<PathBuf>,
 }
 
@@ -44,6 +48,7 @@ pub(crate) struct Build {
     // Directory where the output is placed
     // [build]
     // build-dir = "book"
+    /// Output directory, relative to the book root; `book` when unset.
     #[serde(rename = "build-dir")]
     build_dir: Option<PathBuf>,
     // We don't care about the rest.
@@ -54,6 +59,7 @@ pub(crate) struct Build {
 pub(crate) struct Output {
     // Capture additional fields
     // https://serde.rs/attr-flatten.html
+    /// Renderer tables, keyed by renderer name, kept as raw TOML values.
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }

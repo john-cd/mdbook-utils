@@ -1,4 +1,5 @@
 // TODO Reviewed ??-??-2026
+//! Integration tests of the grouped public library API.
 use std::fs;
 
 use mdbook_utils::api::BadgeStyle;

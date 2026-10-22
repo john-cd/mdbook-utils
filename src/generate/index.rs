@@ -1,16 +1,21 @@
 // TODO Reviewed ??-??-2026
+//! Generation of crates.io category and crate index pages.
 use std::collections::BTreeSet;
 use std::io::Write;
 
 use crate::link::Link;
 
+/// Kind of crates.io index to generate.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum IndexKind {
+    /// Index of crates.io categories.
     Categories,
+    /// Index of crates.io crates.
     Crates,
 }
 
 impl IndexKind {
+    /// Returns the Markdown heading for this index.
     pub(crate) fn title(self) -> &'static str {
         match self {
             Self::Categories => "Categories",
@@ -18,6 +23,7 @@ impl IndexKind {
         }
     }
 
+    /// Returns the crates.io page URL for the named category or crate.
     pub(crate) fn list_url(self, name: &str) -> String {
         match self {
             Self::Categories => format!("https://crates.io/categories/{name}"),
@@ -25,6 +31,7 @@ impl IndexKind {
         }
     }
 
+    /// Returns the URL path segment that precedes a name of this kind.
     fn segment_prefix(self) -> &'static str {
         match self {
             Self::Categories => "crates.io/categories/",
@@ -32,6 +39,8 @@ impl IndexKind {
         }
     }
 
+    /// Returns the final path segment that is a listing page rather than a
+    /// name.
     fn segment_exclusion(self) -> &'static str {
         match self {
             Self::Categories => "categories",
@@ -40,11 +49,15 @@ impl IndexKind {
     }
 }
 
+/// Returns true if the name contains only ASCII alphanumerics, `-`, and `_`.
 fn is_valid_name(name: &str) -> bool {
     name.chars()
         .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
 }
 
+/// Collects the sorted, deduplicated names of the given kind from crates.io
+/// link URLs, ignoring query strings, trailing slashes, listing pages, and
+/// invalid names.
 pub(crate) fn extract_index_names<'a>(
     links: impl IntoIterator<Item = Link<'a>>,
     kind: IndexKind,
@@ -70,6 +83,12 @@ pub(crate) fn extract_index_names<'a>(
     names
 }
 
+/// Writes a Markdown heading followed by one list item linking each name to
+/// crates.io.
+///
+/// # Errors
+///
+/// Returns an error if writing to `writer` fails.
 pub(crate) fn write_index<W: Write>(
     mut writer: W,
     kind: IndexKind,
