@@ -43,8 +43,10 @@ fn identify_files_not_in_summary_reports_nested_unlisted_chapters() -> Result<()
         String::from_utf8_lossy(&output.stderr)
     );
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains(&unlisted.display().to_string()));
-    assert!(!stdout.contains(&listed.display().to_string()));
+    // The command prints canonical paths, whose prefix differs from the
+    // temporary directory's on Windows (`\\?\` and short names); compare names.
+    assert!(stdout.contains("unlisted.md"), "{stdout}");
+    assert!(!stdout.contains("chapter.md"), "{stdout}");
     Ok(())
 }
 
