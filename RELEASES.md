@@ -4,6 +4,9 @@
 ## vNext
 
 - Generate other types of badges
+- More unit tests (Markdown file discovery, parser options and broken-link handler, link writers, HTML output, debug output) and CLI integration tests for the `links`, `refdefs write`, `debug`, and `markdown generate-*` commands.
+- Fix: Markdown file discovery skipped the whole source directory when its own name started with a dot.
+- README: corrected the list of subcommands.
 
 ## v0.1.4
 

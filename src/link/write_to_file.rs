@@ -191,9 +191,102 @@ fn write<W: Write>(l: &Link<'_>, flags: &BitFlags<LinkWrite>, w: &mut W) -> Resu
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use std::borrow::Cow;
 
-    // #[test]
-    // fn test() {
-    // }
+    use anyhow::Result;
+    use pulldown_cmark::LinkType;
+
+    use super::*;
+    use crate::link::LinkBuilder;
+
+    /// Builds a link with text, label, URL and title.
+    fn link(text: &'static str, label: &'static str, url: &'static str) -> Link<'static> {
+        LinkBuilder::from_type_url_title(
+            LinkType::Inline,
+            Cow::Borrowed(url),
+            Cow::Borrowed(""),
+            Cow::Borrowed(label),
+        )
+        .add_text(Cow::Borrowed(text))
+        .build()
+    }
+
+    /// Reference-style output has a heading, the reference link, and its
+    /// definition.
+    #[test]
+    fn writes_reference_links_and_definitions() -> Result<()> {
+        let mut out = Vec::new();
+        write_reference_style_links_to(vec![link("Serde", "serde", "https://serde.rs")], &mut out)?;
+        let text = String::from_utf8(out)?;
+
+        assert!(text.starts_with("# Links\n"), "{text}");
+        assert!(text.contains("[Serde][serde]"), "{text}");
+        assert!(text.contains("[serde]: https://serde.rs"), "{text}");
+        Ok(())
+    }
+
+    /// Reference definition output omits the reference links.
+    #[test]
+    fn writes_only_reference_definitions() -> Result<()> {
+        let mut out = Vec::new();
+        write_refdefs_to(vec![link("Serde", "serde", "https://serde.rs")], &mut out)?;
+        let text = String::from_utf8(out)?;
+
+        assert!(text.starts_with("# Reference Definitions\n"), "{text}");
+        assert!(text.contains("[serde]: https://serde.rs"), "{text}");
+        assert!(!text.contains("[Serde][serde]"), "{text}");
+        Ok(())
+    }
+
+    /// Duplicate-link output uses its own heading.
+    #[test]
+    fn writes_duplicate_links_heading() -> Result<()> {
+        let mut out = Vec::new();
+        write_duplicate_links_to(vec![link("A", "a", "https://a.example")], &mut out)?;
+
+        assert!(String::from_utf8(out)?.starts_with("# Duplicate Links\n"));
+        Ok(())
+    }
+
+    /// Broken links are written as a list of reference, text, and type.
+    #[test]
+    fn writes_broken_links_list() -> Result<()> {
+        let mut out = Vec::new();
+        write_broken_links_to(
+            vec![("ref".into(), "txt".into(), "Shortcut".into())],
+            &mut out,
+        )?;
+
+        assert_eq!(
+            String::from_utf8(out)?,
+            "# Broken Links\n\n- Reference: ref\n  Text: txt\n  Type: Shortcut\n\n"
+        );
+        Ok(())
+    }
+
+    /// An empty list of broken links still writes the heading.
+    #[test]
+    fn writes_heading_for_no_broken_links() -> Result<()> {
+        let mut out = Vec::new();
+        write_broken_links_to(Vec::new(), &mut out)?;
+
+        assert_eq!(String::from_utf8(out)?, "# Broken Links\n\n");
+        Ok(())
+    }
+
+    /// Badge output sends links and definitions to separate writers.
+    #[test]
+    fn writes_badge_links_and_definitions_to_two_writers() -> Result<()> {
+        let (mut links, mut refdefs) = (Vec::new(), Vec::new());
+        write_badge_refdefs_and_links_to_two(
+            vec![link("Serde", "serde", "https://serde.rs")],
+            &mut links,
+            &mut refdefs,
+        )?;
+        let (links, refdefs) = (String::from_utf8(links)?, String::from_utf8(refdefs)?);
+
+        assert!(links.contains("[![serde][serde-badge]][serde]"), "{links}");
+        assert!(refdefs.contains("[serde]: https://serde.rs"), "{refdefs}");
+        Ok(())
+    }
 }
