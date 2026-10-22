@@ -31,3 +31,36 @@ where
     )?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use super::*;
+
+    /// Raw parser events are written to the destination file.
+    #[test]
+    fn writes_raw_events() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        let src = dir.path().join("src");
+        fs::create_dir(&src)?;
+        fs::write(src.join("a.md"), "# Title\n")?;
+        let dest = dir.path().join("out").join("events.txt");
+
+        debug_parse_to(&src, &dest)?;
+
+        let text = fs::read_to_string(&dest)?;
+        assert!(text.contains("Title"), "{text}");
+        Ok(())
+    }
+
+    /// A missing source directory is an error and writes nothing.
+    #[test]
+    fn missing_source_directory_is_an_error() {
+        let dir = tempfile::tempdir().expect("temp dir");
+        let dest = dir.path().join("events.txt");
+
+        assert!(debug_parse_to(dir.path().join("nope"), &dest).is_err());
+        assert!(!dest.exists());
+    }
+}

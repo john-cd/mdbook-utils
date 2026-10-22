@@ -53,3 +53,28 @@ where
     pulldown_cmark::html::push_html(&mut html_output, parser);
     html_output
 }
+
+#[cfg(test)]
+mod tests {
+    use anyhow::Result;
+
+    use super::*;
+    use crate::parser::get_parser;
+
+    /// HTML written to a string contains the rendered Markdown.
+    #[test]
+    fn writes_html_to_string() {
+        let html = write_html_to_string(get_parser("# Title\n\n*em*"));
+
+        assert_eq!(html, "<h1>Title</h1>\n<p><em>em</em></p>\n");
+    }
+
+    /// HTML written to bytes equals the string rendering.
+    #[test]
+    fn writes_html_to_bytes() -> Result<()> {
+        let bytes = write_html_to_bytes(get_parser("text"))?;
+
+        assert_eq!(String::from_utf8(bytes)?, "<p>text</p>\n");
+        Ok(())
+    }
+}

@@ -29,6 +29,16 @@ just prep   # Run all the steps required before pushing code to GitHub
 just update # Update Cargo.lock dependencies
 ```
 
+## Tests
+
+`just test` runs all Rust tests (`cargo test --all-targets --locked`) and the mdBook tests of `user_guide/` and `test_book/`.
+
+- **Unit tests** are in an inline `#[cfg(test)] mod tests` at the bottom of the module they cover, under `src/`.
+- **Integration tests** are in `tests/`. They run the compiled `mdbook-utils` binary (through `CARGO_BIN_EXE_mdbook-utils`) or the public library API against temporary directories, and check exit codes and the files written. Shared sample inputs are in `tests/fixtures/`.
+- Give each test a descriptive name and a doc comment that states the behavior it verifies. Avoid `unwrap()`; return `anyhow::Result` from the test or use `expect()` with a message.
+
+Run a single integration test file with, for example, `cargo test --test cli_links_and_generate`.
+
 ## Docker Compose
 
 Test the `Docker Compose` setup used during development (which `Dev Containers` runs) with:
