@@ -10,6 +10,37 @@ use crate::link;
 use crate::parser;
 use crate::write_from_parser;
 
+/// Visual style for generated GitHub badges.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, clap::ValueEnum)]
+pub enum BadgeStyle {
+    /// The standard flat style used by Shields.io by default.
+    #[default]
+    Flat,
+    /// A flat style with square corners.
+    #[value(name = "flat-square")]
+    FlatSquare,
+    /// A style with a glossy appearance.
+    Plastic,
+    /// A wider style with uppercase text.
+    #[value(name = "for-the-badge")]
+    ForTheBadge,
+    /// The social style with a larger logo.
+    Social,
+}
+
+impl BadgeStyle {
+    /// Return the query value for non-default Shields.io styles.
+    pub(crate) fn shields_query_value(self) -> Option<&'static str> {
+        match self {
+            Self::Flat => None,
+            Self::FlatSquare => Some("flat-square"),
+            Self::Plastic => Some("plastic"),
+            Self::ForTheBadge => Some("for-the-badge"),
+            Self::Social => Some("social"),
+        }
+    }
+}
+
 // REFERENCE DEFINITIONS
 
 /// Parse Markdown from all .md files in a given source directory
@@ -39,7 +70,7 @@ where
 /// Parse Markdown from all .md files in a given source directory,
 /// extract existing reference definitions,
 /// identify URLs that are GitHub repos,
-/// create badge URLs for these links,
+/// create default flat-style Shields.io badge URLs for these links,
 /// and write to a file.
 ///
 /// src_dir_path: path to the source directory.
@@ -55,11 +86,31 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(
-        src_dir_path,
-        dest_file_path,
-        write_from_parser::write_github_repo_badge_refdefs,
-    )?;
+    generate_badges_with_style(src_dir_path, dest_file_path, BadgeStyle::Flat)
+}
+
+/// Generate GitHub badge reference definitions using a Shields.io style.
+///
+/// `src_dir_path` is the directory containing Markdown source files.
+/// `dest_file_path` is the output file to create or replace.
+/// `style` is the visual style applied to generated GitHub badge image URLs.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
+pub fn generate_badges_with_style<P1, P2>(
+    src_dir_path: P1,
+    dest_file_path: P2,
+    style: BadgeStyle,
+) -> Result<()>
+where
+    P1: AsRef<Path>,
+    P2: AsRef<Path>,
+{
+    helper(src_dir_path, dest_file_path, |parser, writer| {
+        write_from_parser::write_github_repo_badge_refdefs(parser, writer, style)
+    })?;
     Ok(())
 }
 

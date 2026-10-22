@@ -8,19 +8,14 @@ use anyhow::Result;
 use pulldown_cmark::Parser;
 use tracing::debug;
 
+use crate::api::BadgeStyle;
 use crate::link::Link;
 use crate::link::LinkBuilder;
 use crate::link::write_badge_refdefs_and_links_to_two;
 
-// Planned enhancements:
-// - Handle '-' and '_' in GitHub repo names to comply with shields.io
-//   conventions.
-// - Implement setting the image alt-text dynamically.
-// - Support custom shields.io styles (e.g., flat, flat-square, for-the-badge).
-//
 // [![github][github-badge]][github]
 // [github]: https://github.com/john-cd/mdbook-utils
-// [github-badge]: https://img.shields.io/badge/mdbook-utils-steelblue?logo=github
+// [github-badge]: https://img.shields.io/badge/mdbook--utils-steelblue?logo=github
 
 /// Get existing reference definitions from a Markdown parser,
 /// identify URLs that are GitHub repos, create badge URLs for these
@@ -32,6 +27,7 @@ use crate::link::write_badge_refdefs_and_links_to_two;
 pub(crate) fn write_github_repo_badge_refdefs<'input, W>(
     parser: &'input mut Parser<'input>,
     w: &mut W,
+    style: BadgeStyle,
 ) -> Result<()>
 where
     W: Write,
@@ -46,18 +42,20 @@ where
     // Iterate through all ref defs
     for (lbl, linkdef) in sorted_refdefs {
         // if the URL is a github repo...
-        if re.captures(linkdef.dest.as_ref()).is_some() {
+        if let Some(captures) = re.captures(linkdef.dest.as_ref()) {
             debug!("matched a GitHub repository reference");
 
-            // ...create the URL for the badge...
-            let badge_image_url: Cow<'_, str> =
-                re.replace(linkdef.dest.as_ref(), rule.badge_url_pattern);
+            let escaped_repo = escape_shields_badge_component(&captures["repo"]);
+            let mut badge_image_url = rule.badge_url_pattern.replace("${repo}", &escaped_repo);
+            if let Some(style) = style.shields_query_value() {
+                badge_image_url.push_str("&style=");
+                badge_image_url.push_str(style);
+            }
 
             let link: Link<'input> = LinkBuilder::default()
                 .set_label(Cow::from(lbl))
                 .set_url(Cow::from(linkdef.dest.as_ref()))
-                // .add_image_alt_text( )
-                .set_image_url(badge_image_url)
+                .set_image_url(Cow::Owned(badge_image_url))
                 .build();
             links.push(link);
         }
@@ -73,11 +71,29 @@ where
     Ok(())
 }
 
+/// Escapes Shields.io path separators within a repository name.
+fn escape_shields_badge_component(value: &str) -> String {
+    let mut escaped = String::with_capacity(value.len());
+    for character in value.chars() {
+        if matches!(character, '-' | '_') {
+            escaped.push(character);
+        }
+        escaped.push(character);
+    }
+    escaped
+}
+
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
-    // #[test]
-    // fn test() {
-    // }
+    /// Doubles Shields.io separator characters in repository names.
+    #[test]
+    fn test_escape_shields_badge_component() {
+        assert_eq!(
+            escape_shields_badge_component("my_repo-with-dash"),
+            "my__repo--with--dash"
+        );
+        assert_eq!(escape_shields_badge_component("plain"), "plain");
+    }
 }

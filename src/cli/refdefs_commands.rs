@@ -4,6 +4,7 @@ use anyhow::Context;
 use anyhow::Result;
 use clap::Subcommand;
 use console::style;
+use mdbook_utils::api::BadgeStyle;
 
 use super::args::*;
 use super::config::Configuration;
@@ -29,6 +30,10 @@ pub(crate) struct GenerateArgs {
     /// Generate badges (reference definitions) for e.g. Github links
     #[arg(long)]
     pub(crate) badges: bool,
+
+    /// Select a Shields.io style and generate GitHub badges.
+    #[arg(long = "badge-style", value_enum, value_name = "STYLE")]
+    pub(crate) badge_style: Option<BadgeStyle>,
 
     /// Generate reference definitions from the dependencies of the code
     /// examples
@@ -63,7 +68,8 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
             println!("{}", style("Done.").green());
         }
         RefDefsSubCommand::Generate(args) => {
-            let mut run_badges = args.badges;
+            let badge_style = args.badge_style.unwrap_or_default();
+            let mut run_badges = args.badges || args.badge_style.is_some();
             let mut run_deps = args.from_dependencies;
 
             // If neither is specified, we default to running both
@@ -90,9 +96,12 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                     style(markdown_src_dir_path.display()).cyan(),
                     style(refdef_dest_path.display()).cyan()
                 );
-                let result =
-                    mdbook_utils::api::generate_badges(&markdown_src_dir_path, &refdef_dest_path)
-                        .context("[run] Failed to generate badges.");
+                let result = mdbook_utils::api::generate_badges_with_style(
+                    &markdown_src_dir_path,
+                    &refdef_dest_path,
+                    badge_style,
+                )
+                .context("[run] Failed to generate badges.");
                 log_command_outcome("refdefs generate-badges", &paths, &result);
                 result?;
                 println!("{}", style("Done.").green());
