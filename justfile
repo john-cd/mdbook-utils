@@ -38,6 +38,11 @@ set quiet
 _default:
   @just --list --unsorted
 
+# Run any cargo command with this justfile's target/build dirs, e.g. `just cargo tree`
+[positional-arguments]
+cargo *args:
+  cargo "$@"
+
 # Clean Cargo's `target` and mdbook's `book` folders
 clean:
   cargo clean
