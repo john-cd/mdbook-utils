@@ -18,6 +18,11 @@ use crate::write_from_parser;
 /// src_dir_path: path to the source directory.
 ///
 /// dest_file_path: path to the file to create and write into.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
 pub fn write_refdefs_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -40,6 +45,11 @@ where
 /// src_dir_path: path to the source directory.
 ///
 /// dest_file_path: path to the file to create and write into.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
 pub fn generate_badges<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -68,6 +78,11 @@ where
 ///
 /// log_file_path: optional path to a log file where the output of `cargo tree`
 /// will be written.
+///
+/// # Errors
+///
+/// Returns an error if Cargo cannot read the manifest or run `cargo tree`, the
+/// Markdown source cannot be read, or the destination cannot be written.
 pub fn generate_refdefs_to<P1, P2, P3, P4>(
     cargo_toml_dir_path: P1,
     markdown_dir_path: P2,

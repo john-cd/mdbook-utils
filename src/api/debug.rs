@@ -1,14 +1,9 @@
 // TODO Reviewed ??-??-2026
-use std::io::BufWriter;
-use std::io::Write;
 use std::path::Path;
 
-use anyhow::Context;
 use anyhow::Result;
 
 use crate::helper;
-use crate::parser;
-use crate::test_markdown;
 use crate::write_from_parser;
 
 // DEBUG
@@ -19,6 +14,11 @@ use crate::write_from_parser;
 /// src_dir_path: path to the source directory.
 ///
 /// dest_file_path: path to the file to create and write into.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
 pub fn debug_parse_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -29,27 +29,5 @@ where
         dest_file_path,
         write_from_parser::write_raw_to,
     )?;
-    Ok(())
-}
-
-/// Test function that uses fake Markdown and writes events to
-/// a temporary log file.
-pub fn test() -> Result<()> {
-    let tf = tempfile::Builder::new()
-        .prefix("mdbook-utils-test-")
-        .suffix(".log")
-        .tempfile()?;
-
-    // Convert NamedTempFile to a standard File before dropping to keep it
-    let (file, path) = tf.keep()?;
-    let mut f = BufWriter::new(file);
-
-    let test_markdown = test_markdown::get_test_markdown();
-    let mut parser = parser::get_parser(test_markdown.as_ref());
-    write_from_parser::write_raw_to(&mut parser, &mut f)?;
-    f.flush()
-        .context("Not all bytes could be written due to I/O errors or EOF being reached.")?;
-
-    println!("Test log written to: {}", path.display());
     Ok(())
 }

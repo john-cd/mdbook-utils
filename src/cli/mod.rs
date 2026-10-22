@@ -64,11 +64,6 @@ pub(crate) enum Command {
     /// Parse the entire Markdown code as events
     /// and write them to a file.
     Debug(MarkdownSrcDirAndDestFileArgs),
-
-    /// Test Markdown parsing
-    #[allow(dead_code)]
-    #[command(skip)]
-    Test,
 }
 
 /// Global options that apply to all (sub)commands

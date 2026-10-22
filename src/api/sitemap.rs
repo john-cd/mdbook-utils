@@ -18,7 +18,13 @@ use crate::sitemap as sitemap_mod;
 /// Pages are included only when their Markdown source exists and the matching
 /// HTML file is present in that renderer output. Unrendered chapters and
 /// shared source fragments are omitted. URLs in base_url are rooted at the
-/// hosted book directory, for example https://john-cd.com/rust_howto/.
+/// hosted book directory, for example <https://john-cd.com/rust_howto/>.
+///
+/// # Errors
+///
+/// Returns an error if `base_url` is invalid for a sitemap, the source or
+/// renderer directory is unavailable, `SUMMARY.md` cannot be read, or the
+/// destination file cannot be created or written.
 pub fn generate_sitemap<P1, P2>(
     markdown_src_dir_path: P1,
     base_url: url::Url,

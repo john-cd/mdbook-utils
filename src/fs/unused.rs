@@ -14,6 +14,11 @@ use crate::fs;
 use crate::parser;
 
 /// Identify .md files not in SUMMARY.md
+///
+/// # Errors
+///
+/// Returns an error if the source directory is unavailable or its
+/// `SUMMARY.md` file cannot be read.
 #[tracing::instrument]
 pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
     markdown_src_dir_path: P,
@@ -64,6 +69,11 @@ pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
 }
 
 /// Identify .rs examples not used in Markdown files
+///
+/// # Errors
+///
+/// Returns an error if either source directory is unavailable or a Markdown
+/// file cannot be read.
 #[tracing::instrument]
 pub fn identify_unused_rs_examples<
     P1: AsRef<Path> + std::fmt::Debug,

@@ -1,5 +1,9 @@
 // TODO Reviewed ??-??-2026
-//! Public API
+//! Reusable public library operations for processing mdBook sources and
+//! outputs.
+//!
+//! The binary's command-line modules handle argument parsing and configuration;
+//! callers that need the underlying work can use these functions directly.
 
 mod categories;
 mod debug;

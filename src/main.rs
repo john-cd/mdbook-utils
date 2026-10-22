@@ -69,7 +69,7 @@ fn main() -> Result<()> {
                 style(sitemap_dest_file_path.display()).cyan(),
                 style(markdown_src_dir_path.display()).cyan(),
             );
-            mdbook_utils::generate_sitemap(
+            mdbook_utils::api::generate_sitemap(
                 markdown_src_dir_path,
                 base_url,
                 sitemap_dest_file_path,
@@ -86,12 +86,8 @@ fn main() -> Result<()> {
                 style(markdown_src_dir_path.display()).cyan(),
                 style(log_dest_path.display()).cyan()
             );
-            mdbook_utils::debug_parse_to(markdown_src_dir_path, log_dest_path)
+            mdbook_utils::api::debug_parse_to(markdown_src_dir_path, log_dest_path)
                 .context("[main] Failed to generate the debug log.")?;
-            println!("{}", style("Done.").green());
-        }
-        Command::Test => {
-            mdbook_utils::test().context("[main] Failed to generate the test file.")?;
             println!("{}", style("Done.").green());
         } /* Add more subcommands here: Some(args::Commands::...) => { ... }
            * _ => {

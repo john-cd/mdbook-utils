@@ -39,7 +39,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 style(markdown_src_dir_path.display()).cyan(),
                 style(links_dest_path.display()).cyan()
             );
-            mdbook_utils::write_all_links(markdown_src_dir_path, links_dest_path)
+            mdbook_utils::api::write_all_links(markdown_src_dir_path, links_dest_path)
                 .context("[run] Failed to write links to a file.")?;
             println!("{}", style("Done.").green());
         }
@@ -51,7 +51,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 style(markdown_src_dir_path.display()).cyan(),
                 style(links_dest_path.display()).cyan()
             );
-            mdbook_utils::write_inline_links(markdown_src_dir_path, links_dest_path)
+            mdbook_utils::api::write_inline_links(markdown_src_dir_path, links_dest_path)
                 .context("[run] Failed to write inline links to a file.")?;
             println!("{}", style("Done.").green());
         }
@@ -63,7 +63,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 style(markdown_src_dir_path.display()).cyan(),
                 style(links_dest_path.display()).cyan()
             );
-            mdbook_utils::write_duplicate_links(markdown_src_dir_path, links_dest_path)
+            mdbook_utils::api::write_duplicate_links(markdown_src_dir_path, links_dest_path)
                 .context("[run] Failed to write duplicate links to a file.")?;
             println!("{}", style("Done.").green());
         }
@@ -75,7 +75,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 style(markdown_src_dir_path.display()).cyan(),
                 style(links_dest_path.display()).cyan()
             );
-            mdbook_utils::write_broken_links(markdown_src_dir_path, links_dest_path)
+            mdbook_utils::api::write_broken_links(markdown_src_dir_path, links_dest_path)
                 .context("[run] Failed to write broken links to a file.")?;
             println!("{}", style("Done.").green());
         } /* _ => {

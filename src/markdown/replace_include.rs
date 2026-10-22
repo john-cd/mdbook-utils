@@ -236,6 +236,12 @@ fn replace_file_atomically(path: &Path, contents: &[u8]) -> Result<()> {
 /// markdown_src_dir_path: path to the source directory containing the
 /// Markdown files.
 /// Process files and replace include macros.
+///
+/// # Errors
+///
+/// Returns an error if the Markdown directory cannot be read, an include path
+/// or anchor is invalid, an included file cannot be read, or a changed file
+/// cannot be written.
 #[tracing::instrument(skip(markdown_src_dir_path))]
 pub fn include_in_all_markdown_files_in<P>(markdown_src_dir_path: P) -> Result<()>
 where
