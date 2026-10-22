@@ -9,7 +9,6 @@
 # space_example = ["run", "--release", "--", "\"command list\""]
 
 [build]
-rustc-wrapper = "sccache"
 incremental = false
 # jobs = 1                      # number of parallel jobs, defaults to # of CPUs
 # rustc = "rustc"               # the rust compiler tool
@@ -18,13 +17,12 @@ incremental = false
 # rustdoc = "rustdoc"           # the doc generator tool
 # target = "triple"             # build for the target triple (ignored by `cargo install`)
 # target-dir = "target"         # path of where to place all generated artifacts
-## Keep Cargo target artifacts outside the source checkout.
-target-dir = "D:/target/mdbook-utils/main"
-build-dir = "C:/code_build/mdbook-utils/main"
+## Machine-specific settings (`target-dir`, `build-dir`, `rustc-wrapper`,
+## `SCCACHE_DIR`) are NOT committed so the repository builds on any OS.
+## Set them in your user-level `$CARGO_HOME/config.toml`, via `CARGO_*`
+## environment variables, or use the `just` recipes. See AGENTS.md "Build outputs".
 
 [env]
-# Just and Cargo share the persistent local compiler cache; process overrides remain supported.
-SCCACHE_DIR = "D:/sccache"
 # rustflags = ["…", "…"]        # custom flags to pass to all compiler invocations
 # rustflags = ["-C", "link-arg=-fuse-ld=lld"]
 # rustdocflags = ["…", "…"]     # custom flags to pass to rustdoc
