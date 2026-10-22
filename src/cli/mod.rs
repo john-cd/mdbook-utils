@@ -50,6 +50,28 @@ pub(crate) fn log_command_outcome<T>(
     }
 }
 
+/// Run one CLI operation: log the selected paths, print `progress`, run `op`,
+/// log the outcome, then print `Done.`.
+///
+/// `failure` is the context attached to an error from `op`.
+pub(crate) fn run_logged(
+    command: &'static str,
+    paths: &[(&'static str, &std::path::Path)],
+    progress: &str,
+    failure: &'static str,
+    op: impl FnOnce() -> anyhow::Result<()>,
+) -> anyhow::Result<()> {
+    use anyhow::Context as _;
+
+    log_command_paths(command, paths);
+    println!("{progress}");
+    let result = op().context(failure);
+    log_command_outcome(command, paths, &result);
+    result?;
+    println!("{}", console::style("Done.").green());
+    Ok(())
+}
+
 /// Log that a user declined a command after its paths were selected.
 pub(crate) fn log_command_cancelled(
     command: &'static str,
