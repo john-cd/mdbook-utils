@@ -12,7 +12,7 @@ use std::io::ErrorKind;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use serde::Deserialize;
 use toml::Value;
@@ -106,15 +106,19 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
 
     // By default, the source directory is found in the directory named `src`
     // directly under the root folder.
-    let markdown_src = PathBuf::from(book_root_dir_path.as_ref())
-        .join(book_toml.book.and_then(|bk| bk.src).unwrap_or("src".into()));
+    let markdown_src = PathBuf::from(book_root_dir_path.as_ref()).join(
+        book_toml
+            .book
+            .and_then(|bk| bk.src)
+            .unwrap_or_else(|| "src".into()),
+    );
 
     // By default, the build directory is `book` in the book's root directory.
     let book_build_dir_path = PathBuf::from(book_root_dir_path.as_ref()).join(
         book_toml
             .build
             .and_then(|bld| bld.build_dir)
-            .unwrap_or("book".into()),
+            .unwrap_or_else(|| "book".into()),
     );
 
     let site_url = book_toml
@@ -123,7 +127,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
         .and_then(|output| output.extra.get("html"))
         .and_then(|html| html.get("site-url"))
         .and_then(Value::as_str)
-        .map(str::to_string);
+        .map(str::to_owned);
     let mut html_output = None;
     let mut markdown_output = None;
 
@@ -145,18 +149,18 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
             }
         } else if num_backends == 1 {
             if output.extra.contains_key("markdown") {
-                markdown_output = Some(book_build_dir_path.clone());
+                markdown_output = Some(book_build_dir_path);
             } else if output.extra.contains_key("html") {
-                html_output = Some(book_build_dir_path.clone());
+                html_output = Some(book_build_dir_path);
             }
         } else {
             // No renderer tables are configured, so mdBook enables HTML by
             // default.
-            html_output = Some(book_build_dir_path.clone());
+            html_output = Some(book_build_dir_path);
         }
     } else {
         // With no output tables, mdBook enables only HTML by default.
-        html_output = Some(book_build_dir_path.clone());
+        html_output = Some(book_build_dir_path);
     }
     debug!(
         markdown_src = %markdown_src.display(),
@@ -181,6 +185,7 @@ mod tests {
 
     use super::*;
 
+    /// Falls back to `src` and `book` when `book.toml` sets nothing.
     #[test]
     fn test_try_parse_book_toml_default() -> Result<()> {
         let dir = tempdir()?;
@@ -194,6 +199,7 @@ mod tests {
         Ok(())
     }
 
+    /// Honors custom source and build directories.
     #[test]
     fn test_try_parse_book_toml_custom_dirs() -> Result<()> {
         let dir = tempdir()?;
@@ -235,9 +241,9 @@ build-dir = "my_book"
         let book_toml_path = dir.path().join("book.toml");
         fs::write(
             book_toml_path,
-            r#"[output.html]
+            "[output.html]
 [output.markdown]
-"#,
+",
         )?;
 
         let paths = try_parse_book_toml(dir.path())?.expect("book.toml was created");
@@ -252,14 +258,15 @@ build-dir = "my_book"
         Ok(())
     }
 
+    /// Uses the Markdown renderer's directory when it is the only output.
     #[test]
     fn test_try_parse_book_toml_only_markdown_output() -> Result<()> {
         let dir = tempdir()?;
         let book_toml_path = dir.path().join("book.toml");
         fs::write(
             book_toml_path,
-            r#"[output.markdown]
-"#,
+            "[output.markdown]
+",
         )?;
 
         let paths = try_parse_book_toml(dir.path())?.expect("book.toml was created");
@@ -268,14 +275,15 @@ build-dir = "my_book"
         Ok(())
     }
 
+    /// Ignores renderers that produce neither HTML nor Markdown.
     #[test]
     fn test_try_parse_book_toml_only_other_output() -> Result<()> {
         let dir = tempdir()?;
         let book_toml_path = dir.path().join("book.toml");
         fs::write(
             book_toml_path,
-            r#"[output.pdf]
-"#,
+            "[output.pdf]
+",
         )?;
 
         let paths = try_parse_book_toml(dir.path())?.expect("book.toml was created");

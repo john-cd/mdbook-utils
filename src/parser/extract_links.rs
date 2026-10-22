@@ -217,6 +217,7 @@ mod tests {
         assert_eq!(defs[0].title.as_deref(), Some("T"));
     }
 
+    /// Extracts a link with a title.
     #[test]
     fn test_extract_links_simple() {
         let markdown = "[text](url \"title\")";
@@ -227,6 +228,7 @@ mod tests {
         assert_eq!(link.get_url(), "url");
     }
 
+    /// Extracts an image nested in a link.
     #[test]
     fn test_extract_links_with_image() {
         let markdown = "[![alt](img_url)](url)";
@@ -238,6 +240,7 @@ mod tests {
         // image alt text is not directly exposed in Link yet via getter
     }
 
+    /// Keeps bold and code inside link text.
     #[test]
     fn test_extract_links_with_nested_formatting() {
         let markdown = "[**bold text** and `code` in link](url \"title\")";
@@ -252,6 +255,7 @@ mod tests {
         );
     }
 
+    /// Keeps formatting inside the alt text of an image link.
     #[test]
     fn test_extract_links_with_image_and_nested_formatting() {
         let markdown = "[![**badge** alt](badge_url)](link_url)";
@@ -263,6 +267,7 @@ mod tests {
         assert_eq!(link.to_link_with_badge(), "[![badge alt][badge alt]][]");
     }
 
+    /// Handles several links, images and nested brackets in one document.
     #[test]
     fn test_extract_links_complex() {
         let markdown = "[`code`](url) [![`image_code`](img_url)](url) [[link_in_link](url2)](url) [![[link_in_img](url2)](img_url)](url) [foo **bold**](url)";
@@ -276,11 +281,11 @@ mod tests {
         assert_eq!(links[4].get_url(), "url");
     }
 
-    /// Extracts CommonMark destinations while preserving code and mdBook helper
+    /// Extracts `CommonMark` destinations while preserving code and mdBook helper
     /// text.
     #[test]
     fn test_extract_links_commonmark_url_edge_cases_and_code_fences() {
-        let markdown = r#"
+        let markdown = r"
 [punctuation](https://example.com/guide_(intro)!.)
 [escaped](https://example.com/guide\(draft\))
 [unicode](https://例え.テスト/雪)
@@ -297,7 +302,7 @@ https://example.com/plain-text-is-not-an-autolink
 [fenced](https://example.com/fenced)
 {{#include examples/demo.rs}}
 ```
-"#;
+";
         let mut parser = super::super::get_parser(markdown);
         let links = extract_links(&mut parser);
         let destinations: Vec<_> = links.iter().map(|link| link.get_url()).collect();
@@ -307,7 +312,7 @@ https://example.com/plain-text-is-not-an-autolink
             [
                 "https://example.com/guide_(intro)!.",
                 "https://example.com/guide(draft)",
-                "https://例え.テスト/雪",
+                "https://\u{4f8b}\u{3048}.\u{30c6}\u{30b9}\u{30c8}/\u{96ea}",
                 "https://example.com/%E9%9B%AA?raw=%E9#item",
                 "https://example.com/search?q=rust%2Fmarkdown#results",
                 "https://example.com/autolink",

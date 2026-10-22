@@ -1,4 +1,4 @@
-//! Internal models for a Markdown [Link] and [LinkBuilder]
+//! Internal models for a Markdown [Link] and [`LinkBuilder`]
 //!
 //! TODO Reviewed ??-??-2026
 

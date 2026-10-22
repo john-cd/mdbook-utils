@@ -16,7 +16,7 @@ pub(crate) mod links_commands;
 pub(crate) mod markdown_commands;
 pub(crate) mod refdefs_commands;
 
-use args::*;
+use args::{MarkdownSrcDirAndDestFileArgs, MarkdownSrcDirUrlAndDestFileArgs};
 use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
@@ -42,10 +42,10 @@ pub(crate) fn log_command_outcome<T>(
     let paths = format_command_paths(paths);
     match result {
         Ok(_) => {
-            tracing::info!(command, paths = ?paths, outcome = "success", "CLI command completed")
+            tracing::info!(command, paths = ?paths, outcome = "success", "CLI command completed");
         }
         Err(_) => {
-            tracing::error!(command, paths = ?paths, outcome = "failure", "CLI command failed")
+            tracing::error!(command, paths = ?paths, outcome = "failure", "CLI command failed");
         }
     }
 }
@@ -130,10 +130,11 @@ pub(crate) struct GlobalOpts {
 
 #[cfg(test)]
 mod tests {
-    use clap::CommandFactory;
+    use clap::CommandFactory as _;
 
     use super::*;
 
+    /// Lets clap check the command definitions for mistakes.
     #[test]
     fn verify_cli() {
         Cli::command().debug_assert();

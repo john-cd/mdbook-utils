@@ -6,27 +6,29 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
-use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
 use tracing::info;
 
 /// Regex to find {{#include \<file\>.md}}.
-static INSERT_REGEX: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"\{\{#include (?<filepath>\S+?\.md)(?<selector>:[^}\s]+)?\}\}").unwrap()
+static INSERT_REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
+    Regex::new(r"\{\{#include (?<filepath>\S+?\.md)(?<selector>:[^}\s]+)?\}\}")
+        .expect("regex literal is valid")
 });
 
 /// Matches the `ANCHOR: name` line that opens a named section of an included
 /// file.
-static ANCHOR_START_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"ANCHOR:\s*(?<name>[\w_-]+)").unwrap());
+static ANCHOR_START_REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
+    Regex::new(r"ANCHOR:\s*(?<name>[\w_-]+)").expect("regex literal is valid")
+});
 
 /// Matches the `ANCHOR_END: name` line that closes a named section of an
 /// included file.
-static ANCHOR_END_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"ANCHOR_END:\s*(?<name>[\w_-]+)").unwrap());
+static ANCHOR_END_REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
+    Regex::new(r"ANCHOR_END:\s*(?<name>[\w_-]+)").expect("regex literal is valid")
+});
 
 /// A Markdown file rewrite, planned before any write.
 struct PlannedReplacement {
@@ -236,7 +238,7 @@ fn expand_includes(
 ///
 /// Note: {{#include *-refs.md}} are excluded.
 ///
-/// markdown_src_dir_path: path to the source directory containing the
+/// `markdown_src_dir_path`: path to the source directory containing the
 /// Markdown files.
 /// Process files and replace include macros.
 ///
@@ -300,6 +302,7 @@ mod tests {
 
     use super::*;
 
+    /// Expands includes in every Markdown file.
     #[test]
     fn test_include_in_all_markdown_files_in() -> Result<()> {
         let dir = tempdir()?;
@@ -317,12 +320,12 @@ mod tests {
         fs::write(&refs_md_path, "Content of refs")?;
         fs::write(&include2_md_path, "Content of include2")?;
 
-        let main_content = r#"
+        let main_content = "
 # Main
 {{#include include1.md}}
 {{#include some-refs.md}}
 {{#include sub/include2.md}}
-"#;
+";
         fs::write(&main_md_path, main_content)?;
 
         include_in_all_markdown_files_in(&src_dir)?;
@@ -338,6 +341,7 @@ mod tests {
         Ok(())
     }
 
+    /// A missing include leaves the source file untouched.
     #[test]
     fn failed_include_expansion_preserves_the_source_file() -> Result<()> {
         for content in [
@@ -359,6 +363,7 @@ mod tests {
         Ok(())
     }
 
+    /// Relative include paths resolve against the including file.
     #[test]
     fn nested_include_paths_resolve_from_the_including_chapter() -> Result<()> {
         let dir = tempdir()?;
@@ -375,6 +380,7 @@ mod tests {
         Ok(())
     }
 
+    /// Expands nested includes and refuses cycles without writing.
     #[test]
     fn recursively_expands_nested_includes_and_rejects_cycles_without_writes() -> Result<()> {
         let dir = tempdir()?;
@@ -405,6 +411,7 @@ mod tests {
         Ok(())
     }
 
+    /// Line ranges and anchors are expanded with their original line endings.
     #[test]
     fn expands_line_ranges_and_named_anchors_without_normalizing_line_endings() -> Result<()> {
         let dir = tempdir()?;

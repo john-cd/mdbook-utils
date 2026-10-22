@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use std::hash::Hash;
 use std::hash::Hasher;
 
-use heck::ToKebabCase;
+use heck::ToKebabCase as _;
 use pulldown_cmark::LinkType;
 
 /// `Link` is a structure that collects all necessary information to
@@ -54,16 +54,12 @@ impl<'a> Link<'a> {
     fn get_text(&self) -> Cow<'_, str> {
         self.text
             .as_deref()
-            .map(Cow::Borrowed)
-            .unwrap_or(Cow::Borrowed(""))
+            .map_or(Cow::Borrowed(""), Cow::Borrowed)
     }
 
     /// Returns the link's url
     pub(crate) fn get_url(&self) -> Cow<'_, str> {
-        self.url
-            .as_deref()
-            .map(Cow::Borrowed)
-            .unwrap_or(Cow::Borrowed(""))
+        self.url.as_deref().map_or(Cow::Borrowed(""), Cow::Borrowed)
     }
 
     /// Returns the link's url (and title if present)
@@ -139,7 +135,7 @@ impl<'a> Link<'a> {
     }
 
     /// Return the label for the badge reference
-    /// e.g. image_label or \<label\>-badge
+    /// e.g. `image_label` or \<label\>-badge
     fn get_badge_label(&self) -> Cow<'a, str> {
         if let Some(ref img_lbl) = self.image_label {
             img_lbl.clone()
@@ -177,7 +173,7 @@ impl<'a> Link<'a> {
         .into()
     }
 
-    /// Return the reference definition for a badge image: [badge-label]: https://badge-image-url...  "image_title"
+    /// Return the reference definition for a badge image: [badge-label]: <https://badge-image-url>...  "`image_title`"
     pub(crate) fn to_badge_reference_definition(&self) -> Cow<'a, str> {
         format!(
             "[{}]: {}",
@@ -189,7 +185,7 @@ impl<'a> Link<'a> {
 }
 
 impl PartialOrd for Link<'_> {
-    /// PartialOrd implementation for Link
+    /// `PartialOrd` implementation for Link
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         // The type is `Ord``,
         // thus we can implement `partial_cmp` by using `cmp`
@@ -208,7 +204,7 @@ impl Ord for Link<'_> {
 }
 
 impl PartialEq for Link<'_> {
-    /// PartialEq implementation for Link
+    /// `PartialEq` implementation for Link
     fn eq(&self, other: &Self) -> bool {
         (self.label == other.label) && (self.url == other.url) && (self.title == other.title)
     }
@@ -230,11 +226,12 @@ mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 
+    /// Links with the same label are equal and hash alike.
     #[test]
     fn test_link_equality_and_hash() {
         use std::collections::hash_map::DefaultHasher;
-        use std::hash::Hash;
-        use std::hash::Hasher;
+        use std::hash::Hash as _;
+        use std::hash::Hasher as _;
 
         let link1 = LinkBuilder::from_type_url_title(
             LinkType::Shortcut,
@@ -272,6 +269,7 @@ mod tests {
         assert_eq!(hash1, hash2);
     }
 
+    /// Links sort by label.
     #[test]
     fn test_link_ordering() {
         let link_a = LinkBuilder::from_type_url_title(
@@ -300,6 +298,7 @@ mod tests {
         assert!(link_a < link_a_url2);
     }
 
+    /// Renders a link as a reference definition.
     #[test]
     fn test_to_reference_definition() {
         let link = LinkBuilder::from_type_url_title(

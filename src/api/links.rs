@@ -24,9 +24,9 @@ use crate::parser;
 /// excluded. See [`write_inline_links_with_format`] to choose the output
 /// format.
 ///
-/// src_dir_path: path to the source directory.
+/// `src_dir_path`: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into.
+/// `dest_file_path`: path to the file to create and write into.
 ///
 /// # Errors
 ///
@@ -86,9 +86,9 @@ fn is_external_url(url: &str) -> bool {
 /// Parse Markdown from all .md files in a given source directory,
 /// write all links found therein to a file.
 ///
-/// src_dir_path: path to the source directory.
+/// `src_dir_path`: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into.
+/// `dest_file_path`: path to the file to create and write into.
 ///
 /// # Errors
 ///
@@ -122,9 +122,9 @@ where
 /// Inline links and autolinks have no label, so they are duplicates when they
 /// point to the same URL, whatever their text.
 ///
-/// src_dir_path: path to the source directory.
+/// `src_dir_path`: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into.
+/// `dest_file_path`: path to the file to create and write into.
 ///
 /// # Errors
 ///
@@ -159,9 +159,9 @@ where
 /// Parse Markdown from all .md files in a given source directory,
 /// write broken links found therein to a file.
 ///
-/// src_dir_path: path to the source directory.
+/// `src_dir_path`: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into.
+/// `dest_file_path`: path to the file to create and write into.
 ///
 /// # Errors
 ///
@@ -182,7 +182,7 @@ where
     let broken_links = handler
         .broken_links
         .lock()
-        .unwrap_or_else(|e| e.into_inner())
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
         .iter()
         .map(|broken| {
             let location = sources
@@ -206,6 +206,7 @@ mod tests {
 
     use super::*;
 
+    /// Reports a reference link that has no definition.
     #[test]
     fn test_write_broken_links() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;
@@ -311,6 +312,7 @@ mod tests {
         Ok(())
     }
 
+    /// Reports URLs that appear in several links.
     #[test]
     fn test_write_duplicate_links() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;

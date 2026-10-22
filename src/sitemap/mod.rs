@@ -9,7 +9,7 @@ use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use anyhow::bail;
 use percent_encoding::percent_decode_str;
@@ -225,7 +225,7 @@ fn source_markdown_path(raw_url: &str, base_url: &Url) -> Result<Option<PathBuf>
 fn hosted_page_url(base_url: &Url, relative_path: &Path) -> Result<String> {
     let mut url = base_url.clone();
     {
-        let mut segments = url.path_segments_mut().map_err(|_| {
+        let mut segments = url.path_segments_mut().map_err(|()| {
             anyhow::anyhow!("Sitemap base URL cannot accept page paths: {base_url}")
         })?;
         segments.pop_if_empty();
@@ -256,6 +256,7 @@ mod tests {
         parser::extract_links(&mut parser)
     }
 
+    /// URLs come from the rendered pages, are normalized and appear once.
     #[test]
     fn sitemap_urls_follow_rendered_inventory_and_are_normalized_and_deduplicated() -> Result<()> {
         let temp = tempdir()?;
@@ -335,6 +336,7 @@ mod tests {
         Ok(())
     }
 
+    /// Malformed URLs and pages missing from the output are reported.
     #[test]
     fn malformed_urls_and_missing_summary_pages_are_reported() -> Result<()> {
         let temp = tempdir()?;
@@ -344,31 +346,28 @@ mod tests {
         fs::create_dir_all(&html)?;
 
         let malformed = links("[Bad](https://[::1/page.md)");
-        assert!(
-            collect_page_urls(
-                malformed,
-                &source,
-                &html,
-                Url::parse("https://example.com/book/")?,
-                None,
-            )
-            .is_err()
-        );
+        collect_page_urls(
+            malformed,
+            &source,
+            &html,
+            Url::parse("https://example.com/book/")?,
+            None,
+        )
+        .expect_err("input should be rejected");
 
         let missing = links("[Missing](missing.md)");
-        assert!(
-            collect_page_urls(
-                missing,
-                &source,
-                &html,
-                Url::parse("https://example.com/book/")?,
-                None,
-            )
-            .is_err()
-        );
+        collect_page_urls(
+            missing,
+            &source,
+            &html,
+            Url::parse("https://example.com/book/")?,
+            None,
+        )
+        .expect_err("input should be rejected");
         Ok(())
     }
 
+    /// The index mapping rewrites only a matching final path component.
     #[test]
     fn index_mapping_changes_only_the_matching_file_component() -> Result<()> {
         let temp = tempdir()?;

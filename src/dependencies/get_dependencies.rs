@@ -4,11 +4,11 @@
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::io::Write;
+use std::io::Write as _;
 use std::path::Path;
 use std::process::Command;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use anyhow::anyhow;
 use serde::Deserialize;
@@ -41,7 +41,7 @@ impl Dependency<'_> {
 /// {p},{lib},{r} --locked (immediate children, no-dev/build, flat list,
 /// crate name and package repository URL)
 ///
-/// dir_path: Path to the directory containing the Cargo.toml file.
+/// `dir_path`: Path to the directory containing the Cargo.toml file.
 pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
     cargo_toml_dir_path: P,
     log_file_path: Option<Q>,
@@ -65,7 +65,7 @@ pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
     write_log(
         &output.stdout,
         &output.stderr,
-        log_file_path.as_ref().map(|p| p.as_ref()),
+        log_file_path.as_ref().map(std::convert::AsRef::as_ref),
     )?;
 
     if !output.status.success() {

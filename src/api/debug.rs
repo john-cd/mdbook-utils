@@ -14,9 +14,9 @@ use crate::write_from_parser;
 /// Parse Markdown from all .md files in a given source directory and
 /// write all raw events to a file for debugging purposes.
 ///
-/// src_dir_path: path to the source directory.
+/// `src_dir_path`: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into.
+/// `dest_file_path`: path to the file to create and write into.
 ///
 /// # Errors
 ///

@@ -15,7 +15,7 @@ use crate::parser;
 
 /// Generate a category index and write to a Markdown file.
 #[tracing::instrument(skip_all)]
-pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
+pub(crate) fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {
@@ -34,7 +34,7 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
 
 /// Generate a crate index and write to a Markdown file.
 #[tracing::instrument(skip_all)]
-pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
+pub(crate) fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {
@@ -59,6 +59,8 @@ mod tests {
 
     use super::*;
 
+    /// Collects distinct categories, ignoring query strings and trailing
+    /// slashes.
     #[test]
     fn test_generate_categories_happy_path() -> Result<()> {
         let dir = tempdir()?;
@@ -87,6 +89,7 @@ mod tests {
         Ok(())
     }
 
+    /// Fails when the source directory does not exist.
     #[test]
     fn test_generate_categories_invalid_dir() -> Result<()> {
         let dir = tempdir()?;
@@ -98,6 +101,7 @@ mod tests {
         Ok(())
     }
 
+    /// Skips category links that name no category.
     #[test]
     fn test_generate_categories_edge_cases() -> Result<()> {
         let dir = tempdir()?;
@@ -120,6 +124,7 @@ mod tests {
         Ok(())
     }
 
+    /// Collects distinct crates, ignoring query strings and trailing slashes.
     #[test]
     fn test_generate_crates_happy_path() -> Result<()> {
         let dir = tempdir()?;
@@ -148,6 +153,7 @@ mod tests {
         Ok(())
     }
 
+    /// Fails when the source directory does not exist.
     #[test]
     fn test_generate_crates_invalid_dir() -> Result<()> {
         let dir = tempdir()?;
@@ -159,6 +165,7 @@ mod tests {
         Ok(())
     }
 
+    /// Skips crate links that name no crate.
     #[test]
     fn test_generate_crates_edge_cases() -> Result<()> {
         let dir = tempdir()?;
@@ -181,6 +188,7 @@ mod tests {
         Ok(())
     }
 
+    /// Does not let a crafted crate URL inject a link into the output.
     #[test]
     fn test_generate_crates_injection() -> Result<()> {
         let dir = tempdir()?;
@@ -206,6 +214,7 @@ mod tests {
         Ok(())
     }
 
+    /// Does not let a crafted category URL inject a link into the output.
     #[test]
     fn test_generate_categories_injection() -> Result<()> {
         let dir = tempdir()?;

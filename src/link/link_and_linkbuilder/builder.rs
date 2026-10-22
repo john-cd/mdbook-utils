@@ -29,9 +29,9 @@ impl<'a> LinkBuilder<'a> {
         Self {
             link: Link {
                 link_type: Some(link_type),
-                url: if !url.is_empty() { Some(url) } else { None },
-                title: if !title.is_empty() { Some(title) } else { None },
-                label: if !label.is_empty() { Some(label) } else { None },
+                url: (!url.is_empty()).then_some(url),
+                title: (!title.is_empty()).then_some(title),
+                label: (!label.is_empty()).then_some(label),
                 ..Link::default()
             },
         }
@@ -73,20 +73,20 @@ impl<'a> LinkBuilder<'a> {
         Self {
             link: Link {
                 image_link_type: Some(image_link_type),
-                image_url: if !image_url.is_empty() {
-                    Some(image_url)
-                } else {
+                image_url: if image_url.is_empty() {
                     self.link.image_url
-                },
-                image_title: if !image_title.is_empty() {
-                    Some(image_title)
                 } else {
+                    Some(image_url)
+                },
+                image_title: if image_title.is_empty() {
                     self.link.image_title
-                },
-                image_label: if !image_label.is_empty() {
-                    Some(image_label)
                 } else {
+                    Some(image_title)
+                },
+                image_label: if image_label.is_empty() {
                     self.link.image_label
+                } else {
+                    Some(image_label)
                 },
                 ..self.link
             },
@@ -105,7 +105,7 @@ impl<'a> LinkBuilder<'a> {
     pub(crate) fn add_image_alt_text(mut self, image_alt_text: Cow<'a, str>) -> Self {
         if !image_alt_text.is_empty() {
             self.link.image_alt_text =
-                Some(self.link.image_alt_text.unwrap_or_default() + image_alt_text)
+                Some(self.link.image_alt_text.unwrap_or_default() + image_alt_text);
         }
         self
     }
@@ -120,11 +120,12 @@ impl<'a> LinkBuilder<'a> {
 mod tests {
     use super::*;
 
+    /// Links with the same label are equal and hash alike.
     #[test]
     fn test_link_equality_and_hash() {
         use std::collections::hash_map::DefaultHasher;
-        use std::hash::Hash;
-        use std::hash::Hasher;
+        use std::hash::Hash as _;
+        use std::hash::Hasher as _;
 
         let link1 = LinkBuilder::from_type_url_title(
             LinkType::Shortcut,
@@ -162,6 +163,7 @@ mod tests {
         assert_eq!(hash1, hash2);
     }
 
+    /// Links sort by label.
     #[test]
     fn test_link_ordering() {
         let link_a = LinkBuilder::from_type_url_title(
@@ -190,6 +192,7 @@ mod tests {
         assert!(link_a < link_a_url2);
     }
 
+    /// Renders a link as a reference definition.
     #[test]
     fn test_to_reference_definition() {
         let link = LinkBuilder::from_type_url_title(

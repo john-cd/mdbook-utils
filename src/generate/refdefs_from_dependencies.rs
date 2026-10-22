@@ -42,19 +42,19 @@ fn generate_refdefs_for_one_library(
     let mut buf = Vec::new();
 
     // [arrow-rs]: https://docs.rs/arrow/
-    let docs_rs_url = format!("https://docs.rs/{}", package_name);
+    let docs_rs_url = format!("https://docs.rs/{library_name}");
     buf.push(
         crate::link::LinkBuilder::default()
-            .set_label(library_name.to_string().into())
+            .set_label(library_name.to_owned().into())
             .set_url(docs_rs_url.into())
             .build(),
     );
 
     // [config-crate]: https://crates.io/crates/config/
-    let crates_io_url = format!("https://crates.io/crates/{}", package_name);
+    let crates_io_url = format!("https://crates.io/crates/{library_name}");
     buf.push(
         crate::link::LinkBuilder::default()
-            .set_label(format!("{}-crate", library_name).into())
+            .set_label(format!("{library_name}-crate").into())
             .set_url(crates_io_url.into())
             .build(),
     );
@@ -63,8 +63,8 @@ fn generate_refdefs_for_one_library(
         // [arrow-rs-github]: https://github.com/apache/arrow-rs/
         buf.push(
             crate::link::LinkBuilder::default()
-                .set_label(format!("{}-github", library_name).into())
-                .set_url(url.to_string().into())
+                .set_label(format!("{library_name}-github").into())
+                .set_url(url.to_owned().into())
                 .build(),
         );
     }

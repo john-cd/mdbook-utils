@@ -14,6 +14,7 @@ mod tests {
 
     use super::*;
 
+    /// Returns nothing when every page is listed in `SUMMARY.md`.
     #[test]
     fn test_identify_files_not_in_summary_all_included() -> Result<()> {
         let dir = tempdir()?;
@@ -31,12 +32,12 @@ mod tests {
         let missing = identify_files_not_in_summary(&root)?;
         assert!(
             missing.is_empty(),
-            "Expected no missing files, but got {:?}",
-            missing
+            "Expected no missing files, but got {missing:?}"
         );
         Ok(())
     }
 
+    /// Returns only the pages that `SUMMARY.md` omits.
     #[test]
     fn test_identify_files_not_in_summary_some_missing() -> Result<()> {
         let dir = tempdir()?;
@@ -55,10 +56,14 @@ mod tests {
 
         let missing = identify_files_not_in_summary(&root)?;
         assert_eq!(missing.len(), 1);
-        assert_eq!(missing[0].file_name().unwrap(), "page2.md");
+        assert_eq!(
+            missing[0].file_name().expect("input should parse"),
+            "page2.md"
+        );
         Ok(())
     }
 
+    /// Treats every page as unlisted when there is no `SUMMARY.md`.
     #[test]
     fn test_identify_files_not_in_summary_no_summary() -> Result<()> {
         let dir = tempdir()?;
@@ -73,13 +78,14 @@ mod tests {
         assert!(result.is_err());
         assert!(
             result
-                .unwrap_err()
+                .expect_err("input should be rejected")
                 .to_string()
                 .contains("SUMMARY.md not found in")
         );
         Ok(())
     }
 
+    /// Finds unlisted pages in nested directories.
     #[test]
     fn test_identify_files_not_in_summary_nested_files() -> Result<()> {
         let dir = tempdir()?;
@@ -103,7 +109,10 @@ mod tests {
 
         let missing = identify_files_not_in_summary(&root)?;
         assert_eq!(missing.len(), 1);
-        assert_eq!(missing[0].file_name().unwrap(), "page3.md");
+        assert_eq!(
+            missing[0].file_name().expect("input should parse"),
+            "page3.md"
+        );
         Ok(())
     }
 }

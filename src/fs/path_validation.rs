@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use anyhow::bail;
 
-/// Returns the canonicalized path if it is within the canonicalized base_dir.
+/// Returns the canonicalized path if it is within the canonicalized `base_dir`.
 /// Otherwise returns an error.
 ///
 /// This function handles non-existent files by validating their parent
@@ -21,28 +21,24 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
             if path_canon.starts_with(&base_dir_canon) {
                 Ok(path_canon)
             } else {
-                bail!(
-                    "Path traversal detected: {:?} is outside of {:?}",
-                    path_canon,
-                    base_dir_canon
-                );
+                bail!("Path traversal detected: {path_canon:?} is outside of {base_dir_canon:?}");
             }
         }
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
             // `..` in a path that does not exist cannot be resolved by the
             // filesystem, so it could climb out of the base directory after
             // the check below.
-            if path.components().any(|c| c == std::path::Component::ParentDir) {
-                bail!(
-                    "Path traversal detected: {:?} does not exist and contains `..`",
-                    path
-                );
+            if path
+                .components()
+                .any(|c| c == std::path::Component::ParentDir)
+            {
+                bail!("Path traversal detected: {path:?} does not exist and contains `..`");
             }
 
             // If the path doesn't exist, it might be a dangling symlink or a
             // new file. Check if it's a dangling symlink.
             if path.symlink_metadata().is_ok() {
-                bail!("Path traversal detected: {:?} is a dangling symlink", path);
+                bail!("Path traversal detected: {path:?} is a dangling symlink");
             }
 
             // Find the first existing ancestor
@@ -66,18 +62,14 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
                         // tricked, but here we are just
                         // validating safety.
                         return Ok(path.to_path_buf());
-                    } else {
-                        bail!(
-                            "Path traversal detected: ancestor {:?} is outside of {:?}",
-                            ancestor_canon,
-                            base_dir_canon
-                        );
                     }
+                    bail!(
+                        "Path traversal detected: ancestor {ancestor_canon:?} is outside of {base_dir_canon:?}"
+                    );
                 }
             }
             bail!(
-                "Path traversal detected: {:?} has no existing ancestor within base directory",
-                path
+                "Path traversal detected: {path:?} has no existing ancestor within base directory"
             );
         }
         Err(e) => Err(e.into()),
@@ -92,6 +84,7 @@ mod tests {
 
     use super::*;
 
+    /// Accepts paths under the base directory and rejects escapes.
     #[test]
     fn test_is_path_within() -> Result<()> {
         let dir = tempdir()?;
@@ -105,26 +98,27 @@ mod tests {
         fs::write(&unsafe_file, "unsafe")?;
 
         // Positive case: existing file
-        assert!(is_path_within(&base_dir, &safe_file).is_ok());
+        is_path_within(&base_dir, &safe_file).expect("input should parse");
 
         // Negative case: existing file outside
-        assert!(is_path_within(&base_dir, &unsafe_file).is_err());
+        is_path_within(&base_dir, &unsafe_file).expect_err("input should be rejected");
 
         // Positive case: non-existent file in safe dir
         let non_existent_safe = base_dir.join("new.txt");
-        assert!(is_path_within(&base_dir, &non_existent_safe).is_ok());
+        is_path_within(&base_dir, &non_existent_safe).expect("input should parse");
 
         // Negative case: non-existent file in unsafe dir
         let non_existent_unsafe = dir.path().join("new_unsafe.txt");
-        assert!(is_path_within(&base_dir, &non_existent_unsafe).is_err());
+        is_path_within(&base_dir, &non_existent_unsafe).expect_err("input should be rejected");
 
         // Negative case: dangling symlink (even if it points to a safe
         // location, we reject it)
         #[cfg(unix)]
         {
+            use std::os::unix::fs::symlink;
             let dangling = base_dir.join("dangling.lnk");
-            std::os::unix::fs::symlink(base_dir.join("non_existent"), &dangling)?;
-            assert!(is_path_within(&base_dir, &dangling).is_err());
+            symlink(base_dir.join("non_existent"), &dangling)?;
+            is_path_within(&base_dir, &dangling).expect_err("input should be rejected");
         }
 
         Ok(())
@@ -136,8 +130,9 @@ mod tests {
         let dir = tempfile::tempdir()?;
         let base = dir.path().join("base");
         std::fs::create_dir(&base)?;
-        assert!(is_path_within(&base, &base.join("new/../../escape.txt")).is_err());
-        assert!(is_path_within(&base, &base.join("new/ok.txt")).is_ok());
+        is_path_within(&base, &base.join("new/../../escape.txt"))
+            .expect_err("input should be rejected");
+        is_path_within(&base, &base.join("new/ok.txt")).expect("input should parse");
         Ok(())
     }
 }
