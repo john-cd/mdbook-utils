@@ -5,6 +5,7 @@
 use std::borrow::Cow;
 
 use pulldown_cmark::Event;
+use pulldown_cmark::LinkType;
 use pulldown_cmark::Parser;
 use pulldown_cmark::Tag;
 use pulldown_cmark::TagEnd;
@@ -23,6 +24,24 @@ enum Where {
     /// Inside an image that is itself inside a link (badge).
     InImageInLink, /* between Start(Tag::Image(...)) and
                     * End(Tag::Image(..)), within a link */
+}
+
+/// Return the reference definitions (`[label]: url "title"`) of the parsed
+/// text, and nothing else: inline links and autolinks are not included.
+pub(crate) fn extract_reference_definitions(parser: &Parser<'_>) -> Vec<Link<'static>> {
+    parser
+        .reference_definitions()
+        .iter()
+        .map(|(label, def)| {
+            LinkBuilder::from_type_url_title(
+                LinkType::Shortcut,
+                def.dest.to_string().into(),
+                def.title.as_deref().unwrap_or_default().to_string().into(),
+                label.to_string().into(),
+            )
+            .build()
+        })
+        .collect()
 }
 
 /// Read from a Markdown parser, extract links from the event stream,
@@ -185,6 +204,18 @@ mod tests {
     use pulldown_cmark::Parser;
 
     use super::*;
+
+    /// Only reference definitions are returned, not inline links.
+    #[test]
+    fn extracts_only_reference_definitions() {
+        let markdown = "[inline](https://a.example) [ref]\n\n[ref]: https://b.example \"T\"\n";
+        let parser = Parser::new(markdown);
+        let defs = extract_reference_definitions(&parser);
+        assert_eq!(defs.len(), 1);
+        assert_eq!(defs[0].label.as_deref(), Some("ref"));
+        assert_eq!(defs[0].get_url(), "https://b.example");
+        assert_eq!(defs[0].title.as_deref(), Some("T"));
+    }
 
     #[test]
     fn test_extract_links_simple() {

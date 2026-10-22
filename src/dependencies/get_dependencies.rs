@@ -19,16 +19,26 @@ use tracing::warn;
 /// Stores a dependency to a crate
 #[derive(Debug, Deserialize)]
 pub(crate) struct Dependency<'a> {
+    /// Package description as printed by `cargo tree` (`name vX.Y.Z ...`).
+    package: Cow<'a, str>,
     /// Name of the dependency crate.
     pub(crate) library_name: Cow<'a, str>,
     /// URL of the crate's package repository, when `cargo tree` reports one.
     pub(crate) package_repo_url: Option<Cow<'a, str>>,
 }
 
+impl Dependency<'_> {
+    /// Name of the package on crates.io, which differs from the library name
+    /// for crates such as `md-5` (library `md5`).
+    pub(crate) fn package_name(&self) -> &str {
+        self.package.split_whitespace().next().unwrap_or_default()
+    }
+}
+
 /// Parse `Cargo.toml` and returns the list of dependencies:
 ///
 /// Calls cargo tree --depth 1 --edges normal --prefix none --format
-/// {lib},{r} --locked (immediate children, no-dev/build, flat list,
+/// {p},{lib},{r} --locked (immediate children, no-dev/build, flat list,
 /// crate name and package repository URL)
 ///
 /// dir_path: Path to the directory containing the Cargo.toml file.
@@ -46,7 +56,7 @@ pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
             "--prefix",
             "none",
             "--format",
-            "{lib},{r}",
+            "{p},{lib},{r}",
             "--locked",
         ])
         .current_dir(cargo_toml_dir_path)
@@ -67,23 +77,25 @@ pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
         ));
     }
 
+    parse_cargo_tree(output.stdout)
+}
+
+/// Parse the `{p},{lib},{r}` lines printed by `cargo tree`.
+fn parse_cargo_tree(stdout: Vec<u8>) -> Result<BTreeMap<Cow<'static, str>, Dependency<'static>>> {
     // Useful wrapper that implements Read for Vec<u8>
-    let cursor = std::io::Cursor::new(output.stdout);
+    let cursor = std::io::Cursor::new(stdout);
 
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .from_reader(cursor);
 
-    // Read cargo tree output
     let mut results: BTreeMap<_, _> = BTreeMap::new();
 
-    while let Some(res) = rdr.deserialize::<Dependency<'_>>().next() {
-        if let Ok(dep) = res {
-            if dep.library_name != "deps" {
-                results.insert(dep.library_name.clone(), dep);
-            }
-        } else {
-            return Err(anyhow!("Failed to parse cargo tree output."));
+    for res in rdr.deserialize::<Dependency<'_>>() {
+        let dep = res.map_err(|e| anyhow!("Failed to parse cargo tree output: {e}"))?;
+        // The first line is the root package itself.
+        if dep.library_name != "deps" {
+            results.insert(dep.library_name.clone(), dep);
         }
     }
 
@@ -136,6 +148,25 @@ fn write_default_log(out: &[u8], err: &[u8]) {
 
 #[cfg(test)]
 mod tests {
+    /// The package name, not the library name, is what crates.io knows.
+    #[test]
+    fn parses_package_and_library_names() -> Result<()> {
+        let out = "deps v0.1.0 (/tmp/deps),deps,\n\
+                   md-5 v0.10.6,md5,https://github.com/RustCrypto/hashes\n\
+                   serde v1.0.0,serde,\n";
+        let deps = parse_cargo_tree(out.as_bytes().to_vec())?;
+        assert_eq!(deps.len(), 2);
+        let md5 = &deps["md5"];
+        assert_eq!(md5.package_name(), "md-5");
+        assert_eq!(
+            md5.package_repo_url.as_deref(),
+            Some("https://github.com/RustCrypto/hashes")
+        );
+        assert_eq!(deps["serde"].package_name(), "serde");
+        assert_eq!(deps["serde"].package_repo_url.as_deref().unwrap_or(""), "");
+        Ok(())
+    }
+
     use super::*;
 
     /// A log path outside the current directory is rejected, not ignored.
