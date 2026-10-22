@@ -16,7 +16,10 @@ services:
       - ${ROOT_PROJECT_PATH}:/code
       - cargo_home_cache:/usr/local/cargo/ # https://doc.rust-lang.org/cargo/guide/cargo-home.html?highlight=crate%20cache
       - cargo_target_cache:/target/mdbook-utils/ # See .cargo/config.toml
+      - cargo_sccache_cache:/root/.cache/sccache/
       - command_history:/command_history
+    environment:
+      SCCACHE_DIR: /root/.cache/sccache
 
     ## Required for ptrace-based debugger like C++, Go, and Rust.
     cap_add:
@@ -30,6 +33,8 @@ volumes:
     name: "${COMPOSE_PROJECT_NAME}_cargo_home_cache_${RUST_VERSION}"
   cargo_target_cache:
     name: "${COMPOSE_PROJECT_NAME}_cargo_target_cache_${RUST_VERSION}"
+  cargo_sccache_cache:
+    name: "${COMPOSE_PROJECT_NAME}_cargo_sccache_cache_${RUST_VERSION}"
   command_history:
     name: "${COMPOSE_PROJECT_NAME}_command_history"
 ## Without custom names, the docker volumes will be prefixed by the compose project name + _

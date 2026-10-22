@@ -17,8 +17,12 @@ set shell := ["bash", "-uc"]
 set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
 worktree_name := env("MDBOOK_UTILS_WORKTREE_NAME", "main")
+cache_home := env("XDG_CACHE_HOME", join(home_directory(), ".cache"))
 export CARGO_TARGET_DIR := join("D:/target/mdbook-utils", worktree_name)
 export CARGO_BUILD_BUILD_DIR := join("C:/code_build/mdbook-utils", worktree_name)
+export RUSTC_WRAPPER := "sccache"
+export CARGO_INCREMENTAL := "0"
+export SCCACHE_DIR := env("SCCACHE_DIR", if os_family() == "windows" { "D:/sccache" } else { join(cache_home, "sccache") })
 
 bin_dir := clean(join(source_directory(), "..", "bin"))
 target_dir := clean(join("D:/target/mdbook-utils", worktree_name))

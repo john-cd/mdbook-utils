@@ -37,7 +37,8 @@ ARG MDBOOK_VERSION
 ## Install just, mdbook, etc... from the binary release
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash \
     && cargo binstall --no-confirm just \
-    && cargo binstall --no-confirm --version ${MDBOOK_VERSION} mdbook
+    && cargo binstall --no-confirm --version ${MDBOOK_VERSION} mdbook \
+    && cargo binstall --no-confirm --secure --version 0.18.0 sccache
 #    && cargo binstall --no-confirm --secure cargo-nextest
 
 WORKDIR /code
@@ -92,6 +93,7 @@ FROM base as ci
 COPY . .
 
 ENV CARGO_TARGET_DIR=./target/
+ENV SCCACHE_DIR=/tmp/sccache
 
 ## Make sure the start scripts have permission to execute
 RUN chmod +x ./.devcontainer/ci.sh ./.devcontainer/publish.sh
