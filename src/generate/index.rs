@@ -68,7 +68,7 @@ fn name_from_url(url: &str, kind: IndexKind) -> Option<String> {
         return None;
     }
     let name = segments.next()?;
-    is_valid_name(name, kind).then(|| name.to_string())
+    is_valid_name(name, kind).then(|| name.to_owned())
 }
 
 /// Collects the sorted, deduplicated names of the given kind from crates.io
@@ -112,7 +112,7 @@ mod tests {
     fn link(url: &str) -> Link<'_> {
         LinkBuilder::default()
             .set_label(Cow::Borrowed("x"))
-            .set_url(Cow::Owned(url.to_string()))
+            .set_url(Cow::Owned(url.to_owned()))
             .build()
     }
 
@@ -128,7 +128,7 @@ mod tests {
         ];
 
         let names = extract_index_names(links, IndexKind::Crates);
-        let expected = BTreeSet::from(["anyhow".to_string(), "serde".to_string()]);
+        let expected = BTreeSet::from(["anyhow".to_owned(), "serde".to_owned()]);
         assert_eq!(names, expected);
     }
 
@@ -144,7 +144,7 @@ mod tests {
         let names = extract_index_names(links, IndexKind::Crates);
         assert_eq!(
             names,
-            BTreeSet::from(["serde".to_string(), "tokio".to_string()])
+            BTreeSet::from(["serde".to_owned(), "tokio".to_owned()])
         );
     }
 
@@ -157,7 +157,7 @@ mod tests {
         let names = extract_index_names(links, IndexKind::Categories);
         assert_eq!(
             names,
-            BTreeSet::from(["web-programming::websocket".to_string()])
+            BTreeSet::from(["web-programming::websocket".to_owned()])
         );
     }
 
@@ -167,7 +167,7 @@ mod tests {
         write_index(
             &mut out,
             IndexKind::Categories,
-            vec!["parsing".to_string(), "development-tools".to_string()],
+            vec!["parsing".to_owned(), "development-tools".to_owned()],
         )?;
 
         let content = String::from_utf8(out)?;

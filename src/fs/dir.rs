@@ -5,14 +5,14 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Error;
 use anyhow::bail;
 use tracing::info;
 
 /// Check if a path is a directory
 ///
-/// Return a PathBuf if it is.
+/// Return a `PathBuf` if it is.
 pub(crate) fn check_is_dir<P>(dir_path: P) -> Result<PathBuf, Error>
 where
     P: AsRef<Path>,
@@ -80,7 +80,7 @@ mod tests {
 
         let file_path = dir.path().join("file.txt");
         fs::write(&file_path, "test")?;
-        assert!(check_is_dir(&file_path).is_err());
+        check_is_dir(&file_path).expect_err("input should be rejected");
         Ok(())
     }
 

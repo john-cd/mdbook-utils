@@ -2,14 +2,14 @@
 //!
 //! TODO Reviewed ??-??-2026
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use clap::Subcommand;
 use console::style;
 use dialoguer::Confirm;
 use dialoguer::theme::ColorfulTheme;
 
-use super::args::*;
+use super::args::{MarkdownDirArgs, MarkdownSrcDirAndDestDirArgs, MarkdownSrcDirAndDestFileArgs};
 use super::config::Configuration;
 use super::log_command_cancelled;
 use super::log_command_outcome;
@@ -164,8 +164,8 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 .context("[run] Failed to remove {{#include ...}} statements.");
                 log_command_outcome("markdown remove-includes", &paths, &result);
                 let modified_files = result?;
-                for f in modified_files.iter() {
-                    println!("Modified: {}", style(f.display()).cyan())
+                for f in &modified_files {
+                    println!("Modified: {}", style(f.display()).cyan());
                 }
                 println!("{}", style("Done.").green());
             } else {

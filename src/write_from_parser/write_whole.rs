@@ -3,7 +3,7 @@
 //!
 //! TODO Reviewed ??-??-2026
 
-use std::io::Write;
+use std::io::Write as _;
 
 use anyhow::Result;
 use pulldown_cmark::Event;
@@ -14,7 +14,7 @@ use pulldown_cmark::html;
 /// Read from a Markdown parser and write HTML to standard output.
 ///
 /// parser: Markdown parser.
-#[allow(dead_code)]
+#[expect(dead_code, reason = "kept for future use and tests")]
 pub(crate) fn write_html_to_stdout<'a, I>(parser: I) -> std::io::Result<()>
 where
     I: Iterator<Item = Event<'a>>,
@@ -31,7 +31,7 @@ where
 /// Read from a Markdown parser and write HTML to bytes.
 ///
 /// parser: Markdown parser.
-#[allow(dead_code)]
+#[cfg_attr(not(test), expect(dead_code, reason = "only used in tests"))]
 pub(crate) fn write_html_to_bytes<'a, I>(parser: I) -> Result<Vec<u8>>
 where
     I: Iterator<Item = Event<'a>>,
@@ -45,7 +45,7 @@ where
 /// Read from a Markdown parser and write HTML to string.
 ///
 /// parser: Markdown parser.
-#[allow(dead_code)]
+#[cfg_attr(not(test), expect(dead_code, reason = "only used in tests"))]
 pub(crate) fn write_html_to_string<'a, I>(parser: I) -> String
 where
     I: Iterator<Item = Event<'a>>,

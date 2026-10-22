@@ -7,7 +7,7 @@ mod dir;
 mod find_markdown_files;
 mod path_validation;
 mod read_files;
-pub mod unused;
+pub(crate) mod unused;
 mod write_atomically;
 
 pub(crate) use dir::*;

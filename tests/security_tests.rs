@@ -25,9 +25,9 @@ fn test_path_traversal_identify_unused_rs_examples() -> anyhow::Result<()> {
     // Attempt to include a file outside of code_dir
     fs::write(
         &md_file,
-        r#"# Test
+        "# Test
 {{#include ../secret.rs}}
-"#,
+",
     )?;
 
     // This should ideally NOT find secret.rs if it's outside code_dir,
@@ -70,9 +70,9 @@ fn test_path_traversal_include_in_all_markdown_files_in() -> anyhow::Result<()> 
     // Attempt to include a file outside of md_dir
     fs::write(
         &md_file,
-        r#"# Test
+        "# Test
 {{#include ../secret.txt.md}}
-"#,
+",
     )?;
 
     // We need it to end in .md for INSERT_REGEX
@@ -136,9 +136,9 @@ fn test_path_traversal_identify_files_not_in_summary() -> anyhow::Result<()> {
     let summary_file = md_dir.join("SUMMARY.md");
     fs::write(
         &summary_file,
-        r#"# Summary
+        "# Summary
 [Secret](../secret.md)
-"#,
+",
     )?;
 
     let unlisted_file = md_dir.join("unlisted.md");

@@ -5,12 +5,12 @@
 use std::borrow::Cow;
 use std::fs::File;
 use std::io;
-use std::io::BufRead;
-use std::io::Read;
+use std::io::BufRead as _;
+use std::io::Read as _;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 
 // // Read a single file to String
@@ -85,7 +85,9 @@ pub(crate) fn read_to_string_all_markdown_files_in<'a, P>(
 where
     P: AsRef<Path>,
 {
-    Ok(Cow::from(read_markdown_sources_in(markdown_root_dir_path)?.text))
+    Ok(Cow::from(
+        read_markdown_sources_in(markdown_root_dir_path)?.text,
+    ))
 }
 
 /// Read a file line by line into a vector of strings.
@@ -97,7 +99,7 @@ where
 /// for line in lines {
 ///     println!("{line}"");
 /// }
-#[allow(dead_code)]
+#[expect(dead_code, reason = "kept for future use and tests")]
 #[tracing::instrument(skip(file_path))]
 pub(crate) fn read_lines<P>(file_path: P) -> Result<Vec<Cow<'static, str>>>
 where
@@ -142,9 +144,15 @@ mod tests {
         assert_eq!(sources.text, "one\ntwo\nthree\nfour\n");
 
         let (path, line) = sources.locate(5).context("offset in a.md")?;
-        assert_eq!((path.file_name().and_then(|n| n.to_str()), line), (Some("a.md"), 2));
+        assert_eq!(
+            (path.file_name().and_then(|n| n.to_str()), line),
+            (Some("a.md"), 2)
+        );
         let (path, line) = sources.locate(15).context("offset in b.md")?;
-        assert_eq!((path.file_name().and_then(|n| n.to_str()), line), (Some("b.md"), 2));
+        assert_eq!(
+            (path.file_name().and_then(|n| n.to_str()), line),
+            (Some("b.md"), 2)
+        );
         Ok(())
     }
 }

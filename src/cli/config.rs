@@ -5,7 +5,7 @@
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use serde::Deserialize;
 use tracing::debug;
@@ -30,40 +30,40 @@ pub(crate) fn init(global_opts: GlobalOpts) -> Result<Configuration> {
 #[derive(Deserialize, Debug)]
 #[serde(default)]
 pub(crate) struct Configuration {
-    /// BOOK_ROOT_DIR_PATH environment variable:
+    /// `BOOK_ROOT_DIR_PATH` environment variable:
     /// the book's root directory (which contains `book.toml`),
     /// typically '.'
     book_root_dir_path: PathBuf,
-    /// MARKDOWN_DIR_PATH environment variable:
+    /// `MARKDOWN_DIR_PATH` environment variable:
     /// Markdown source directory,
     /// typically ./src/
     markdown_dir_path: Option<PathBuf>,
-    /// BOOK_HTML_BUILD_DIR_PATH environment variable:
+    /// `BOOK_HTML_BUILD_DIR_PATH` environment variable:
     /// Directory where `mdbook` outputs the book's HTML and JS,
     /// typically ./book/ or ./book/html/
     book_html_build_dir_path: Option<PathBuf>,
-    /// BOOK_MARKDOWN_BUILD_DIR_PATH environment variable:
+    /// `BOOK_MARKDOWN_BUILD_DIR_PATH` environment variable:
     /// Directory where `mdbook` outputs the book's fully expanded Markdown,
     /// i.e. with all includes resolved. It is typically ./book/markdown/
     /// The directory is created only if `[output.markdown]` is added to
     /// `book.toml`.
     book_markdown_build_dir_path: Option<PathBuf>,
-    /// CARGO_TOML_DIR_PATH environment variable:
+    /// `CARGO_TOML_DIR_PATH` environment variable:
     /// Directory where `Cargo.toml` may be found,
     /// typically '.'
     cargo_toml_dir_path: Option<PathBuf>,
-    /// DEFAULT_DEST_DIR_PATH environment variable:
+    /// `DEFAULT_DEST_DIR_PATH` environment variable:
     /// Default destination directory for `mdbook-utils` outputs.
     default_dest_dir_path: Option<PathBuf>,
-    /// BASE_URL environment variable:
+    /// `BASE_URL` environment variable:
     /// Base url of the website where the book will be deployed
-    /// e.g. https://example.com/mybook/
+    /// e.g. <https://example.com/mybook>/
     /// It is used to build sitemaps.
     base_url: Option<String>,
-    /// SITEMAP_MAP_INDEX environment variable:
+    /// `SITEMAP_MAP_INDEX` environment variable:
     /// Map a filename to another (e.g., 'intro.md' to 'index.md')
     sitemap_map_index: Option<String>,
-    /// MDBOOK_PATH environment variable:
+    /// `MDBOOK_PATH` environment variable:
     /// Path to the `mdbook` binary
     /// typically `mdbook`
     mdbook_path: Option<PathBuf>,
@@ -84,7 +84,7 @@ impl Default for Configuration {
             cargo_toml_dir_path: None,
             default_dest_dir_path: None,
             base_url: None,
-            sitemap_map_index: Some("intro.md:index.md".to_string()),
+            sitemap_map_index: Some("intro.md:index.md".to_owned()),
             mdbook_path: None,
             global_opts: GlobalOpts::default(),
         }
@@ -94,12 +94,12 @@ impl Default for Configuration {
 impl Configuration {
     /// Returns the Markdown source directory provided by the
     /// command-line argument (if set);
-    /// the MARKDOWN_DIR_PATH environment variable (if set);
-    /// the "book.src" field (which defaults to {book_root_dir_path}/src) in
+    /// the `MARKDOWN_DIR_PATH` environment variable (if set);
+    /// the "book.src" field (which defaults to {`book_root_dir_path}/src`) in
     /// `book.toml` (if `book.toml` is found); otherwise the default value
     /// passed as function argument (./src/ or ./drafts/ typically).
     ///
-    /// `book.toml` is looked up in BOOK_ROOT_DIR_PATH, if set,
+    /// `book.toml` is looked up in `BOOK_ROOT_DIR_PATH`, if set,
     /// or the current working directory.
     pub(crate) fn markdown_src_dir_path<S: AsRef<OsStr>>(
         &self,
@@ -142,7 +142,7 @@ impl Configuration {
     /// added to `book.toml`
     ///
     /// The return value is provided by the command-line argument (if set);
-    /// the BOOK_MARKDOWN_BUILD_DIR_PATH environment variable (if set);
+    /// the `BOOK_MARKDOWN_BUILD_DIR_PATH` environment variable (if set);
     /// the "build.build-dir" field in `book.toml` (which defaults to
     /// `{book_root_dir_path}/book`). The Markdown renderer writes directly to
     /// that directory when it is the only renderer, or to its `markdown`
@@ -150,7 +150,7 @@ impl Configuration {
     /// found, the default value passed as function argument is used
     /// (`./book/markdown` typically).
     ///
-    /// `book.toml` is looked up in BOOK_ROOT_DIR_PATH, if set,
+    /// `book.toml` is looked up in `BOOK_ROOT_DIR_PATH`, if set,
     /// or the current working directory.
     pub(crate) fn book_markdown_build_dir_path<S: AsRef<OsStr>>(
         &self,
@@ -184,7 +184,7 @@ impl Configuration {
 
     /// Returns the destination directory where to store mdbook-utils
     /// outputs, as provided by the command-line argument (if set),
-    /// the DEFAULT_DEST_DIR_PATH environment variable (if set),
+    /// the `DEFAULT_DEST_DIR_PATH` environment variable (if set),
     /// or the current working directory otherwise.
     pub(crate) fn dest_dir_path(&self, args: DestDirArgs) -> PathBuf {
         let (path, source) = if let Some(path) = args.dir_path {
@@ -215,8 +215,8 @@ impl Configuration {
 
     /// Returns the directory where `Cargo.toml` may be found,
     /// as provided by the command-line argument (if set),
-    /// the CARGO_TOML_DIR_PATH environment variable (if set),
-    /// or BOOK_ROOT_DIR_PATH (which defaults to '.') otherwise.
+    /// the `CARGO_TOML_DIR_PATH` environment variable (if set),
+    /// or `BOOK_ROOT_DIR_PATH` (which defaults to '.') otherwise.
     pub(crate) fn cargo_toml_dir_path(&self, args: CargoTomlDirArgs) -> Result<PathBuf> {
         let (p, source) = if let Some(path) = args.cargo_toml_dir_path {
             (path, "command-line")
@@ -235,7 +235,7 @@ impl Configuration {
     }
 
     /// Returns the base url of the website where the book will be deployed
-    /// (used to build sitemaps): the command-line option, otherwise the BASE_URL
+    /// (used to build sitemaps): the command-line option, otherwise the `BASE_URL`
     /// environment variable, otherwise `output.html.site-url` in `book.toml`.
     ///
     /// # Errors
@@ -256,17 +256,11 @@ impl Configuration {
         url::Url::parse(&configured).context("[base_url] Could not parse the base url provided.")
     }
 
+    /// Splits the `--map-index` value into its (source, target) pair, if present.
     pub(crate) fn sitemap_map_index(&self, map_index: Option<String>) -> Option<(String, String)> {
-        map_index
-            .or_else(|| self.sitemap_map_index.clone())
-            .and_then(|s| {
-                let parts: Vec<&str> = s.split(':').collect();
-                if parts.len() == 2 {
-                    Some((parts[0].to_string(), parts[1].to_string()))
-                } else {
-                    None
-                }
-            })
+        let s = map_index.or_else(|| self.sitemap_map_index.clone())?;
+        let parts: Vec<&str> = s.split(':').collect();
+        (parts.len() == 2).then(|| (parts[0].to_owned(), parts[1].to_owned()))
     }
 
     /// Resolve the sitemap output file from the command-line argument,
@@ -323,12 +317,15 @@ mod tests {
         assert_eq!(config.base_url, None);
         assert_eq!(
             config.sitemap_map_index,
-            Some("intro.md:index.md".to_string())
+            Some("intro.md:index.md".to_owned())
         );
     }
 
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(
+        clippy::field_reassign_with_default,
+        reason = "tests tweak one field of a default configuration"
+    )]
     fn test_markdown_src_dir_path() -> Result<()> {
         let dir = tempdir()?;
         let src_dir = dir.path().join("src");
@@ -341,7 +338,8 @@ mod tests {
         let args = MarkdownDirArgs {
             markdown_dir_path: None,
         };
-        let path = config.markdown_src_dir_path(args, src_dir.to_str().unwrap())?;
+        let path =
+            config.markdown_src_dir_path(args, src_dir.to_str().expect("input should parse"))?;
         assert_eq!(path, src_dir.canonicalize()?);
 
         // 2. Environment variable case
@@ -383,7 +381,10 @@ src = "toml_src"
     }
 
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(
+        clippy::field_reassign_with_default,
+        reason = "tests tweak one field of a default configuration"
+    )]
     fn test_book_markdown_build_dir_path() -> Result<()> {
         let dir = tempdir()?;
         let build_dir = dir.path().join("book").join("markdown");
@@ -396,7 +397,8 @@ src = "toml_src"
         let args = MarkdownDirArgs {
             markdown_dir_path: None,
         };
-        let path = config.book_markdown_build_dir_path(args, build_dir.to_str().unwrap())?;
+        let path = config
+            .book_markdown_build_dir_path(args, build_dir.to_str().expect("input should parse"))?;
         assert_eq!(path, build_dir.canonicalize()?);
 
         // 2. Environment variable case
@@ -424,8 +426,8 @@ src = "toml_src"
         fs::create_dir_all(&toml_build)?;
         fs::write(
             dir.path().join("book.toml"),
-            r#"[output.markdown]
-"#,
+            "[output.markdown]
+",
         )?;
         let args = MarkdownDirArgs {
             markdown_dir_path: None,
@@ -499,7 +501,10 @@ src = "toml_src"
     }
 
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(
+        clippy::field_reassign_with_default,
+        reason = "tests tweak one field of a default configuration"
+    )]
     fn test_cargo_toml_dir_path() -> Result<()> {
         let dir = tempdir()?;
         let root_dir = dir.path().to_path_buf();
@@ -538,7 +543,7 @@ src = "toml_src"
 
         // 1. Nothing configured: an error instead of a placeholder URL
         let args = UrlArgs { url: None };
-        assert!(config.base_url(args).is_err());
+        config.base_url(args).expect_err("input should be rejected");
 
         // 1b. Environment value
         let configured = Configuration {
@@ -588,7 +593,10 @@ src = "toml_src"
     }
 
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(
+        clippy::field_reassign_with_default,
+        reason = "tests tweak one field of a default configuration"
+    )]
     fn test_sitemap_file_path() -> Result<()> {
         let dir = tempdir()?;
         let mut config = Configuration::default();
@@ -641,7 +649,10 @@ build-dir = "toml_book"
     /// Verifies malformed configuration fails unless the sitemap destination is
     /// explicit.
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(
+        clippy::field_reassign_with_default,
+        reason = "tests tweak one field of a default configuration"
+    )]
     fn test_sitemap_file_path_reports_malformed_book_toml_unless_overridden() -> Result<()> {
         let dir = tempdir()?;
         fs::write(dir.path().join("book.toml"), "[build\nbuild-dir = 7")?;
@@ -667,7 +678,10 @@ build-dir = "toml_book"
     /// Verifies the sitemap requires an HTML renderer when no destination is
     /// overridden.
     #[test]
-    #[allow(clippy::field_reassign_with_default)]
+    #[expect(
+        clippy::field_reassign_with_default,
+        reason = "tests tweak one field of a default configuration"
+    )]
     fn test_sitemap_file_path_requires_html_when_config_disables_it() -> Result<()> {
         let dir = tempdir()?;
         fs::write(dir.path().join("book.toml"), "[output.markdown]\n")?;

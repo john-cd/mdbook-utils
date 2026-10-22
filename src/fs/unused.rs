@@ -7,7 +7,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::LazyLock;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use anyhow::bail;
 use percent_encoding::percent_decode_str;
@@ -205,8 +205,7 @@ mod tests {
         let missing = identify_files_not_in_summary(&root)?;
         assert!(
             missing.is_empty(),
-            "Expected no missing files, but got {:?}",
-            missing
+            "Expected no missing files, but got {missing:?}"
         );
         Ok(())
     }
@@ -228,7 +227,10 @@ mod tests {
         let missing = identify_files_not_in_summary(&root)?;
         assert_eq!(missing.len(), 1);
         assert_eq!(
-            missing[0].file_name().unwrap().to_string_lossy(),
+            missing[0]
+                .file_name()
+                .expect("input should parse")
+                .to_string_lossy(),
             "page2.md"
         );
         Ok(())
@@ -248,7 +250,7 @@ mod tests {
         assert!(result.is_err());
         assert!(
             result
-                .unwrap_err()
+                .expect_err("input should be rejected")
                 .to_string()
                 .contains("SUMMARY.md not found in")
         );
@@ -279,7 +281,10 @@ mod tests {
         let missing = identify_files_not_in_summary(&root)?;
         assert_eq!(missing.len(), 1);
         assert_eq!(
-            missing[0].file_name().unwrap().to_string_lossy(),
+            missing[0]
+                .file_name()
+                .expect("input should parse")
+                .to_string_lossy(),
             "page3.md"
         );
         Ok(())
@@ -303,7 +308,7 @@ mod tests {
 ",
         )?;
         fs::write(root.join("nested/sub/index.md"), "# Nested")?;
-        fs::write(root.join("nested pages/café.md"), "# Encoded")?;
+        fs::write(root.join("nested pages/caf\u{e9}.md"), "# Encoded")?;
         fs::write(dir.path().join("outside.md"), "# Outside")?;
         fs::write(root.join("unlisted.md"), "# Unlisted")?;
 
@@ -314,16 +319,16 @@ mod tests {
 
     #[test]
     fn test_identify_unused_rs_examples_invalid_markdown_dir() {
-        let dir = tempdir().unwrap();
+        let dir = tempdir().expect("input should parse");
         let markdown_dir = dir.path().join("non_existent_markdown");
         let code_dir = dir.path().join("code");
-        fs::create_dir(&code_dir).unwrap();
+        fs::create_dir(&code_dir).expect("input should parse");
 
         let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
         assert!(result.is_err());
         assert!(
             result
-                .unwrap_err()
+                .expect_err("input should be rejected")
                 .to_string()
                 .contains("should be a folder and exist on disk!")
         );
@@ -331,16 +336,16 @@ mod tests {
 
     #[test]
     fn test_identify_unused_rs_examples_invalid_code_dir() {
-        let dir = tempdir().unwrap();
+        let dir = tempdir().expect("input should parse");
         let markdown_dir = dir.path().join("markdown");
-        fs::create_dir(&markdown_dir).unwrap();
+        fs::create_dir(&markdown_dir).expect("input should parse");
         let code_dir = dir.path().join("non_existent_code");
 
         let result = identify_unused_rs_examples(&markdown_dir, &code_dir);
         assert!(result.is_err());
         assert!(
             result
-                .unwrap_err()
+                .expect_err("input should be rejected")
                 .to_string()
                 .contains("should be a folder and exist on disk!")
         );
