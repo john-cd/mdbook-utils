@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Generation of crates.io category and crate index pages.
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::collections::BTreeSet;
 use std::io::Write;
 

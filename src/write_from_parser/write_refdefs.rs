@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Write reference definitions
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::io::Write;
 
 use anyhow::Result;

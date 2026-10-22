@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Output markdown parsing debugging information.
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::io::Write;
 
 use anyhow::Result;

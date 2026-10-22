@@ -1,5 +1,6 @@
-// TODO Reviewed ??-??-2026
 //! Operations on Markdown that are not link- or reference-related
+//!
+//! TODO Reviewed ??-??-2026
 
 pub mod extract_code;
 pub mod remove_includes;

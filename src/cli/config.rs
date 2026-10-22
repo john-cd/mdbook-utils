@@ -1,5 +1,6 @@
-// TODO Reviewed ??-??-2026
 //! Handles CLI configuration, environment variables, and defaults
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::ffi::OsStr;
 use std::path::PathBuf;

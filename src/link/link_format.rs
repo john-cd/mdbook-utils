@@ -1,5 +1,6 @@
-// TODO Reviewed ??-??-2026
 //! Output format for links written by the `links` commands.
+//!
+//! TODO Reviewed ??-??-2026
 
 use clap::ValueEnum;
 

@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Sitemap file generation.
+//!
+//! TODO Reviewed ??-??-2026
+
 mod xml;
 
 use std::collections::BTreeSet;

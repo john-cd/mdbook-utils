@@ -1,8 +1,9 @@
-// TODO Reviewed ??-??-2026
 //! Remove left-over {{#include file.ext}} from mdbook-style Markdown sources.
 //!
 //! Use to clean up Markdown sources or when the [output.markdown] renderer is
 //! enabled in `book.toml`.
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::fs;
 use std::path::Path;

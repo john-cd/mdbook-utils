@@ -1,5 +1,6 @@
-// TODO Reviewed ??-??-2026
 //! Read one or multiple files into a string or vector of strings
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::borrow::Cow;
 use std::fs::File;

@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Builder for [`Link`](super::Link).
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::borrow::Cow;
 
 use pulldown_cmark::LinkType;

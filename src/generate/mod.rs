@@ -1,6 +1,8 @@
-// TODO Reviewed ??-??-2026
 //! Functions that generate reference definitions
 //! e.g. from code dependencies and links.
+//!
+//! TODO Reviewed ??-??-2026
+
 pub mod crates;
 mod index;
 mod merge_refdefs;

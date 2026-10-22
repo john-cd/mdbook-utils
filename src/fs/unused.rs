@@ -1,6 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Functions to identify unused files
 //! like examples and files not in SUMMARY.md
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::path::Path;
 use std::path::PathBuf;

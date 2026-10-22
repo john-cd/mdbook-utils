@@ -1,4 +1,3 @@
-// TODO Reviewed ??-??-2026
 //! # mdbook-utils
 //!
 //! For installation and usage instructions for the `mdbook-utils` command-line
@@ -16,10 +15,13 @@
 //!   script,
 //! - Extend its capabilities,
 //! - ...
+//!
+//! TODO Reviewed ??-??-2026
 
 #![deny(missing_docs)]
 #![deny(rust_2018_idioms)]
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
+
 // #![doc(html_favicon_url = "https://example.com/favicon.ico")]
 // #![doc(html_logo_url = "https://example.com/logo.jpg")]
 

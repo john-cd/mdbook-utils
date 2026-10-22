@@ -1,5 +1,6 @@
-// TODO Reviewed ??-??-2026
 //! Write a file without exposing partial contents
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::io::Write;
 use std::path::Path;
