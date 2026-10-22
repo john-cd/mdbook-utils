@@ -3,7 +3,7 @@
 //!
 //! TODO Reviewed ??-??-2026
 
-pub mod crates;
+pub(crate) mod crates;
 mod index;
 mod merge_refdefs;
 mod refdefs_from_dependencies;

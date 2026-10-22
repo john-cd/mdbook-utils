@@ -5,24 +5,23 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use tracing::debug;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
 
-/// Returns `true`` if the directory entry is hidden (starts with a `.`).
+/// Returns `true` if the directory entry is hidden (starts with a `.`).
 fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.starts_with('.'))
-        .unwrap_or(false)
+        .is_some_and(|s| s.starts_with('.'))
 }
 
 /// Locate Markdown files within a directory
 ///
-/// If root_dir_path is a file, then it is the first and only item
+/// If `root_dir_path` is a file, then it is the first and only item
 /// yielded
 pub(crate) fn find_markdown_files_in<P>(root_dir_path: P) -> Result<Vec<PathBuf>>
 where
@@ -87,7 +86,7 @@ mod tests {
 
         let names: Vec<_> = find_markdown_files_in(root)?
             .iter()
-            .map(|p| p.strip_prefix(root).map(|r| r.to_path_buf()))
+            .map(|p| p.strip_prefix(root).map(std::path::Path::to_path_buf))
             .collect::<std::result::Result<_, _>>()?;
 
         assert_eq!(

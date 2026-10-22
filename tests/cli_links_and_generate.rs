@@ -217,7 +217,11 @@ fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
             .output()?)
     };
 
-    assert!(run(&["markdown", "extract-code-examples"])?.status.success());
+    assert!(
+        run(&["markdown", "extract-code-examples"])?
+            .status
+            .success()
+    );
     assert!(
         run(&["markdown", "replace-code-examples-by-includes"])?
             .status

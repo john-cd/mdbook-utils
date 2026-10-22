@@ -8,15 +8,16 @@
 use std::fs;
 use std::path::Path;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
-use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
 use tracing::info;
 
 /// Regex to find {{#include \<file\>.md}}
-static REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{\{#include.*?\}\}").unwrap());
+static REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
+    Regex::new(r"\{\{#include.*?\}\}").expect("regex literal is valid")
+});
 
 /// Within each mdBook-style Markdown file in a source directory,
 /// remove any left-over {{#include file.md}} statements
@@ -24,10 +25,10 @@ static REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{\{#include.*?\}\}").unwr
 ///
 /// See the [mdBook documentation](https://rust-lang.github.io/mdBook/format/mdbook.html#including-files).
 ///
-/// markdown_src_dir_path: path to the source directory containing the Markdown
+/// `markdown_src_dir_path`: path to the source directory containing the Markdown
 /// files.
 ///
-/// contents_to_insert: replacement of {{#include ...}} statements (same value
+/// `contents_to_insert`: replacement of {{#include ...}} statements (same value
 /// for all statements). Can be "".
 /// Within each mdBook-style Markdown file in a source directory,
 /// remove any left-over {{#include file.md}} statements
@@ -91,11 +92,11 @@ mod tests {
         let md_file1 = src_dir.join("test1.md");
         fs::write(
             &md_file1,
-            r#"# Test 1
+            "# Test 1
 Here is an include:
 {{#include file1.rs}}
 End.
-"#,
+",
         )?;
 
         // 2. Markdown file with multiple includes, same line and different
@@ -103,29 +104,29 @@ End.
         let md_file2 = src_dir.join("test2.md");
         fs::write(
             &md_file2,
-            r#"# Test 2
+            "# Test 2
 {{#include a.rs}} and {{#include b.rs}}
 Another line.
 {{#include c.rs}}
-"#,
+",
         )?;
 
         // 3. Markdown file with no includes
         let md_file3 = src_dir.join("test3.md");
         fs::write(
             &md_file3,
-            r#"# Test 3
+            "# Test 3
 No includes here.
-"#,
+",
         )?;
 
         // 4. Non-markdown file (should be ignored)
         let txt_file = src_dir.join("test.txt");
         fs::write(
             &txt_file,
-            r#"# Test text
+            "# Test text
 {{#include ignore.rs}}
-"#,
+",
         )?;
 
         // Run the function
@@ -140,40 +141,40 @@ No includes here.
         let content1 = fs::read_to_string(&md_file1)?;
         assert_eq!(
             content1,
-            r#"# Test 1
+            "# Test 1
 Here is an include:
 REPLACED
 End.
-"#
+"
         );
 
         // Verify contents of md_file2
         let content2 = fs::read_to_string(&md_file2)?;
         assert_eq!(
             content2,
-            r#"# Test 2
+            "# Test 2
 REPLACED and REPLACED
 Another line.
 REPLACED
-"#
+"
         );
 
         // Verify contents of md_file3 are unchanged
         let content3 = fs::read_to_string(&md_file3)?;
         assert_eq!(
             content3,
-            r#"# Test 3
+            "# Test 3
 No includes here.
-"#
+"
         );
 
         // Verify contents of txt_file are unchanged
         let content_txt = fs::read_to_string(&txt_file)?;
         assert_eq!(
             content_txt,
-            r#"# Test text
+            "# Test text
 {{#include ignore.rs}}
-"#
+"
         );
 
         // Test with empty replacement string

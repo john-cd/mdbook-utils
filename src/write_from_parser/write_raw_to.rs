@@ -22,7 +22,7 @@ pub(crate) fn write_raw_to<W>(parser: &mut Parser<'_>, w: &mut W) -> Result<()>
 where
     W: Write,
 {
-    for event in parser.into_iter() {
+    for event in &mut *parser {
         match event {
             // Start of a tagged element. Events that are yielded after this
             // event and before its corresponding End event are inside this
@@ -209,7 +209,7 @@ where
             Event::DisplayMath(s) => {
                 writeln!(w, "Event::DisplayMath({s:?})")?;
             }
-        };
+        }
     }
     Ok(())
 }

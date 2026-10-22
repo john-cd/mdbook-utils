@@ -34,7 +34,7 @@ pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Resu
         .create_element("urlset")
         .with_attribute(("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9"))
         .write_inner_content(|writer| {
-            for link in links.iter() {
+            for link in &links {
                 // <url><loc>
                 writer.create_element("url").write_inner_content(|w| {
                     w.create_element("loc")
@@ -59,11 +59,11 @@ mod tests {
     /// Escapes XML special characters in URLs.
     #[test]
     fn test_write_xml_escapes_url() {
-        let links = vec!["http://example.com/test?a=1&b=2<script>alert(1)</script>'\"".to_string()];
+        let links = vec!["http://example.com/test?a=1&b=2<script>alert(1)</script>'\"".to_owned()];
         let mut w = Cursor::new(Vec::new());
-        write_xml(links, &mut w).unwrap();
+        write_xml(links, &mut w).expect("input should parse");
 
-        let result = String::from_utf8(w.into_inner()).unwrap();
+        let result = String::from_utf8(w.into_inner()).expect("input should parse");
         // The URL should be properly escaped
         assert!(result.contains("<loc>http://example.com/test?a=1&amp;b=2&lt;script&gt;alert(1)&lt;/script&gt;&apos;&quot;</loc>"));
     }
