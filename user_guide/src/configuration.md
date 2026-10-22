@@ -1,7 +1,11 @@
 <!-- TODO Reviewed ??-??-2026 -->
 # Configuration
 
-Each subcommand uses defaults that are overwritten by values in `book.toml` (if present), by environment variables (if set), or command-line options (the latter trumps the former).
+Path selection follows this order when a command supports the corresponding option: command-line option, matching environment variable, mdBook's `book.toml`, then the command's built-in default. The Markdown source default varies by command. `BOOK_ROOT_DIR_PATH` selects the directory containing `book.toml`; it defaults to the current working directory.
+
+`mdbook-utils` reads the mdBook [`book.src` and `build.build-dir` settings][mdbook-config], and uses the configured [`[output.*]` renderers][mdbook-backend] to resolve renderer output directories. Relative paths in `book.toml` are relative to the book root. If there are no output tables, mdBook enables HTML by default. One renderer writes into `build.build-dir`; with multiple renderers, each writes into a subdirectory named after the renderer, such as `html` or `markdown`.
+
+The mdBook `book.toml` is the only TOML configuration source; no separate `mdbook-utils` TOML file is needed. A missing `book.toml` is optional. If path resolution reaches an unreadable or malformed `book.toml`, the command reports the error instead of silently using defaults. When a valid configuration disables the HTML renderer, `sitemap` requires an explicit destination through `--output` or `BOOK_HTML_BUILD_DIR_PATH`.
 
 You may export environment variables manually or store them in a `.env` file, which will be read automatically:
 
@@ -11,11 +15,11 @@ You may export environment variables manually or store them in a `.env` file, wh
 # in the current working directory otherwise.
 export BOOK_ROOT_DIR_PATH=./test_book/
 
-# Markdown source directory
+# Markdown source directory. This overrides `book.src`.
 export MARKDOWN_DIR_PATH=./test_book/src/
 
-# Directory where mdbook outputs the book's HTML and JS;
-# typically ./book/ or ./book/html/
+# Directory where mdBook outputs HTML and JS. This overrides `build.build-dir`
+# and renderer-based directory selection.
 export BOOK_HTML_BUILD_DIR_PATH=./test_book/book/
 
 # Directory where `mdbook` outputs the book's fully expanded Markdown,
@@ -34,9 +38,11 @@ export DEFAULT_DEST_DIR_PATH=./test_book/temp/
 export BASE_URL=http://myexample.com/some_book/
 ```
 
+For example, when `book.toml` contains `[output.html]` and `[output.markdown]` and sets `build-dir = "dist"`, mdBook writes HTML to `dist/html` and expanded Markdown to `dist/markdown`, relative to the book root. A sole `[output.html]` writes directly to `dist`.
+
 You may also set the [`RUST_LOG`][rust-log] environment variable to display the logs.
 
-See `cli/config.rs` in the [GitHub repo][mdbook-utils-github] for more details.
+The CLI options `--markdown-dir`, `--output`, `--target-dir`, `--cargo-toml-dir`, and `--base-url` override the matching settings for the current command. See the [mdBook general configuration][mdbook-config] and [renderer configuration][mdbook-backend] for the underlying format.
 
 Note: `mdbook-utils` is not a mdbook [mdbook-preprocessor] or [mdbook-backend] at this point.
 

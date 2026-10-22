@@ -13,6 +13,7 @@
 [just]: https://just.systems
 [markdown]: https://en.wikipedia.org/wiki/Markdown
 [mdbook]: https://rust-lang.github.io/mdBook
+[mdbook-config]: https://rust-lang.github.io/mdBook/format/configuration/general.html
 [mdbook-backend]: https://rust-lang.github.io/mdBook/format/configuration/renderers.html
 [mdbook-include]: https://rust-lang.github.io/mdBook/format/mdbook.html#including-files
 [mdbook-summary]: https://rust-lang.github.io/mdBook/format/summary.html

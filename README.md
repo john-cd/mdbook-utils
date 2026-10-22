@@ -49,13 +49,20 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
 
 - `MARKDOWN_DIR_PATH`: Path to the Markdown source directory (default: `./src/`).
 - `BOOK_ROOT_DIR_PATH`: Path to the book's root directory containing `book.toml` (default: `.`).
-- `BOOK_HTML_BUILD_DIR_PATH`: Path where `mdbook` outputs HTML (default: `./book/`).
+- `BOOK_HTML_BUILD_DIR_PATH`: Path where `mdbook` outputs HTML (usually `./book/` for one renderer or `./book/html/` for multiple renderers).
+- `BOOK_MARKDOWN_BUILD_DIR_PATH`: Path where the Markdown renderer writes expanded Markdown.
+- `CARGO_TOML_DIR_PATH`: Directory where a `Cargo.toml` can be found.
+- `DEFAULT_DEST_DIR_PATH`: Default directory for generated `mdbook-utils` files.
 - `BASE_URL`: Base URL for sitemap generation.
 - `RUST_LOG`: Logging level (error, warn, info, debug, trace).
 
 ### Configuration via `book.toml`
 
-`mdbook-utils` parses `book.toml` to retrieve configuration like the source directory (`book.src`) and the build directory (`build.build-dir`).
+`mdbook-utils` uses mdBook's [`book.toml` configuration][mdbook-config] for the Markdown source directory (`book.src`) and renderer output directories (`build.build-dir` and `[output.*]`). Relative paths are resolved from the directory containing `book.toml`, selected by `BOOK_ROOT_DIR_PATH`.
+
+For a path with a command-line option, the precedence is command-line option, matching environment variable, `book.toml`, then that command's default. A missing `book.toml` is optional; an unreadable or malformed file produces an error when resolution reaches it. mdBook enables HTML when no renderer tables are configured. One renderer writes directly to `build.build-dir`; with multiple renderers, each writes to a renderer-named subdirectory such as `html` or `markdown`.
+
+`book.toml` is the only TOML configuration source. There is no separate `mdbook-utils` TOML file.
 
 ## Public API
 
@@ -66,6 +73,7 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
 `mdbook-utils` [(github)][mdbook-utils-github]  [(docs.rs)][mdbook-utils-docs-rs]  [(crates.io)][mdbook-utils-crates-io]  [(user guide)][mdbook-utils-user-guide]
 
 [mdbook]: https://rust-lang.github.io/mdBook/
+[mdbook-config]: https://rust-lang.github.io/mdBook/format/configuration/general.html
 [mdbook-include]: https://rust-lang.github.io/mdBook/format/mdbook.html#including-files
 [mdbook-utils-github]: https://github.com/john-cd/mdbook-utils
 [mdbook-utils-docs-rs]: https://docs.rs/mdbook-utils/latest/mdbook_utils/
