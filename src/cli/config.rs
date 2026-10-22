@@ -109,7 +109,7 @@ impl Configuration {
             (path, "command-line")
         } else if let Some(path) = &self.markdown_dir_path {
             (path.clone(), "environment")
-        } else if let Some(path) = self.get_markdown_dir_path_from_book_toml() {
+        } else if let Some(path) = self.get_markdown_dir_path_from_book_toml()? {
             (path, "book.toml")
         } else {
             (PathBuf::from(default_dir_path.as_ref()), "default")
@@ -125,22 +125,15 @@ impl Configuration {
         Ok(p)
     }
 
-    /// Return markdown_dir_path if retrievable from `book.toml`,
-    /// None otherwise.
+    /// Return `book.src` resolved from `book.toml`, if that file exists.
     ///
-    /// Does not propagate errors, since having a `book.toml` is optional.
-    fn get_markdown_dir_path_from_book_toml(&self) -> Option<PathBuf> {
-        match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
-            // `book.toml` exists and is parseable
-            Ok((src, _, _)) => Some(src),
-            Err(_) => {
-                debug!(
-                    "`book.toml` does not exist in {} or is not parseable",
-                    self.book_root_dir_path.display(),
-                );
-                None
-            }
-        }
+    /// File access and parse errors are propagated so explicit configuration
+    /// cannot silently fall back to a different source directory.
+    fn get_markdown_dir_path_from_book_toml(&self) -> Result<Option<PathBuf>> {
+        Ok(
+            super::book_toml::try_parse_book_toml(&self.book_root_dir_path)?
+                .map(|paths| paths.markdown_src),
+        )
     }
 
     /// Returns the directory where `mdbook` outputs the book's fully expanded
@@ -150,8 +143,10 @@ impl Configuration {
     /// The return value is provided by the command-line argument (if set);
     /// the BOOK_MARKDOWN_BUILD_DIR_PATH environment variable (if set);
     /// the "build.build-dir" field in `book.toml` (which defaults to
-    /// `{book_root_dir_path}/book`) followed by `markdown` (if `book.toml`
-    /// is found); otherwise the default value passed as function argument
+    /// `{book_root_dir_path}/book`). The Markdown renderer writes directly to
+    /// that directory when it is the only renderer, or to its `markdown`
+    /// subdirectory when there are multiple renderers. If no `book.toml` is
+    /// found, the default value passed as function argument is used
     /// (`./book/markdown` typically).
     ///
     /// `book.toml` is looked up in BOOK_ROOT_DIR_PATH, if set,
@@ -166,9 +161,12 @@ impl Configuration {
         } else if let Some(path) = &self.book_markdown_build_dir_path {
             (path.clone(), "environment")
         } else {
-            match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
-                Ok((_, _, Some(path))) => (path, "book.toml"),
-                _ => (PathBuf::from(default_dir_path.as_ref()), "default"),
+            match super::book_toml::try_parse_book_toml(&self.book_root_dir_path)? {
+                Some(paths) => match paths.markdown_output {
+                    Some(path) => (path, "book.toml"),
+                    None => (PathBuf::from(default_dir_path.as_ref()), "default"),
+                },
+                None => (PathBuf::from(default_dir_path.as_ref()), "default"),
             }
         };
 
@@ -259,30 +257,36 @@ impl Configuration {
             })
     }
 
-    /// Returns the sitemap output file path, as provided by
-    /// the command-line argument (if set); or {path}/sitemap.xml,
-    /// where the HTML output path is retrieved from `book.toml`, if possible,
-    /// or the default (`./book`) otherwise.
-    pub(crate) fn sitemap_file_path(&self, args: DestFileArgs) -> PathBuf {
+    /// Resolve the sitemap output file from the command-line argument,
+    /// environment, mdBook HTML output, or the default `./book` directory.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the explicit `book.toml` is unreadable or
+    /// malformed, or when it disables the HTML renderer without an explicit
+    /// destination override.
+    pub(crate) fn sitemap_file_path(&self, args: DestFileArgs) -> Result<PathBuf> {
         let (path, source) = if let Some(file_path) = args.file_path {
             (file_path, "command-line")
         } else {
             let (dir, source) = if let Some(dir) = &self.book_html_build_dir_path {
                 (dir.clone(), "environment")
             } else {
-                match super::book_toml::try_parse_book_toml(self.book_root_dir_path.clone()) {
-                    Ok((_, Some(html_output_dir), _)) => {
-                        // `book.toml`` exists, is parseable and build.build-dir
-                        // is defined
-                        (html_output_dir, "book.toml")
-                    }
-                    _ => ("./book".into(), "default"),
+                match super::book_toml::try_parse_book_toml(&self.book_root_dir_path)? {
+                    Some(paths) => match paths.html_output {
+                        Some(html_output_dir) => (html_output_dir, "book.toml"),
+                        None => anyhow::bail!(
+                            "The HTML renderer is not configured in {}/book.toml; pass --output or set BOOK_HTML_BUILD_DIR_PATH to choose a sitemap destination.",
+                            self.book_root_dir_path.display()
+                        ),
+                    },
+                    None => ("./book".into(), "default"),
                 }
             };
             (dir.join("sitemap.xml"), source)
         };
         debug!(source, selected_path = %path.display(), "selected sitemap file");
-        path
+        Ok(path)
     }
 
     /// if true, skip confirmation prompts
@@ -576,7 +580,7 @@ src = "toml_src"
             file_path: Some(PathBuf::from("arg_sitemap.xml")),
         };
         assert_eq!(
-            config.sitemap_file_path(args),
+            config.sitemap_file_path(args)?,
             PathBuf::from("arg_sitemap.xml")
         );
 
@@ -584,7 +588,10 @@ src = "toml_src"
         let env_html = PathBuf::from("env_html");
         config.book_html_build_dir_path = Some(env_html.clone());
         let args = DestFileArgs { file_path: None };
-        assert_eq!(config.sitemap_file_path(args), env_html.join("sitemap.xml"));
+        assert_eq!(
+            config.sitemap_file_path(args)?,
+            env_html.join("sitemap.xml")
+        );
 
         // 3. book.toml
         config.book_html_build_dir_path = None;
@@ -596,21 +603,62 @@ build-dir = "toml_book"
         )?;
         let args = DestFileArgs { file_path: None };
         assert_eq!(
-            config.sitemap_file_path(args),
+            config.sitemap_file_path(args)?,
             dir.path().join("toml_book").join("sitemap.xml")
         );
 
         // 4. Default
         fs::remove_file(dir.path().join("book.toml"))?;
         let args = DestFileArgs { file_path: None };
-        // The default in the code is hardcoded as
-        // PathBuf::from("./book").join("sitemap.xml") when try_parse_book_toml
-        // fails.
+        // A missing book.toml leaves the command default in effect.
         assert_eq!(
-            config.sitemap_file_path(args),
+            config.sitemap_file_path(args)?,
             PathBuf::from("./book").join("sitemap.xml")
         );
 
+        Ok(())
+    }
+
+    /// Verifies malformed configuration fails unless the sitemap destination is
+    /// explicit.
+    #[test]
+    #[allow(clippy::field_reassign_with_default)]
+    fn test_sitemap_file_path_reports_malformed_book_toml_unless_overridden() -> Result<()> {
+        let dir = tempdir()?;
+        fs::write(dir.path().join("book.toml"), "[build\nbuild-dir = 7")?;
+
+        let mut config = Configuration::default();
+        config.book_root_dir_path = dir.path().to_path_buf();
+        let args = DestFileArgs { file_path: None };
+        let error = config
+            .sitemap_file_path(args)
+            .expect_err("malformed explicit configuration must fail");
+        assert!(format!("{error:#}").contains("book.toml"));
+
+        let overridden_args = DestFileArgs {
+            file_path: Some(PathBuf::from("chosen.xml")),
+        };
+        assert_eq!(
+            config.sitemap_file_path(overridden_args)?,
+            PathBuf::from("chosen.xml")
+        );
+        Ok(())
+    }
+
+    /// Verifies the sitemap requires an HTML renderer when no destination is
+    /// overridden.
+    #[test]
+    #[allow(clippy::field_reassign_with_default)]
+    fn test_sitemap_file_path_requires_html_when_config_disables_it() -> Result<()> {
+        let dir = tempdir()?;
+        fs::write(dir.path().join("book.toml"), "[output.markdown]\n")?;
+        let mut config = Configuration::default();
+        config.book_root_dir_path = dir.path().to_path_buf();
+
+        let error = config
+            .sitemap_file_path(DestFileArgs { file_path: None })
+            .expect_err("sitemap needs an HTML destination when HTML is disabled");
+        assert!(format!("{error:#}").contains("HTML renderer is not configured"));
         Ok(())
     }
 

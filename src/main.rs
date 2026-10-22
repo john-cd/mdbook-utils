@@ -61,7 +61,7 @@ fn main() -> Result<()> {
         Command::SiteMap(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let base_url = config.base_url(args.base)?;
-            let sitemap_dest_file_path = config.sitemap_file_path(args.dest);
+            let sitemap_dest_file_path = config.sitemap_file_path(args.dest)?;
             let map_index = config.sitemap_map_index(args.map_index);
             let paths = [
                 ("markdown_source", markdown_src_dir_path.as_path()),
