@@ -9,14 +9,14 @@ Manage reference definitions
 Usage: mdbook-utils refdefs [OPTIONS] <COMMAND>
 
 Commands:
-  write              Write existing reference definitions to a file
-  badges             Generate badges (reference definitions) for e.g. Github links
-  from-dependencies  Generate reference definitions from the dependencies of the code examples and merge them with those found in the Markdown source directory
-  help               Print this message or the help of the given subcommand(s)
+  write     Write existing reference definitions to a file
+  generate  Generate reference definitions (e.g. badges for Github links or from the dependencies of the code examples)
+  help      Print this message or the help of the given subcommand(s)
 
 Options:
-  -y, --yes   Automatically answer `yes` to any user confirmation request
-  -h, --help  Print help
+  -y, --yes        Automatically answer `yes` to any user confirmation request
+      --log <LOG>  Set the logging level (error, warn, info, debug, trace) [env: RUST_LOG=]
+  -h, --help       Print help
 ```
 
 Generate GitHub badges with the default flat Shields.io style:

@@ -10,18 +10,19 @@ Usage: mdbook-utils markdown [OPTIONS] <COMMAND>
 
 Commands:
   extract-code-examples              Copy Rust code examples from the Markdown into .rs files
-  replace-code-examples-by-includes  Replace Rust code examples from the Markdown by #include statements
-  replace-includes-by-contents       Replace #include statements by the file contents
-  remove-includes                    Remove #include statements (and replace them by a hard-coded string)
-  generate-categories                Generate a listing of crates.io categories and write to a Markdown file
+  replace-code-examples-by-includes  Replace Rust code examples from the Markdown by \{{#include ...}} statements
+  replace-includes-by-contents       Replace \{{#include file.md}} by the file contents
+  remove-includes                    Remove \{{#include }} statements (and replace them by a hard-coded string)
+  generate-categories                Generate a listing of crates.io dependencies and write to a Markdown file
   generate-crates                    Generate a crate index and write to a Markdown file
   identify-files-not-in-summary      Identify .md files not in SUMMARY.md
   identify-unused-rs-examples        Identify .rs examples not used in Markdown files
   help                               Print this message or the help of the given subcommand(s)
 
 Options:
-  -y, --yes   Automatically answer `yes` to any user confirmation request
-  -h, --help  Print help
+  -y, --yes        Automatically answer `yes` to any user confirmation request
+      --log <LOG>  Set the logging level (error, warn, info, debug, trace) [env: RUST_LOG=]
+  -h, --help       Print help
 ```
 
 To keep Rust examples in separate source files, run `extract-code-examples`
@@ -61,4 +62,4 @@ These commands print the unmatched Markdown or Rust paths. A chapter omitted
 from `SUMMARY.md` appears in the first command's output, and a Rust file with
 no supported mdBook helper appears in the second command's output.
 
-{{#include ../refs.md}}
+\{{#include ../refs.md}}

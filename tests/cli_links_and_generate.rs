@@ -323,3 +323,80 @@ fn modifying_commands_fail_without_terminal_or_yes() -> Result<()> {
     }
     Ok(())
 }
+
+/// `refdefs generate --from-dependencies` reads the dependencies of a crate
+/// with `cargo tree` and writes docs.rs and crates.io definitions that use the
+/// package name, keeping definitions the book already has.
+#[test]
+fn refdefs_from_dependencies_uses_package_names_and_keeps_existing() -> Result<()> {
+    let dir = tempdir()?;
+    let dep = dir.path().join("local-dep");
+    fs::create_dir_all(dep.join("src"))?;
+    fs::write(
+        dep.join("Cargo.toml"),
+        "[package]\nname = \"local-dep\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+    )?;
+    fs::write(dep.join("src/lib.rs"), "")?;
+    let krate = dir.path().join("deps");
+    fs::create_dir_all(krate.join("src"))?;
+    fs::write(
+        krate.join("Cargo.toml"),
+        "[package]\nname = \"deps\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\nlocal-dep = { path = \"../local-dep\" }\n",
+    )?;
+    fs::write(krate.join("src/lib.rs"), "")?;
+    // The lockfile is generated offline: both crates are local.
+    let lock = Command::new("cargo")
+        .args(["generate-lockfile", "--offline"])
+        .current_dir(&krate)
+        .output()?;
+    assert!(
+        lock.status.success(),
+        "{}",
+        String::from_utf8_lossy(&lock.stderr)
+    );
+
+    let src = dir.path().join("src");
+    fs::create_dir(&src)?;
+    fs::write(
+        src.join("page.md"),
+        "[local_dep]: https://example.com/mine\n",
+    )?;
+    let out = dir.path().join("refs.md");
+    let log = dir.path().join("cargo.log");
+    let output = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
+        .args([
+            "refdefs",
+            "generate",
+            "--from-dependencies",
+            "--markdown-dir",
+        ])
+        .arg(&src)
+        .arg("--cargo-toml-dir")
+        .arg(&krate)
+        .arg("--output")
+        .arg(&out)
+        .arg("--log-file")
+        .arg(&log)
+        .current_dir(dir.path())
+        .env_remove("BOOK_ROOT_DIR_PATH")
+        .env_remove("MARKDOWN_DIR_PATH")
+        .env("RUST_LOG", "off")
+        .output()?;
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let content = fs::read_to_string(&out)?;
+    assert!(
+        content.contains("[local_dep]: https://example.com/mine"),
+        "{content}"
+    );
+    assert!(
+        content.contains("[local_dep-crate]: https://crates.io/crates/local-dep"),
+        "{content}"
+    );
+    assert!(log.is_file(), "the cargo log should be written");
+    Ok(())
+}

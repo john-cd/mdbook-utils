@@ -13,6 +13,16 @@ use pulldown_cmark::LinkType;
 /// `Link` is a structure that collects all necessary information to
 /// write Markdown (inline or reference-style) links and reference
 /// definitions, including badges.
+///
+/// Equality, ordering and hashing consider only the label, URL and title: the
+/// parts that make up a reference definition. Two links with different text or
+/// link types but the same label, URL and title are the same definition.
+///
+/// The optional fields are filled differently for inline links, reference
+/// links, autolinks and badge images, and the builder only sets what the
+/// parser found. Splitting this into one type per link kind was considered and
+/// not done: every consumer reads the same few fields, so it would add
+/// conversions without removing a failure mode.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct Link<'a> {
     /// Link type reported by the parser (inline, reference, autolink, ...).

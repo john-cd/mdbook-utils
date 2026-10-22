@@ -33,7 +33,7 @@ pub(crate) enum MarkdownSubCommand {
     /// (and replace them by a hard-coded string)
     RemoveIncludes(MarkdownDirArgs),
 
-    /// Generate a listing of crates.io dependencies
+    /// Generate a listing of crates.io categories
     /// and write to a Markdown file
     GenerateCategories(MarkdownSrcDirAndDestFileArgs),
 

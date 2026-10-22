@@ -37,6 +37,11 @@ impl Dependency<'_> {
 
 /// Parse `Cargo.toml` and returns the list of dependencies:
 ///
+/// `cargo tree` is used instead of the `cargo_metadata` crate because its
+/// output is a stable, flat list of the direct normal dependencies (with the
+/// `--locked` guarantee that the lockfile is not modified), which is all this
+/// needs; `cargo_metadata` would add a dependency and a larger JSON model.
+///
 /// Calls cargo tree --depth 1 --edges normal --prefix none --format
 /// {p},{lib},{r} --locked (immediate children, no-dev/build, flat list,
 /// crate name and package repository URL)
