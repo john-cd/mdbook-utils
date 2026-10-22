@@ -19,4 +19,21 @@ Options:
   -h, --help  Print help
 ```
 
+Generate GitHub badges with the default flat Shields.io style:
+
+```sh
+mdbook-utils refdefs generate --badges --markdown-dir ./src --output ./badge_refs.md
+```
+
+Choose another supported style with `--badge-style`. The style option also
+enables badge generation, so `--badges` may be omitted:
+
+```sh
+mdbook-utils refdefs generate --badge-style flat-square --markdown-dir ./src --output ./badge_refs.md
+```
+
+Supported values are `flat`, `flat-square`, `plastic`, `for-the-badge`, and
+`social`. Omitting the option keeps the default flat output and leaves the
+`style` query parameter out of generated URLs.
+
 {{#include ../refs.md}}

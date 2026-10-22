@@ -9,4 +9,19 @@ A status _badge_ is a small image that provides at-a-glance information, for exa
 
 There is no "badge" concept in the Markdown specification. Badges are simply clickable images e.g. `[ ![image-alt-text](link-to-image) ](link-to-webpage)`.
 
+`mdbook-utils refdefs generate --badges` creates a flat-style GitHub badge by
+default. Add `--badge-style flat-square`, `plastic`, `for-the-badge`, or
+`social` to choose another [Shields.io style][shields-io]. Repository name
+hyphens and underscores are escaped in the badge path so Shields.io renders
+them as literal characters. The default flat style omits the `style` query
+parameter, matching Shields.io's default and preserving existing output for
+repository names without separators.
+
+For example, a GitHub repository named `my_repo-with-dash` uses this badge
+image URL with the flat-square style:
+
+```text
+https://img.shields.io/badge/my__repo--with--dash-steelblue?logo=github&style=flat-square
+```
+
 {{#include ../refs.md}}

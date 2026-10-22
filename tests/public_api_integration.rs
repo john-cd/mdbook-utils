@@ -1,6 +1,9 @@
 // TODO Reviewed ??-??-2026
 use std::fs;
 
+use mdbook_utils::api::BadgeStyle;
+use mdbook_utils::api::generate_badges;
+use mdbook_utils::api::generate_badges_with_style;
 use mdbook_utils::api::generate_categories;
 use mdbook_utils::api::generate_crates;
 use mdbook_utils::api::write_refdefs_to;
@@ -58,5 +61,52 @@ fn integration_write_refdefs() -> anyhow::Result<()> {
         definitions,
         "[mdbook]: https://rust-lang.github.io/mdBook/\n"
     );
+    Ok(())
+}
+
+/// Generates escaped GitHub badge paths with the default flat style.
+#[test]
+fn integration_generate_badges_defaults_to_flat_and_escapes_repo_names() -> anyhow::Result<()> {
+    let dir = tempfile::tempdir()?;
+    let src_dir = dir.path().join("src");
+    fs::create_dir(&src_dir)?;
+    fs::write(
+        src_dir.join("github.md"),
+        "\
+[plain]: https://github.com/john-cd/project\n\
+[hyphen]: https://github.com/john-cd/my-repo\n\
+[underscore]: https://github.com/john-cd/my_repo\n\
+",
+    )?;
+    let destination = dir.path().join("badges.md");
+
+    generate_badges(&src_dir, &destination)?;
+
+    let badges = fs::read_to_string(destination)?;
+    assert!(badges.contains("https://img.shields.io/badge/project-steelblue?logo=github"));
+    assert!(badges.contains("https://img.shields.io/badge/my--repo-steelblue?logo=github"));
+    assert!(badges.contains("https://img.shields.io/badge/my__repo-steelblue?logo=github"));
+    assert!(!badges.contains("style=flat"));
+    Ok(())
+}
+
+/// Applies a selected Shields.io style through the grouped public API.
+#[test]
+fn integration_generate_badges_with_style() -> anyhow::Result<()> {
+    let dir = tempfile::tempdir()?;
+    let src_dir = dir.path().join("src");
+    fs::create_dir(&src_dir)?;
+    fs::write(
+        src_dir.join("github.md"),
+        "[project]: https://github.com/john-cd/my-repo\n",
+    )?;
+    let destination = dir.path().join("badges.md");
+
+    generate_badges_with_style(&src_dir, &destination, BadgeStyle::ForTheBadge)?;
+
+    let badges = fs::read_to_string(destination)?;
+    assert!(badges.contains(
+        "https://img.shields.io/badge/my--repo-steelblue?logo=github&style=for-the-badge"
+    ));
     Ok(())
 }
