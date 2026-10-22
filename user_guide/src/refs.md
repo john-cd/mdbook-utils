@@ -3,6 +3,7 @@
 [cargo]: https://doc.rust-lang.org/cargo
 [cargo-layout]: https://doc.rust-lang.org/cargo/guide/project-layout.html
 [commonmark]: https://commonmark.org
+[commonmark-spec]: https://spec.commonmark.org/0.31.2/
 [crates-io]: https://crates.io
 [dev-container-cli]: https://github.com/devcontainers/cli
 [dev-container-extension]: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers

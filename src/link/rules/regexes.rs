@@ -253,7 +253,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "website",
         Rule {
-            re: r"https?://(?<domain>[^/]+)/?(?:[?#].*)?$",
+            re: r"^https?://(?<domain>[^/?#\s]+)/?(?:[?#][^\s]*)?$",
             label_pattern: "${domain}-website",
             ..Rule::default()
         },
@@ -265,7 +265,7 @@ pub(crate) static GLOBAL_RULES: Lazy<HashMap<&str, Rule<'_>>> = Lazy::new(|| {
     m.insert(
         "website page",
         Rule {
-            re: r"https?://(?<domain>[^/]+)/(?:.*/)?(?<last>[^/?#.]+)(?:\.html|/)?(?:[?#].*)?$",
+            re: r"^https?://(?<domain>[^/?#\s]+)/(?:[^\s?#]*/)*(?<last>[^/?#\s]+?)(?:\.html|/)?(?:[?#][^\s]*)?$",
             label_pattern: "${domain}-${last}",
             ..Rule::default()
         },
@@ -492,6 +492,7 @@ mod tests {
             ("https://example.com/", "example.com"),
             ("http://example.com", "example.com"),
             ("https://example.com/?id=1#foo", "example.com"),
+            ("https://example.com?id=1#foo", "example.com"),
             ("https://dev.to/#main", "dev.to"),
         ];
         for (url, domain) in cases {
@@ -500,6 +501,29 @@ mod tests {
             assert_eq!(&caps["domain"], domain);
         }
         assert!(!re.is_match("https://example.com/path"));
+    }
+
+    /// Matches generic root URLs with Unicode hosts and separated
+    /// query/fragment data.
+    #[test]
+    fn test_website_rule_handles_unicode_query_and_fragment() {
+        let re = get_re("website");
+        let url = "https://例え.テスト?topic=rust%2Fmarkdown#intro";
+        let caps = re.captures(url).unwrap();
+        assert_eq!(&caps["domain"], "例え.テスト");
+    }
+
+    /// Rejects generic root destinations with a missing host or raw whitespace.
+    #[test]
+    fn test_website_rule_rejects_malformed_destinations() {
+        let re = get_re("website");
+        for url in [
+            "https://?query=1",
+            "https:///path",
+            "https://example.com?query=two words",
+        ] {
+            assert!(!re.is_match(url), "unexpectedly matched {url:?}");
+        }
     }
 
     #[test]
@@ -516,12 +540,32 @@ mod tests {
             ("https://tokio.rs/tokio/tutorial", "tokio.rs", "tutorial"),
             ("https://example.com/about", "example.com", "about"),
             ("https://example.com/foo/bar.html?id=1#baz", "example.com", "bar"),
+            (
+                "https://example.com/guide/v1.2/page_(draft)!?lang=ja#section",
+                "example.com",
+                "page_(draft)!",
+            ),
+            ("https://例え.テスト/雪/%E9%9B%AA", "例え.テスト", "%E9%9B%AA"),
+            ("https://example.com/docs/v1.2", "example.com", "v1.2"),
         ];
         for (url, domain, last) in cases {
             assert!(re.is_match(url));
             let caps = re.captures(url).unwrap();
             assert_eq!(&caps["domain"], domain);
             assert_eq!(&caps["last"], last);
+        }
+    }
+
+    /// Rejects malformed generic page destinations.
+    #[test]
+    fn test_website_page_rule_rejects_malformed_destinations() {
+        let re = get_re("website page");
+        for url in [
+            "https://?/page",
+            "https:///page",
+            "https://example.com/path with space",
+        ] {
+            assert!(!re.is_match(url), "unexpectedly matched {url:?}");
         }
     }
 }
