@@ -20,6 +20,16 @@ categories = [
     "command-line-utilities",
 ]
 publish = true
+[package.metadata.binstall]
+# Archives built by .github/workflows/release.yml:
+# mdbook-utils-<target>-v<version>.tar.gz (.zip on Windows), binary at the root.
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }-v{ version }.{ archive-format }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+
 exclude = [
     "/.devcontainer",
     "/.github",

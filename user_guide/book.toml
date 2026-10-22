@@ -16,7 +16,7 @@ use-default-preprocessors = true
 no-section-label = true
 git-repository-url = "https://github.com/john-cd/mdbook-utils"
 git-repository-icon = "fab-github"
-edit-url-template = "https://github.com/john-cd/mdbook-utils/edit/master/guide/{path}"
+edit-url-template = "https://github.com/john-cd/mdbook-utils/edit/develop/user_guide/src/{path}"
 site-url = "/mdbook-utils/"
 # cname = "john-cd.com"
 

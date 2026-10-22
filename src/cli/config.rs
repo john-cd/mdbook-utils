@@ -280,8 +280,9 @@ impl Configuration {
     }
 
     /// Returns the base url of the website where the book will be deployed
-    /// (used to build sitemaps): the command-line option, otherwise the `BASE_URL`
-    /// environment variable, otherwise `output.html.site-url` in `book.toml`.
+    /// (used to build sitemaps): the command-line option, otherwise the
+    /// `BASE_URL` environment variable, otherwise `output.html.site-url` in
+    /// `book.toml`.
     ///
     /// # Errors
     ///
@@ -301,7 +302,8 @@ impl Configuration {
         url::Url::parse(&configured).context("[base_url] Could not parse the base url provided.")
     }
 
-    /// Splits the `--map-index` value into its (source, target) pair, if present.
+    /// Splits the `--map-index` value into its (source, target) pair, if
+    /// present.
     pub(crate) fn sitemap_map_index(&self, map_index: Option<String>) -> Option<(String, String)> {
         let s = map_index.or_else(|| self.sitemap_map_index.clone())?;
         let parts: Vec<&str> = s.split(':').collect();

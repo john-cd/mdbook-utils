@@ -7,7 +7,9 @@ use anyhow::Result;
 use clap::Subcommand;
 use console::style;
 
-use super::args::{MarkdownDirArgs, MarkdownSrcDirAndDestDirArgs, MarkdownSrcDirAndDestFileArgs};
+use super::args::MarkdownDirArgs;
+use super::args::MarkdownSrcDirAndDestDirArgs;
+use super::args::MarkdownSrcDirAndDestFileArgs;
 use super::config::Configuration;
 use super::confirm;
 use super::log_command_cancelled;

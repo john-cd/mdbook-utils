@@ -25,8 +25,8 @@ static REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
 ///
 /// See the [mdBook documentation](https://rust-lang.github.io/mdBook/format/mdbook.html#including-files).
 ///
-/// `markdown_src_dir_path`: path to the source directory containing the Markdown
-/// files.
+/// `markdown_src_dir_path`: path to the source directory containing the
+/// Markdown files.
 ///
 /// `contents_to_insert`: replacement of {{#include ...}} statements (same value
 /// for all statements). Can be "".
