@@ -239,3 +239,46 @@ fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
     assert_eq!(fs::read_to_string(&chapter)?, first);
     Ok(())
 }
+
+/// `remove-includes` asks for confirmation; without a terminal and without
+/// `--yes` it fails and leaves the files alone, and with `--yes` it replaces
+/// each include and reports the modified file.
+#[test]
+fn remove_includes_requires_confirmation_and_replaces_includes() -> Result<()> {
+    let dir = tempdir()?;
+    let chapter = dir.path().join("ch.md");
+    let original = "# T\n\n```rust\n{{#include missing.rs}}\n```\n";
+    fs::write(&chapter, original)?;
+    let run = |extra: &[&str]| -> Result<Output> {
+        Ok(Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
+            .args(["markdown", "remove-includes"])
+            .args(extra)
+            .arg("--markdown-dir")
+            .arg(dir.path())
+            .current_dir(dir.path())
+            .stdin(std::process::Stdio::null())
+            .env_remove("BOOK_ROOT_DIR_PATH")
+            .env_remove("MARKDOWN_DIR_PATH")
+            .env("RUST_LOG", "off")
+            .output()?)
+    };
+
+    let declined = run(&[])?;
+    assert!(!declined.status.success());
+    assert!(String::from_utf8_lossy(&declined.stderr).contains("confirmation"));
+    assert_eq!(fs::read_to_string(&chapter)?, original);
+
+    let confirmed = run(&["--yes"])?;
+    assert!(confirmed.status.success());
+    let stdout = String::from_utf8_lossy(&confirmed.stdout);
+    assert!(stdout.contains("{{#include ...}}"), "{stdout}");
+    assert!(
+        stdout.contains("Modified:") && stdout.contains("ch.md"),
+        "{stdout}"
+    );
+    assert_eq!(
+        fs::read_to_string(&chapter)?,
+        "# T\n\n```rust\n// MISSING INCLUDE FILE\nfn main() {}\n```\n"
+    );
+    Ok(())
+}
