@@ -135,17 +135,14 @@ pub fn identify_unused_rs_examples<
     let code_dir_path = fs::check_is_dir(&code_dir_path)?;
 
     let mut all_rs_files = Vec::new();
-    for entry in walkdir::WalkDir::new(&code_dir_path)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file() && e.path().extension().is_some_and(|ext| ext == "rs"))
-    {
-        match entry.path().canonicalize() {
-            Ok(canon) => all_rs_files.push(canon),
-            Err(e) => {
-                tracing::warn!("Failed to canonicalize {:?}: {}", entry.path(), e);
-                continue;
-            }
+    for entry in walkdir::WalkDir::new(&code_dir_path) {
+        let entry = entry.context("Failed to read a directory entry in the code directory")?;
+        if entry.file_type().is_file() && entry.path().extension().is_some_and(|ext| ext == "rs") {
+            let canon = entry
+                .path()
+                .canonicalize()
+                .with_context(|| format!("Failed to resolve {}", entry.path().display()))?;
+            all_rs_files.push(canon);
         }
     }
 

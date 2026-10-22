@@ -1,7 +1,5 @@
 // TODO Reviewed ??-??-2026
 //! Command-line subcommands to handle links
-#![allow(dead_code)]
-
 use anyhow::Context;
 use anyhow::Result;
 use clap::Args;

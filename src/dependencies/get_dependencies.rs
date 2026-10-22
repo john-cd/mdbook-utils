@@ -2,12 +2,11 @@
 //! Get the book's examples' dependencies
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::fs::File;
-use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 
+use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
 use serde::Deserialize;
@@ -90,77 +89,70 @@ pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
 }
 
 /// Write e.g. stdout / stderr to a file.
+///
+/// An explicitly requested log file must be inside the current directory and
+/// writable; failures are returned. The default temporary log is best effort.
 fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()> {
-    let (file, actual_path) = match log_file_path {
-        Some(path) => {
-            let current_dir = match std::env::current_dir() {
-                Ok(dir) => dir,
-                Err(e) => {
-                    warn!("Failed to get current directory for path validation: {}", e);
-                    return Ok(());
-                }
-            };
-            if let Err(e) = crate::fs::is_path_within(&current_dir, path) {
-                warn!(
-                    "Path traversal detected or invalid path for log file {}: {}",
-                    path.display(),
-                    e
-                );
-                return Ok(());
-            }
-
-            match File::create(path) {
-                Ok(f) => (f, path.to_path_buf()),
-                Err(e) => {
-                    warn!("Failed to create log file {}: {}", path.display(), e);
-                    return Ok(());
-                }
-            }
-        }
-        None => match Builder::new()
-            .prefix("mdbook-utils-dependencies-")
-            .suffix(".log")
-            .tempfile()
-        {
-            Ok(tf) => {
-                let actual_path = tf.path().to_path_buf();
-                match tf.keep() {
-                    Ok((f, _p)) => (f, actual_path),
-                    Err(e) => {
-                        warn!("Failed to keep temporary log file: {}", e);
-                        return Ok(());
-                    }
-                }
-            }
-            Err(e) => {
-                warn!("Failed to create temporary log file: {}", e);
-                return Ok(());
-            }
-        },
+    let Some(path) = log_file_path else {
+        write_default_log(out, err);
+        return Ok(());
     };
 
-    let mut buffer = BufWriter::new(file);
-    if let Err(e) = buffer
-        .write_all(out)
-        .and_then(|_| buffer.write_all(err))
-        .and_then(|_| buffer.flush())
-    {
-        warn!(
-            "Failed to write to log file {}: {}",
-            actual_path.display(),
-            e
-        );
-    } else {
-        debug!("Dependencies log written to {}", actual_path.display());
-    }
+    let current_dir = std::env::current_dir()
+        .context("Failed to get the current directory to validate the log file path")?;
+    crate::fs::is_path_within(&current_dir, path)
+        .with_context(|| format!("Refusing to write the log file {}", path.display()))?;
+
+    let mut contents = Vec::with_capacity(out.len() + err.len());
+    contents.extend_from_slice(out);
+    contents.extend_from_slice(err);
+    crate::fs::write_atomically(path, &contents)
+        .with_context(|| format!("Failed to write the log file {}", path.display()))?;
+    debug!("Dependencies log written to {}", path.display());
     Ok(())
+}
+
+/// Keep the `cargo tree` output in a temporary file; failures are only logged.
+fn write_default_log(out: &[u8], err: &[u8]) {
+    let result = Builder::new()
+        .prefix("mdbook-utils-dependencies-")
+        .suffix(".log")
+        .tempfile()
+        .map_err(anyhow::Error::from)
+        .and_then(|tf| {
+            let (mut file, path) = tf.keep().map_err(anyhow::Error::from)?;
+            file.write_all(out)?;
+            file.write_all(err)?;
+            file.flush()?;
+            Ok(path)
+        });
+    match result {
+        Ok(path) => debug!("Dependencies log written to {}", path.display()),
+        Err(e) => warn!("Failed to write the temporary dependencies log: {e}"),
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
-    // #[test]
-    // fn test() {
-    // }
+    /// A log path outside the current directory is rejected, not ignored.
+    #[test]
+    fn rejects_log_path_outside_current_directory() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        let outside = dir.path().join("cargo.log");
+        assert!(write_log(b"out", b"err", Some(&outside)).is_err());
+        assert!(!outside.exists());
+        Ok(())
+    }
+
+    /// An explicit log inside the current directory receives stdout and stderr.
+    #[test]
+    fn writes_explicit_log_inside_current_directory() -> Result<()> {
+        let dir = tempfile::tempdir_in(std::env::current_dir()?)?;
+        let log = dir.path().join("cargo.log");
+        write_log(b"out", b"err", Some(&log))?;
+        assert_eq!(std::fs::read_to_string(log)?, "outerr");
+        Ok(())
+    }
 }

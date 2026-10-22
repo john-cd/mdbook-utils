@@ -1,7 +1,6 @@
 // TODO Reviewed ??-??-2026
 //! Replace {{#include file.md}} by the file contents
 use std::fs;
-use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -10,7 +9,6 @@ use anyhow::Result;
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
-use tempfile::NamedTempFile;
 use tracing::info;
 
 /// Regex to find {{#include \<file\>.md}}.
@@ -226,31 +224,6 @@ fn expand_includes(
     Ok((new_txt, modified))
 }
 
-/// Replaces a file by writing a temporary sibling and renaming it over the
-/// original.
-///
-/// # Errors
-///
-/// Returns an error if the temporary file cannot be written or renamed.
-fn replace_file_atomically(path: &Path, contents: &[u8]) -> Result<()> {
-    let parent_dir = path
-        .parent()
-        .context("Expected source file parent directory")?;
-    let mut staged = NamedTempFile::new_in(parent_dir)
-        .with_context(|| format!("Failed to stage expanded Markdown for {}", path.display()))?;
-    staged
-        .write_all(contents)
-        .with_context(|| format!("Failed to write staged Markdown for {}", path.display()))?;
-    staged
-        .flush()
-        .with_context(|| format!("Failed to flush staged Markdown for {}", path.display()))?;
-    staged
-        .persist(path)
-        .map(|_| ())
-        .map_err(|error| error.error)
-        .with_context(|| format!("Failed to replace Markdown file {}", path.display()))
-}
-
 ///  Within each mdBook-style Markdown file in a source directory,
 /// replace {{#include file.md}} statements by the contents of the
 /// included file.
@@ -312,7 +285,7 @@ where
     // Resolve every include before replacing any Markdown file. This keeps a
     // missing or forbidden include from leaving a partially transformed tree.
     for replacement in planned {
-        replace_file_atomically(&replacement.path, &replacement.contents)?;
+        crate::fs::write_atomically(&replacement.path, &replacement.contents)?;
     }
     Ok(())
 }

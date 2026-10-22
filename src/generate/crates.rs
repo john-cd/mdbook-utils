@@ -2,10 +2,8 @@
 //! Generate index files for crates and categories
 //! in Markdown format.
 
-use std::fs::File;
 use std::path::Path;
 
-use anyhow::Context;
 use anyhow::Result;
 
 use crate::fs;
@@ -20,16 +18,15 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {
-    fs::create_parent_dir_for(dest_file_path.as_ref())?;
-    let f = File::create(dest_file_path.as_ref()).context("Failed to create categories file.")?;
-
     let src_dir_path = fs::check_is_dir(&src_dir_path)?;
     let all_markdown = fs::read_to_string_all_markdown_files_in(&src_dir_path)?;
     let mut parser = parser::get_parser(all_markdown.as_ref());
     let links = parser::extract_links(&mut parser);
     let categories = extract_index_names(links, IndexKind::Categories);
     tracing::info!(count = categories.len(), "writing categories index");
-    write_index(f, IndexKind::Categories, categories)?;
+    let mut buffer = Vec::new();
+    write_index(&mut buffer, IndexKind::Categories, categories)?;
+    fs::write_atomically(dest_file_path.as_ref(), &buffer)?;
 
     Ok(())
 }
@@ -40,16 +37,15 @@ pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
     dest_file_path: P2,
 ) -> Result<()> {
-    fs::create_parent_dir_for(dest_file_path.as_ref())?;
-    let f = File::create(dest_file_path.as_ref()).context("Failed to create crates file.")?;
-
     let src_dir_path = fs::check_is_dir(&src_dir_path)?;
     let all_markdown = fs::read_to_string_all_markdown_files_in(&src_dir_path)?;
     let mut parser = parser::get_parser(all_markdown.as_ref());
     let links = parser::extract_links(&mut parser);
     let crates = extract_index_names(links, IndexKind::Crates);
     tracing::info!(count = crates.len(), "writing crates index");
-    write_index(f, IndexKind::Crates, crates)?;
+    let mut buffer = Vec::new();
+    write_index(&mut buffer, IndexKind::Crates, crates)?;
+    fs::write_atomically(dest_file_path.as_ref(), &buffer)?;
 
     Ok(())
 }
