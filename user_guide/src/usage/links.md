@@ -20,4 +20,23 @@ Options:
   -h, --help  Print help
 ```
 
+Link extraction follows CommonMark link syntax as implemented by
+`pulldown-cmark`, including inline links, reference links, images, and URI
+autolinks written in angle brackets. Plain URL text is not treated as an
+autolink. Link-like text in fenced or indented code blocks and code spans is
+preserved, as are mdBook helpers such as `{{# include path/to/file.rs}}`.
+
+The parser enables the existing extensions for tables, footnotes, and
+strikethrough; it does not enable GitHub's bare-URL autolinks or unrelated
+Markdown dialects. See the [CommonMark specification][commonmark-spec] for
+destination escaping and link syntax.
+
+Generic website rules classify absolute `http` and `https` destinations. They
+separate query strings and fragments from the host and final path segment,
+preserve Unicode and percent-encoded text for matching, and reject destinations
+without a host or with raw whitespace. This is a parsing and classification
+boundary: mdBook-utils does not check whether a destination is reachable or
+validate every URI component. A destination accepted by CommonMark syntax may
+still contain a malformed percent escape and remains its original destination.
+
 {{#include ../refs.md}}

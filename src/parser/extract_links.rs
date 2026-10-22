@@ -239,4 +239,45 @@ mod tests {
         assert_eq!(links[3].get_url(), "url2");
         assert_eq!(links[4].get_url(), "url");
     }
+
+    /// Extracts CommonMark destinations while preserving code and mdBook helper
+    /// text.
+    #[test]
+    fn test_extract_links_commonmark_url_edge_cases_and_code_fences() {
+        let markdown = r#"
+[punctuation](https://example.com/guide_(intro)!.)
+[escaped](https://example.com/guide\(draft\))
+[unicode](https://例え.テスト/雪)
+[encoded](https://example.com/%E9%9B%AA?raw=%E9#item)
+[query](https://example.com/search?q=rust%2Fmarkdown#results)
+<https://example.com/autolink>
+[invalid host](https://?query)
+[invalid percent escape](https://example.com/%ZZ)
+
+https://example.com/plain-text-is-not-an-autolink
+`[code span](https://example.com/code-span)`
+
+```markdown
+[fenced](https://example.com/fenced)
+{{#include examples/demo.rs}}
+```
+"#;
+        let mut parser = super::super::get_parser(markdown);
+        let links = extract_links(&mut parser);
+        let destinations: Vec<_> = links.iter().map(|link| link.get_url()).collect();
+
+        assert_eq!(
+            destinations,
+            [
+                "https://example.com/guide_(intro)!.",
+                "https://example.com/guide(draft)",
+                "https://例え.テスト/雪",
+                "https://example.com/%E9%9B%AA?raw=%E9#item",
+                "https://example.com/search?q=rust%2Fmarkdown#results",
+                "https://example.com/autolink",
+                "https://?query",
+                "https://example.com/%ZZ",
+            ]
+        );
+    }
 }
