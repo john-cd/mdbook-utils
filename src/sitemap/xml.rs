@@ -12,6 +12,11 @@ use quick_xml::events::BytesText;
 use quick_xml::writer::Writer;
 
 // Write in the sitemap.xml format to a file, given a list of links.
+/// Writes the links in `sitemap.xml` format.
+///
+/// # Errors
+///
+/// Returns an error if the XML cannot be written.
 pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Result<()> {
     let mut writer = Writer::new_with_indent(w, b' ', 2);
 

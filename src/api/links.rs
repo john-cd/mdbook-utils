@@ -1,4 +1,5 @@
 // TODO Reviewed ??-??-2026
+//! Public operations that write reports about the links in Markdown sources.
 use std::fs::File;
 use std::path::Path;
 

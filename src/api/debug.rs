@@ -1,4 +1,5 @@
 // TODO Reviewed ??-??-2026
+//! Public operation that writes raw Markdown parser events for debugging.
 use std::path::Path;
 
 use anyhow::Result;

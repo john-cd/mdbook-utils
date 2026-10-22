@@ -1,4 +1,5 @@
 // TODO Reviewed ??-??-2026
+//! The [`Link`] type and its Markdown renderings.
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::hash::Hash;
@@ -12,24 +13,35 @@ use pulldown_cmark::LinkType;
 /// definitions, including badges.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct Link<'a> {
+    /// Link type reported by the parser (inline, reference, autolink, ...).
     pub(crate) link_type: Option<LinkType>,
-    pub(crate) text: Option<Cow<'a, str>>,  // [text](...)
+    /// Link text.
+    pub(crate) text: Option<Cow<'a, str>>, // [text](...)
+    /// Reference label.
     pub(crate) label: Option<Cow<'a, str>>, // [...][label] and [label]: ...
-    pub(crate) url: Option<Cow<'a, str>>,   // [...]: url or [...](url) or <url>
+    /// Destination URL.
+    pub(crate) url: Option<Cow<'a, str>>, // [...]: url or [...](url) or <url>
     // parsed_url: Option<Url>, Url::parse( )?
+    /// Optional title.
     pub(crate) title: Option<Cow<'a, str>>, // [...]: url "title" or [...](url "title")
 
     // [![image_alt_text][image_label]][...]
     // [image_label]: image_url "image_title"
+    /// Link type of the image, if the link text is an image.
     #[allow(dead_code)]
     pub(crate) image_link_type: Option<LinkType>,
+    /// Image alt text.
     pub(crate) image_alt_text: Option<Cow<'a, str>>,
+    /// Image reference label.
     pub(crate) image_label: Option<Cow<'a, str>>,
+    /// Image URL.
     pub(crate) image_url: Option<Cow<'a, str>>,
+    /// Image title.
     pub(crate) image_title: Option<Cow<'a, str>>,
 }
 
 impl<'a> Link<'a> {
+    /// Returns a copy that owns all of its text.
     pub(crate) fn to_static(&self) -> Link<'static> {
         Link {
             link_type: self.link_type,

@@ -1,4 +1,5 @@
 // TODO Reviewed ??-??-2026
+//! Public operations that generate crates.io category and crate index pages.
 use std::path::Path;
 
 use anyhow::Result;

@@ -82,9 +82,11 @@ pub(crate) fn parse_arguments() -> Cli {
 // #[command(arg_required_else_help = true)]
 /// Command-line interface: commands and global options
 pub(crate) struct Cli {
+    /// Selected top-level command.
     #[command(subcommand)]
     pub(crate) command: Command,
     // This structure allows the addition of global options, if needed
+    /// Options shared by every command.
     #[clap(flatten)]
     pub(crate) global_opts: GlobalOpts,
 }

@@ -43,8 +43,12 @@ static REG: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?m)^# (?<rest>.*)$").unwrap
 static REG2: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.*?\n)(?<last>```)").unwrap());
 
+/// A file to be written, planned before any write so that collisions are
+/// detected first.
 struct PlannedFile {
+    /// Destination path of the file.
     path: PathBuf,
+    /// Bytes to write.
     contents: Vec<u8>,
 }
 
@@ -114,6 +118,12 @@ fn relative_path(from_dir: &Path, target: &Path) -> Result<PathBuf> {
     Ok(relative)
 }
 
+/// Returns every Markdown file under `root` as `(absolute path, path relative
+/// to root)` pairs.
+///
+/// # Errors
+///
+/// Returns an error if `root` cannot be resolved or traversed.
 fn markdown_files_under(root: &Path) -> Result<Vec<(PathBuf, PathBuf)>> {
     let root = root.canonicalize().with_context(|| {
         format!(
@@ -139,6 +149,7 @@ fn markdown_files_under(root: &Path) -> Result<Vec<(PathBuf, PathBuf)>> {
         .collect()
 }
 
+/// Fails if two planned files target the same path.
 fn check_plan_collisions(plans: &mut [PlannedFile]) -> Result<()> {
     plans.sort_by(|left, right| left.path.cmp(&right.path));
     for pair in plans.windows(2) {
@@ -152,6 +163,11 @@ fn check_plan_collisions(plans: &mut [PlannedFile]) -> Result<()> {
     Ok(())
 }
 
+/// Returns true if `path` already holds exactly `contents`; refuses symlinks.
+///
+/// # Errors
+///
+/// Returns an error if the path is a symlink or cannot be read.
 fn existing_file_matches(path: &Path, contents: &[u8]) -> Result<bool> {
     match fs::symlink_metadata(path) {
         Ok(metadata) if metadata.file_type().is_symlink() => {

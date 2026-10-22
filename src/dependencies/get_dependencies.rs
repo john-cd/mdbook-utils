@@ -18,7 +18,9 @@ use tracing::warn;
 /// Stores a dependency to a crate
 #[derive(Debug, Deserialize)]
 pub(crate) struct Dependency<'a> {
+    /// Name of the dependency crate.
     pub(crate) library_name: Cow<'a, str>,
+    /// URL of the crate's package repository, when `cargo tree` reports one.
     pub(crate) package_repo_url: Option<Cow<'a, str>>,
 }
 
