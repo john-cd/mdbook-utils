@@ -69,12 +69,14 @@ jobs:
         run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml build
       - name: Build / test the code and the user guide
         run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm mdbook-utils
-        if: ${{ inputs.publish == 'false' }}"
+        if: ${{ !inputs.publish }}
       - name: Build / test the code and the user guide AND PUBLISH to crates.io
         # Pass the crates.io secret as an env. variable, which is then used by `publish.sh`.
         # See <https://docs.docker.com/compose/environment-variables/envvars-precedence/>
-        run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm --env CRATES_TOKEN=${{ secrets.CRATES_TOKEN }} mdbook-utils .devcontainer/publish.sh -y
-        if: ${{ inputs.publish == 'true' }}"
+        env:
+          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+        run: docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run --rm --env CRATES_TOKEN mdbook-utils .devcontainer/publish.sh -y
+        if: ${{ inputs.publish }}
       - name: Setup Github Pages
         id: pages
         uses: actions/configure-pages@v4
@@ -86,7 +88,7 @@ jobs:
   ## GitHub Pages Deployment job
   pages-deploy:
     name: Deploy to GitHub Pages
-    if: ${{ inputs.deploy_to_gh_pages == 'true' }}"
+    if: ${{ inputs.deploy_to_gh_pages }}
     needs: build
     runs-on: ubuntu-latest
     environment:
