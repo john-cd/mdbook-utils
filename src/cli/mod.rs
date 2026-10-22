@@ -16,7 +16,8 @@ pub(crate) mod links_commands;
 pub(crate) mod markdown_commands;
 pub(crate) mod refdefs_commands;
 
-use args::{MarkdownSrcDirAndDestFileArgs, MarkdownSrcDirUrlAndDestFileArgs};
+use args::MarkdownSrcDirAndDestFileArgs;
+use args::MarkdownSrcDirUrlAndDestFileArgs;
 use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
