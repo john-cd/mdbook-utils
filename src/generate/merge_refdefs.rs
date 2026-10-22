@@ -15,7 +15,11 @@ pub(crate) fn merge_links<'a>(
         .iter()
         .filter_map(|link| link.label.clone())
         .collect();
-    new_links.retain(|link| link.label.as_ref().is_none_or(|l| !existing_labels.contains(l)));
+    new_links.retain(|link| {
+        link.label
+            .as_ref()
+            .is_none_or(|l| !existing_labels.contains(l))
+    });
 
     let mut buf = existing_links.clone();
     buf.append(new_links);

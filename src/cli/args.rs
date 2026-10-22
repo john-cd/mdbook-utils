@@ -119,15 +119,32 @@ pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {
     pub(crate) dest: DestFileArgs,
 
     /// Map a filename to another (e.g., 'intro.md' to 'index.md')
-    #[arg(long = "map-index", value_name = "FROM:TO")]
+    #[arg(long = "map-index", value_name = "FROM:TO", value_parser = parse_map_index)]
     pub(crate) map_index: Option<String>,
+}
+
+/// Validate a `FROM:TO` file name mapping.
+fn parse_map_index(s: &str) -> Result<String, String> {
+    match s.split_once(':') {
+        Some((from, to)) if !from.is_empty() && !to.is_empty() && !to.contains(':') => {
+            Ok(s.to_string())
+        }
+        _ => Err(format!(
+            "expected FROM:TO (for example intro.md:index.md), got {s:?}"
+        )),
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
-    // #[test]
-    // fn test() {
-    // }
+    /// Only well-formed `FROM:TO` mappings are accepted.
+    #[test]
+    fn map_index_requires_two_non_empty_names() {
+        assert!(parse_map_index("intro.md:index.md").is_ok());
+        for bad in ["intro.md", ":index.md", "intro.md:", "a:b:c"] {
+            assert!(parse_map_index(bad).is_err(), "{bad}");
+        }
+    }
 }

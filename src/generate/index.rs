@@ -140,7 +140,10 @@ mod tests {
             link("https://notcrates.io/crates/fake"),
         ];
         let names = extract_index_names(links, IndexKind::Crates);
-        assert_eq!(names, BTreeSet::from(["serde".to_string(), "tokio".to_string()]));
+        assert_eq!(
+            names,
+            BTreeSet::from(["serde".to_string(), "tokio".to_string()])
+        );
     }
 
     /// Subcategories such as `web-programming::websocket` are kept.
