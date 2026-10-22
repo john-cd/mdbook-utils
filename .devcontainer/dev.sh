@@ -23,7 +23,7 @@ fi
 
 echo "-------------------------------------------"
 echo "Format the code"
-cargo +nightly fmt --all
+cargo +nightly-2026-10-22 fmt --all
 
 echo "Fetch the dependencies"
 cargo fetch
