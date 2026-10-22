@@ -90,3 +90,5 @@ rust-project.json
 # Ignore all local history of files
 .history
 .ionide
+# Local snapshot of registered worktrees and build-cache usage.
+WORKTREES.md
