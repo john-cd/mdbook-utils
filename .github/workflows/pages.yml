@@ -1,0 +1,65 @@
+# TODO Reviewed ??-??-2026
+name: Deploy the user guide to Pages
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Do not cancel in-progress deployments.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  # Public location of the user guide; used for the sitemap.
+  GUIDE_URL: https://john-cd.com/mdbook-utils/
+
+jobs:
+  build:
+    name: Build the user guide and its sitemap
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: 1.99.1
+
+      - uses: Swatinem/rust-cache@aa7c1c80a07a27a84c0aa76d0cef0aad3830e330 # v2.7.8
+
+      - uses: taiki-e/install-action@510b3ecd7915856b6909305605afa7a8a57c1b04 # v2.48.1
+        with:
+          tool: mdbook
+
+      - name: Build and test the user guide
+        run: |
+          mdbook build ./user_guide
+          mdbook test ./user_guide
+
+      - name: Write sitemap.xml into the rendered guide
+        env:
+          MDBOOK_UTILS_BOOK_ROOT_DIR_PATH: user_guide
+        run: cargo run --locked -- sitemap --base-url "$GUIDE_URL"
+
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: ./user_guide/book/
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

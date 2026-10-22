@@ -35,3 +35,17 @@ In turn, most commands offer a menu of subcommands.
 {{#include ./usage/command_line_options.md}}
 
 {{#include ./refs.md}}
+
+## Which tool for what
+
+`mdbook-utils` and [`book_tooling`](https://github.com/john-cd/book_tooling) overlap. The split is:
+
+| Task | Tool |
+| --- | --- |
+| Sitemap, `book.toml` path resolution | `mdbook-utils` |
+| Extract, replace, or remove `{{#include}}` and code examples; unused `.rs` examples; files not in `SUMMARY.md` | `mdbook-utils` |
+| Crate and category indexes, dependency reference definitions, GitHub badges | `mdbook-utils` |
+| Reports on links (`links write-all`, `duplicate-links`, `broken-links`) | `mdbook-utils` (read-only reports) |
+| Rewriting inline links as reference links in place, reference-definition clean-up, HTTP link checking, search | `book_tooling` |
+
+`mdbook-utils` keeps pulldown-cmark for its read-only scans and does not rewrite link syntax in place. Commands that overlap with `book_tooling` (`links write-inline`, `refdefs write`) stay as reports and are not extended further.
