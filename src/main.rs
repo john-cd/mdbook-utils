@@ -4,7 +4,7 @@
 
 use std::env;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use console::style;
 use tracing::debug;

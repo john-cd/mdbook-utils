@@ -128,7 +128,7 @@ pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {
 fn parse_map_index(s: &str) -> Result<String, String> {
     match s.split_once(':') {
         Some((from, to)) if !from.is_empty() && !to.is_empty() && !to.contains(':') => {
-            Ok(s.to_string())
+            Ok(s.to_owned())
         }
         _ => Err(format!(
             "expected FROM:TO (for example intro.md:index.md), got {s:?}"
@@ -143,7 +143,7 @@ mod tests {
     /// Only well-formed `FROM:TO` mappings are accepted.
     #[test]
     fn map_index_requires_two_non_empty_names() {
-        assert!(parse_map_index("intro.md:index.md").is_ok());
+        parse_map_index("intro.md:index.md").expect("input should parse");
         for bad in ["intro.md", ":index.md", "intro.md:", "a:b:c"] {
             assert!(parse_map_index(bad).is_err(), "{bad}");
         }

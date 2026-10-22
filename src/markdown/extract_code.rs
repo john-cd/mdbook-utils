@@ -3,15 +3,14 @@
 //! TODO Reviewed ??-??-2026
 
 use std::fs;
-use std::io::Write;
+use std::io::Write as _;
 use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use anyhow::bail;
-use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
 use tempfile::NamedTempFile;
@@ -26,7 +25,8 @@ use super::rust_blocks::find_rust_blocks;
 /// matches such lines and captures the rest of the line (after `# `) in the
 /// named group `rest`, so they can be included verbatim in extracted `.rs`
 /// files.
-static REG: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?m)^# (?<rest>.*)$").unwrap());
+static REG: std::sync::LazyLock<Regex> =
+    std::sync::LazyLock::new(|| Regex::new("(?m)^# (?<rest>.*)$").expect("regex literal is valid"));
 
 /// Strip the mdBook hidden-line marker (`# `) so the code compiles as a file.
 fn hidden_lines_removed(code: &str) -> String {
@@ -233,9 +233,9 @@ fn write_generated_file(path: &Path, contents: &[u8]) -> Result<()> {
 /// deterministic block index. Existing identical outputs are kept; conflicting
 /// files are reported instead of being truncated.
 ///
-/// markdown_src_dir_path: path to the source directory
+/// `markdown_src_dir_path`: path to the source directory
 ///
-/// code_dest_dir_path: path to the directory, where destination files
+/// `code_dest_dir_path`: path to the directory, where destination files
 /// will be created
 ///
 /// # Errors
@@ -300,9 +300,7 @@ where
     // Check every destination before writing any of them, so a collision late
     // in the traversal cannot leave earlier chapters partially extracted.
     for output in &planned {
-        if existing_file_matches(&output.path, &output.contents)? {
-            continue;
-        }
+        let _matches = existing_file_matches(&output.path, &output.contents)?;
     }
     for output in planned {
         write_generated_file(&output.path, &output.contents)?;
@@ -314,10 +312,10 @@ where
 /// `{{#include ...}}` statement that points to the corresponding generated
 /// code file.
 ///
-/// markdown_src_dir_path: path to the source directory containing the
+/// `markdown_src_dir_path`: path to the source directory containing the
 /// Markdown files
 ///
-/// code_dir_path: path to the folder containing the extracted Rust code
+/// `code_dir_path`: path to the folder containing the extracted Rust code
 ///
 /// # Errors
 ///

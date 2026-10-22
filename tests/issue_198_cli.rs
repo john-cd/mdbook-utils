@@ -58,7 +58,7 @@ fn assert_successful_output(output: &Output, action: &str) {
     );
 }
 
-/// Runs links and Markdown scan commands against the repository's test_book
+/// Runs links and Markdown scan commands against the repository's `test_book`
 /// fixtures.
 #[test]
 fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
@@ -112,8 +112,8 @@ fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
     assert!(markdown_stdout.contains("Files not in SUMMARY.md:"));
     for file in [
         format!("chapter_2{}incl.md", std::path::MAIN_SEPARATOR),
-        "included.md".to_string(),
-        "wont-be-included-refs.md".to_string(),
+        "included.md".to_owned(),
+        "wont-be-included-refs.md".to_owned(),
     ] {
         assert!(
             markdown_stdout.contains(&file),

@@ -98,8 +98,8 @@ mod tests {
     /// Builds a definition with a label and URL.
     fn definition(label: &str, url: &str) -> Link<'static> {
         LinkBuilder::default()
-            .set_label(label.to_string().into())
-            .set_url(url.to_string().into())
+            .set_label(label.to_owned().into())
+            .set_url(url.to_owned().into())
             .build()
     }
 

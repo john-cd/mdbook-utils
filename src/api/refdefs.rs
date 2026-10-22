@@ -49,9 +49,9 @@ impl BadgeStyle {
 /// Parse Markdown from all .md files in a given source directory
 /// and write reference definitions found therein to a file.
 ///
-/// src_dir_path: path to the source directory.
+/// `src_dir_path`: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into.
+/// `dest_file_path`: path to the file to create and write into.
 ///
 /// # Errors
 ///
@@ -76,9 +76,9 @@ where
 /// create default flat-style Shields.io badge URLs for these links,
 /// and write to a file.
 ///
-/// src_dir_path: path to the source directory.
+/// `src_dir_path`: path to the source directory.
 ///
-/// dest_file_path: path to the file to create and write into.
+/// `dest_file_path`: path to the file to create and write into.
 ///
 /// # Errors
 ///
@@ -123,14 +123,14 @@ where
 /// generate reference definitions from code dependencies
 /// and write them to a file.
 ///
-/// cargo_toml_dir_path: path to the directory containing `Cargo.toml`.
+/// `cargo_toml_dir_path`: path to the directory containing `Cargo.toml`.
 ///
-/// markdown_dir_path: path to the directory containing Markdown files.
+/// `markdown_dir_path`: path to the directory containing Markdown files.
 ///
-/// refdef_dest_file_path: path to the file to create and
+/// `refdef_dest_file_path`: path to the file to create and
 /// write into.
 ///
-/// log_file_path: optional path to a log file where the output of `cargo tree`
+/// `log_file_path`: optional path to a log file where the output of `cargo tree`
 /// will be written.
 ///
 /// # Errors

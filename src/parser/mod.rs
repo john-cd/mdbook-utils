@@ -20,7 +20,7 @@ use tracing::warn;
 
 /// Return a parser with suitable options
 ///
-/// markdown_input: the unprocessed markdown text
+/// `markdown_input`: the unprocessed markdown text
 pub(crate) fn get_parser(markdown_input: &str) -> Parser<'_> {
     Parser::new_ext(markdown_input, get_options())
 }
@@ -101,7 +101,7 @@ impl<'input> BrokenLinkCallback<'input> for Handler {
 
 /// Return a parser with suitable options and a broken link handler.
 ///
-/// markdown_input: the Markdown contents to parse
+/// `markdown_input`: the Markdown contents to parse
 pub(crate) fn get_parser_with_broken_links_handler<'input>(
     markdown_input: &'input str,
     handler: Handler,
@@ -168,13 +168,13 @@ mod tests {
         let broken = handler
             .broken_links
             .lock()
-            .unwrap_or_else(|e| e.into_inner())
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
             .clone();
         assert_eq!(
             broken,
             vec![BrokenReference {
-                reference: "missing".to_string(),
-                link_type: "Shortcut".to_string(),
+                reference: "missing".to_owned(),
+                link_type: "Shortcut".to_owned(),
                 offset: 0,
             }]
         );
@@ -189,7 +189,7 @@ mod tests {
             handler
                 .broken_links
                 .lock()
-                .unwrap_or_else(|e| e.into_inner())
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
                 .is_empty()
         );
     }

@@ -5,7 +5,7 @@
 use std::fs::File;
 use std::path::Path;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 
 use crate::fs;
@@ -15,12 +15,12 @@ use crate::sitemap as sitemap_mod;
 
 /// Create a sitemap from published HTML pages linked in SUMMARY.md.
 ///
-/// The parent directory of sitemap_dest_file_path must be the existing output
+/// The parent directory of `sitemap_dest_file_path` must be the existing output
 /// directory for the selected HTML renderer, such as book/html.
 ///
 /// Pages are included only when their Markdown source exists and the matching
 /// HTML file is present in that renderer output. Unrendered chapters and
-/// shared source fragments are omitted. URLs in base_url are rooted at the
+/// shared source fragments are omitted. URLs in `base_url` are rooted at the
 /// hosted book directory, for example <https://john-cd.com/rust_howto/>.
 ///
 /// # Errors
@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn test_generate_sitemap_invalid_base_url() {
         let markdown_src_dir_path = PathBuf::from("non_existent_src");
-        let base_url = Url::parse("mailto:test@example.com").unwrap();
+        let base_url = Url::parse("mailto:test@example.com").expect("input should parse");
         let sitemap_dest_file_path = PathBuf::from("sitemap.xml");
 
         let result = generate_sitemap(
@@ -103,7 +103,7 @@ mod tests {
         assert!(result.is_err());
         assert!(
             result
-                .unwrap_err()
+                .expect_err("input should be rejected")
                 .to_string()
                 .contains("Invalid sitemap base URL")
         );

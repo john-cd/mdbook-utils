@@ -4,7 +4,7 @@
 
 use std::io::Write;
 
-use anyhow::Context;
+use anyhow::Context as _;
 use anyhow::Result;
 use enumflags2::BitFlags;
 use enumflags2::bitflags;
@@ -26,9 +26,9 @@ where
         .context("[write_reference_style_links_to] Failed to write links.")?;
 
     let link_flags = LinkWrite::ReferenceLink | LinkWrite::ReferenceDefinition;
-    for l in links.iter() {
+    for l in &links {
         write(l, &link_flags, link_writer)?;
-        writeln!(link_writer)?
+        writeln!(link_writer)?;
     }
     Ok(())
 }
@@ -57,9 +57,9 @@ where
         _ => LinkWrite::Autolink,
     }
     .into();
-    for l in links.iter() {
+    for l in &links {
         write(l, &link_flags, link_writer)?;
-        writeln!(link_writer)?
+        writeln!(link_writer)?;
     }
     Ok(())
 }
@@ -74,9 +74,9 @@ where
 
     let refdef_flags = (LinkWrite::ReferenceDefinition).into();
 
-    for l in links.iter() {
+    for l in &links {
         write(l, &refdef_flags, refdef_writer)?;
-        writeln!(refdef_writer)?
+        writeln!(refdef_writer)?;
     }
     Ok(())
 }
@@ -90,9 +90,9 @@ where
         .context("[write_duplicate_links_to] Failed to write duplicate links.")?;
 
     let link_flags = LinkWrite::ReferenceLink | LinkWrite::ReferenceDefinition;
-    for l in links.iter() {
+    for l in &links {
         write(l, &link_flags, link_writer)?;
-        writeln!(link_writer)?
+        writeln!(link_writer)?;
     }
     Ok(())
 }
@@ -149,7 +149,7 @@ where
 
     let link_flags = LinkWrite::LinkWithBadge.into();
     let refdef_flags = LinkWrite::ReferenceDefinition | LinkWrite::BadgeReferenceDefinition;
-    for l in links.iter() {
+    for l in &links {
         write(l, &link_flags, link_writer)?;
         write(l, &refdef_flags, refdef_writer)?;
     }

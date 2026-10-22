@@ -1,4 +1,4 @@
-//! Locate fenced Rust code blocks in Markdown with the CommonMark parser.
+//! Locate fenced Rust code blocks in Markdown with the `CommonMark` parser.
 //!
 //! Extraction and replacement both use this scanner, so they always agree on
 //! how many blocks a chapter has and on their order.
@@ -93,7 +93,7 @@ fn build_block(markdown: &str, range: Range<usize>, code: String) -> RustBlock {
     let indent = prefix
         .chars()
         .all(char::is_whitespace)
-        .then(|| prefix.to_string());
+        .then(|| prefix.to_owned());
 
     RustBlock {
         code,
