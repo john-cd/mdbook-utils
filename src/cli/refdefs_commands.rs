@@ -48,7 +48,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                 style(markdown_src_dir_path.display()).cyan(),
                 style(refdef_dest_path.display()).cyan()
             );
-            mdbook_utils::write_refdefs_to(markdown_src_dir_path, refdef_dest_path)
+            mdbook_utils::api::write_refdefs_to(markdown_src_dir_path, refdef_dest_path)
                 .context("[run] Failed to write reference definitions to a file.")?;
             println!("{}", style("Done.").green());
         }
@@ -75,7 +75,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                     style(markdown_src_dir_path.display()).cyan(),
                     style(refdef_dest_path.display()).cyan()
                 );
-                mdbook_utils::generate_badges(markdown_src_dir_path, refdef_dest_path)
+                mdbook_utils::api::generate_badges(markdown_src_dir_path, refdef_dest_path)
                     .context("[run] Failed to generate badges.")?;
                 println!("{}", style("Done.").green());
             }
@@ -92,7 +92,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
                     style(cargo_toml_dir_path.display()).cyan(),
                     style(markdown_src_dir_path.display()).cyan(),
                 );
-                mdbook_utils::generate_refdefs_to(
+                mdbook_utils::api::generate_refdefs_to(
                     cargo_toml_dir_path,
                     markdown_src_dir_path,
                     refdef_dest_file_path,

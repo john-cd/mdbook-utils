@@ -146,7 +146,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 style(categories_dest_path.display()).cyan(),
                 style(markdown_src_dir_path.display()).cyan(),
             );
-            mdbook_utils::generate_categories(markdown_src_dir_path, categories_dest_path)
+            mdbook_utils::api::generate_categories(markdown_src_dir_path, categories_dest_path)
                 .context("[run] Failed to generate categories.")?;
             println!("{}", style("Done.").green());
         }
@@ -158,7 +158,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 style(crates_dest_path.display()).cyan(),
                 style(markdown_src_dir_path.display()).cyan()
             );
-            mdbook_utils::generate_crates(markdown_src_dir_path, crates_dest_path)
+            mdbook_utils::api::generate_crates(markdown_src_dir_path, crates_dest_path)
                 .context("[run] Failed to generate crate index.")?;
             println!("{}", style("Done.").green());
         }
@@ -168,7 +168,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 "Identifying Markdown files in {} not in SUMMARY.md...",
                 style(markdown_src_dir_path.display()).cyan(),
             );
-            let missing = mdbook_utils::identify_files_not_in_summary(markdown_src_dir_path)
+            let missing = mdbook_utils::api::identify_files_not_in_summary(markdown_src_dir_path)
                 .context("[run] Failed to identify files not in SUMMARY.md.")?;
             if missing.is_empty() {
                 println!("{}", style("All files are in SUMMARY.md.").green());
@@ -187,9 +187,11 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 style(code_dir_path.display()).cyan(),
                 style(markdown_src_dir_path.display()).cyan(),
             );
-            let unused =
-                mdbook_utils::identify_unused_rs_examples(markdown_src_dir_path, code_dir_path)
-                    .context("[run] Failed to identify unused .rs examples.")?;
+            let unused = mdbook_utils::api::identify_unused_rs_examples(
+                markdown_src_dir_path,
+                code_dir_path,
+            )
+            .context("[run] Failed to identify unused .rs examples.")?;
             if unused.is_empty() {
                 println!("{}", style("All .rs files are used.").green());
             } else {

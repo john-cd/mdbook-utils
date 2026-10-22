@@ -251,6 +251,11 @@ fn replace_file(path: &Path, contents: &[u8]) -> Result<()> {
 ///
 /// code_dest_dir_path: path to the directory, where destination files
 /// will be created
+///
+/// # Errors
+///
+/// Returns an error if the Markdown source cannot be read or a code file
+/// cannot be created or written.
 pub fn extract_code_from_all_markdown_files_in<P1, P2>(
     markdown_src_dir_path: P1,
     code_dest_dir_path: P2,
@@ -327,6 +332,11 @@ where
 /// Markdown files
 ///
 /// code_dir_path: path to the folder containing the extracted Rust code
+///
+/// # Errors
+///
+/// Returns an error if the Markdown source or extracted code directory cannot
+/// be read, or a Markdown file cannot be written.
 pub fn remove_code_from_all_markdown_files_in<P1, P2>(
     markdown_src_dir_path: P1,
     code_dir_path: P2,

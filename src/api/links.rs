@@ -20,6 +20,11 @@ use crate::parser;
 /// src_dir_path: path to the source directory.
 ///
 /// dest_file_path: path to the file to create and write into.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
 pub fn write_inline_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -52,6 +57,11 @@ where
 /// src_dir_path: path to the source directory.
 ///
 /// dest_file_path: path to the file to create and write into.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
 pub fn write_all_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -79,6 +89,11 @@ where
 /// src_dir_path: path to the source directory.
 ///
 /// dest_file_path: path to the file to create and write into.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
 pub fn write_duplicate_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -111,6 +126,11 @@ where
 /// src_dir_path: path to the source directory.
 ///
 /// dest_file_path: path to the file to create and write into.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
 pub fn write_broken_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
