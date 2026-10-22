@@ -42,7 +42,7 @@ fn generate_refdefs_for_one_library(
     let mut buf = Vec::new();
 
     // [arrow-rs]: https://docs.rs/arrow/
-    let docs_rs_url = format!("https://docs.rs/{library_name}");
+    let docs_rs_url = format!("https://docs.rs/{package_name}");
     buf.push(
         crate::link::LinkBuilder::default()
             .set_label(library_name.to_owned().into())
@@ -51,7 +51,7 @@ fn generate_refdefs_for_one_library(
     );
 
     // [config-crate]: https://crates.io/crates/config/
-    let crates_io_url = format!("https://crates.io/crates/{library_name}");
+    let crates_io_url = format!("https://crates.io/crates/{package_name}");
     buf.push(
         crate::link::LinkBuilder::default()
             .set_label(format!("{library_name}-crate").into())
@@ -86,14 +86,17 @@ mod tests {
         );
         let got: Vec<_> = links
             .iter()
-            .map(|l| (l.label.as_deref().unwrap_or(""), l.get_url().to_string()))
+            .map(|l| (l.label.as_deref().unwrap_or(""), l.get_url().into_owned()))
             .collect();
         assert_eq!(
             got,
             [
-                ("md5", "https://docs.rs/md-5".to_string()),
-                ("md5-crate", "https://crates.io/crates/md-5".to_string()),
-                ("md5-github", "https://github.com/RustCrypto/hashes".to_string()),
+                ("md5", "https://docs.rs/md-5".to_owned()),
+                ("md5-crate", "https://crates.io/crates/md-5".to_owned()),
+                (
+                    "md5-github",
+                    "https://github.com/RustCrypto/hashes".to_owned()
+                ),
             ]
         );
     }

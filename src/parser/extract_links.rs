@@ -36,8 +36,8 @@ pub(crate) fn extract_reference_definitions(parser: &Parser<'_>) -> Vec<Link<'st
             LinkBuilder::from_type_url_title(
                 LinkType::Shortcut,
                 def.dest.to_string().into(),
-                def.title.as_deref().unwrap_or_default().to_string().into(),
-                label.to_string().into(),
+                def.title.as_deref().unwrap_or_default().to_owned().into(),
+                label.to_owned().into(),
             )
             .build()
         })

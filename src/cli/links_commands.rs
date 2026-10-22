@@ -2,7 +2,6 @@
 //!
 //! TODO Reviewed ??-??-2026
 
-use anyhow::Context as _;
 use anyhow::Result;
 use clap::Args;
 use clap::Subcommand;
@@ -11,8 +10,29 @@ use mdbook_utils::api::LinkFormat;
 
 use super::args::MarkdownSrcDirAndDestFileArgs;
 use super::config::Configuration;
-use super::log_command_outcome;
-use super::log_command_paths;
+use super::run_logged;
+
+/// Link syntax, as accepted on the command line.
+#[derive(clap::ValueEnum, Debug, Clone, Copy, Default)]
+pub(crate) enum LinkFormatArg {
+    /// Reference-style links with their reference definitions.
+    #[default]
+    Reference,
+    /// Inline links: `[text](url "title")`.
+    Inline,
+    /// Autolinks: `<url>`. Link text and title are dropped.
+    Autolink,
+}
+
+impl From<LinkFormatArg> for LinkFormat {
+    fn from(format: LinkFormatArg) -> Self {
+        match format {
+            LinkFormatArg::Reference => Self::Reference,
+            LinkFormatArg::Inline => Self::Inline,
+            LinkFormatArg::Autolink => Self::Autolink,
+        }
+    }
+}
 
 /// Arguments of `links write-inline`
 #[derive(Args, Debug)]
@@ -23,8 +43,8 @@ pub(crate) struct WriteInlineArgs {
     pub(crate) paths: MarkdownSrcDirAndDestFileArgs,
 
     /// Syntax used to write the external links found
-    #[arg(long = "link-format", value_enum, default_value_t = LinkFormat::Reference)]
-    pub(crate) link_format: LinkFormat,
+    #[arg(long = "link-format", value_enum, default_value_t = LinkFormatArg::Reference)]
+    pub(crate) link_format: LinkFormatArg,
 }
 
 /// Command-line subcommands to handle links
@@ -52,90 +72,88 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
         LinksSubCommand::WriteAll(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "all_links.md");
-            let paths = [
-                ("source", markdown_src_dir_path.as_path()),
-                ("destination", links_dest_path.as_path()),
-            ];
-            log_command_paths("links write-all", &paths);
-            println!(
-                "Parsing markdown files in {} and writing existing links to {}...",
-                style(markdown_src_dir_path.display()).cyan(),
-                style(links_dest_path.display()).cyan()
-            );
-            let result =
-                mdbook_utils::api::write_all_links(&markdown_src_dir_path, &links_dest_path)
-                    .context("[run] Failed to write links to a file.");
-            log_command_outcome("links write-all", &paths, &result);
-            result?;
-            println!("{}", style("Done.").green());
+            run_logged(
+                "links write-all",
+                &[
+                    ("source", markdown_src_dir_path.as_path()),
+                    ("destination", links_dest_path.as_path()),
+                ],
+                &format!(
+                    "Parsing markdown files in {} and writing existing links to {}...",
+                    style(markdown_src_dir_path.display()).cyan(),
+                    style(links_dest_path.display()).cyan()
+                ),
+                "[run] Failed to write links to a file.",
+                || mdbook_utils::api::write_all_links(&markdown_src_dir_path, &links_dest_path),
+            )?;
         }
         LinksSubCommand::WriteInline(args) => {
             let link_format = args.link_format;
             let args = args.paths;
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "inline_links.md");
-            let paths = [
-                ("source", markdown_src_dir_path.as_path()),
-                ("destination", links_dest_path.as_path()),
-            ];
-            log_command_paths("links write-inline", &paths);
-            println!(
-                "Parsing markdown files in {} and writing inline / auto links to {}...",
-                style(markdown_src_dir_path.display()).cyan(),
-                style(links_dest_path.display()).cyan()
-            );
-            let result = mdbook_utils::api::write_inline_links_with_format(
-                &markdown_src_dir_path,
-                &links_dest_path,
-                link_format,
-            )
-            .context("[run] Failed to write inline links to a file.");
-            log_command_outcome("links write-inline", &paths, &result);
-            result?;
-            println!("{}", style("Done.").green());
+            run_logged(
+                "links write-inline",
+                &[
+                    ("source", markdown_src_dir_path.as_path()),
+                    ("destination", links_dest_path.as_path()),
+                ],
+                &format!(
+                    "Parsing markdown files in {} and writing inline / auto links to {}...",
+                    style(markdown_src_dir_path.display()).cyan(),
+                    style(links_dest_path.display()).cyan()
+                ),
+                "[run] Failed to write inline links to a file.",
+                || {
+                    mdbook_utils::api::write_inline_links_with_format(
+                        &markdown_src_dir_path,
+                        &links_dest_path,
+                        link_format.into(),
+                    )
+                },
+            )?;
         }
         LinksSubCommand::DuplicateLinks(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "duplicate_links.md");
-            let paths = [
-                ("source", markdown_src_dir_path.as_path()),
-                ("destination", links_dest_path.as_path()),
-            ];
-            log_command_paths("links duplicate-links", &paths);
-            println!(
-                "Parsing markdown files in {} and writing duplicates links to {}...",
-                style(markdown_src_dir_path.display()).cyan(),
-                style(links_dest_path.display()).cyan()
-            );
-            let result =
-                mdbook_utils::api::write_duplicate_links(&markdown_src_dir_path, &links_dest_path)
-                    .context("[run] Failed to write duplicate links to a file.");
-            log_command_outcome("links duplicate-links", &paths, &result);
-            result?;
-            println!("{}", style("Done.").green());
+            run_logged(
+                "links duplicate-links",
+                &[
+                    ("source", markdown_src_dir_path.as_path()),
+                    ("destination", links_dest_path.as_path()),
+                ],
+                &format!(
+                    "Parsing markdown files in {} and writing duplicates links to {}...",
+                    style(markdown_src_dir_path.display()).cyan(),
+                    style(links_dest_path.display()).cyan()
+                ),
+                "[run] Failed to write duplicate links to a file.",
+                || {
+                    mdbook_utils::api::write_duplicate_links(
+                        &markdown_src_dir_path,
+                        &links_dest_path,
+                    )
+                },
+            )?;
         }
         LinksSubCommand::BrokenLinks(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "broken_links.md");
-            let paths = [
-                ("source", markdown_src_dir_path.as_path()),
-                ("destination", links_dest_path.as_path()),
-            ];
-            log_command_paths("links broken-links", &paths);
-            println!(
-                "Parsing markdown files in {} and writing broken links to {}...",
-                style(markdown_src_dir_path.display()).cyan(),
-                style(links_dest_path.display()).cyan()
-            );
-            let result =
-                mdbook_utils::api::write_broken_links(&markdown_src_dir_path, &links_dest_path)
-                    .context("[run] Failed to write broken links to a file.");
-            log_command_outcome("links broken-links", &paths, &result);
-            result?;
-            println!("{}", style("Done.").green());
-        } /* _ => {
-           *     println!("NOT IMPLEMENTED");
-           * } */
+            run_logged(
+                "links broken-links",
+                &[
+                    ("source", markdown_src_dir_path.as_path()),
+                    ("destination", links_dest_path.as_path()),
+                ],
+                &format!(
+                    "Parsing markdown files in {} and writing broken links to {}...",
+                    style(markdown_src_dir_path.display()).cyan(),
+                    style(links_dest_path.display()).cyan()
+                ),
+                "[run] Failed to write broken links to a file.",
+                || mdbook_utils::api::write_broken_links(&markdown_src_dir_path, &links_dest_path),
+            )?;
+        }
     }
     Ok(())
 }

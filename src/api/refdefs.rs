@@ -14,18 +14,16 @@ use crate::parser;
 use crate::write_from_parser;
 
 /// Visual style for generated GitHub badges.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, clap::ValueEnum)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum BadgeStyle {
     /// The standard flat style used by Shields.io by default.
     #[default]
     Flat,
     /// A flat style with square corners.
-    #[value(name = "flat-square")]
     FlatSquare,
     /// A style with a glossy appearance.
     Plastic,
     /// A wider style with uppercase text.
-    #[value(name = "for-the-badge")]
     ForTheBadge,
     /// The social style with a larger logo.
     Social,
