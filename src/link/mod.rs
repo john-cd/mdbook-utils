@@ -3,9 +3,11 @@
 //! Rules to create a reference label and/or a badge URL
 //! from a link URL
 mod link_and_linkbuilder;
+mod link_format;
 mod rules;
 mod write_to_file;
 
 pub(crate) use link_and_linkbuilder::*;
+pub use link_format::LinkFormat;
 pub(crate) use rules::*;
 pub(crate) use write_to_file::*;

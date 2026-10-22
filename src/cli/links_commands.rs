@@ -4,13 +4,28 @@
 
 use anyhow::Context;
 use anyhow::Result;
+use clap::Args;
 use clap::Subcommand;
 use console::style;
+use mdbook_utils::api::LinkFormat;
 
 use super::args::*;
 use super::config::Configuration;
 use super::log_command_outcome;
 use super::log_command_paths;
+
+/// Arguments of `links write-inline`
+#[derive(Args, Debug)]
+#[command(flatten_help = true)]
+pub(crate) struct WriteInlineArgs {
+    /// Source and destination
+    #[command(flatten)]
+    pub(crate) paths: MarkdownSrcDirAndDestFileArgs,
+
+    /// Syntax used to write the external links found
+    #[arg(long = "link-format", value_enum, default_value_t = LinkFormat::Reference)]
+    pub(crate) link_format: LinkFormat,
+}
 
 /// Command-line subcommands to handle links
 #[derive(Subcommand, Debug)]
@@ -20,7 +35,7 @@ pub(crate) enum LinksSubCommand {
 
     /// Write all existing inline / autolinks (i.e., not
     /// written as reference-style links) to a Markdown file
-    WriteInline(MarkdownSrcDirAndDestFileArgs),
+    WriteInline(WriteInlineArgs),
 
     /// Identify duplicate links / labels and write to a Markdown file
     DuplicateLinks(MarkdownSrcDirAndDestFileArgs),
@@ -54,6 +69,8 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
             println!("{}", style("Done.").green());
         }
         LinksSubCommand::WriteInline(args) => {
+            let link_format = args.link_format;
+            let args = args.paths;
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
             let links_dest_path = config.dest_file_path(args.dest, "inline_links.md");
             let paths = [
@@ -66,9 +83,12 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
                 style(markdown_src_dir_path.display()).cyan(),
                 style(links_dest_path.display()).cyan()
             );
-            let result =
-                mdbook_utils::api::write_inline_links(&markdown_src_dir_path, &links_dest_path)
-                    .context("[run] Failed to write inline links to a file.");
+            let result = mdbook_utils::api::write_inline_links_with_format(
+                &markdown_src_dir_path,
+                &links_dest_path,
+                link_format,
+            )
+            .context("[run] Failed to write inline links to a file.");
             log_command_outcome("links write-inline", &paths, &result);
             result?;
             println!("{}", style("Done.").green());

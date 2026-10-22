@@ -20,6 +20,12 @@ Options:
   -h, --help  Print help
 ```
 
+`links write-inline` writes only inline links and autolinks that point to
+external `http` / `https` sites; relative paths, fragments, other schemes, and
+links inside code are excluded. Use `--link-format <reference|inline|autolink>`
+(default `reference`) to choose the output syntax. The `autolink` format drops
+link text and titles.
+
 Link extraction follows CommonMark link syntax as implemented by
 `pulldown-cmark`, including inline links, reference links, images, and URI
 autolinks written in angle brackets. Plain URL text is not treated as an

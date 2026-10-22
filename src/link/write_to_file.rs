@@ -8,6 +8,7 @@ use enumflags2::BitFlags;
 use enumflags2::bitflags;
 
 use super::Link;
+use super::LinkFormat;
 
 // PUBLIC FUNCTIONS
 
@@ -23,6 +24,37 @@ where
         .context("[write_reference_style_links_to] Failed to write links.")?;
 
     let link_flags = LinkWrite::ReferenceLink | LinkWrite::ReferenceDefinition;
+    for l in links.iter() {
+        write(l, &link_flags, link_writer)?;
+        writeln!(link_writer)?
+    }
+    Ok(())
+}
+
+/// Write links to a writer (e.g. file) in the requested [`LinkFormat`].
+///
+/// Reference format writes each reference link followed by its definition,
+/// inline format writes `[text](url "title")`, and autolink format writes
+/// `<url>`.
+pub(crate) fn write_links_in_format_to<W>(
+    links: Vec<Link<'_>>,
+    format: LinkFormat,
+    link_writer: &mut W,
+) -> Result<()>
+where
+    W: Write,
+{
+    if format == LinkFormat::Reference {
+        return write_reference_style_links_to(links, link_writer);
+    }
+    writeln!(link_writer, "# Links\n")
+        .context("[write_links_in_format_to] Failed to write links.")?;
+
+    let link_flags = match format {
+        LinkFormat::Inline => LinkWrite::InlineLink,
+        _ => LinkWrite::Autolink,
+    }
+    .into();
     for l in links.iter() {
         write(l, &link_flags, link_writer)?;
         writeln!(link_writer)?
@@ -156,6 +188,7 @@ enum LinkWrite {
     ReferenceDefinition = 4,
     LinkWithBadge = 8,
     BadgeReferenceDefinition = 16,
+    Autolink = 32,
 }
 
 /// Write a link to a writer in the format specified by flags.
@@ -169,6 +202,9 @@ enum LinkWrite {
 fn write<W: Write>(l: &Link<'_>, flags: &BitFlags<LinkWrite>, w: &mut W) -> Result<()> {
     if flags.contains(LinkWrite::InlineLink) {
         writeln!(w, "{}", l.to_inline_link())?;
+    }
+    if flags.contains(LinkWrite::Autolink) {
+        writeln!(w, "{}", l.to_autolink())?;
     }
     if flags.contains(LinkWrite::ReferenceLink) {
         writeln!(w, "{}", l.to_reference_link())?;
