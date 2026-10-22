@@ -1,5 +1,6 @@
-// TODO Reviewed ??-??-2026
 //! Create reference definitions from dependencies.
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;

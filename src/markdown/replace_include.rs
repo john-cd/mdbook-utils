@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Replace {{#include file.md}} by the file contents
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -15,10 +17,12 @@ use tracing::info;
 static INSERT_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"\{\{#include (?<filepath>\S+?\.md)(?<selector>:[^}\s]+)?\}\}").unwrap()
 });
+
 /// Matches the `ANCHOR: name` line that opens a named section of an included
 /// file.
 static ANCHOR_START_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"ANCHOR:\s*(?<name>[\w_-]+)").unwrap());
+
 /// Matches the `ANCHOR_END: name` line that closes a named section of an
 /// included file.
 static ANCHOR_END_REGEX: Lazy<Regex> =

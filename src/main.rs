@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Command-line interface.
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::env;
 
 use anyhow::Context;
@@ -10,6 +12,7 @@ use tracing_subscriber::EnvFilter;
 
 use crate::cli::Cli;
 use crate::cli::Command;
+
 mod cli;
 
 /// Entrypoint of the command-line interface.

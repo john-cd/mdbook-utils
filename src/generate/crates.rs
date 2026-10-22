@@ -1,6 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Generate index files for crates and categories
 //! in Markdown format.
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::path::Path;
 

@@ -1,9 +1,10 @@
-// TODO Reviewed ??-??-2026
 //! Write links to sitemap.xml
 //!
 //! Inspired by <https://github.com/rxdn/mdbook-sitemap-generator/tree/master>
 //! Consider using <https://docs.rs/sitewriter/1.0.4/sitewriter/>.
 //! or <https://crates.io/crates/sitemap> instead.
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::io::Write;
 

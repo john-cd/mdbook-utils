@@ -1,5 +1,7 @@
-// TODO Reviewed ??-??-2026
 //! Public operations that generate reference definitions and GitHub badges.
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::path::Path;
 
 use anyhow::Result;

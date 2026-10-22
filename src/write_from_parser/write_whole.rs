@@ -1,6 +1,8 @@
-// TODO Reviewed ??-??-2026
 //! Functions that read from a Markdown parser and write the whole
 //! content to various outputs / formats
+//!
+//! TODO Reviewed ??-??-2026
+
 use std::io::Write;
 
 use anyhow::Result;

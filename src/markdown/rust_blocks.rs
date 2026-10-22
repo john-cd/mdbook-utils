@@ -1,8 +1,9 @@
-// TODO Reviewed ??-??-2026
 //! Locate fenced Rust code blocks in Markdown with the CommonMark parser.
 //!
 //! Extraction and replacement both use this scanner, so they always agree on
 //! how many blocks a chapter has and on their order.
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::ops::Range;
 

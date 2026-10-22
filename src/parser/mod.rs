@@ -1,7 +1,9 @@
-// TODO Reviewed ??-??-2026
 //! Functions that create parsers, and
 //! extract reference definitions and links
 //! from said parser
+//!
+//! TODO Reviewed ??-??-2026
+
 mod extract_links;
 
 pub(crate) use extract_links::*;
