@@ -262,6 +262,7 @@ mod tests {
         COMPILED_RULES.get(name).unwrap()
     }
 
+    /// Matches a crates.io category URL and captures its name.
     #[test]
     fn test_category_rule() {
         let re = get_re("category");
@@ -273,6 +274,7 @@ mod tests {
         }
     }
 
+    /// Matches the crates.io home and crates pages.
     #[test]
     fn test_crates_io_rule() {
         let re = get_re("crates.io");
@@ -280,6 +282,7 @@ mod tests {
         assert!(re.is_match("https://crates.io/crates"));
     }
 
+    /// Matches a crates.io crate URL and captures the crate name.
     #[test]
     fn test_crate_rule() {
         let re = get_re("crate");
@@ -291,12 +294,14 @@ mod tests {
         }
     }
 
+    /// Matches the docs.rs home page.
     #[test]
     fn test_docs_rs_rule() {
         let re = get_re("docs.rs");
         assert!(re.is_match("https://docs.rs/"));
     }
 
+    /// Matches a docs.rs item page.
     #[test]
     fn test_documentation_rule() {
         let re = get_re("documentation");
@@ -316,12 +321,14 @@ mod tests {
         }
     }
 
+    /// Matches the standard library documentation home.
     #[test]
     fn test_std_rule() {
         let re = get_re("std");
         assert!(re.is_match("https://doc.rust-lang.org/std/"));
     }
 
+    /// Matches a standard library item page and captures its path.
     #[test]
     fn test_std_item_documentation_rule() {
         let re = get_re("std item documentation");
@@ -343,12 +350,14 @@ mod tests {
         assert_eq!(&caps["rest"], "cell/struct.OnceCell");
     }
 
+    /// Matches the lib.rs home page.
     #[test]
     fn test_lib_rs_rule() {
         let re = get_re("lib.rs");
         assert!(re.is_match("https://lib.rs/"));
     }
 
+    /// Matches a crate page on lib.rs.
     #[test]
     fn test_crate_on_lib_rs_rule() {
         let re = get_re("crate on lib.rs");
@@ -358,6 +367,7 @@ mod tests {
         assert_eq!(&caps["crate"], "sqlx");
     }
 
+    /// Matches a GitHub wiki page and captures owner and repository.
     #[test]
     fn test_github_repo_wiki_rule() {
         let re = get_re("github repo wiki");
@@ -368,6 +378,7 @@ mod tests {
         assert_eq!(&caps["repo"], "cross");
     }
 
+    /// Matches a file in a john-cd repository.
     #[test]
     fn test_github_john_cd_rule() {
         let re = get_re("github.com/john-cd");
@@ -377,6 +388,7 @@ mod tests {
         assert_eq!(&caps["last"], "CONTRIBUTING.md");
     }
 
+    /// Matches a GitHub repository URL.
     #[test]
     fn test_github_repo_rule() {
         let re = get_re("github repo");
@@ -397,6 +409,7 @@ mod tests {
         }
     }
 
+    /// Matches a GitHub Pages site.
     #[test]
     fn test_github_pages_rule() {
         let re = get_re("github pages");
@@ -409,12 +422,14 @@ mod tests {
         }
     }
 
+    /// Matches the Rust Book home page.
     #[test]
     fn test_rust_book_rule() {
         let re = get_re("rust book");
         assert!(re.is_match("https://doc.rust-lang.org/book/"));
     }
 
+    /// Matches a Rust Book chapter and captures its name.
     #[test]
     fn test_rust_book_item_rule() {
         let re = get_re("rust book item");
@@ -424,6 +439,7 @@ mod tests {
         assert_eq!(&caps["item"], "box");
     }
 
+    /// Matches a Rust Reference page.
     #[test]
     fn test_rust_reference_rule() {
         let re = get_re("rust reference");
@@ -440,12 +456,14 @@ mod tests {
         assert_eq!(&caps["item"], "traits");
     }
 
+    /// Matches the Rust by Example home page.
     #[test]
     fn test_rust_by_example_book_rule() {
         let re = get_re("rust by example book");
         assert!(re.is_match("https://doc.rust-lang.org/rust-by-example/"));
     }
 
+    /// Matches a Rust by Example chapter.
     #[test]
     fn test_rust_by_example_chapter_rule() {
         let re = get_re("rust by example chapter");
@@ -455,6 +473,7 @@ mod tests {
         assert_eq!(&caps["last"], "visibility");
     }
 
+    /// Matches a Cargo Book page.
     #[test]
     fn test_cargo_book_rule() {
         let re = get_re("cargo book");
@@ -464,6 +483,7 @@ mod tests {
         assert_eq!(&caps["rest"], "index");
     }
 
+    /// Matches a bare website domain.
     #[test]
     fn test_website_rule() {
         let re = get_re("website");
@@ -506,6 +526,7 @@ mod tests {
         }
     }
 
+    /// Matches a page on an arbitrary website.
     #[test]
     fn test_website_page_rule() {
         let re = get_re("website page");

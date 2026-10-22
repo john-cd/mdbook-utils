@@ -92,6 +92,7 @@ mod tests {
 
     use super::*;
 
+    /// Accepts paths under the base directory and rejects escapes.
     #[test]
     fn test_is_path_within() -> Result<()> {
         let dir = tempdir()?;

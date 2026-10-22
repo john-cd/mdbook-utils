@@ -181,6 +181,7 @@ mod tests {
 
     use super::*;
 
+    /// Falls back to `src` and `book` when `book.toml` sets nothing.
     #[test]
     fn test_try_parse_book_toml_default() -> Result<()> {
         let dir = tempdir()?;
@@ -194,6 +195,7 @@ mod tests {
         Ok(())
     }
 
+    /// Honors custom source and build directories.
     #[test]
     fn test_try_parse_book_toml_custom_dirs() -> Result<()> {
         let dir = tempdir()?;
@@ -252,6 +254,7 @@ build-dir = "my_book"
         Ok(())
     }
 
+    /// Uses the Markdown renderer's directory when it is the only output.
     #[test]
     fn test_try_parse_book_toml_only_markdown_output() -> Result<()> {
         let dir = tempdir()?;
@@ -268,6 +271,7 @@ build-dir = "my_book"
         Ok(())
     }
 
+    /// Ignores renderers that produce neither HTML nor Markdown.
     #[test]
     fn test_try_parse_book_toml_only_other_output() -> Result<()> {
         let dir = tempdir()?;

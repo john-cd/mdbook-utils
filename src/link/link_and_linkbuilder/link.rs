@@ -248,6 +248,7 @@ mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 
+    /// Links with the same label are equal and hash alike.
     #[test]
     fn test_link_equality_and_hash() {
         use std::collections::hash_map::DefaultHasher;
@@ -290,6 +291,7 @@ mod tests {
         assert_eq!(hash1, hash2);
     }
 
+    /// Links sort by label.
     #[test]
     fn test_link_ordering() {
         let link_a = LinkBuilder::from_type_url_title(
@@ -318,6 +320,7 @@ mod tests {
         assert!(link_a < link_a_url2);
     }
 
+    /// Renders a link as a reference definition.
     #[test]
     fn test_to_reference_definition() {
         let link = LinkBuilder::from_type_url_title(

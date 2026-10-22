@@ -86,6 +86,7 @@ mod tests {
 
     use super::*;
 
+    /// Rejects a base URL that cannot be a base, such as `mailto:`.
     #[test]
     fn test_generate_sitemap_invalid_base_url() {
         let markdown_src_dir_path = PathBuf::from("non_existent_src");
@@ -108,6 +109,8 @@ mod tests {
         );
     }
 
+    /// Reads pages from the configured renderer's output rather than the
+    /// default `html` directory.
     #[test]
     fn sitemap_uses_the_selected_custom_renderer_directory() -> Result<()> {
         let temp = tempdir()?;

@@ -134,6 +134,7 @@ mod tests {
 
     use super::*;
 
+    /// Lets clap check the command definitions for mistakes.
     #[test]
     fn verify_cli() {
         Cli::command().debug_assert();

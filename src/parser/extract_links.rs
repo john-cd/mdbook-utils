@@ -186,6 +186,7 @@ mod tests {
 
     use super::*;
 
+    /// Extracts a link with a title.
     #[test]
     fn test_extract_links_simple() {
         let markdown = "[text](url \"title\")";
@@ -196,6 +197,7 @@ mod tests {
         assert_eq!(link.get_url(), "url");
     }
 
+    /// Extracts an image nested in a link.
     #[test]
     fn test_extract_links_with_image() {
         let markdown = "[![alt](img_url)](url)";
@@ -207,6 +209,7 @@ mod tests {
         // image alt text is not directly exposed in Link yet via getter
     }
 
+    /// Keeps bold and code inside link text.
     #[test]
     fn test_extract_links_with_nested_formatting() {
         let markdown = "[**bold text** and `code` in link](url \"title\")";
@@ -221,6 +224,7 @@ mod tests {
         );
     }
 
+    /// Keeps formatting inside the alt text of an image link.
     #[test]
     fn test_extract_links_with_image_and_nested_formatting() {
         let markdown = "[![**badge** alt](badge_url)](link_url)";
@@ -232,6 +236,7 @@ mod tests {
         assert_eq!(link.to_link_with_badge(), "[![badge alt][badge alt]][]");
     }
 
+    /// Handles several links, images and nested brackets in one document.
     #[test]
     fn test_extract_links_complex() {
         let markdown = "[`code`](url) [![`image_code`](img_url)](url) [[link_in_link](url2)](url) [![[link_in_img](url2)](img_url)](url) [foo **bold**](url)";
