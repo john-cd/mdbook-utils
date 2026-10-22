@@ -206,6 +206,7 @@ mod tests {
 
     use super::*;
 
+    /// Reports a reference link that has no definition.
     #[test]
     fn test_write_broken_links() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;
@@ -311,6 +312,7 @@ mod tests {
         Ok(())
     }
 
+    /// Reports URLs that appear in several links.
     #[test]
     fn test_write_duplicate_links() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;

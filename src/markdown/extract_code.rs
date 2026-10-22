@@ -444,6 +444,8 @@ mod tests {
         content
     }
 
+    /// Chapters with the same file name extract to separate files, and a second
+    /// run changes nothing.
     #[test]
     fn extracts_same_basename_chapters_without_collisions_and_is_repeatable() -> Result<()> {
         let dir = tempdir()?;
@@ -478,6 +480,8 @@ mod tests {
         Ok(())
     }
 
+    /// An existing conflicting output file aborts the run before any chapter is
+    /// written.
     #[test]
     fn rejects_existing_output_conflicts_before_writing_other_chapters() -> Result<()> {
         let dir = tempdir()?;
@@ -510,6 +514,7 @@ mod tests {
         Ok(())
     }
 
+    /// Replacement points each block at the file extraction would write.
     #[test]
     fn replacement_uses_the_same_per_chapter_mapping() -> Result<()> {
         let dir = tempdir()?;

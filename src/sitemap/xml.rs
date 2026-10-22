@@ -56,6 +56,7 @@ mod tests {
 
     use super::*;
 
+    /// Escapes XML special characters in URLs.
     #[test]
     fn test_write_xml_escapes_url() {
         let links = vec!["http://example.com/test?a=1&b=2<script>alert(1)</script>'\"".to_string()];
