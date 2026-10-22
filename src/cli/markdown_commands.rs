@@ -79,7 +79,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             ];
             log_command_paths("markdown replace-code-examples-by-includes", &paths);
             println!(
-                "About to remove Rust code examples from Markdown files in {}, replacing them with {{#include ... }} statements pointing to code files in {}...",
+                "About to remove Rust code examples from Markdown files in {}, replacing them with {{{{#include ... }}}} statements pointing to code files in {}...",
                 style(markdown_drafts_dir_path.display()).cyan(),
                 style(code_dir_path.display()).cyan()
             );
@@ -114,7 +114,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             let paths = [("markdown_directory", markdown_src_dir_path.as_path())];
             log_command_paths("markdown replace-includes-by-contents", &paths);
             println!(
-                "About to parse Markdown files in {} and replace any {{#include <file>.md}} statements by the corresponding file contents (excluding includes of *refs.md files)...",
+                "About to parse Markdown files in {} and replace any {{{{#include <file>.md}}}} statements by the corresponding file contents (excluding includes of *refs.md files)...",
                 style(markdown_src_dir_path.display()).cyan()
             );
             let confirmation = config.skip_confirm()
@@ -144,7 +144,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
             let paths = [("markdown_directory", book_markdown_build_dir_path.as_path())];
             log_command_paths("markdown remove-includes", &paths);
             println!(
-                "About to parse Markdown files in {} and remove any left-over {{#include ...}} statements...",
+                "About to parse Markdown files in {} and remove any left-over {{{{#include ...}}}} statements...",
                 style(book_markdown_build_dir_path.display()).cyan()
             );
             let confirmation = config.skip_confirm()
