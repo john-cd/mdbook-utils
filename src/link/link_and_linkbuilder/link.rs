@@ -111,7 +111,7 @@ impl<'a> Link<'a> {
     /// Return a Markdown inline link:
     /// [text](url) or [text](url "title")
     pub(crate) fn to_inline_link(&self) -> Cow<'_, str> {
-        format!("[{}]( {} )", self.get_text(), self.get_url_and_title()).into()
+        format!("[{}]({})", self.get_text(), self.get_url_and_title()).into()
     }
 
     /// Return a Markdown autolink: \<url\>

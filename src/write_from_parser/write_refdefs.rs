@@ -20,7 +20,7 @@ where
 
     for (s, linkdef) in sorted_linkdefs {
         if let Some(t) = &linkdef.title {
-            writeln!(w, "[{s}]: {} \"{t:?}\"", linkdef.dest)?;
+            writeln!(w, "[{s}]: {} \"{}\"", linkdef.dest, t.replace('"', "\\\""))?;
         } else {
             writeln!(w, "[{s}]: {}", linkdef.dest)?;
         }
@@ -30,9 +30,20 @@ where
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
+    use crate::parser::get_parser;
 
-    // #[test]
-    // fn test() {
-    // }
+    /// Titles are written as plain quoted strings, with quotes escaped.
+    #[test]
+    fn writes_titles_without_debug_formatting() -> Result<()> {
+        let md = "[a]: http://x.com \"My Title\"\n[b]: http://y.com\n";
+        let mut parser = get_parser(md);
+        let mut out = Vec::new();
+        write_refdefs_to(&mut parser, &mut out)?;
+        assert_eq!(
+            String::from_utf8(out)?,
+            "[a]: http://x.com \"My Title\"\n[b]: http://y.com\n"
+        );
+        Ok(())
+    }
 }

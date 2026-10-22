@@ -4,8 +4,9 @@
 use std::path::Path;
 use std::path::PathBuf;
 
+use anyhow::Context;
 use anyhow::Result;
-use tracing::warn;
+use tracing::debug;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
 
@@ -35,23 +36,23 @@ where
         // but never the root itself (it may legitimately be e.g. `.book`)
         .filter_entry(|e| e.depth() == 0 || !is_hidden(e));
 
-    for entry in walker
-        // Yields only the values for which the supplied closure returns Some(value)
-        // Ignores WalkDir errors
-        .filter_map(|res| res.ok())
-        .filter(|de| de.file_type().is_file())
-    {
+    for entry in walker {
+        let entry =
+            entry.context("Failed to read a directory entry while looking for Markdown files")?;
+        if !entry.file_type().is_file() {
+            continue;
+        }
         match entry.path().extension() {
             Some(extension) => {
                 if extension == "md" {
                     // debug: println!("{}", entry.path().display());
                     paths.push(entry.into_path());
                 } else {
-                    warn!("Not a Markdown file: {}", entry.path().display());
+                    debug!("Not a Markdown file: {}", entry.path().display());
                 }
             }
             None => {
-                warn!("Could not extract extension for {}", entry.path().display());
+                debug!("Could not extract extension for {}", entry.path().display());
             }
         }
     }

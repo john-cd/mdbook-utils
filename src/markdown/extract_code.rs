@@ -15,9 +15,7 @@ use regex::Regex;
 use tempfile::NamedTempFile;
 use tracing::info;
 
-/// Embedded Rust code extraction from Markdown
-static EXTRACT_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?s)```rust.*?\n(?<code>.*?)```").unwrap());
+use super::rust_blocks::find_rust_blocks;
 
 /// Regex to match hidden lines in Rust code blocks.
 ///
@@ -28,20 +26,10 @@ static EXTRACT_REGEX: Lazy<Regex> =
 /// files.
 static REG: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?m)^# (?<rest>.*)$").unwrap());
 
-/// Regex to match and capture entire Rust code blocks, including their
-/// boundaries and content.
-///
-/// Uses the `(?s)` (DOTALL) flag so that `.` matches newlines, allowing the
-/// pattern to span multiple lines. It captures three named groups:
-/// - `first`: the opening fence line (e.g. `` ```rust ``) up to and including
-///   the newline.
-/// - `code`: the body of the code block.
-/// - `last`: the closing `` ``` `` fence.
-///
-/// This is used to locate complete code blocks when replacing inline code with
-/// `{{#include ...}}` directives.
-static REG2: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?s)(?<first>```rust.*?\n)(?<code>.*?\n)(?<last>```)").unwrap());
+/// Strip the mdBook hidden-line marker (`# `) so the code compiles as a file.
+fn hidden_lines_removed(code: &str) -> String {
+    REG.replace_all(code, "$rest").into_owned()
+}
 
 /// A file to be written, planned before any write so that collisions are
 /// detected first.
@@ -236,26 +224,6 @@ fn write_generated_file(path: &Path, contents: &[u8]) -> Result<()> {
     }
 }
 
-/// Replace an existing file after its complete new contents have been staged.
-fn replace_file(path: &Path, contents: &[u8]) -> Result<()> {
-    let parent = path
-        .parent()
-        .context("Expected source file parent directory")?;
-    let mut staged = NamedTempFile::new_in(parent)
-        .with_context(|| format!("Failed to stage replacement for {}", path.display()))?;
-    staged
-        .write_all(contents)
-        .with_context(|| format!("Failed to write staged replacement for {}", path.display()))?;
-    staged
-        .flush()
-        .with_context(|| format!("Failed to flush staged replacement for {}", path.display()))?;
-    staged
-        .persist(path)
-        .map(|_| ())
-        .map_err(|error| error.error)
-        .with_context(|| format!("Failed to replace {}", path.display()))
-}
-
 /// Extract code examples from all Markdown files within a source
 /// directory and write them to separate files.
 ///
@@ -299,11 +267,11 @@ where
             let buf = fs::read_to_string(&markdown_file).with_context(|| {
                 format!("Failed to read Markdown file {}", markdown_file.display())
             })?;
-            EXTRACT_REGEX
-                .captures_iter(&buf)
+            find_rust_blocks(&buf)
+                .into_iter()
                 .enumerate()
-                .map(|(number, captures)| {
-                    let code = REG.replace_all(&captures[1], "$rest");
+                .map(|(number, block)| {
+                    let code = hidden_lines_removed(&block.code);
                     let output_path =
                         code_block_path(&markdown_root, &markdown_file, &code_dest_root, number)?;
                     crate::fs::is_path_within(&code_dest_root, &output_path).with_context(
@@ -317,7 +285,7 @@ where
                     info!(" {number}: {output_path:?}\n");
                     Ok(PlannedFile {
                         path: output_path,
-                        contents: code.as_bytes().to_vec(),
+                        contents: code.into_bytes(),
                     })
                 })
                 .collect()
@@ -380,12 +348,12 @@ where
             let mut last_match = 0;
             let mut counter = 0;
 
-            for captures in REG2.captures_iter(&buf) {
-                let matched = captures.get(0).context("Missing Rust code block match")?;
-                new_txt.push_str(&buf[last_match..matched.start()]);
-
-                let code_path =
-                    code_block_path(&markdown_root, &markdown_file, &code_root, counter)?;
+            for (number, block) in find_rust_blocks(&buf).into_iter().enumerate() {
+                // A previous run already replaced this block by an include.
+                if block.code.trim_start().starts_with("{{#include") {
+                    continue;
+                }
+                let code_path = code_block_path(&markdown_root, &markdown_file, &code_root, number)?;
                 let safe_code_path = crate::fs::is_path_within(&code_root, &code_path)
                     .with_context(|| {
                         format!(
@@ -402,6 +370,22 @@ where
                         canonical_code_path.display()
                     );
                 }
+                // Never replace a block with an include of code that no
+                // longer matches it.
+                let extracted = fs::read_to_string(&canonical_code_path).with_context(|| {
+                    format!("Failed to read {}", canonical_code_path.display())
+                })?;
+                if extracted != hidden_lines_removed(&block.code) {
+                    bail!(
+                        "{} is out of date with code block {number} of {}; run extract-code-examples again",
+                        canonical_code_path.display(),
+                        markdown_file.display()
+                    );
+                }
+                // Blocks that cannot be rewritten safely stay in place.
+                let (Some(indent), Some(close_fence)) = (&block.indent, &block.close_fence) else {
+                    continue;
+                };
                 let source_dir = markdown_file
                     .parent()
                     .context("Expected Markdown file parent directory")?;
@@ -410,17 +394,13 @@ where
                     .to_str()
                     .context("Include path contains non-UTF-8 characters")?
                     .replace('\\', "/");
-                let first = captures
-                    .name("first")
-                    .context("Missing Rust code fence")?
-                    .as_str();
-                let last = captures
-                    .name("last")
-                    .context("Missing closing code fence")?
-                    .as_str();
-                new_txt.push_str(&format!("{first}{{{{#include {include_path}}}}}\n{last}"));
-
-                last_match = matched.end();
+                new_txt.push_str(&buf[last_match..block.range.start]);
+                new_txt.push_str(&format!(
+                    "{}\n{indent}{{{{#include {include_path}}}}}\n{indent}{}",
+                    &buf[block.open_fence.clone()],
+                    &buf[close_fence.clone()],
+                ));
+                last_match = block.range.end;
                 counter += 1;
             }
 
@@ -438,7 +418,7 @@ where
     let mut planned: Vec<PlannedFile> = planned?.into_iter().flatten().collect();
     planned.sort_by(|left, right| left.path.cmp(&right.path));
     for source in planned {
-        replace_file(&source.path, &source.contents)?;
+        crate::fs::write_atomically(&source.path, &source.contents)?;
     }
     Ok(())
 }
@@ -546,6 +526,71 @@ mod tests {
             fs::read_to_string(code_dir.join("a/index.md.d/block-000.rs"))?,
             "fn main() {}\n"
         );
+        Ok(())
+    }
+
+    /// Writes a chapter, extracts its blocks, and replaces them by includes.
+    fn round_trip(markdown: &str) -> Result<(String, std::path::PathBuf)> {
+        let dir = tempdir()?;
+        let src_dir = dir.keep().join("src");
+        let code_dir = src_dir.join("code");
+        fs::create_dir_all(&src_dir)?;
+        let chapter = src_dir.join("ch.md");
+        fs::write(&chapter, markdown)?;
+        extract_code_from_all_markdown_files_in(&src_dir, &code_dir)?;
+        remove_code_from_all_markdown_files_in(&src_dir, &code_dir)?;
+        Ok((fs::read_to_string(&chapter)?, code_dir))
+    }
+
+    /// An empty block must not swallow the text and blocks that follow it.
+    #[test]
+    fn empty_block_does_not_corrupt_following_content() -> Result<()> {
+        let (updated, code_dir) = round_trip(
+            "# T\n\n```rust\n```\n\ntext\n\n```rust\n# use std::fmt;\nfn main() {}\n```\n",
+        )?;
+        assert_eq!(
+            updated,
+            "# T\n\n```rust\n{{#include code/ch.md.d/block-000.rs}}\n```\n\ntext\n\n```rust\n{{#include code/ch.md.d/block-001.rs}}\n```\n"
+        );
+        assert_eq!(
+            fs::read_to_string(code_dir.join("ch.md.d/block-001.rs"))?,
+            "use std::fmt;\nfn main() {}\n"
+        );
+        Ok(())
+    }
+
+    /// Tilde fences, attributes and indented list fences are replaced, other
+    /// languages are untouched, and a second run changes nothing.
+    #[test]
+    fn handles_fence_variants_and_is_idempotent() -> Result<()> {
+        let (updated, code_dir) = round_trip(
+            "~~~rust\na();\n~~~\n\n```rustc\nb\n```\n\n- item\n\n  ```rust,ignore\n  c();\n  ```\n",
+        )?;
+        assert_eq!(
+            updated,
+            "~~~rust\n{{#include code/ch.md.d/block-000.rs}}\n~~~\n\n```rustc\nb\n```\n\n- item\n\n  ```rust,ignore\n  {{#include code/ch.md.d/block-001.rs}}\n  ```\n"
+        );
+        let src_dir = code_dir.parent().context("expected source directory")?;
+        remove_code_from_all_markdown_files_in(src_dir, &code_dir)?;
+        assert_eq!(fs::read_to_string(src_dir.join("ch.md"))?, updated);
+        Ok(())
+    }
+
+    /// A chapter edited after extraction is not replaced by stale code.
+    #[test]
+    fn refuses_to_replace_a_block_edited_after_extraction() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        let code_dir = src_dir.join("code");
+        fs::create_dir_all(&src_dir)?;
+        let chapter = src_dir.join("ch.md");
+        fs::write(&chapter, chapter_with_blocks(&["fn old() {}"]))?;
+        extract_code_from_all_markdown_files_in(&src_dir, &code_dir)?;
+        let edited = chapter_with_blocks(&["fn new() {}"]);
+        fs::write(&chapter, &edited)?;
+
+        assert!(remove_code_from_all_markdown_files_in(&src_dir, &code_dir).is_err());
+        assert_eq!(fs::read_to_string(&chapter)?, edited);
         Ok(())
     }
 }

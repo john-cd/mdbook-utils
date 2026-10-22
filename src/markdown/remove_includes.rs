@@ -5,11 +5,9 @@
 //! enabled in `book.toml`.
 
 use std::fs;
-use std::fs::File;
-use std::io::Write;
 use std::path::Path;
-use std::sync::Mutex;
 
+use anyhow::Context;
 use anyhow::Result;
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
@@ -45,26 +43,32 @@ pub fn remove_includes_in_all_markdown_files_in<P>(
 where
     P: AsRef<Path> + std::marker::Sync,
 {
-    let modified = Mutex::new(Vec::new());
-
     // Locate the Markdown files with the `src` directory
     let paths = crate::fs::find_markdown_files_in(markdown_dir_path.as_ref())?;
 
-    // Process each .md file
-    paths.into_par_iter().try_for_each(|p| -> Result<()> {
-        info!("Looking into {p:?}");
-        let buf = fs::read_to_string(p.as_path())?;
-        if REGEX.is_match(&buf) {
-            let new_txt = REGEX.replace_all(&buf, regex::NoExpand(contents_to_insert));
-            if let std::borrow::Cow::Owned(new_txt) = new_txt {
-                // tracing::debug!("modified: {}", p.display());
-                File::create(p.clone())?.write_all(new_txt.as_bytes())?;
-                modified.lock().unwrap().push(p);
-            }
-        }
-        Ok(())
-    })?;
-    Ok(modified.into_inner().unwrap())
+    // Plan every change first, so a read error cannot leave the tree partly
+    // modified.
+    let planned: Vec<Option<(std::path::PathBuf, String)>> = paths
+        .into_par_iter()
+        .map(|p| -> Result<_> {
+            info!("Looking into {p:?}");
+            let buf = fs::read_to_string(p.as_path())
+                .with_context(|| format!("Failed to read {}", p.display()))?;
+            Ok(
+                match REGEX.replace_all(&buf, regex::NoExpand(contents_to_insert)) {
+                    std::borrow::Cow::Owned(new_txt) => Some((p, new_txt)),
+                    std::borrow::Cow::Borrowed(_) => None,
+                },
+            )
+        })
+        .collect::<Result<_>>()?;
+
+    let mut modified = Vec::new();
+    for (path, new_txt) in planned.into_iter().flatten() {
+        crate::fs::write_atomically(&path, new_txt.as_bytes())?;
+        modified.push(path);
+    }
+    Ok(modified)
 }
 
 #[cfg(test)]

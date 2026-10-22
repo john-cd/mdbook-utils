@@ -108,7 +108,9 @@ where
 
     for (reference, text, link_type) in broken_links {
         writeln!(link_writer, "- Reference: {reference}")?;
-        writeln!(link_writer, "  Text: {text}")?;
+        if !text.is_empty() {
+            writeln!(link_writer, "  Text: {text}")?;
+        }
         writeln!(link_writer, "  Type: {link_type}")?;
         writeln!(link_writer)?;
     }
