@@ -24,7 +24,6 @@
 // #![doc(html_logo_url = "https://example.com/logo.jpg")]
 
 pub mod api;
-mod build_book;
 mod dependencies;
 mod fs;
 mod generate;
