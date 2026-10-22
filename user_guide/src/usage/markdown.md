@@ -40,4 +40,25 @@ does not process mdBook directives. Include paths resolve from the Markdown
 file containing each directive. The expansion command also handles mdBook line
 and named-anchor selectors, and leaves `*-refs.md` includes intact.
 
+`identify-files-not-in-summary` reads chapter links from `SUMMARY.md`. Nested
+paths are resolved from the Markdown source directory, URL-encoded path
+characters are decoded, and query strings or heading fragments do not change
+which source file is checked, following [mdBook's SUMMARY.md chapter links][mdbook-summary].
+Links that resolve outside the source directory are ignored. A missing
+`SUMMARY.md` is an error.
+
+`identify-unused-rs-examples` recognizes the mdBook Rust file helpers
+`{{# include path/to/example.rs}}`,
+`{{# rustdoc_include path/to/example.rs:section}}`, and
+`{{# playground path/to/example.rs editable}}`. Their paths are relative to the
+Markdown file containing the helper and must resolve inside the requested code
+directory. Other `.rs` text is not treated as a reference, including Rust
+string literals and ordinary prose or code that mentions a file path.
+Standard-library Rust macros such as `include_str!` are not interpreted by
+this Markdown scan.
+
+These commands print the unmatched Markdown or Rust paths. A chapter omitted
+from `SUMMARY.md` appears in the first command's output, and a Rust file with
+no supported mdBook helper appears in the second command's output.
+
 {{#include ../refs.md}}

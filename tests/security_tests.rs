@@ -138,12 +138,12 @@ fn test_path_traversal_identify_files_not_in_summary() -> anyhow::Result<()> {
 "#,
     )?;
 
-    let _missing = identify_files_not_in_summary(&md_dir)?;
+    let unlisted_file = md_dir.join("unlisted.md");
+    fs::write(&unlisted_file, "# Unlisted")?;
 
-    let _secret_canon = secret_file.canonicalize()?;
-    // If it's in files_in_summary (vulnerable), it won't be "missing" if we
-    // were to look for it. But identify_files_not_in_summary only lists
-    // files IN md_dir that are NOT in SUMMARY.md.
+    let missing = identify_files_not_in_summary(&md_dir)?;
+    assert_eq!(missing, vec![unlisted_file]);
+    assert!(secret_file.exists());
 
     Ok(())
 }

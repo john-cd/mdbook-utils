@@ -14,6 +14,7 @@
 [mdbook]: https://rust-lang.github.io/mdBook
 [mdbook-backend]: https://rust-lang.github.io/mdBook/format/configuration/renderers.html
 [mdbook-include]: https://rust-lang.github.io/mdBook/format/mdbook.html#including-files
+[mdbook-summary]: https://rust-lang.github.io/mdBook/format/summary.html
 [mdbook-preprocessor]: https://rust-lang.github.io/mdBook/for_developers/preprocessors.html
 [mdbook-utils-github]: https://github.com/john-cd/mdbook-utils
 [mdbook-utils-docs-rs]: https://docs.rs/mdbook-utils/latest/mdbook_utils
