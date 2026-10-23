@@ -83,7 +83,9 @@ pub(crate) fn read_to_string_all_markdown_files_in<'a, P>(
 where
     P: AsRef<Path>,
 {
-    Ok(Cow::from(read_markdown_sources_in(markdown_root_dir_path)?.text))
+    Ok(Cow::from(
+        read_markdown_sources_in(markdown_root_dir_path)?.text,
+    ))
 }
 
 #[cfg(test)]
@@ -111,9 +113,15 @@ mod tests {
         assert_eq!(sources.text, "one\ntwo\nthree\nfour\n");
 
         let (path, line) = sources.locate(5).context("offset in a.md")?;
-        assert_eq!((path.file_name().and_then(|n| n.to_str()), line), (Some("a.md"), 2));
+        assert_eq!(
+            (path.file_name().and_then(|n| n.to_str()), line),
+            (Some("a.md"), 2)
+        );
         let (path, line) = sources.locate(15).context("offset in b.md")?;
-        assert_eq!((path.file_name().and_then(|n| n.to_str()), line), (Some("b.md"), 2));
+        assert_eq!(
+            (path.file_name().and_then(|n| n.to_str()), line),
+            (Some("b.md"), 2)
+        );
         Ok(())
     }
 }

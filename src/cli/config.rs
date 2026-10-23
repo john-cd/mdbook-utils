@@ -235,8 +235,9 @@ impl Configuration {
     }
 
     /// Returns the base url of the website where the book will be deployed
-    /// (used to build sitemaps): the command-line option, otherwise the BASE_URL
-    /// environment variable, otherwise `output.html.site-url` in `book.toml`.
+    /// (used to build sitemaps): the command-line option, otherwise the
+    /// BASE_URL environment variable, otherwise `output.html.site-url` in
+    /// `book.toml`.
     ///
     /// # Errors
     ///

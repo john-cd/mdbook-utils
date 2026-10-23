@@ -32,7 +32,10 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
             // `..` in a path that does not exist cannot be resolved by the
             // filesystem, so it could climb out of the base directory after
             // the check below.
-            if path.components().any(|c| c == std::path::Component::ParentDir) {
+            if path
+                .components()
+                .any(|c| c == std::path::Component::ParentDir)
+            {
                 bail!(
                     "Path traversal detected: {:?} does not exist and contains `..`",
                     path
