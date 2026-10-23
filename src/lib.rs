@@ -30,6 +30,7 @@ mod dependencies;
 mod fs;
 mod generate;
 mod link;
+
 /// Markdown manipulation modules
 pub mod markdown;
 mod parser;

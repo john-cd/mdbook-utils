@@ -109,6 +109,7 @@ mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 
+    /// Builds a test link with the supplied URL and a fixed label.
     fn link(url: &str) -> Link<'_> {
         LinkBuilder::default()
             .set_label(Cow::Borrowed("x"))

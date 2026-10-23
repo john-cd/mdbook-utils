@@ -13,8 +13,11 @@ use tempfile::tempdir;
 
 /// A temporary book with one Markdown file in `src/`.
 struct Fixture {
+    /// Temporary directory containing the fixture files.
     dir: TempDir,
+    /// Markdown source directory passed to the CLI.
     src: PathBuf,
+    /// Destination used for generated output.
     out: PathBuf,
 }
 

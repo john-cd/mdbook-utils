@@ -259,6 +259,7 @@ mod tests {
     use super::*;
     use crate::parser;
 
+    /// Parses links from a Markdown string for sitemap tests.
     fn links(markdown: &str) -> Vec<crate::link::Link<'_>> {
         let mut parser = parser::get_parser(markdown);
         parser::extract_links(&mut parser)
