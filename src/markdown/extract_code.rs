@@ -432,6 +432,7 @@ mod tests {
 
     use super::*;
 
+    /// Builds a Markdown chapter with one Rust code fence per supplied block.
     fn chapter_with_blocks(blocks: &[&str]) -> String {
         let mut content = String::from("# Chapter\n");
         for block in blocks {

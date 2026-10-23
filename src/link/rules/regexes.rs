@@ -259,6 +259,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
 mod tests {
     use super::*;
 
+    /// Returns the compiled matching rule named by `name`.
     fn get_re(name: &str) -> &'static Regex {
         COMPILED_RULES.get(name).expect("input should parse")
     }

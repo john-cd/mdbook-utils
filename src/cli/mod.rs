@@ -127,12 +127,12 @@ pub(crate) fn parse_arguments() -> Cli {
     Cli::parse()
 }
 
-#[derive(Parser, Debug)]
-// Reads the following attributes from the package's `Cargo.toml`
-#[command(author, version, about, long_about = None)]
-// Displays the help, if no arguments are provided
+/// Command-line interface for the available commands and global options.
+// Reads the following attributes from the package's `Cargo.toml`.
+// Displays help when no arguments are provided.
 // #[command(arg_required_else_help = true)]
-/// Command-line interface: commands and global options
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
 pub(crate) struct Cli {
     /// Selected top-level command.
     #[command(subcommand)]
