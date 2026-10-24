@@ -16,6 +16,9 @@ alias p := prep
 set shell := ["bash", "-uc"]
 set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
+rustfmt_toolchain_default := trim(read(join(source_directory(), "rustfmt-toolchain")))
+rustfmt_toolchain_override := env("RUSTFMT_TOOLCHAIN", "")
+rustfmt_toolchain := if rustfmt_toolchain_override == "" { rustfmt_toolchain_default } else { rustfmt_toolchain_override }
 worktree_name := env("MDBOOK_UTILS_WORKTREE_NAME", "main")
 cache_home := env("XDG_CACHE_HOME", join(home_directory(), ".cache"))
 # Out-of-tree build outputs. Windows defaults can be overridden with
@@ -51,7 +54,7 @@ clean:
 
 # Format all code
 fmt:
-  cargo +nightly-2026-10-22 fmt --all
+  cargo +{{rustfmt_toolchain}} fmt --all
   echo "DONE"
 
 # Check whether the code can compile
@@ -107,7 +110,7 @@ prep: fmt clean build clippy test _builddoc
 
 @release:
   echo "Build the tools in $(pwd) in release mode and copy to ../bin"
-  cargo +nightly-2026-10-22 build --bins --locked --all-features --release -Z unstable-options --artifact-dir "{{bin_dir}}"
+  cargo +{{rustfmt_toolchain}} build --bins --locked --all-features --release -Z unstable-options --artifact-dir "{{bin_dir}}"
 
 ## Utilities --------------------------------------
 
