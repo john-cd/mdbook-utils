@@ -21,9 +21,11 @@ if [ ! -f /code/justfile ]; then
   exit 112
 fi
 
+RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(tr -d '\r\n' < /code/rustfmt-toolchain)}"
+
 echo "-------------------------------------------"
 echo "Format the code"
-cargo +nightly-2026-10-22 fmt --all
+cargo +"$RUSTFMT_TOOLCHAIN" fmt --all
 
 echo "Fetch the dependencies"
 cargo fetch

@@ -26,10 +26,14 @@ RUN apt-get update \
 
 ## Update Rust if needed
 ## Install nightly fmt
+ARG RUSTFMT_TOOLCHAIN
+COPY rustfmt-toolchain /usr/local/share/rustfmt-toolchain
 RUN rustup update \
     && rustup component add clippy \
-    && rustup toolchain install nightly-2026-10-22 \
-    && rustup component add rustfmt --toolchain nightly-2026-10-22
+    && RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(cat /usr/local/share/rustfmt-toolchain)}" \
+    && rustup toolchain install "$RUSTFMT_TOOLCHAIN" \
+    && rustup component add rustfmt --toolchain "$RUSTFMT_TOOLCHAIN"
+ENV RUSTFMT_TOOLCHAIN=${RUSTFMT_TOOLCHAIN}
 
 ARG MDBOOK_VERSION
 

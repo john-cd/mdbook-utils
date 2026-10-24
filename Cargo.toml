@@ -42,6 +42,7 @@ exclude = [
     "CONTRIBUTING.md",
     "CODE_OF_CONDUCT.md",
     "RELEASES.md",
+    "rustfmt-toolchain",
 ]
 
 [[bin]]

@@ -3,11 +3,14 @@
 set -eux
 set -o pipefail
 
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(tr -d '\r\n' < "$repo_root/rustfmt-toolchain")}"
+
 echo "----------"
 
 ## Checks the Rust code formatting
 ## Fails if not formatted properly
-cargo +nightly-2026-10-22 fmt --all --check
+cargo +"$RUSTFMT_TOOLCHAIN" fmt --all --check
 
 ## Check dependencies
 # cargo deny check \

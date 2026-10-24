@@ -32,10 +32,15 @@ jobs:
           components: clippy
 
       - name: Install pinned nightly rustfmt
-        run: rustup toolchain install nightly-2026-10-22 --profile minimal --component rustfmt
+        shell: bash
+        run: |
+          RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(tr -d '\r\n' < rustfmt-toolchain)}"
+          echo "RUSTFMT_TOOLCHAIN=$RUSTFMT_TOOLCHAIN" >> "$GITHUB_ENV"
+          rustup toolchain install "$RUSTFMT_TOOLCHAIN" --profile minimal --component rustfmt
 
       - name: Check formatting
-        run: cargo +nightly-2026-10-22 fmt --all -- --check
+        shell: bash
+        run: cargo +"$RUSTFMT_TOOLCHAIN" fmt --all -- --check
 
       - uses: Swatinem/rust-cache@aa7c1c80a07a27a84c0aa76d0cef0aad3830e330 # v2.7.8
 
