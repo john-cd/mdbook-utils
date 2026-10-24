@@ -19,6 +19,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [I Want To Contribute](#i-want-to-contribute)
 - [Reporting Bugs](#reporting-bugs)
 - [Suggesting Enhancements](#suggesting-enhancements)
+- [Issue Priorities and Review Labels](#issue-priorities-and-review-labels)
 - [Your First Code Contribution](#your-first-code-contribution)
 - [Improving The Documentation](#improving-the-documentation)
 - [Styleguides](#styleguides)
@@ -106,6 +107,14 @@ Enhancement suggestions are tracked as [GitHub issues][issues].
 - **Describe the current behavior** and **explain which behavior you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
 - You may want to **include screenshots and animated GIFs** which help you demonstrate the steps or point out the part which the suggestion is related to. You can use [this tool](https://www.cockos.com/licecap/) to record GIFs on macOS and Windows, and [this tool](https://github.com/colinkeenan/silentcast) or [this tool](https://github.com/GNOME/byzanz) on Linux.
 - **Explain why this enhancement would be useful** to most CONTRIBUTING.md users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
+
+## Issue Priorities and Review Labels
+
+Use `priority:P1` through `priority:P4` labels; do not put `[P#]` prefixes in issue titles. P1 blocks publication, P2 is needed for the first edition, P3 should be done, and P4 is later or optional. Use `human-review` when work needs the owner's decision or a manual acceptance check. In `rust_howto`, every `human-review` issue must be a sub-issue of epic [#1849](https://github.com/john-cd/rust_howto/issues/1849).
+
+Priority labels rank work. Milestones track release scope: reserve `URGENT` for current publication blockers; use `PUBLISHABLE` for work in the publication-ready batch. These axes are independent, so a P3 item can be in `PUBLISHABLE` when it belongs in that batch, and P1/P2 items can use another milestone when their release target differs. A P4 item normally belongs in `LATER PUBLICATION`.
+
+When a project board has a `Priority` field, mirror the issue's `priority:P#` label there for sorting. Use board status and scheduling fields to track workflow; the issue label remains the priority source of truth. Update the label and board field together when priority changes.
 
 ### Your First Code Contribution
 
