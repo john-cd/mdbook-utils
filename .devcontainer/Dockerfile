@@ -36,13 +36,14 @@ RUN rustup update \
 ENV RUSTFMT_TOOLCHAIN=${RUSTFMT_TOOLCHAIN}
 
 ARG MDBOOK_VERSION
+ARG SCCACHE_VERSION
 
 ## Install cargo binstall (binary install)
 ## Install just, mdbook, etc... from the binary release
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash \
     && cargo binstall --no-confirm just \
     && cargo binstall --no-confirm --version ${MDBOOK_VERSION} mdbook \
-    && cargo binstall --no-confirm --secure --version 0.18.0 sccache
+    && cargo binstall --no-confirm --secure --version ${SCCACHE_VERSION} sccache
 #    && cargo binstall --no-confirm --secure cargo-nextest
 
 WORKDIR /code
