@@ -92,3 +92,4 @@ rust-project.json
 .ionide
 # Local snapshot of registered worktrees and build-cache usage.
 WORKTREES.md
+/.worktrees/
