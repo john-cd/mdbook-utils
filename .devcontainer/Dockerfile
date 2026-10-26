@@ -27,10 +27,10 @@ RUN apt-get update \
 ## Update Rust if needed
 ## Install nightly fmt
 ARG RUSTFMT_TOOLCHAIN
-COPY rustfmt-toolchain /usr/local/share/rustfmt-toolchain
+COPY rustfmt-toolchain.toml /usr/local/share/rustfmt-toolchain.toml
 RUN rustup update \
     && rustup component add clippy \
-    && RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(cat /usr/local/share/rustfmt-toolchain)}" \
+    && RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(sed -n 's/^channel *= *"\([^"]*\)".*/\1/p' /usr/local/share/rustfmt-toolchain.toml)}" \
     && rustup toolchain install "$RUSTFMT_TOOLCHAIN" \
     && rustup component add rustfmt --toolchain "$RUSTFMT_TOOLCHAIN"
 ENV RUSTFMT_TOOLCHAIN=${RUSTFMT_TOOLCHAIN}

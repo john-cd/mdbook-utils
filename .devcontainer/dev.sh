@@ -21,7 +21,7 @@ if [ ! -f /code/justfile ]; then
   exit 112
 fi
 
-RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(tr -d '\r\n' < /code/rustfmt-toolchain)}"
+RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(sed -n 's/^channel *= *"\([^"]*\)".*/\1/p' /code/rustfmt-toolchain.toml)}"
 
 echo "-------------------------------------------"
 echo "Format the code"

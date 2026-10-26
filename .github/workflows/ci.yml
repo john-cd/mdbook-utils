@@ -34,7 +34,7 @@ jobs:
       - name: Install pinned nightly rustfmt
         shell: bash
         run: |
-          RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(tr -d '\r\n' < rustfmt-toolchain)}"
+          RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(sed -n 's/^channel *= *"\([^"]*\)".*/\1/p' rustfmt-toolchain.toml)}"
           echo "RUSTFMT_TOOLCHAIN=$RUSTFMT_TOOLCHAIN" >> "$GITHUB_ENV"
           rustup toolchain install "$RUSTFMT_TOOLCHAIN" --profile minimal --component rustfmt
 
