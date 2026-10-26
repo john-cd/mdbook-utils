@@ -16,7 +16,7 @@ alias p := prep
 set shell := ["bash", "-uc"]
 set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
-rustfmt_toolchain_default := trim(read(join(source_directory(), "rustfmt-toolchain")))
+rustfmt_toolchain_default := trim(replace_regex(read(join(source_directory(), "rustfmt-toolchain.toml")), '(?s).*channel\s*=\s*"([^"]+)".*', "$1"))
 rustfmt_toolchain_override := env("RUSTFMT_TOOLCHAIN", "")
 rustfmt_toolchain := if rustfmt_toolchain_override == "" { rustfmt_toolchain_default } else { rustfmt_toolchain_override }
 worktree_name := env("MDBOOK_UTILS_WORKTREE_NAME", "main")
