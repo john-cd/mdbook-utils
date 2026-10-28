@@ -1,4 +1,4 @@
-# TODO Reviewed ??-??-2026
+# TODO Reviewed ??-??-2026.
 ## Build versioned binary archives when a `vX.Y.Z` tag is pushed and attach them,
 ## with SHA-256 checksums, to a GitHub release. The names match
 ## `[package.metadata.binstall]` in Cargo.toml so that `cargo binstall` works.

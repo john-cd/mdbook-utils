@@ -1,16 +1,16 @@
-# TODO Reviewed ??-??-2026
+# TODO Reviewed ??-??-2026.
 [package]
 name = "mdbook-utils"
 version = "0.1.4"
+description = "Tools to manage links, reference definitions, and code examples in Markdown files, especially `mdbook` source directories."
 authors = ["John CD"]
 edition = "2024"
 rust-version = "1.99"
-description = "Tools to manage links, reference definitions, and code examples in Markdown files, especially `mdbook` source directories."
+license-file = "LICENSE"
 readme = "README.md"
 homepage = "https://john-cd.com/mdbook-utils/"
 repository = "https://github.com/john-cd/mdbook-utils/"
-license-file = "LICENSE"
-
+publish = true
 keywords = ["documentation", "markdown", "book", "mdbook", "rustbook"]
 categories = [
     "parser-implementations",
@@ -19,7 +19,6 @@ categories = [
     "development-tools",
     "command-line-utilities",
 ]
-publish = true
 [package.metadata.binstall]
 # Archives built by .github/workflows/release.yml:
 # mdbook-utils-<target>-v<version>.tar.gz (.zip on Windows), binary at the root.
@@ -661,7 +660,6 @@ unsafe_derive_deserialize = "warn"
 
 # Checks for functions that are declared async but have no .awaits inside of them.
 unused_async = "warn"
-
 # Checks for trait method implementations that are declared async but have no .awaits inside of
 # them.
 
@@ -679,7 +677,6 @@ verbose_bit_mask = "warn"
 
 # Checks for wildcard imports use _::*.
 wildcard_imports = "warn"
-
 # Checks for calls to with_capacity(0) on standard library collections and types.
 
 # Checks for maps with zero-sized value types anywhere in the code.
