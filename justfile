@@ -14,7 +14,8 @@ alias s := serve
 alias p := prep
 
 set shell := ["bash", "-uc"]
-set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+# Recipes run in Bash on every OS: Git Bash on Windows.
+set windows-shell := ["C:/Program Files/Git/bin/bash.exe", "-uc"]
 
 rustfmt_toolchain_default := trim(replace_regex(read(join(source_directory(), "rustfmt-toolchain.toml")), '(?s).*channel\s*=\s*"([^"]+)".*', "$1"))
 rustfmt_toolchain_override := env("RUSTFMT_TOOLCHAIN", "")
@@ -32,8 +33,8 @@ export RUSTC_WRAPPER := env("RUSTC_WRAPPER", "sccache")
 export CARGO_INCREMENTAL := "0"
 export SCCACHE_DIR := env("SCCACHE_DIR", if os_family() == "windows" { "D:/sccache" } else { join(cache_home, "sccache") })
 
-bin_dir := clean(join(source_directory(), "..", "bin"))
-target_dir := clean(join(target_root, worktree_name))
+bin_dir := replace(clean(join(source_directory(), "..", "bin")), "\\", "/")
+target_dir := replace(clean(join(target_root, worktree_name)), "\\", "/")
 
 set quiet
 
@@ -91,11 +92,7 @@ run cmd=help subcmd=empty:
 
 # Build and display the `cargo doc` documentation
 doc: _builddoc
-  cd "{{join(target_dir, "doc")}}" && python3 -m http.server 9000
-
-# [windows]
-# doc:
-#   echo Not implemented.
+  cd "{{join(target_dir, "doc")}}" && (python3 -m http.server 9000 || python -m http.server 9000)
 
 _builddoc:
   cargo clean --doc
