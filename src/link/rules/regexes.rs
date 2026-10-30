@@ -264,6 +264,15 @@ mod tests {
         COMPILED_RULES.get(name).expect("input should parse")
     }
 
+    /// Every rule compiles, and the rule looked up by name at run time exists,
+    /// so the string-keyed lookups cannot panic.
+    #[test]
+    fn every_rule_compiles_and_the_github_repo_rule_exists() {
+        assert_eq!(COMPILED_RULES.len(), GLOBAL_RULES.len());
+        assert!(GLOBAL_RULES.contains_key("github repo"));
+        assert!(COMPILED_RULES.contains_key("github repo"));
+    }
+
     /// Matches a crates.io category URL and captures its name.
     #[test]
     fn test_category_rule() {
