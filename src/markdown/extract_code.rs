@@ -2,6 +2,7 @@
 //!
 //! TODO Reviewed ??-??-2026
 
+use std::fmt::Write as _;
 use std::fs;
 use std::io::Write as _;
 use std::path::Component;
@@ -395,11 +396,12 @@ where
                     .context("Include path contains non-UTF-8 characters")?
                     .replace('\\', "/");
                 new_txt.push_str(&buf[last_match..block.range.start]);
-                new_txt.push_str(&format!(
+                write!(
+                    new_txt,
                     "{}\n{indent}{{{{#include {include_path}}}}}\n{indent}{}",
                     &buf[block.open_fence.clone()],
                     &buf[close_fence.clone()],
-                ));
+                )?;
                 last_match = block.range.end;
                 counter += 1;
             }
