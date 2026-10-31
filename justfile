@@ -20,21 +20,29 @@ set windows-shell := ["C:/Program Files/Git/bin/bash.exe", "-uc"]
 rustfmt_toolchain_default := trim(replace_regex(read(join(source_directory(), "rustfmt-toolchain.toml")), '(?s).*channel\s*=\s*"([^"]+)".*', "$1"))
 rustfmt_toolchain_override := env("RUSTFMT_TOOLCHAIN", "")
 rustfmt_toolchain := if rustfmt_toolchain_override == "" { rustfmt_toolchain_default } else { rustfmt_toolchain_override }
-worktree_name := env("MDBOOK_UTILS_WORKTREE_NAME", "main")
+checkout_name := file_name(source_directory())
+worktree_name := if checkout_name == "mdbook-utils" { "main" } else { checkout_name }
 cache_home := env("XDG_CACHE_HOME", join(home_directory(), ".cache"))
-# Out-of-tree build outputs. Windows defaults can be overridden with
-# `MDBOOK_UTILS_TARGET_ROOT` / `MDBOOK_UTILS_BUILD_ROOT`; elsewhere Cargo's
-# `target/` is used unless those variables are set.
-target_root := env("MDBOOK_UTILS_TARGET_ROOT", if os_family() == "windows" { "D:/target/mdbook-utils" } else { join(cache_home, "mdbook-utils/target") })
-build_root := env("MDBOOK_UTILS_BUILD_ROOT", if os_family() == "windows" { "C:/code_build/mdbook-utils" } else { join(cache_home, "mdbook-utils/build") })
-export CARGO_TARGET_DIR := join(target_root, worktree_name)
-export CARGO_BUILD_BUILD_DIR := join(build_root, worktree_name)
-export RUSTC_WRAPPER := env("RUSTC_WRAPPER", "sccache")
+repo_root := source_directory()
+sccache_base := if file_name(parent_directory(repo_root)) == ".worktrees" { parent_directory(parent_directory(repo_root)) } else { repo_root }
+inherited_sccache_bases := env("SCCACHE_BASEDIRS", "")
+sccache_base_separator := if os() == "windows" { ";" } else { ":" }
+target_root := if os() == "windows" { "D:/target/mdbook-utils" } else { join(cache_home, "cargo-target/mdbook-utils") }
+build_root := if os() == "windows" { "C:/code_build/mdbook-utils" } else { join(cache_home, "cargo-build/mdbook-utils") }
+target_dir := target_root + "/" + worktree_name
+build_dir := build_root + "/" + worktree_name
+export CARGO_TARGET_DIR := target_dir
+export CARGO_BUILD_TARGET_DIR := target_dir
+export CARGO_BUILD_BUILD_DIR := build_dir
+export RUSTC_WRAPPER := "sccache"
+export CARGO_BUILD_RUSTC_WRAPPER := "sccache"
 export CARGO_INCREMENTAL := "0"
-export SCCACHE_DIR := env("SCCACHE_DIR", if os_family() == "windows" { "D:/sccache" } else { join(cache_home, "sccache") })
+export SCCACHE_DIR := if os() == "windows" { "D:/sccache" } else { join(cache_home, "sccache") }
+export SCCACHE_CACHE_SIZE := "20G"
+export SCCACHE_BASEDIRS := if inherited_sccache_bases == "" { sccache_base } else { inherited_sccache_bases + sccache_base_separator + sccache_base }
 
-bin_dir := replace(clean(join(source_directory(), "..", "bin")), "\\", "/")
-target_dir := replace(clean(join(target_root, worktree_name)), "\\", "/")
+
+bin_dir := join(build_root, worktree_name, "artifacts")
 
 set quiet
 

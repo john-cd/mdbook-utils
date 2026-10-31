@@ -91,3 +91,11 @@ For a path with a command-line option, the precedence is command-line option, ma
 [mdbook-utils-user-guide]: https://john-cd.github.io/mdbook-utils
 [rust-howto]: https://www.john-cd.com/rust_howto/
 [rust-howto-github]: https://github.com/john-cd/rust_howto
+## Central build outputs and worktrees
+
+- Keep auxiliary Git worktrees under .worktrees/ and name them with one lowercase letter from a through j. A through j are reserved here.
+- Windows: target outputs go to D:/target/mdbook-utils/slot and intermediate build outputs go to C:/code_build/mdbook-utils/slot. C: is NTFS; D: is ReFS.
+- Linux/macOS: target outputs go to the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/<slot>; intermediate outputs go under cargo-build/mdbook-utils/<slot>.
+- Run ad hoc commands as just cargo <subcommand> [args...]; existing cargo-make tasks also receive the configured paths.
+- sccache is enabled with incremental compilation disabled. Cache size is 20G; the Windows cache directory is D:/sccache and the Linux/macOS cache directory is under the user's XDG cache folder.
+- SCCACHE_BASEDIRS adds the common repository root, which covers the main checkout and every auxiliary worktree, while preserving inherited project bases.

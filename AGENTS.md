@@ -31,11 +31,11 @@
 
 ## Build outputs
 
-The committed `.cargo/config.toml` contains no machine-specific paths, so the repository builds on Windows, Linux, macOS and CI. On the maintainer's Windows machine, artifacts live in `D:\target\mdbook-utils\<worktree name>` and intermediate files in `C:\code_build\mdbook-utils\<worktree name>`.
+Run ad hoc Cargo commands through the root justfile as just cargo <subcommand> [args...]. Every checkout selects its own central output slot automatically. Cargo-make tasks also receive centralized paths where configured.
 
-The root `justfile` exports `CARGO_TARGET_DIR` and `CARGO_BUILD_BUILD_DIR` (Windows defaults above; `$XDG_CACHE_HOME/mdbook-utils/...` elsewhere; override with `MDBOOK_UTILS_TARGET_ROOT` and `MDBOOK_UTILS_BUILD_ROOT`). Set `MDBOOK_UTILS_WORKTREE_NAME` before running `just` in another worktree; the default is `main`. `just cargo <args>` runs any Cargo command with those same settings (for example `just cargo tree`). For direct `cargo` invocations, set the paths in your user-level `%CARGO_HOME%\config.toml` (or `~/.cargo/config.toml`) or via `CARGO_TARGET_DIR` / `CARGO_BUILD_BUILD_DIR`; without them Cargo uses `./target`. Do not put them back in the repository config.
+On Windows, target artifacts go to D:/target/mdbook-utils/slot and intermediate build artifacts go to C:/code_build/mdbook-utils/slot. On Linux/macOS, use the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/slot and cargo-build/mdbook-utils/slot.
 
-`just` and CI use `sccache` 0.18 or newer as the Rust compiler wrapper (`RUSTC_WRAPPER`); plain `cargo` builds work without it. Local Windows builds default to `D:\sccache`; `just` defaults to `${XDG_CACHE_HOME:-$HOME/.cache}/sccache` on Linux. An existing `SCCACHE_DIR` environment variable takes precedence. CI and the dev container set their own cache locations.
+These repositories use sccache with incremental compilation disabled. The shared cache is limited to 20G. SCCACHE_BASEDIRS resolves to the current checkout root for the main checkout and each auxiliary worktree.
 
 ## Build, lint, and test
 
@@ -99,3 +99,12 @@ The `user_guide\` and `test_book\` directories are independent mdBook projects a
 - Inspect running Cargo/rustc processes before starting expensive builds or cleaning artifacts. Do not stop another task's processes or restart the shared sccache server while builds are active.
 - Use `D:\temp` for Windows temporary files where an override is needed. Keep temporary files separate from persistent target, intermediate-build, Cargo, and sccache caches.
 - Finish with `git diff --check`. Report unavailable checks and pre-existing failures without attributing them to the current change.
+## Central build outputs and worktrees
+
+- Keep auxiliary Git worktrees under .worktrees/ and name them with one lowercase letter from a through j. A through j are reserved here.
+- Keep the main worktree on this repository’s configured integration branch (usually `develop`; use `main` or `master` when that is the configured integration branch). Keep topic branches in auxiliary worktrees.
+- Windows: target outputs go to D:/target/mdbook-utils/slot and intermediate build outputs go to C:/code_build/mdbook-utils/slot. C: is NTFS; D: is ReFS.
+- Linux/macOS: target outputs go to the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/<slot>; intermediate outputs go under cargo-build/mdbook-utils/<slot>.
+- Run ad hoc commands as just cargo <subcommand> [args...]; existing cargo-make tasks also receive the configured paths.
+- sccache is enabled with incremental compilation disabled. Cache size is 20G; the Windows cache directory is D:/sccache and the Linux/macOS cache directory is under the user's XDG cache folder.
+- SCCACHE_BASEDIRS adds the common repository root, which covers the main checkout and every auxiliary worktree, while preserving inherited project bases.
