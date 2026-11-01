@@ -20,6 +20,12 @@ env:
   # Public location of the user guide; used for the sitemap.
   GUIDE_URL: https://john-cd.com/mdbook-utils/
 
+  CODE_TARGET_ROOT: ${{ github.workspace }}/.ci/target
+  CODE_BUILD_ROOT: ${{ github.workspace }}/.ci/build
+  CARGO_TARGET_DIR: ${{ github.workspace }}/.ci/target/mdbook-utils/main
+  CARGO_BUILD_TARGET_DIR: ${{ github.workspace }}/.ci/target/mdbook-utils/main
+  CARGO_BUILD_BUILD_DIR: ${{ github.workspace }}/.ci/build/mdbook-utils/main
+  CARGO_INCREMENTAL: '0'
 jobs:
   build:
     name: Build the user guide and its sitemap
@@ -31,9 +37,21 @@ jobs:
         with:
           toolchain: 1.99.1
 
+      - name: Install compiler cache
+        uses: taiki-e/install-action@a4d3f3f761dcd95cce1b72cb61cb6d1963438177
+        with:
+          tool: sccache@0.19.0
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       - uses: taiki-e/install-action@86f7a0ffb25f40114606501a311ebcfaf882ea32 # v2.88.0
+        with:
+          key: config-v1-${{ github.workflow }}-${{ github.job }}-${{ runner.arch }}-${{
+            hashFiles('**/.cargo/config.toml', '**/rust-toolchain.toml', '**/Cargo.lock') }}
+          cache-directories: ${{ github.workspace }}/.ci/build/mdbook-utils/main
+          save-if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}',
+            github.event.repository.default_branch) }}
+          workspaces: . -> ${{ github.workspace }}/.ci/target/mdbook-utils/main
+      - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
           tool: mdbook@0.5.4,sccache@0.19.0
 
