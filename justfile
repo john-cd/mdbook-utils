@@ -128,6 +128,10 @@ build:
 clippy:
   cargo clippy --all-targets --locked -- --deny warnings
 
+# Check dependency advisories, licenses, duplicate versions, and registry sources.
+deny:
+  cargo deny --locked check
+
 # Test all code and books
 test:
   cargo test --all-targets --locked
@@ -218,3 +222,8 @@ configure-cargo-host:
     pwsh -NoLogo -NoProfile -File {{quote(join(repo_root, "scripts/cargo-host.ps1"))}} -BuildRoot {{quote(code_build_root)}} -ConfigureHost
 
 repo_cache_name := if file_name(parent_directory(tooling_main)) == "rust_howto" { "rust_howto-mdbook-utils" } else { "mdbook-utils" }
+
+
+# Link Cargo and rust-analyzer outputs without replacing existing directories.
+build-setup:
+    pwsh -NoLogo -NoProfile -File {{quote(join(source_directory(), "scripts/cargo-host.ps1"))}} -BuildRoot {{quote(code_build_root)}} -LinkOutputs
