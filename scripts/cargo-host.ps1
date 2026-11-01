@@ -12,9 +12,20 @@ if ($IsWindows) {
         if (-not $parent -or $parent -eq $existing) { throw "Cannot resolve build volume: $BuildRoot" }
         $existing = $parent
     }
-    $volume = Get-Volume -FilePath $existing -ErrorAction Stop
-    if ($volume.FileSystem -ne 'NTFS') {
-        throw "Cargo intermediate builds require NTFS; $BuildRoot uses $($volume.FileSystem). Set CODE_BUILD_ROOT to an NTFS directory."
+    # Native drive information avoids starting a CIM query on every runner call.
+    # Resolve mount points/junctions through the volume API when a parent is a link.
+    $driveRoot = [IO.Path]::GetPathRoot($existing)
+    $fileSystem = [IO.DriveInfo]::new($driveRoot).DriveFormat
+    $ancestor = $existing
+    while ($ancestor -and $ancestor -ne $driveRoot) {
+        if ((Get-Item -LiteralPath $ancestor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            $fileSystem = (Get-Volume -FilePath $existing -ErrorAction Stop).FileSystem
+            break
+        }
+        $ancestor = Split-Path -Parent $ancestor
+    }
+    if ($fileSystem -ne 'NTFS') {
+        throw "Cargo intermediate builds require NTFS; $BuildRoot uses $fileSystem. Set CODE_BUILD_ROOT to an NTFS directory."
     }
 }
 if ($ConfigureHost) {
