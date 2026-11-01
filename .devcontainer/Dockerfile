@@ -41,7 +41,7 @@ ARG SCCACHE_VERSION
 ## Install cargo binstall (binary install)
 ## Install just, mdbook, etc... from the binary release
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash \
-    && cargo binstall --no-confirm just \
+    && cargo binstall --no-confirm --version ${JUST_VERSION} just \
     && cargo binstall --no-confirm --version ${MDBOOK_VERSION} mdbook \
     && cargo binstall --no-confirm --secure --version ${SCCACHE_VERSION} sccache
 #    && cargo binstall --no-confirm --secure cargo-nextest
@@ -67,7 +67,8 @@ FROM base as development
 # RUN cargo install --locked cargo-udeps || true
 # RUN cargo install --locked cargo-audit || true
 # RUN cargo install --locked cargo-pants || true
-RUN cargo install cargo-bump
+ARG CARGO_BUMP_VERSION
+RUN cargo install --locked --version ${CARGO_BUMP_VERSION} cargo-bump
 
 ## rustup completions
 RUN mkdir -p ~/.local/share/bash-completion/completions/ \

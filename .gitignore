@@ -97,6 +97,7 @@ WORKTREES.md
 /.ci/
 **/.ci/
 /build/
+!.devcontainer/.env
 **/build/
 /target/
 **/target/

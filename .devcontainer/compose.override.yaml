@@ -12,6 +12,7 @@ services:
       args:
         EMAIL: ${EMAIL}
         GIT_AUTHOR_NAME: ${GIT_AUTHOR_NAME}
+        CARGO_BUMP_VERSION: ${CARGO_BUMP_VERSION}
     volumes:
       - ${ROOT_PROJECT_PATH}:/code
       - cargo_home_cache:/usr/local/cargo/ # https://doc.rust-lang.org/cargo/guide/cargo-home.html?highlight=crate%20cache
