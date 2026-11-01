@@ -42,9 +42,6 @@ When this repository is checked out inside `rust_howto`, the runner uses
 `rust_howto-mdbook-utils` as its cache namespace to keep its slots separate
 from a standalone `mdbook-utils` checkout.
 
-## Configuration alignment checkout
+## Current state
 
-The `codex/config-homogeneity` branch uses `.worktrees/d` for this review.
-The primary checkout stays on `develop`; existing edits and detached work are preserved.
-See [CONFIGURATION.md](CONFIGURATION.md) for output setup and validation evidence.
-Use `git worktree list --porcelain` for current ownership and paths.
+The 2026-11-01 configuration alignment was integrated into develop; no dedicated alignment worktree remains. Use git worktree list --porcelain and git status --short for live ownership and cleanliness.
