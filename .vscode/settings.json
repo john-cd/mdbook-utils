@@ -4,4 +4,6 @@
     "rust-analyzer.cargo.buildScripts.enable": false,
     "rust-analyzer.statusBar.clickAction": "stopServer",
     "rust-analyzer.statusBar.showStatusBar": "always",
+  "files.eol": "\n",
+  "rust-analyzer.cargo.targetDir": null
 }
