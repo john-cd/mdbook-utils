@@ -1,14 +1,6 @@
-# Run configure-cargo-host through this repo's runner once per host for direct Cargo defaults.
-# Use the runner's cargo command for isolated per-checkout outputs and cache base directories.
 # TODO Reviewed ??-??-2026.
-# Reference: https://doc.rust-lang.org/cargo/reference/config.html
-
-# paths = ["/path/to/override"] # path dependency overrides
-
-# [alias]     # command aliases
-# rr = "run --release"
-# recursive_example = "rr --example recursions"
-# space_example = ["run", "--release", "--", "\"command list\""]
+# Build configuration: see CONFIGURATION.md at the repository root.
+# Run the repository build-setup recipe to link target/build to the central checkout slot.
 
 [build]
 # jobs = 1                      # number of parallel jobs, defaults to # of CPUs
@@ -26,6 +18,9 @@
 # The justfile/Makefile.toml reads CODE_*_ROOT overrides (with Windows and XDG defaults) and exports per-checkout Cargo output paths; use its cargo command for these roots.
 rustc-wrapper = "sccache"
 incremental = false
+target-dir = "target"
+build-dir = "build"
+
 [env]
 # rustflags = ["…", "…"]        # custom flags to pass to all compiler invocations
 # rustflags = ["-C", "link-arg=-fuse-ld=lld"]
@@ -135,73 +130,71 @@ incremental = false
 
 ## "ci" is used by the Github Action CD/CI workflow
 SCCACHE_BASEDIRS = { value = ".", relative = true }
-SCCACHE_CACHE_SIZE = { value = "35G", force = true }
+
+[env.SCCACHE_CACHE_SIZE]
+value = "35G"
+force = true
+
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld.exe"
+
+[target.aarch64-pc-windows-msvc]
+linker = "rust-lld.exe"
+
+[profile.dev]
+# Unoptimized workspace code, small cached dependencies, and no link-time optimization.
+opt-level = 0
+debug = "line-tables-only"
+lto = "off"
+incremental = false
+codegen-units = 256
+build-override = {opt-level = 3, debug = 0, codegen-units = 16}
+
+[profile.dev.package]
+"*" = {opt-level = "s", debug = 0, codegen-units = 16}
+hashbrown = {opt-level = 3}
+indexmap = {opt-level = 3}
+memchr = {opt-level = 3}
+proc-macro2 = {opt-level = 3}
+quote = {opt-level = 3}
+rayon = {opt-level = 3}
+rayon-core = {opt-level = 3}
+regex = {opt-level = 3}
+regex-automata = {opt-level = 3}
+regex-syntax = {opt-level = 3}
+smallvec = {opt-level = 3}
+syn = {opt-level = 3}
+# Package overrides take precedence over build-override; macro parsing crates stay optimized.
+
+[profile.test]
+incremental = false
+
+[profile.debugging]
+inherits = "dev"
+opt-level = 0
+debug = 2
+build-override = {opt-level = 0, debug = 2}
+
+[profile.debugging.package]
+"*" = {opt-level = 0, debug = 2}
+hashbrown = {opt-level = 0, debug = 2}
+indexmap = {opt-level = 0, debug = 2}
+memchr = {opt-level = 0, debug = 2}
+proc-macro2 = {opt-level = 0, debug = 2}
+quote = {opt-level = 0, debug = 2}
+rayon = {opt-level = 0, debug = 2}
+rayon-core = {opt-level = 0, debug = 2}
+regex = {opt-level = 0, debug = 2}
+regex-automata = {opt-level = 0, debug = 2}
+regex-syntax = {opt-level = 0, debug = 2}
+smallvec = {opt-level = 0, debug = 2}
+syn = {opt-level = 0, debug = 2}
+
 [profile.ci]
-inherits = "release"  # Inherits debug = false debug-assertions = false overflow-checks = false incremental = false...
-# opt-level = 3
-# strip = false
-# lto = "off"           # No link-time optimization
-# codegen-units = 8     # More code generation units allows more of a crate to be processed in parallel possibly reducing compile time, but may produce slower code.
-# see: https://doc.rust-lang.org/cargo/reference/profiles.html
-# see: https://nnethercote.github.io/perf-book/build-configuration.html
+inherits = "dev"
+incremental = false
 
-# [profile.ci.package."*"]  # Override profile for all packages.
-# opt-level = 0
 
-# [registries.<name>]  # registries other than crates.io
-# index = "…"          # URL of the registry index
-# token = "…"          # authentication token for the registry
-
-# [registry]
-# default = "…"        # name of the default registry
-# token = "…"          # authentication token for crates.io
-
-# [source.<name>]      # source definition and replacement
-# replace-with = "…"   # replace this source with the given named source
-# directory = "…"      # path to a directory source
-# registry = "…"       # URL to a registry source
-# local-registry = "…" # path to a local registry source
-# git = "…"            # URL of a git repository source
-# branch = "…"         # branch name for the git repository
-# tag = "…"            # tag name for the git repository
-# rev = "…"            # revision for the git repository
-
-## using mold
-#[target.x86_64-unknown-linux-gnu]
-#linker = "clang"
-#rustflags = ["-C", "link-arg=-fuse-ld=/usr/bin/mold"]
-
-## Using `lld`
-# [target.x86_64-unknown-linux-gnu]
-# rustflags = ["-C", "linker=clang", "-C", "link-arg=-fuse-ld=lld"]
-
-## Another variant for lld
-# [target.x86_64-unknown-linux-gnu]
-# linker = "/usr/bin/clang"
-# rustflags = ["-Clink-arg=-fuse-ld=lld", "-Zshare-generics=y"]
-
-# [target.<triple>]
-# linker = "…"            # linker to use
-# runner = "…"            # wrapper to run executables
-# rustflags = ["…", "…"]  # custom flags for `rustc`
-
-# [target.<cfg>]
-# runner = "…"            # wrapper to run executables
-# rustflags = ["…", "…"]  # custom flags for `rustc`
-
-# [target.<triple>.<links>] # `links` build script override
-# rustc-link-lib = ["foo"]
-# rustc-link-search = ["/path/to/foo"]
-# rustc-flags = ["-L", "/some/path"]
-# rustc-cfg = ['key="value"']
-# rustc-env = {key = "value"}
-# rustc-cdylib-link-arg = ["…"]
-# metadata_key1 = "value"
-# metadata_key2 = "value"
-
-# [term]
-# quiet = false          # whether cargo output is quiet
-# verbose = false        # whether cargo provides verbose output
-# color = 'auto'         # whether cargo colorizes output
-# progress.when = 'auto' # whether cargo shows progress bar
-# progress.width = 80    # width of progress bar
+[profile.tools]
+inherits = "dev"
+opt-level = 2
