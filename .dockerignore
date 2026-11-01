@@ -8,17 +8,31 @@
 **/.git
 *.log
 
-# Local outputs, caches, and linked worktrees
-/build/
-/target/
-/.sccache
-/.worktrees/
-**/__pycache__/
-**/.venv/
-**/.ruff_cache/
-**/.pytest_cache/
+# Repository metadata and worktree state
 .git/
-.env
-.env.*
-!.env.example
-!.env.*.example
+**/.git/
+/.worktrees/
+**/.worktrees/
+
+# Rust and native build outputs
+/target/
+**/target/
+/build/
+**/build/
+/debug/
+**/debug/
+/.sccache/
+**/.sccache/
+*.pdb
+*.profraw
+*.profdata
+
+# CI runner output
+/.ci/
+**/.ci/
+
+# Secrets and local environment files
+**/.env
+**/.env.*
+!/.env.example
+!**/.env.example
