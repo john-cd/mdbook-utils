@@ -33,9 +33,9 @@
 
 Run ad hoc Cargo commands through the root justfile as just cargo <subcommand> [args...]. Every checkout selects its own central output slot automatically. Cargo-make tasks also receive centralized paths where configured.
 
-On Windows, target artifacts go to D:/target/mdbook-utils/slot and intermediate build artifacts go to C:/code_build/mdbook-utils/slot. On Linux/macOS, use the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/slot and cargo-build/mdbook-utils/slot.
+On Windows, target artifacts go to CODE_TARGET_ROOT/mdbook-utils/<slot> and intermediate build artifacts go to CODE_BUILD_ROOT/mdbook-utils/slot. On Linux/macOS, use the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/slot and cargo-build/mdbook-utils/slot.
 
-These repositories use sccache with incremental compilation disabled. The shared cache is limited to 20G. SCCACHE_BASEDIRS resolves to the current checkout root for the main checkout and each auxiliary worktree.
+These repositories use sccache with incremental compilation disabled. The shared cache is limited to 35G. The Just runner sets `SCCACHE_BASEDIRS` to the main checkout and registered allowed `.worktrees/<letter>` paths only, discarding inherited paths. Use its Cargo command to select external per-worktree build paths.
 
 ## Build, lint, and test
 
@@ -97,14 +97,51 @@ The `user_guide\` and `test_book\` directories are independent mdBook projects a
 - Record commands, configurations, results, and remaining failures. Use read-only validation; apply fixes deliberately, inspect their diff, and preserve unrelated work.
 - Run builds for a checkout sequentially. Independent checkouts may build concurrently when CPU, memory, and disk capacity permit; avoid changing inputs during a build.
 - Inspect running Cargo/rustc processes before starting expensive builds or cleaning artifacts. Do not stop another task's processes or restart the shared sccache server while builds are active.
-- Use `D:\temp` for Windows temporary files where an override is needed. Keep temporary files separate from persistent target, intermediate-build, Cargo, and sccache caches.
+- Use `CODE_TEMP_ROOT` for Windows temporary files where an override is needed. Keep temporary files separate from persistent target, intermediate-build, Cargo, and sccache caches.
 - Finish with `git diff --check`. Report unavailable checks and pre-existing failures without attributing them to the current change.
 ## Central build outputs and worktrees
 
 - Keep auxiliary Git worktrees under .worktrees/ and name them with one lowercase letter from a through j. A through j are reserved here.
-- Keep the main worktree on this repository’s configured integration branch (usually `develop`; use `main` or `master` when that is the configured integration branch). Keep topic branches in auxiliary worktrees.
-- Windows: target outputs go to D:/target/mdbook-utils/slot and intermediate build outputs go to C:/code_build/mdbook-utils/slot. C: is NTFS; D: is ReFS.
+- Keep the main worktree on `develop`. Keep topic branches in auxiliary worktrees.
+- Windows: target outputs go to CODE_TARGET_ROOT/mdbook-utils/<slot> and intermediate build outputs go to CODE_BUILD_ROOT/mdbook-utils/slot. Keep CODE_BUILD_ROOT on an NTFS volume; do not use a ReFS volume for builds.
 - Linux/macOS: target outputs go to the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/<slot>; intermediate outputs go under cargo-build/mdbook-utils/<slot>.
 - Run ad hoc commands as just cargo <subcommand> [args...]; existing cargo-make tasks also receive the configured paths.
-- sccache is enabled with incremental compilation disabled. Cache size is 20G; the Windows cache directory is D:/sccache and the Linux/macOS cache directory is under the user's XDG cache folder.
-- SCCACHE_BASEDIRS adds the common repository root, which covers the main checkout and every auxiliary worktree, while preserving inherited project bases.
+- sccache is enabled with incremental compilation disabled. Cache size is 35G; the Windows cache directory is CODE_SCCACHE_ROOT and the Linux/macOS cache directory is under the user's XDG cache folder.
+- The Just runner sets `SCCACHE_BASEDIRS` to the main checkout and registered allowed letter worktrees only. Large-build repositories allow `main`, `a`, and `b`; inherited paths are discarded. Use its Cargo command to select external per-worktree build paths.
+
+## Machine storage roots
+
+- On Windows, use `CODE_TEMP_ROOT` for temporary and staging files, setting `TEMP`, `TMP`, and `TMPDIR` as needed. Use `C:\temp` only when `CODE_TEMP_ROOT` is unavailable.
+- Keep package-manager data, library caches, and package installations under `CODE_PACKAGES_ROOT`, including Cargo, npm, NuGet, pip/uv, vcpkg, and similar data. Do not store standalone tool distributions there.
+- Keep portable developer tools and SDKs under `CODE_TOOLS_ROOT`, in a named subdirectory per tool (for example NASM, Oracle Instant Client, Cap'n Proto, Flutter, Pandoc, Tectonic, and repository tool bundles). Update PATH and installer/config references when relocating a tool. Leave package-manager-managed tools in their managed roots unless replacing them with a portable installation.
+- In WSL, keep temporary files on the distribution's configured temp paths. Keep package data in `CODE_PACKAGES_ROOT` (default `~/.local/share`) and portable tools in `CODE_TOOLS_ROOT` (default `~/.local/tools`); avoid Windows drive mounts for these roots unless a tool requires them.
+
+## Portable storage-root configuration
+
+The current Windows defaults below can be overridden per machine or shell with environment variables. The per-repository Rust Justfile or Cargo Make helper, when present, reads these variables. Non-Rust repositories do not need a Cargo build runner; use the environment roots only for tools or scripts that consume them.
+
+- CODE_REPOS_ROOT: D:/code on Windows; ~/code by default on Unix.
+- CODE_BUILD_ROOT: C:/code_build on Windows; XDG cache or ~/.cache/cargo-build by default on Unix. Keep Windows build output on NTFS.
+- CODE_TARGET_ROOT: D:/target on Windows; XDG cache or ~/.cache/cargo-target by default on Unix.
+- CODE_SCCACHE_ROOT: D:/sccache on Windows; XDG cache or ~/.cache/sccache by default on Unix.
+- CODE_TEMP_ROOT: D:/temp on Windows, with C:/temp as a fallback where a script needs one; Unix uses the existing TMPDIR or /tmp.
+- CODE_PACKAGES_ROOT: D:/packages on Windows; ~/.local/share by default on Unix.
+- CODE_TOOLS_ROOT: C:/tools on Windows; ~/.local/tools by default on Unix.
+
+Windows drive paths elsewhere in this file are defaults. Set a root variable to relocate the corresponding directory. WSL must keep its distribution temp behavior and must not redirect temp variables to a Windows drive mount.
+
+## Git Hooks
+
+- Use prek with this repository's prek.toml; install Git hook shims with hooks-install (or prek install directly).
+- Use `prek` with the repository's `prek.toml` for Git hooks.
+
+## Required repository storage and Git policy
+
+- Keep the primary checkout on `develop`. Keep `main` as an independent empty root commit; do not merge development history into it.
+- Auxiliary worktrees must be direct children of the repo's `.worktrees/` directory, named one lowercase letter from a through j only. Never create task-named or external worktree directories.
+- Preserve unique commits on named branches before moving a detached checkout. Keep history linear, squash unpublished related changes, and never rewrite published history without explicit authorization.
+- Use `CODE_TEMP_ROOT` for Windows temp files: `D:/temp` when available, otherwise `C:/temp`. Unix uses its native `TMPDIR` or `/tmp`.
+- Use `CODE_PACKAGES_ROOT` for package data (Windows `D:/packages`) and `CODE_TOOLS_ROOT` for portable tools (Windows `C:/tools`). Existing tool-specific environment overrides take precedence; changing a root does not move installed packages.
+- Run Cargo through `just cargo`. The runner must export central per-repo/per-slot target and build paths, sccache with incremental disabled, and only registered allowed sccache base directories.
+- Windows intermediate builds must use NTFS. The runner validates `CODE_BUILD_ROOT` before Cargo starts; a ReFS override is an error. Defaults are `C:/code_build/<repo>/<slot>` and `D:/target/<repo>/<slot>`.
+- Run `just configure-cargo-host` once per host and after changing roots to configure direct Cargo's central fallback. Direct Cargo shares the host target folder and isolates intermediates by workspace-path hash; use the runner for stable named checkout slots.
