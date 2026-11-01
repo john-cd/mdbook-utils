@@ -21,10 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu, ext: tar.gz }
-          - { os: windows-latest, target: x86_64-pc-windows-msvc, ext: zip }
-          - { os: macos-latest, target: aarch64-apple-darwin, ext: tar.gz }
-          - { os: macos-15-intel, target: x86_64-apple-darwin, ext: tar.gz }
+          - {os: ubuntu-latest, target: x86_64-unknown-linux-gnu, ext: tar.gz}
+          - {os: windows-latest, target: x86_64-pc-windows-msvc, ext: zip}
+          - {os: macos-latest, target: aarch64-apple-darwin, ext: tar.gz}
+          - {os: macos-15-intel, target: x86_64-apple-darwin, ext: tar.gz}
     defaults:
       run:
         shell: bash
@@ -92,3 +92,10 @@ jobs:
       - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: artifacts/*
+env:
+  CODE_TARGET_ROOT: ${{ github.workspace }}/.ci/target
+  CODE_BUILD_ROOT: ${{ github.workspace }}/.ci/build
+  CARGO_TARGET_DIR: ${{ github.workspace }}/.ci/target/mdbook-utils/main
+  CARGO_BUILD_TARGET_DIR: ${{ github.workspace }}/.ci/target/mdbook-utils/main
+  CARGO_BUILD_BUILD_DIR: ${{ github.workspace }}/.ci/build/mdbook-utils/main
+  CARGO_INCREMENTAL: '0'
