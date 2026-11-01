@@ -1,16 +1,32 @@
+# Purpose: Build, validate, and maintain this Rust workspace with its configured tooling environment.
+# Usage: Run just --list from this directory to inspect the available recipes.
+
 # TODO Reviewed ??-??-2026.
+# Format Rust code with the configured formatter toolchain. Alias: f.
 alias f := fmt
+# Format Rust code with the configured formatter toolchain. Alias: fa.
 alias fa := fmt
+# Run the build recipe. Alias: b.
 alias b := build
+# Run the build recipe. Alias: ba.
 alias ba := build
+# Run the clippy recipe. Alias: ca.
 alias ca := clippy
+# Run the check recipe. Alias: ck.
 alias ck := check
+# Run the check recipe. Alias: cka.
 alias cka := check
+# Print the Just executable and directory paths used by this example. Alias: t.
 alias t := test
+# Print the Just executable and directory paths used by this example. Alias: ta.
 alias ta := test
+# Run a command in the locked Python project environment. Alias: r.
 alias r := run
+# Build and open the Rust API documentation. Alias: d.
 alias d := doc
+# Run the serve recipe. Alias: s.
 alias s := serve
+# Run the formatting, build, lint, and test checks before integration. Alias: p.
 alias p := prep
 
 set shell := ["bash", "-uc"]
@@ -73,6 +89,7 @@ bin_dir := join(build_root, worktree_name, "artifacts")
 
 set quiet
 
+# List the available recipes and task modules.
 [no-exit-message]
 _default:
   @just --list --unsorted
@@ -129,6 +146,7 @@ run cmd=help subcmd=empty:
 doc: _builddoc
   cd "{{join(target_dir, "doc")}}" && (python3 -m http.server 9000 || python -m http.server 9000)
 
+# Remove old API documentation and rebuild the project docs without dependency docs.
 _builddoc:
   cargo clean --doc
   cargo doc --no-deps --locked # --document-private-items
@@ -140,6 +158,7 @@ serve:
 # Run all the steps required before pushing code to GitHub
 prep: fmt clean build clippy test _builddoc
 
+# Build release binaries into the configured external artifact directory.
 @release:
   echo "Build the tools in $(pwd) in release mode and copy to ../bin"
   cargo +{{rustfmt_toolchain}} build --bins --locked --all-features --release -Z unstable-options --artifact-dir "{{bin_dir}}"
