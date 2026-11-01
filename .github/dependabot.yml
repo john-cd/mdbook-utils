@@ -4,7 +4,7 @@ version: 2
 updates:
   - package-ecosystem: cargo
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
       time: 06:00
       timezone: America/Los_Angeles
@@ -16,7 +16,7 @@ updates:
     directory: /
   - package-ecosystem: docker
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
       time: 06:00
       timezone: America/Los_Angeles
@@ -32,7 +32,7 @@ updates:
   - package-ecosystem: rust-toolchain
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
       time: 06:00
       timezone: America/Los_Angeles
@@ -46,7 +46,7 @@ updates:
           - patch
   - package-ecosystem: docker-compose
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
       time: 06:00
       timezone: America/Los_Angeles
@@ -63,7 +63,7 @@ updates:
           - patch
   - package-ecosystem: devcontainers
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
       time: 06:00
       timezone: America/Los_Angeles
@@ -78,7 +78,7 @@ updates:
           - patch
   - package-ecosystem: github-actions
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
       time: 06:00
       timezone: America/Los_Angeles
