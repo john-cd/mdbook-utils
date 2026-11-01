@@ -33,7 +33,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-
 # Linux -----------------------
 *~
 
@@ -48,7 +47,6 @@ $RECYCLE.BIN/
 
 # .nfs files are created when an open file is removed but is still being accessed
 .nfs*
-
 
 # Rust ---------------------------------
 
@@ -94,11 +92,22 @@ rust-project.json
 WORKTREES.md
 /.worktrees/
 
-# Local outputs, caches, and linked worktrees
+# Repository-local outputs and generated files
+**/.worktrees/
+/.ci/
+**/.ci/
 /build/
+**/build/
 /target/
-/.sccache
-**/__pycache__/
-**/.venv/
-**/.ruff_cache/
-**/.pytest_cache/
+**/target/
+/debug/
+**/debug/
+/.sccache/
+**/.sccache/
+rustc-ice-*.txt
+
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
