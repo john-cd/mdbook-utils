@@ -57,3 +57,14 @@
 #### HUMAN-INFRA-02 — Cross-repository feature ownership
 
 - [#223](https://github.com/john-cd/mdbook-utils/issues/223) — **P2** — mdbook-utils / book_tooling: Decide which tool owns each overlapping feature — Owner: Unassigned — **HUMAN REVIEW**
+## Configuration alignment (2026-11-01)
+
+Implementation is paused. Focused editor/ignore and applicable formatting commits are on
+`codex/config-homogeneity`; build/profile, CI, and documentation edits remain under review.
+See `WORKTREES.md` for the checkout slot. No branch has been pushed.
+
+Remaining work is tracked in GitHub:
+
+- [ ] [[P2] Finish shared formatting, lint, and hook policy validation](https://github.com/john-cd/mdbook-utils/issues/263)
+- [ ] [[P2] Validate and finalize Cargo profiles, output paths, and linker policy](https://github.com/john-cd/mdbook-utils/issues/264)
+- [ ] [[P2] Complete dependency-update coverage and consistent CI caching](https://github.com/john-cd/mdbook-utils/issues/265)

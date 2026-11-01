@@ -138,3 +138,8 @@ This guide is based on the **contributing.md**. [Make your own][make-your-own]!
 ## Legal
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in _ by you, shall be licensed as __, without any additional terms or conditions.
+
+## Configuration consistency
+
+See [CONFIGURATION.md](CONFIGURATION.md) for profile selection, checkout-local output setup,
+formatting and lint rules, CI caches, and dependency-update coverage.
