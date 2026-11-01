@@ -93,3 +93,12 @@ rust-project.json
 # Local snapshot of registered worktrees and build-cache usage.
 WORKTREES.md
 /.worktrees/
+
+# Local outputs, caches, and linked worktrees
+/build/
+/target/
+/.sccache
+**/__pycache__/
+**/.venv/
+**/.ruff_cache/
+**/.pytest_cache/
