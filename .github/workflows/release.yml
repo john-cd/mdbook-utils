@@ -36,6 +36,11 @@ jobs:
           toolchain: 1.99.1
           targets: ${{ matrix.target }}
 
+      - name: Install the configured compiler wrapper
+        uses: taiki-e/install-action@86f7a0ffb25f40114606501a311ebcfaf882ea32 # v2.88.0
+        with:
+          tool: sccache@0.19.0
+
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
 
