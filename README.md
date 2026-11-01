@@ -91,11 +91,80 @@ For a path with a command-line option, the precedence is command-line option, ma
 [mdbook-utils-user-guide]: https://john-cd.github.io/mdbook-utils
 [rust-howto]: https://www.john-cd.com/rust_howto/
 [rust-howto-github]: https://github.com/john-cd/rust_howto
-## Central build outputs and worktrees
 
-- Keep auxiliary Git worktrees under .worktrees/ and name them with one lowercase letter from a through j. A through j are reserved here.
-- Windows: target outputs go to D:/target/mdbook-utils/slot and intermediate build outputs go to C:/code_build/mdbook-utils/slot. C: is NTFS; D: is ReFS.
-- Linux/macOS: target outputs go to the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/<slot>; intermediate outputs go under cargo-build/mdbook-utils/<slot>.
-- Run ad hoc commands as just cargo <subcommand> [args...]; existing cargo-make tasks also receive the configured paths.
-- sccache is enabled with incremental compilation disabled. Cache size is 20G; the Windows cache directory is D:/sccache and the Linux/macOS cache directory is under the user's XDG cache folder.
-- SCCACHE_BASEDIRS adds the common repository root, which covers the main checkout and every auxiliary worktree, while preserving inherited project bases.
+## Rust tooling
+
+Use `just` for build, lint, and test tasks. Install Rust, sccache, and Just. Windows recipes require Git Bash.
+Build paths and diagnostics are implemented directly in the justfile.
+
+- `just build-env` displays the effective environment, checkout, and branch.
+- `just cargo <subcommand> [args...]` runs Cargo with this checkout's output paths.
+
+### Compiler cache
+
+Direct Cargo defaults and `just` use sccache with incremental compilation
+disabled and a 35G cache limit. The runner exports `RUSTC_WRAPPER=sccache`,
+`CARGO_BUILD_RUSTC_WRAPPER=sccache`, `CARGO_INCREMENTAL=0`, and
+`SCCACHE_CACHE_SIZE=35G`, replacing inherited values. Explicit shell or Cargo
+command-line overrides still take precedence for direct Cargo invocations.
+
+`CODE_SCCACHE_ROOT` overrides `SCCACHE_DIR`; otherwise the default below applies.
+The task runner sets `SCCACHE_BASEDIRS` to the main checkout and registered `.worktrees/a` through `.worktrees/j`,
+discarding inherited unrelated paths. sccache reads daemon settings at startup;
+wait for all builds to finish before restarting a daemon with stale settings.
+
+### Output paths and worktrees
+
+Use `.worktrees/a` through `.worktrees/j` for auxiliary checkouts.
+Preserve active or dirty checkouts when reusing slots. The primary checkout's
+output slot is `main`, regardless of its branch name.
+
+| Variable            | Windows default | Linux/macOS default                                       |
+| ------------------- | --------------- | --------------------------------------------------------- |
+| `CODE_TARGET_ROOT`  | `D:/target`     | `$XDG_CACHE_HOME/cargo-target` or `~/.cache/cargo-target` |
+| `CODE_BUILD_ROOT`   | `C:/code_build` | `$XDG_CACHE_HOME/cargo-build` or `~/.cache/cargo-build`   |
+| `CODE_SCCACHE_ROOT` | `D:/sccache`    | `$XDG_CACHE_HOME/sccache` or `~/.cache/sccache`           |
+| `CODE_TEMP_ROOT`    | `D:/temp`       | Existing native `TMPDIR` or `/tmp`                        |
+
+Set roots to absolute paths and create the directories before building. Keep
+Windows intermediate builds on NTFS. Targets use
+`CODE_TARGET_ROOT/mdbook-utils/<slot>` and intermediate files use
+`CODE_BUILD_ROOT/mdbook-utils/<slot>`. The runner exports these as
+`CARGO_TARGET_DIR`, `CARGO_BUILD_TARGET_DIR`, and `CARGO_BUILD_BUILD_DIR`.
+
+On Windows, the runner sets `TEMP`, `TMP`, and `TMPDIR` from `CODE_TEMP_ROOT`.
+Unix and WSL retain their native temporary directories.
+
+## Consistent Python and hook tooling
+
+Use `uv` for Python dependencies and commands. Each standalone Python project
+commits `uv.lock` and `.python-version`; uv workspace members share their root's
+lockfile and Python pin. Run `uv sync --locked` before development.
+
+Use `prek` with `prek.toml`: run `prek install` and `prek run --all-files`.
+
+## Checkout and storage policy
+
+The primary checkout uses `develop`; `main` is an independent empty branch.
+Auxiliary worktrees belong under `.worktrees/`, with names one lowercase letter from a through j only.
+Storage roots are configurable through `CODE_REPOS_ROOT`, `CODE_TEMP_ROOT`,
+`CODE_PACKAGES_ROOT`, and `CODE_TOOLS_ROOT`. Windows defaults are `D:/code`,
+`D:/temp` (`C:/temp` fallback), `D:/packages`, and `C:/tools` respectively.
+Unix uses native home/cache/temp paths. A root override changes destinations;
+it does not move existing installations. Tool-specific overrides such as
+`CARGO_HOME`, `npm_config_cache`, and `NUGET_PACKAGES` remain independent.
+Rust builds also read `CODE_BUILD_ROOT`, `CODE_TARGET_ROOT`, and
+`CODE_SCCACHE_ROOT`. Their Windows defaults are `C:/code_build`, `D:/target`,
+and `D:/sccache`. The runner rejects non-NTFS intermediate build roots.
+Run `just configure-cargo-host` once per host (PowerShell 7 is required for
+this setup command), and rerun it after changing roots. This preserves other Cargo
+settings and sets direct Cargo's fallback in `CARGO_HOME/config.toml`:
+`CODE_TARGET_ROOT/direct-cargo` for targets and
+`CODE_BUILD_ROOT/direct-cargo/{workspace-path-hash}` for intermediates.
+Use `just cargo <arguments>` for isolated per-repo/worktree directories,
+the configured temp environment, and registered sccache base directories.
+The runner uses sccache with incremental compilation disabled.
+
+When this repository is checked out inside `rust_howto`, the runner uses
+`rust_howto-mdbook-utils` as its cache namespace to keep its slots separate
+from a standalone `mdbook-utils` checkout.

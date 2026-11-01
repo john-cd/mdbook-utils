@@ -1,3 +1,5 @@
+# Run configure-cargo-host through this repo's runner once per host for direct Cargo defaults.
+# Use the runner's cargo command for isolated per-checkout outputs and cache base directories.
 # TODO Reviewed ??-??-2026.
 # Reference: https://doc.rust-lang.org/cargo/reference/config.html
 
@@ -21,7 +23,7 @@
 ## Set them in your user-level `$CARGO_HOME/config.toml`, via `CARGO_*`
 ## environment variables, or use the `just` recipes. See AGENTS.md "Build outputs".
 
-# Use just cargo or cargo-make for external per-checkout output roots.
+# The justfile/Makefile.toml reads CODE_*_ROOT overrides (with Windows and XDG defaults) and exports per-checkout Cargo output paths; use its cargo command for these roots.
 rustc-wrapper = "sccache"
 incremental = false
 [env]
@@ -133,7 +135,7 @@ incremental = false
 
 ## "ci" is used by the Github Action CD/CI workflow
 SCCACHE_BASEDIRS = { value = ".", relative = true }
-SCCACHE_CACHE_SIZE = { value = "20G", force = true }
+SCCACHE_CACHE_SIZE = { value = "35G", force = true }
 [profile.ci]
 inherits = "release"  # Inherits debug = false debug-assertions = false overflow-checks = false incremental = false...
 # opt-level = 3
