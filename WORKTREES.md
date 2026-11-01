@@ -1,6 +1,6 @@
 # Worktrees
 
-Updated 2026-10-31 (America/Los_Angeles). This file describes the managed layout;
+Updated 2026-11-01 (America/Los_Angeles). This file describes the managed layout;
 use `git worktree list --porcelain` and `git status --short` for live state.
 
 - The primary checkout stays on `develop` and uses cache slot `main`.
@@ -34,9 +34,17 @@ Unix defaults use XDG cache or `~/.cache` under `cargo-target` and
 and computes base directories from registered allowed worktrees.
 
 Run `just configure-cargo-host` once per host and after changing roots.
-It configures direct Cargo's central fallback in `CARGO_HOME/config.toml`;
-the runner retains isolated named checkout slots. See [README](README.md).
+It configures the host fallback in `CARGO_HOME/config.toml`. Run the repository's
+`build-setup` recipe per checkout; local Cargo output settings take precedence and
+rust-analyzer follows the same target/build links. See [README](README.md).
 
 When this repository is checked out inside `rust_howto`, the runner uses
 `rust_howto-mdbook-utils` as its cache namespace to keep its slots separate
 from a standalone `mdbook-utils` checkout.
+
+## Configuration alignment checkout
+
+The `codex/config-homogeneity` branch uses `.worktrees/d` for this review.
+The primary checkout stays on `develop`; existing edits and detached work are preserved.
+See [CONFIGURATION.md](CONFIGURATION.md) for output setup and validation evidence.
+Use `git worktree list --porcelain` for current ownership and paths.
