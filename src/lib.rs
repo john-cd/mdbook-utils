@@ -11,8 +11,7 @@
 //!
 //! You will want to use the Public API (over the CLI) to:
 //!
-//! - Integrate it in your project, for example call it from a `build.rs` build
-//!   script,
+//! - Integrate it in your project, for example call it from a `build.rs` build script,
 //! - Extend its capabilities,
 //! - ...
 //!

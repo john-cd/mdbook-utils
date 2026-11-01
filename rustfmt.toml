@@ -36,3 +36,10 @@ use_try_shorthand = true # Replace uses of the try! macro by the ? shorthand. De
 ## Ignore specific files
 ignore = [
 ]
+max_width = 100
+comment_width = 100
+hard_tabs = false
+tab_spaces = 4
+reorder_imports = true
+condense_wildcard_suffixes = true
+format_macro_matchers = true
