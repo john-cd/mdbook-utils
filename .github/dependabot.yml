@@ -1,30 +1,93 @@
 # TODO Reviewed ??-??-2026.
+# Maintained dependency roots; immutable test fixtures are intentionally excluded.
 version: 2
 updates:
-  - package-ecosystem: "cargo"
-    directory: "/"
+  - package-ecosystem: cargo
     schedule:
-      interval: "monthly"
+      interval: weekly
+      day: monday
+      time: 06:00
+      timezone: America/Los_Angeles
     open-pull-requests-limit: 5
     groups:
       cargo-dependencies:
         patterns:
           - "*"
-  - package-ecosystem: "docker"
-    directory: "/.devcontainer"
+    directory: /
+  - package-ecosystem: docker
     schedule:
-      interval: "monthly"
-  - package-ecosystem: "docker-compose"
+      interval: weekly
+      day: monday
+      time: 06:00
+      timezone: America/Los_Angeles
+    directory: /.devcontainer
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: rust-toolchain
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: 06:00
+      timezone: America/Los_Angeles
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: docker-compose
+    schedule:
+      interval: weekly
+      day: monday
+      time: 06:00
+      timezone: America/Los_Angeles
     directories:
-      - "/"
-      - "/.devcontainer"
+      - /
+      - /.devcontainer
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: devcontainers
     schedule:
-      interval: "monthly"
-  - package-ecosystem: "devcontainers"
-    directory: "/"
+      interval: weekly
+      day: monday
+      time: 06:00
+      timezone: America/Los_Angeles
+    directory: /
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: github-actions
     schedule:
-      interval: "monthly"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "monthly"
+      interval: weekly
+      day: monday
+      time: 06:00
+      timezone: America/Los_Angeles
+    directory: /
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
