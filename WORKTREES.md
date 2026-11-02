@@ -44,4 +44,19 @@ from a standalone `mdbook-utils` checkout.
 
 ## Current state
 
-The 2026-11-01 configuration alignment was integrated into develop; no dedicated alignment worktree remains. Use git worktree list --porcelain and git status --short for live ownership and cleanliness.
+Reviewed 2026-11-01. The primary checkout is clean on `develop`; this inventory
+commit is local and not yet pushed.
+
+| Checkout       | Branch or revision | Status |
+| -------------- | ------------------ | ------ |
+| Repository root | `develop` | Clean; inventory commit remains local. |
+| `.worktrees/a` | detached / `8926394f` | Clean. |
+| `.worktrees/b` | detached / `8926394f` | Clean. |
+| `.worktrees/c` | detached / `8926394f` | Clean. |
+
+Slot `e` was detached and removed. Its unique commit remains on the local
+`codex/cargo-update` branch at `4a975c2f`; preserve that branch until its commit
+is integrated or deliberately retired. No per-slot build or target outputs
+existed for `e`. The unregistered junction-only slot `d` and its build and
+target outputs were removed. Use `git worktree list --porcelain` and
+`git status --short` to refresh this snapshot.
