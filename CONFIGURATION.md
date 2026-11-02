@@ -1,6 +1,7 @@
 # Repository configuration
 
 Reviewed 2026-11-01. This is the consistency plan and reference for `mdbook-utils`.
+<!-- TODO Reviewed ??-??-2026 -->
 Keep this file, README, contributor guidance, and configuration comments synchronized.
 
 ## Consistency plan
@@ -22,6 +23,8 @@ Keep this file, README, contributor guidance, and configuration comments synchro
 | `Cargo.toml`, `clippy.toml`, `rustfmt.toml` | Workspace lint inheritance and a common baseline; preserve explicit exceptions and package compatibility requirements. |
 | `pyproject.toml`, `uv.lock` | Ruff uses 100 columns and LF; explicit default E4/E7/E9/F lint selection. Keep project Python pins and locked resolution. |
 | `prek.toml` | Keep the existing repository hook set and pinned hook revisions. Run the configured formatter and linter rather than duplicating policy in hooks. |
+| `dprint.jsonc` | Format Markdown, JSON/JSONC, TOML, and YAML with dprint; run `dprint fmt` to format and `dprint check` to verify. Rust source remains formatted by rustfmt. |
+| `.markdownlint.yaml` | Configure Markdown lint rules; dprint handles Markdown formatting separately. |
 | `deny.toml`, `nextest.toml` | Keep dependency-license exceptions, test filters, and resource/time limits local. Nextest normally discovers `.config/nextest.toml`; a Cargo profile is selected separately. |
 | `.github/`, `.devcontainer/`, `Dockerfile*` | Preserve deployment/platform behavior; align package coverage and cache inputs. Keep compiler/Python pins compatible with manifests and lockfiles. |
 
