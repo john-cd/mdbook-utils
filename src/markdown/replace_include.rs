@@ -435,4 +435,39 @@ mod tests {
         );
         Ok(())
     }
+
+    /// A blank line before an anchor end marker is part of the selected content.
+    #[test]
+    fn anchor_selection_preserves_a_blank_line_before_the_end_marker() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir_all(&src_dir)?;
+        fs::write(
+            src_dir.join("snippet.md"),
+            "<!-- ANCHOR: sample -->\nfirst\n\n<!-- ANCHOR_END: sample -->\n",
+        )?;
+        let source = src_dir.join("doc.md");
+        fs::write(&source, "{{#include snippet.md:sample}}\n")?;
+
+        include_in_all_markdown_files_in(&src_dir)?;
+
+        assert_eq!(fs::read_to_string(source)?, "first\n\n\n");
+        Ok(())
+    }
+
+    /// Expressions other than include directives are preserved verbatim.
+    #[test]
+    fn leaves_crate_marker_syntax_unchanged() -> Result<()> {
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir_all(&src_dir)?;
+        let source = src_dir.join("doc.md");
+        let content = "{{!crate }}\n";
+        fs::write(&source, content)?;
+
+        include_in_all_markdown_files_in(&src_dir)?;
+
+        assert_eq!(fs::read_to_string(source)?, content);
+        Ok(())
+    }
 }
