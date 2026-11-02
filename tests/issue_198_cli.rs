@@ -1,3 +1,5 @@
+// TODO Reviewed ??-??-2026
+
 //! Executable regression tests for CLI behavior and generated file output.
 
 use std::fs;
