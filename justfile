@@ -96,6 +96,8 @@ bin_dir := join(build_root, worktree_name, "artifacts")
 
 set quiet
 
+export CARGO_TERM_QUIET := env("CARGO_TERM_QUIET", "true")
+
 # List the available recipes and task modules.
 [no-exit-message]
 _default:
