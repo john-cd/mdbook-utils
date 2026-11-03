@@ -50,6 +50,23 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
 
 Run `mdbook-utils <command> --help` for the options of each command.
 
+### Which tool should I use?
+
+`mdbook-utils` focuses on mdBook workflows: sitemaps, includes and code examples, unused-file checks,
+crate and category indexes, dependency reference definitions, badges, and read-only link reports.
+[`book_tooling`](https://github.com/john-cd/book_tooling) owns in-place link rewriting, reference-definition
+cleanup, HTTP link checking, search, and comment extraction.
+
+| Task                                                                                  | Tool                                                |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Write link, duplicate-link, or unresolved-reference reports                           | `mdbook-utils links`                                |
+| Convert inline links in Markdown files in place                                       | `book_tool inline-links`                            |
+| Check external HTTP links or audit unused reference definitions                       | `book_tool link-check` or `book_tool refdefs-audit` |
+| Generate sitemaps, manage includes and code examples, or build crate/category indexes | `mdbook-utils`                                      |
+
+`mdbook-utils links write-inline` and `refdefs write` only write reports. They do not edit source
+Markdown; use `book_tooling` for authoring-time rewrites.
+
 ### Environment Variables
 
 - `MDBOOK_UTILS_MARKDOWN_DIR_PATH`: Path to the Markdown source directory (default: `./src/`).
