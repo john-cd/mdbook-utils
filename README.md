@@ -1,4 +1,5 @@
 <!-- TODO Reviewed ??-??-2026 -->
+
 # mdBook Utilities
 
 Project status and roadmap are actively maintained.
@@ -28,22 +29,22 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
 ### Command-line Subcommands
 
 - `refdefs`: Manage reference definitions.
-    - `write`: Write existing reference definitions to a file.
-    - `generate`: Generate reference definitions: GitHub badges (`--badges`, `--badge-style <STYLE>`) or definitions from the `Cargo.toml` dependencies of the code examples (`--from-dependencies`).
+  - `write`: Write existing reference definitions to a file.
+  - `generate`: Generate reference definitions: GitHub badges (`--badges`, `--badge-style <STYLE>`) or definitions from the `Cargo.toml` dependencies of the code examples (`--from-dependencies`).
 - `links`: Manage links.
-    - `write-all`: Write all existing links to a Markdown file.
-    - `write-inline`: Write the external (`http`/`https`) inline links and autolinks to a Markdown file, without modifying the sources. `--link-format reference|inline|autolink` selects the output syntax (default `reference`). Labels default to the kebab-cased link text; when two links with the same text point to different URLs, the later label gets a numeric suffix (`docs`, `docs-2`). To rewrite sources in place, use `book_tooling`'s `inline-links`.
-    - `duplicate-links`: Identify duplicate links/labels.
-    - `broken-links`: Identify broken links.
+  - `write-all`: Write all existing links to a Markdown file.
+  - `write-inline`: Write the external (`http`/`https`) inline links and autolinks to a Markdown file, without modifying the sources. `--link-format reference|inline|autolink` selects the output syntax (default `reference`). Labels default to the kebab-cased link text; when two links with the same text point to different URLs, the later label gets a numeric suffix (`docs`, `docs-2`). To rewrite sources in place, use `book_tooling`'s `inline-links`.
+  - `duplicate-links`: Identify duplicate links/labels.
+  - `broken-links`: Identify broken links.
 - `markdown`: Manage code blocks and includes.
-    - `extract-code-examples`: Extract Rust code examples to separate files.
-    - `replace-code-examples-by-includes`: Replace code examples with `{{#include}}` statements.
-    - `replace-includes-by-contents`: Resolve `{{#include}}` statements.
-    - `remove-includes`: Remove `{{#include}}` statements.
-    - `identify-files-not-in-summary`: Find `.md` files missing from `SUMMARY.md`.
-    - `identify-unused-rs-examples`: Find `.rs` files not included in any `.md` file.
-    - `generate-crates`: Generate an index of the crates linked from the book.
-    - `generate-categories`: Generate an index of the crates.io categories linked from the book.
+  - `extract-code-examples`: Extract Rust code examples to separate files.
+  - `replace-code-examples-by-includes`: Replace code examples with `{{#include}}` statements.
+  - `replace-includes-by-contents`: Resolve `{{#include}}` statements.
+  - `remove-includes`: Remove `{{#include}}` statements.
+  - `identify-files-not-in-summary`: Find `.md` files missing from `SUMMARY.md`.
+  - `identify-unused-rs-examples`: Find `.rs` files not included in any `.md` file.
+  - `generate-crates`: Generate an index of the crates linked from the book.
+  - `generate-categories`: Generate an index of the crates.io categories linked from the book.
 - `sitemap`: Generate a `sitemap.xml` file (`--base-url`, `--map-index FROM:TO`). `README.md` pages are listed as `index.html`, as mdBook renders them; use `--map-index` for any other renamed page.
 - `debug`: Write the Markdown parser events to a file.
 
@@ -80,7 +81,7 @@ For a path with a command-line option, the precedence is command-line option, ma
 
 ## Key Links
 
-`mdbook-utils` [(github)][mdbook-utils-github]  [(docs.rs)][mdbook-utils-docs-rs]  [(crates.io)][mdbook-utils-crates-io]  [(user guide)][mdbook-utils-user-guide]
+`mdbook-utils` [(github)][mdbook-utils-github] [(docs.rs)][mdbook-utils-docs-rs] [(crates.io)][mdbook-utils-crates-io] [(user guide)][mdbook-utils-user-guide]
 
 [mdbook]: https://rust-lang.github.io/mdBook/
 [mdbook-config]: https://rust-lang.github.io/mdBook/format/configuration/general.html

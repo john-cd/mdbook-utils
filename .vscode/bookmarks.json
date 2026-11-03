@@ -1,161 +1,161 @@
 // TODO Reviewed ??-??-2026
 
 {
-	"files": [
-		{
-			"path": "src/cli/book_toml.rs",
-			"bookmarks": [
-				{
-					"line": 127,
-					"column": 6,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/cli/mod.rs",
-			"bookmarks": [
-				{
-					"line": 82,
-					"column": 3,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/cli/markdown_commands.rs",
-			"bookmarks": [
-				{
-					"line": 32,
-					"column": 16,
-					"label": ""
-				},
-				{
-					"line": 37,
-					"column": 12,
-					"label": ""
-				},
-				{
-					"line": 124,
-					"column": 34,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/generate/refdefs_from_dependencies.rs",
-			"bookmarks": [
-				{
-					"line": 27,
-					"column": 6,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "user_guide/src/usage/refdefs.md",
-			"bookmarks": [
-				{
-					"line": 2,
-					"column": 9,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "user_guide/src/usage/markdown.md",
-			"bookmarks": [
-				{
-					"line": 2,
-					"column": 11,
-					"label": ""
-				},
-				{
-					"line": 7,
-					"column": 14,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "compose-dev.yaml",
-			"bookmarks": [
-				{
-					"line": 0,
-					"column": 6,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/markdown/extract_code.rs",
-			"bookmarks": [
-				{
-					"line": 20,
-					"column": 9,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/markdown/remove_includes.rs",
-			"bookmarks": [
-				{
-					"line": 27,
-					"column": 16,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/parser/mod.rs",
-			"bookmarks": [
-				{
-					"line": 83,
-					"column": 15,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/link/link_and_linkbuilder.rs",
-			"bookmarks": [
-				{
-					"line": 131,
-					"column": 21,
-					"label": ""
-				},
-				{
-					"line": 162,
-					"column": 40,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "src/cli/links_commands.rs",
-			"bookmarks": [
-				{
-					"line": 14,
-					"column": 15,
-					"label": ""
-				},
-				{
-					"line": 22,
-					"column": 10,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "README.md",
-			"bookmarks": [
-				{
-					"line": 8,
-					"column": 196,
-					"label": ""
-				}
-			]
-		}
-	]
+  "files": [
+    {
+      "path": "src/cli/book_toml.rs",
+      "bookmarks": [
+        {
+          "line": 127,
+          "column": 6,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "src/cli/mod.rs",
+      "bookmarks": [
+        {
+          "line": 82,
+          "column": 3,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "src/cli/markdown_commands.rs",
+      "bookmarks": [
+        {
+          "line": 32,
+          "column": 16,
+          "label": ""
+        },
+        {
+          "line": 37,
+          "column": 12,
+          "label": ""
+        },
+        {
+          "line": 124,
+          "column": 34,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "src/generate/refdefs_from_dependencies.rs",
+      "bookmarks": [
+        {
+          "line": 27,
+          "column": 6,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "user_guide/src/usage/refdefs.md",
+      "bookmarks": [
+        {
+          "line": 2,
+          "column": 9,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "user_guide/src/usage/markdown.md",
+      "bookmarks": [
+        {
+          "line": 2,
+          "column": 11,
+          "label": ""
+        },
+        {
+          "line": 7,
+          "column": 14,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "compose-dev.yaml",
+      "bookmarks": [
+        {
+          "line": 0,
+          "column": 6,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "src/markdown/extract_code.rs",
+      "bookmarks": [
+        {
+          "line": 20,
+          "column": 9,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "src/markdown/remove_includes.rs",
+      "bookmarks": [
+        {
+          "line": 27,
+          "column": 16,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "src/parser/mod.rs",
+      "bookmarks": [
+        {
+          "line": 83,
+          "column": 15,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "src/link/link_and_linkbuilder.rs",
+      "bookmarks": [
+        {
+          "line": 131,
+          "column": 21,
+          "label": ""
+        },
+        {
+          "line": 162,
+          "column": 40,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "src/cli/links_commands.rs",
+      "bookmarks": [
+        {
+          "line": 14,
+          "column": 15,
+          "label": ""
+        },
+        {
+          "line": 22,
+          "column": 10,
+          "label": ""
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "bookmarks": [
+        {
+          "line": 8,
+          "column": 196,
+          "label": ""
+        }
+      ]
+    }
+  ]
 }

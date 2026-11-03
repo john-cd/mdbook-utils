@@ -1,4 +1,5 @@
 <!-- TODO Reviewed ??-??-2026 -->
+
 # Public API
 
 The `mdbook-utils` package provides one library and one command-line binary. The library API is useful when another Rust program needs to run the same processing as a CLI command or compose it with its own workflow.

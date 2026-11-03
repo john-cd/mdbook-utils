@@ -1,4 +1,5 @@
 <!-- TODO Reviewed ??-??-2026 -->
+
 ## Repo structure
 
 `mdbook-utils` is written in [Rust][rust-lang] and follows the typical [cargo package layout][cargo-layout].

@@ -1,8 +1,9 @@
 <!-- TODO Reviewed ??-??-2026 -->
+
 # Summary
 
-[Intro]( ./intro.md )
-[Index]( ./index.md )
+[Intro](./intro.md)
+[Index](./index.md)
 
 - [Chapter 1](./chapter_1.md)
 - [Chapter 2](./chapter_2/index.md)

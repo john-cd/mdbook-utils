@@ -1,4 +1,5 @@
 <!-- TODO Reviewed ??-??-2026 -->
+
 # Chapter 1
 
 Example code block:
@@ -15,7 +16,7 @@ fn main() {}
 
 Links:
 
-[Inline]( https://inline )
+[Inline](https://inline)
 
 [Reference-style][ref]
 
