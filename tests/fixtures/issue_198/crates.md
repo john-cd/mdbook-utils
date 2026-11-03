@@ -1,5 +1,3 @@
-<!-- TODO Reviewed ??-??-2026 -->
-
 # Crates
 
 - [rayon](https://crates.io/crates/rayon)
