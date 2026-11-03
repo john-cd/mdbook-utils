@@ -148,22 +148,22 @@ debug = "line-tables-only"
 lto = "off"
 incremental = false
 codegen-units = 256
-build-override = {opt-level = 3, debug = 0, codegen-units = 16}
+build-override = { opt-level = 3, debug = 0, codegen-units = 16 }
 
 [profile.dev.package]
-"*" = {opt-level = "s", debug = 0, codegen-units = 16}
-hashbrown = {opt-level = 3}
-indexmap = {opt-level = 3}
-memchr = {opt-level = 3}
-proc-macro2 = {opt-level = 3}
-quote = {opt-level = 3}
-rayon = {opt-level = 3}
-rayon-core = {opt-level = 3}
-regex = {opt-level = 3}
-regex-automata = {opt-level = 3}
-regex-syntax = {opt-level = 3}
-smallvec = {opt-level = 3}
-syn = {opt-level = 3}
+"*" = { opt-level = "s", debug = 0, codegen-units = 16 }
+hashbrown = { opt-level = 3 }
+indexmap = { opt-level = 3 }
+memchr = { opt-level = 3 }
+proc-macro2 = { opt-level = 3 }
+quote = { opt-level = 3 }
+rayon = { opt-level = 3 }
+rayon-core = { opt-level = 3 }
+regex = { opt-level = 3 }
+regex-automata = { opt-level = 3 }
+regex-syntax = { opt-level = 3 }
+smallvec = { opt-level = 3 }
+syn = { opt-level = 3 }
 # Package overrides take precedence over build-override; macro parsing crates stay optimized.
 
 [profile.test]
@@ -173,27 +173,26 @@ incremental = false
 inherits = "dev"
 opt-level = 0
 debug = 2
-build-override = {opt-level = 0, debug = 2}
+build-override = { opt-level = 0, debug = 2 }
 
 [profile.debugging.package]
-"*" = {opt-level = 0, debug = 2}
-hashbrown = {opt-level = 0, debug = 2}
-indexmap = {opt-level = 0, debug = 2}
-memchr = {opt-level = 0, debug = 2}
-proc-macro2 = {opt-level = 0, debug = 2}
-quote = {opt-level = 0, debug = 2}
-rayon = {opt-level = 0, debug = 2}
-rayon-core = {opt-level = 0, debug = 2}
-regex = {opt-level = 0, debug = 2}
-regex-automata = {opt-level = 0, debug = 2}
-regex-syntax = {opt-level = 0, debug = 2}
-smallvec = {opt-level = 0, debug = 2}
-syn = {opt-level = 0, debug = 2}
+"*" = { opt-level = 0, debug = 2 }
+hashbrown = { opt-level = 0, debug = 2 }
+indexmap = { opt-level = 0, debug = 2 }
+memchr = { opt-level = 0, debug = 2 }
+proc-macro2 = { opt-level = 0, debug = 2 }
+quote = { opt-level = 0, debug = 2 }
+rayon = { opt-level = 0, debug = 2 }
+rayon-core = { opt-level = 0, debug = 2 }
+regex = { opt-level = 0, debug = 2 }
+regex-automata = { opt-level = 0, debug = 2 }
+regex-syntax = { opt-level = 0, debug = 2 }
+smallvec = { opt-level = 0, debug = 2 }
+syn = { opt-level = 0, debug = 2 }
 
 [profile.ci]
 inherits = "dev"
 incremental = false
-
 
 [profile.tools]
 inherits = "dev"

@@ -4,7 +4,7 @@ services:
   mdbook-utils:
     build:
       context: ..
-      dockerfile: .devcontainer/Dockerfile  # path relative to context
+      dockerfile: .devcontainer/Dockerfile # path relative to context
       args:
         RUST_IMAGE_LABEL: ${RUST_IMAGE_LABEL}
         RUSTFMT_TOOLCHAIN: ${RUSTFMT_TOOLCHAIN:-}

@@ -16,12 +16,12 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: 'If true, publish the code to crates.io'
+        description: "If true, publish the code to crates.io"
         type: boolean
         required: true
         default: false
       deploy_to_gh_pages:
-        description: 'If true, deploy the user guide to GitHub Pages'
+        description: "If true, deploy the user guide to GitHub Pages"
         type: boolean
         required: true
         default: false
@@ -55,7 +55,7 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: '0' # 0 indicates all history for all branches and tags. Allows the use of `git`. See https://github.com/actions/checkout
+          fetch-depth: "0" # 0 indicates all history for all branches and tags. Allows the use of `git`. See https://github.com/actions/checkout
       - name: Git status and tags
         run: |
           git --version
@@ -106,4 +106,4 @@ env:
   CARGO_TARGET_DIR: ${{ github.workspace }}/.ci/target/mdbook-utils/main
   CARGO_BUILD_TARGET_DIR: ${{ github.workspace }}/.ci/target/mdbook-utils/main
   CARGO_BUILD_BUILD_DIR: ${{ github.workspace }}/.ci/build/mdbook-utils/main
-  CARGO_INCREMENTAL: '0'
+  CARGO_INCREMENTAL: "0"

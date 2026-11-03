@@ -1,7 +1,9 @@
 # Repository configuration
 
 Reviewed 2026-11-01. This is the consistency plan and reference for `mdbook-utils`.
+
 <!-- TODO Reviewed ??-??-2026 -->
+
 Keep this file, README, contributor guidance, and configuration comments synchronized.
 
 ## Consistency plan
@@ -15,18 +17,18 @@ Keep this file, README, contributor guidance, and configuration comments synchro
 
 ## File ownership
 
-| Files | Convention |
-| --- | --- |
-| `.editorconfig`, `.gitattributes` | UTF-8 and LF, four-space Rust/Python, two-space configuration; preserve Markdown hard breaks and binary attributes. |
-| `.gitignore`, `.dockerignore`, `.aiexclude` | Exclude outputs, compiler caches, environments, and worktrees; keep maintained configuration and lockfiles reviewable. Ignore files are not a security boundary. |
-| `AGENTS.md`, `CONTRIBUTING.md`, `README.md` | Keep repository-specific commands, ownership, and examples; link this reference. |
-| `Cargo.toml`, `clippy.toml`, `rustfmt.toml` | Workspace lint inheritance and a common baseline; preserve explicit exceptions and package compatibility requirements. |
-| `pyproject.toml`, `uv.lock` | Ruff uses 100 columns and LF; explicit default E4/E7/E9/F lint selection. Keep project Python pins and locked resolution. |
-| `prek.toml` | Keep the existing repository hook set and pinned hook revisions. Run the configured formatter and linter rather than duplicating policy in hooks. |
-| `dprint.jsonc` | Format Markdown, JSON/JSONC, TOML, and YAML with dprint; run `dprint fmt` to format and `dprint check` to verify. Rust source remains formatted by rustfmt. |
-| `.markdownlint.yaml` | Configure Markdown lint rules; dprint handles Markdown formatting separately. |
-| `deny.toml`, `nextest.toml` | Keep dependency-license exceptions, test filters, and resource/time limits local. Nextest normally discovers `.config/nextest.toml`; a Cargo profile is selected separately. |
-| `.github/`, `.devcontainer/`, `Dockerfile*` | Preserve deployment/platform behavior; align package coverage and cache inputs. Keep compiler/Python pins compatible with manifests and lockfiles. |
+| Files                                       | Convention                                                                                                                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.editorconfig`, `.gitattributes`           | UTF-8 and LF, four-space Rust/Python, two-space configuration; preserve Markdown hard breaks and binary attributes.                                                          |
+| `.gitignore`, `.dockerignore`, `.aiexclude` | Exclude outputs, compiler caches, environments, and worktrees; keep maintained configuration and lockfiles reviewable. Ignore files are not a security boundary.             |
+| `AGENTS.md`, `CONTRIBUTING.md`, `README.md` | Keep repository-specific commands, ownership, and examples; link this reference.                                                                                             |
+| `Cargo.toml`, `clippy.toml`, `rustfmt.toml` | Workspace lint inheritance and a common baseline; preserve explicit exceptions and package compatibility requirements.                                                       |
+| `pyproject.toml`, `uv.lock`                 | Ruff uses 100 columns and LF; explicit default E4/E7/E9/F lint selection. Keep project Python pins and locked resolution.                                                    |
+| `prek.toml`                                 | Keep the existing repository hook set and pinned hook revisions. Run the configured formatter and linter rather than duplicating policy in hooks.                            |
+| `dprint.jsonc`                              | Format Markdown, JSON/JSONC, TOML, and YAML with dprint; run `dprint fmt` to format and `dprint check` to verify. Rust source remains formatted by rustfmt.                  |
+| `.markdownlint.yaml`                        | Configure Markdown lint rules; dprint handles Markdown formatting separately.                                                                                                |
+| `deny.toml`, `nextest.toml`                 | Keep dependency-license exceptions, test filters, and resource/time limits local. Nextest normally discovers `.config/nextest.toml`; a Cargo profile is selected separately. |
+| `.github/`, `.devcontainer/`, `Dockerfile*` | Preserve deployment/platform behavior; align package coverage and cache inputs. Keep compiler/Python pins compatible with manifests and lockfiles.                           |
 
 ## Dependency updates
 
@@ -36,13 +38,13 @@ test-book, and malformed-manifest fixtures are excluded intentionally. Revisit t
 `.github/dependabot.yml` whenever a manifest, Dockerfile, chart, or local action is added.
 Python uv workspace members share the root lock; they do not need overlapping update entries.
 
-| Ecosystem | Roots |
-| --- | --- |
-| `cargo` | `/` |
-| `docker` | `/.devcontainer` |
+| Ecosystem        | Roots                 |
+| ---------------- | --------------------- |
+| `cargo`          | `/`                   |
+| `docker`         | `/.devcontainer`      |
 | `docker-compose` | `/`, `/.devcontainer` |
-| `devcontainers` | `/` |
-| `github-actions` | `/` |
+| `devcontainers`  | `/`                   |
+| `github-actions` | `/`                   |
 
 GitHub Actions uses `/` for workflows and explicit directories for nested composite actions.
 Dependabot can update supported toolchain files, container images/features, charts, and packages;
@@ -70,13 +72,13 @@ config discovery starts at the command's working directory; run from the owning 
 especially when that workspace has a child config. Config values override manifest profiles,
 and environment/command-line overrides take precedence over config values.
 
-| Profile | Workspace code | Dependencies and build tools |
-| --- | --- | --- |
-| `dev` / `test` | `opt-level = 0`, line tables, LTO off, 256 codegen units | `opt-level = "s"`, no debug info, 16 units; selected hashing, collections, math, regex, parallelism, allocator and macro crates use level 3. |
-| `debugging` | Level 0 and full symbols | Level 0 and full symbols, including build scripts/procedural macros; intentionally uses a separate cache variant. |
-| `ci` | Inherits `dev`, incremental disabled | Same flags as `dev` for dependency cache reuse. Use release jobs for performance validation. |
-| `tools` | Level 2 for repeatedly executed repository tools | Same dependency flags as `dev`; build overrides request level 3 with no debug info; named package overrides take precedence. |
-| `release` / other specialized profiles | Preserve existing shipping/profiling choices | Preserve existing shipping/profiling choices. |
+| Profile                                | Workspace code                                           | Dependencies and build tools                                                                                                                 |
+| -------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dev` / `test`                         | `opt-level = 0`, line tables, LTO off, 256 codegen units | `opt-level = "s"`, no debug info, 16 units; selected hashing, collections, math, regex, parallelism, allocator and macro crates use level 3. |
+| `debugging`                            | Level 0 and full symbols                                 | Level 0 and full symbols, including build scripts/procedural macros; intentionally uses a separate cache variant.                            |
+| `ci`                                   | Inherits `dev`, incremental disabled                     | Same flags as `dev` for dependency cache reuse. Use release jobs for performance validation.                                                 |
+| `tools`                                | Level 2 for repeatedly executed repository tools         | Same dependency flags as `dev`; build overrides request level 3 with no debug info; named package overrides take precedence.                 |
+| `release` / other specialized profiles | Preserve existing shipping/profiling choices             | Preserve existing shipping/profiling choices.                                                                                                |
 
 `test` inherits `dev`. Package overrides take precedence over build overrides; macro parsing
 crates are tuned explicitly. Optimization can increase cold compile time, and size optimization
@@ -111,12 +113,12 @@ of nextest's test-runner `--profile ci`.
 
 ## Linkers
 
-| Platform | Policy |
-| --- | --- |
-| Windows MSVC | Rust-bundled `rust-lld.exe` in the maintained repos; preserve stack flags. Rust How-To retains its measured default-linker exception. MSVC libraries/SDK are still required. |
+| Platform         | Policy                                                                                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Windows MSVC     | Rust-bundled `rust-lld.exe` in the maintained repos; preserve stack flags. Rust How-To retains its measured default-linker exception. MSVC libraries/SDK are still required.                     |
 | x86-64 GNU/Linux | Rust 1.90+ already defaults to LLD. Existing mold users retain mold and its installation steps. For AArch64/other triples, explicitly install/configure the appropriate linker before switching. |
-| macOS | Use the modern Apple linker shipped with Xcode 15+. sold's maintainer now recommends Apple's linker. |
-| Experiments | Compare mold and Wild on representative native Linux binaries. Wild lists Linux/Wasm support and future Mach-O/Windows/incremental-linking work; do not assume universal drop-in support. |
+| macOS            | Use the modern Apple linker shipped with Xcode 15+. sold's maintainer now recommends Apple's linker.                                                                                             |
+| Experiments      | Compare mold and Wild on representative native Linux binaries. Wild lists Linux/Wasm support and future Mach-O/Windows/incremental-linking work; do not assume universal drop-in support.        |
 
 Changing linker flags invalidates compiler cache keys. Benchmark cold and warm links with native
 dependencies, debug symbols, and release/LTO settings before adopting a new default.

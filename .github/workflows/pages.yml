@@ -25,7 +25,7 @@ env:
   CARGO_TARGET_DIR: ${{ github.workspace }}/.ci/target/mdbook-utils/main
   CARGO_BUILD_TARGET_DIR: ${{ github.workspace }}/.ci/target/mdbook-utils/main
   CARGO_BUILD_BUILD_DIR: ${{ github.workspace }}/.ci/build/mdbook-utils/main
-  CARGO_INCREMENTAL: '0'
+  CARGO_INCREMENTAL: "0"
 jobs:
   build:
     name: Build the user guide and its sitemap

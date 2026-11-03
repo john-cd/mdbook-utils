@@ -1,4 +1,5 @@
 <!-- TODO Reviewed ??-??-2026 -->
+
 # Configuration
 
 Path selection follows this order when a command supports the corresponding option: command-line option, matching environment variable, mdBook's `book.toml`, then the command's built-in default. The Markdown source default varies by command. `MDBOOK_UTILS_BOOK_ROOT_DIR_PATH` selects the directory containing `book.toml`; it defaults to the current working directory.
@@ -7,12 +8,12 @@ Path selection follows this order when a command supports the corresponding opti
 
 The mdBook `book.toml` is the only TOML configuration source; no separate `mdbook-utils` TOML file is needed. A missing `book.toml` is optional. If path resolution reaches an unreadable or malformed `book.toml`, the command reports the error instead of silently using defaults. When a valid configuration disables the HTML renderer, `sitemap` requires an explicit destination through `--output` or `MDBOOK_UTILS_BOOK_HTML_BUILD_DIR_PATH`.
 
-| Priority | Source | Example |
-| --- | --- | --- |
-| 1 | Command-line option | `--markdown-dir ./src/` |
-| 2 | Environment variable (or `.env` file in the current directory) | `MDBOOK_UTILS_MARKDOWN_DIR_PATH` |
-| 3 | mdBook's `book.toml` | `book.src`, `build.build-dir`, `output.html.site-url` |
-| 4 | The command's default | `./src/` |
+| Priority | Source                                                         | Example                                               |
+| -------- | -------------------------------------------------------------- | ----------------------------------------------------- |
+| 1        | Command-line option                                            | `--markdown-dir ./src/`                               |
+| 2        | Environment variable (or `.env` file in the current directory) | `MDBOOK_UTILS_MARKDOWN_DIR_PATH`                      |
+| 3        | mdBook's `book.toml`                                           | `book.src`, `build.build-dir`, `output.html.site-url` |
+| 4        | The command's default                                          | `./src/`                                              |
 
 All environment variables start with `MDBOOK_UTILS_`. The older unprefixed names (for example `BASE_URL` or `MARKDOWN_DIR_PATH`) are still read when the prefixed variable is not set, but print a deprecation warning and will be removed in a later release. Only a `.env` file in the current directory is loaded; parent directories are not searched.
 

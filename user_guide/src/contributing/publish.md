@@ -1,4 +1,5 @@
 <!-- TODO Reviewed ??-??-2026 -->
+
 ## Publish to crates.io
 
 1. Manual method
@@ -29,7 +30,7 @@ A manual run of the workflow builds and smoke-tests the archives without creatin
 ### Release checklist and rollback
 
 1. Update `RELEASES.md` and the version in `Cargo.toml`, merge to `develop`, and wait for CI.
-2. Publish to crates.io with the *Build, test, optionally deploy to Pages & publish* workflow (or the manual method above).
+2. Publish to crates.io with the _Build, test, optionally deploy to Pages & publish_ workflow (or the manual method above).
 3. Push the tag `vX.Y.Z` to create the GitHub release.
 4. Rollback: `cargo yank --version X.Y.Z mdbook-utils` hides a bad crates.io release without deleting it; delete the GitHub release and tag if the archives are bad, fix forward, and publish a new patch version.
 

@@ -106,6 +106,7 @@ The `user_guide\` and `test_book\` directories are independent mdBook projects a
 - Inspect running Cargo/rustc processes before starting expensive builds or cleaning artifacts. Do not stop another task's processes or restart the shared sccache server while builds are active.
 - Use `CODE_TEMP_ROOT` for Windows temporary files where an override is needed. Keep temporary files separate from persistent target, intermediate-build, Cargo, and sccache caches.
 - Finish with `git diff --check`. Report unavailable checks and pre-existing failures without attributing them to the current change.
+
 ## Central build outputs and worktrees
 
 - Keep auxiliary Git worktrees directly under `.worktrees/` in slots `a`, `b`, or `c` only; keep the primary checkout separate.

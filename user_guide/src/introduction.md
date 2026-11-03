@@ -1,4 +1,5 @@
 <!-- TODO Reviewed ??-??-2026 -->
+
 # Introduction
 
 ## What is `mdbook-utils`? What is it used for?
@@ -19,6 +20,6 @@ The `mdbook-utils` command-line tool manages _links_, _reference definitions_, a
 
 ## Key Links
 
-`mdbook-utils` [(GitHub repo)][mdbook-utils-github]  [(docs.rs)][mdbook-utils-docs-rs]  [(crates.io)][mdbook-utils-crates-io]  [(user guide - this book)][mdbook-utils-user-guide]
+`mdbook-utils` [(GitHub repo)][mdbook-utils-github] [(docs.rs)][mdbook-utils-docs-rs] [(crates.io)][mdbook-utils-crates-io] [(user guide - this book)][mdbook-utils-user-guide]
 
 {{#include ./refs.md}}
