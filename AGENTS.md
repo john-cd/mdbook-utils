@@ -19,6 +19,8 @@
 
 ## Git workflow
 
+- For issue work, create at least one commit per issue. Every commit must address only one issue; never combine multiple issues in a commit. An issue may have multiple focused commits.
+
 - Keep the primary checkout on `develop`; use short-lived topic branches in clean, inactive worktree slots for implementation. Prefer `codex/issue-<number>-<description>` for issue work.
 - Keep history linear. Rebase topic branches onto current `develop` before integration; use fast-forward integration or squash-merge PRs according to the requested workflow. Do not create merge commits to synchronize `develop`.
 - Inspect local and remote history before integrating. Fast-forward when only behind; rebase unpublished local commits when histories diverge. Never rewrite shared history; use `--force-with-lease` only for an authorized update to an unshared rebased topic branch.
