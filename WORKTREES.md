@@ -1,6 +1,6 @@
 # Worktrees
 
-Updated 2026-11-01 (America/Los_Angeles). This file describes the managed layout;
+Updated 2026-11-03 (America/Los_Angeles). This file describes the managed layout;
 use `git worktree list --porcelain` and `git status --short` for live state.
 
 - The primary checkout stays on `develop` and uses cache slot `main`.
@@ -22,6 +22,7 @@ Windows defaults are `CODE_REPOS_ROOT=D:/code`,
 `CODE_PACKAGES_ROOT=D:/packages`, and `CODE_TOOLS_ROOT=C:/tools`.
 Unix uses native home/cache/temp directories. Root overrides do not move existing
 installations or rewrite independent package-manager settings.
+
 ## Rust
 
 Use `just build-env` to inspect the effective environment and
@@ -44,19 +45,22 @@ from a standalone `mdbook-utils` checkout.
 
 ## Current state
 
-Reviewed 2026-11-01. The primary checkout is clean on `develop`; this inventory
-commit is local and not yet pushed.
+Reviewed 2026-11-01.
+TODO Reviewed ??-??-2026.
 
-| Checkout       | Branch or revision | Status |
-| -------------- | ------------------ | ------ |
-| Repository root | `develop` | Clean; inventory commit remains local. |
-| `.worktrees/a` | detached / `8926394f` | Clean. |
-| `.worktrees/b` | detached / `8926394f` | Clean. |
-| `.worktrees/c` | detached / `8926394f` | Clean. |
+Refresh this snapshot from live Git state before moving any
+checkout. The inventory itself is edited on the active local issue branch and is
+not yet integrated or published.
 
-Slot `e` was detached and removed. Its unique commit remains on the local
-`codex/cargo-update` branch at `4a975c2f`; preserve that branch until its commit
-is integrated or deliberately retired. No per-slot build or target outputs
-existed for `e`. The unregistered junction-only slot `d` and its build and
-target outputs were removed. Use `git worktree list --porcelain` and
-`git status --short` to refresh this snapshot.
+| Checkout        | Branch or revision                                   | Status                                                                              |
+| --------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Repository root | `develop` at `e2914ad`                               | Clean; matches `origin/develop`.                                                    |
+| `.worktrees/a`  | `codex/issue-268-269-ci-cache-fixtures` at `c6698c1` | Clean; four local issue commits, not published.                                     |
+| `.worktrees/b`  | detached at `bc98697`                                | Clean; retains unique `1a0bec1` and `bc98697` commits. Do not move until preserved. |
+| `.worktrees/c`  | detached at `f833761`                                | Clean; retains unique `f833761` commit. Do not move until preserved.                |
+
+The remote `codex/wsl-build-policy-f6bf7fd` branch at `f6bf7fd` remains
+unmerged and patch-unique; retain it for review. Historical backup refs are
+preserved. No checkout or branch was removed during this inventory. Use
+`git worktree list --porcelain`, `git status --short`, and `git log` to refresh
+this snapshot before making changes.
