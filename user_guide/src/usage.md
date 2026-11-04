@@ -50,3 +50,7 @@ In turn, most commands offer a menu of subcommands.
 | Rewriting inline links as reference links in place, reference-definition clean-up, HTTP link checking, search  | `book_tooling`                     |
 
 `mdbook-utils` keeps pulldown-cmark for its read-only scans and does not rewrite link syntax in place. Commands that overlap with `book_tooling` (`links write-inline`, `refdefs write`) stay as reports and are not extended further.
+
+The tools are separate binaries with independent parsers and URL/badge rule tables. `mdbook-utils`
+uses pulldown-cmark for read-only scans; `book_tooling` uses `parse_lib` for source-preserving
+analysis and edits.

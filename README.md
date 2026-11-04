@@ -65,7 +65,9 @@ cleanup, HTTP link checking, search, and comment extraction.
 | Generate sitemaps, manage includes and code examples, or build crate/category indexes | `mdbook-utils`                                      |
 
 `mdbook-utils links write-inline` and `refdefs write` only write reports. They do not edit source
-Markdown; use `book_tooling` for authoring-time rewrites.
+Markdown; use `book_tooling` for authoring-time rewrites. The tools remain separate binaries with
+independent parsers and URL/badge rule tables: `mdbook-utils` keeps pulldown-cmark for read-only scans,
+while `book_tooling` uses `parse_lib` for source-preserving analysis and edits.
 
 ### Environment Variables
 
