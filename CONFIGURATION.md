@@ -37,6 +37,7 @@ the maintained roots; workspace members share their root manifest/lockfile. Immu
 test-book, and malformed-manifest fixtures are excluded intentionally. Revisit this table and
 `.github/dependabot.yml` whenever a manifest, Dockerfile, chart, or local action is added.
 Python uv workspace members share the root lock; they do not need overlapping update entries.
+Version updates have a seven-day cooldown; security updates are not delayed by this setting.
 
 | Ecosystem        | Roots                 |
 | ---------------- | --------------------- |
@@ -44,16 +45,21 @@ Python uv workspace members share the root lock; they do not need overlapping up
 | `docker`         | `/.devcontainer`      |
 | `docker-compose` | `/`, `/.devcontainer` |
 | `devcontainers`  | `/`                   |
+| `rust-toolchain` | `/`                   |
 | `github-actions` | `/`                   |
 
 GitHub Actions uses `/` for workflows and explicit directories for nested composite actions.
-Dependabot can update supported toolchain files, container images/features, charts, and packages;
-it does not update arbitrary version strings in shell scripts or custom formatter-pin files.
+The current inventory has one maintained root Cargo package and an immutable `test_book/code`
+manifest fixture, one devcontainer, three Compose files, the root Rust and Rustfmt toolchain pins,
+and four GitHub workflows; there are no Python projects, charts, submodules, or local composite
+actions. Dependabot can update supported toolchain files, container images/features, and packages;
+it does not update arbitrary version strings in shell scripts or workflow `tool:` inputs. Review
+those manual pins when updating tool versions.
 
 ## CI caches
 
 Rust-cache entries include toolchain/environment inputs plus workflow, job, architecture, and
-Cargo-config/lockfile hashes. Save Rust artifact caches only on pushes to the default branch;
+Cargo manifest/config/lockfile hashes (including profile and feature definitions). Save Rust artifact caches only on pushes to the default branch;
 pull requests restore caches. CI sets matching `CODE_*` and `CARGO_*` paths under `.ci/target/<repo>/main` and
 `.ci/build/<repo>/main`. Rust-cache workspace maps use those same absolute paths,
 including intermediate artifacts, so direct Cargo and task runners reuse one output tree.
