@@ -13,6 +13,7 @@ use tracing::debug;
 use crate::api::BadgeStyle;
 use crate::link::Link;
 use crate::link::LinkBuilder;
+use crate::link::RuleKind;
 use crate::link::write_badge_refdefs_and_links_to_two;
 
 // [![github][github-badge]][github]
@@ -36,8 +37,8 @@ where
 {
     let sorted_refdefs: BTreeMap<_, _> = parser.reference_definitions().iter().collect();
 
-    let rule = &crate::link::GLOBAL_RULES["github repo"];
-    let re = &crate::link::COMPILED_RULES["github repo"];
+    let rule = &crate::link::GLOBAL_RULES[&RuleKind::GithubRepo];
+    let re = &crate::link::COMPILED_RULES[&RuleKind::GithubRepo];
 
     let mut links = Vec::new();
 

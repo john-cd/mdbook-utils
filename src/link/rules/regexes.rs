@@ -6,6 +6,53 @@ use std::collections::HashMap;
 
 use regex::Regex;
 
+/// Identifies a URL-matching rule used by badge and reference helpers.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub(crate) enum RuleKind {
+    /// A crates.io category URL.
+    Category,
+    /// The crates.io home page.
+    CratesIo,
+    /// A crates.io crate page.
+    Crate,
+    /// The docs.rs home page.
+    DocsRs,
+    /// A docs.rs crate or item page.
+    Documentation,
+    /// The Rust standard-library home page.
+    Std,
+    /// A Rust standard-library or core item page.
+    StdItemDocumentation,
+    /// The lib.rs home page.
+    LibRs,
+    /// A crate page on lib.rs.
+    CrateOnLibRs,
+    /// A GitHub repository wiki page.
+    GithubRepoWiki,
+    /// A matching file under john-cd/rust_howto.
+    GithubComJohnCd,
+    /// A GitHub repository URL.
+    GithubRepo,
+    /// A GitHub Pages site.
+    GithubPages,
+    /// The Rust Book home page.
+    RustBook,
+    /// A Rust Book chapter page.
+    RustBookItem,
+    /// A Rust Reference page.
+    RustReference,
+    /// The Rust by Example home page.
+    RustByExampleBook,
+    /// A Rust by Example chapter page.
+    RustByExampleChapter,
+    /// A Cargo Book page.
+    CargoBook,
+    /// A generic website root URL.
+    Website,
+    /// A page on a generic website.
+    WebsitePage,
+}
+
 /// A URL-matching rule: a regex plus the patterns derived from a match.
 #[derive(Debug, Default)]
 pub(crate) struct Rule<'a> {
@@ -17,7 +64,7 @@ pub(crate) struct Rule<'a> {
 }
 
 /// Globally compiled regexes for each rule.
-pub(crate) static COMPILED_RULES: std::sync::LazyLock<HashMap<&str, Regex>> =
+pub(crate) static COMPILED_RULES: std::sync::LazyLock<HashMap<RuleKind, Regex>> =
     std::sync::LazyLock::new(|| {
         GLOBAL_RULES
             .iter()
@@ -25,14 +72,14 @@ pub(crate) static COMPILED_RULES: std::sync::LazyLock<HashMap<&str, Regex>> =
                 (
                     *name,
                     Regex::new(rule.re)
-                        .unwrap_or_else(|_| panic!("Invalid regex for rule: {name}")),
+                        .unwrap_or_else(|_| panic!("Invalid regex for rule: {name:?}")),
                 )
             })
             .collect()
     });
 
 /// All rules that transform a URL to a label or badge URL.
-pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
+pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<RuleKind, Rule<'_>>> =
     std::sync::LazyLock::new(|| {
         let mut m = HashMap::new();
 
@@ -41,7 +88,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [cat-websocket]: https://crates.io/categories/web-programming::websocket/
         // Optional query
         m.insert(
-        "category",
+        RuleKind::Category,
         Rule {
             re: r"https://crates.io/categories/(?<catg>[^/?]+)/?(?:\?\S+)?",
             badge_url_pattern: "https://badge-cache.kominick.com/badge/${catg}--x.svg?style=social",
@@ -51,7 +98,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // CRATES
         // [crates-io]: https://crates.io/
         m.insert(
-            "crates.io",
+            RuleKind::CratesIo,
             Rule {
                 re: "https://crates.io(?:/crates)?/?",
                 ..Rule::default()
@@ -60,14 +107,14 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
 
         // [smol-badge]: https://badge-cache.kominick.com/crates/v/smol.svg?label=smol
         // [smol-crate]: https://crates.io/crates/smol/
-        m.insert("crate", Rule {
+        m.insert(RuleKind::Crate, Rule {
         re: "https://crates.io/crates/(?<crate>[^/?]+)/?",
         badge_url_pattern: "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}",
     });
 
         // DOCS
         m.insert(
-            "docs.rs",
+            RuleKind::DocsRs,
             Rule {
                 re: "https://docs.rs/?",
                 ..Rule::default()
@@ -79,7 +126,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [actix-web]: https://docs.rs/actix-web/latest/actix_web/
         // [join]: https://docs.rs/rayon/latest/rayon/fn.join.html
         // [spawn-blocking]: https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html
-        m.insert("documentation", Rule {
+        m.insert(RuleKind::Documentation, Rule {
         re: r"https://docs.rs/(?<crate>[^/]+)(?:/(?:latest|[^/]+))?(?<item>(?:/[^/]+)+)?/?(?:index\.html)?",
         badge_url_pattern: "https://badge-cache.kominick.com/crates/v/${crate}.svg?label=${crate}",
     });
@@ -88,7 +135,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [std]: https://doc.rust-lang.org/std/"
         // [std-badge]: https://badge-cache.kominick.com/badge/std-1.75.0-blue.svg
         m.insert(
-            "std",
+            RuleKind::Std,
             Rule {
                 re: "https://doc.rust-lang.org/std/?",
                 badge_url_pattern: "https://badge-cache.kominick.com/badge/std-1.75.0-blue.svg",
@@ -99,7 +146,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [std::sync::atomic]: https://doc.rust-lang.org/std/sync/atomic/"
         // [core::cell::OnceCell]: https://doc.rust-lang.org/core/cell/struct.OnceCell.html
         m.insert(
-        "std item documentation",
+        RuleKind::StdItemDocumentation,
         Rule {
             re: r"https://doc.rust-lang.org/(?<lib>std|core)/(?<rest>[^/?#]+?(?:/[^/?#]+?)*?)(?:/|\.html|[?#]|$)(?:[?#].*)?$",
             ..Rule::default()
@@ -109,7 +156,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // LIB.RS
         // https://lib.rs/
         m.insert(
-            "lib.rs",
+            RuleKind::LibRs,
             Rule {
                 re: "https://lib.rs/?",
                 ..Rule::default()
@@ -117,7 +164,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         );
         // [sqlx-librs]: https://lib.rs/crates/sqlx/
         m.insert(
-            "crate on lib.rs",
+            RuleKind::CrateOnLibRs,
             Rule {
                 re: "https://lib.rs/crates/(?<crate>[^/]+)/?",
                 ..Rule::default()
@@ -127,7 +174,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // GITHUB REPO WIKI
         // https://github.com/cross-rs/cross/wiki/Getting-Started
         m.insert(
-            "github repo wiki",
+            RuleKind::GithubRepoWiki,
             Rule {
                 re: r"https://github.com/(?<owner>\S*?)/(?<repo>\S*?)/wiki/(?:\S+?)",
                 ..Rule::default()
@@ -139,7 +186,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // GITHUB
         // https://github.com/john-cd/rust_howto/blob/main/CONTRIBUTING.md
         m.insert(
-            "github.com/john-cd",
+            RuleKind::GithubComJohnCd,
             Rule {
                 re: r"https://github.com/john-cd/rust_howto/(?:\S+?/)*(?<last>\S*)(?:/|.md)?",
                 ..Rule::default()
@@ -149,7 +196,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [sqlx-github]: https://github.com/launchbadge/sqlx/
         // https://github.com/amar-laksh/workstation/blob/master/src/main.rs
         m.insert(
-            "github repo",
+            RuleKind::GithubRepo,
             Rule {
                 re: "https://github.com/(?<owner>[^/]+?)/(?<repo>[^/]+)/?.*",
                 badge_url_pattern: "https://img.shields.io/badge/${repo}-steelblue?logo=github",
@@ -160,7 +207,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [rustup-documentation]: https://rust-lang.github.io/rustup/
         // [rustup-command-examples]: https://rust-lang.github.io/rustup/examples.html
         m.insert(
-            "github pages",
+            RuleKind::GithubPages,
             Rule {
                 re: r"https://(?<owner>[^.]+)\.github\.io/(?<repo>[^/]+)/?.*",
                 badge_url_pattern: "https://img.shields.io/badge/${repo}-red?logo=githubpages",
@@ -173,7 +220,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [rust-book-badge]: https://img.shields.io/badge/Rust_Book-blue?logo=mdbook
         // [rust-book]: https://doc.rust-lang.org/book/
         m.insert(
-            "rust book",
+            RuleKind::RustBook,
             Rule {
                 re: "https://doc.rust-lang.org/book/?",
                 badge_url_pattern: "https://img.shields.io/badge/Rust_Book-blue?logo=mdbook",
@@ -183,7 +230,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [box-rust-book-badge]: https://img.shields.io/badge/Box-blue?logo=mdbook
         // [box-rust-book]: https://doc.rust-lang.org/book/ch15-01-box.html
         m.insert(
-            "rust book item",
+            RuleKind::RustBookItem,
             Rule {
                 re: r"https://doc.rust-lang.org/book/ch\d{2}-\d{2}-(?<item>[^.]+)\.html",
                 badge_url_pattern: "https://img.shields.io/badge/${item}-blue?logo=mdbook",
@@ -195,7 +242,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [object-safe-reference]: https://doc.rust-lang.org/nightly/reference/items/traits.html#object-safety
         // [attributes-reference]: https://doc.rust-lang.org/reference/attributes.html
         // [conditional-compilation]: https://doc.rust-lang.org/reference/conditional-compilation.html#the-cfg-attribute
-        m.insert("rust reference", Rule {
+        m.insert(RuleKind::RustReference, Rule {
         re: r"https://doc.rust-lang.org(?:/nightly)?/reference/(?:(?<chapter>[^/]+)/)?(?<item>[^/]+)\.html(?:#\S+)?",
         badge_url_pattern: "https://img.shields.io/badge/${item}-green?logo=mdbook",
     });
@@ -204,7 +251,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [rust-by-example-book-badge]: https://img.shields.io/badge/RBE-violet?logo=mdbook
         // [rust-by-example-book]: https://doc.rust-lang.org/rust-by-example/
         m.insert(
-        "rust by example book",
+        RuleKind::RustByExampleBook,
         Rule {
             re: "https://doc.rust-lang.org/rust-by-example/?",
             badge_url_pattern: "https://img.shields.io/badge/Rust_by_example-violet?logo=mdbook",
@@ -214,7 +261,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [visibility-rules-rust-by-example-badge]: https://img.shields.io/badge/RBE-Visibility_Rules-violet?logo=mdbook
         // [visibility-rules-rust-by-example]: https://doc.rust-lang.org/rust-by-example/mod/visibility.html
         m.insert(
-        "rust by example chapter",
+        RuleKind::RustByExampleChapter,
         Rule {
             re: r"https://doc.rust-lang.org/rust-by-example/(?:[^/]+/)*(?<last>[^/.]+)(?:\.html)?",
             badge_url_pattern:
@@ -225,7 +272,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // CARGO BOOK
         // [cargo-book]: https://doc.rust-lang.org/cargo/index.html
         m.insert(
-        "cargo book",
+        RuleKind::CargoBook,
         Rule {
             re: r"https://doc.rust-lang.org/cargo/(?<rest>[^/.]+)(?:\.html)?",
             badge_url_pattern: "https://img.shields.io/badge/Cargo_Book-${rest}-yellow?logo=mdbook",
@@ -234,7 +281,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
 
         // GENERIC
         m.insert(
-            "website",
+            RuleKind::Website,
             Rule {
                 re: r"^https?://(?<domain>[^/?#\s]+)/?(?:[?#][^\s]*)?$",
                 ..Rule::default()
@@ -245,7 +292,7 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<&str, Rule<'_>>> =
         // [tokio-glossary]: https://tokio.rs/tokio/glossary
         // [tokio-tutorial]: https://tokio.rs/tokio/tutorial
         m.insert(
-        "website page",
+        RuleKind::WebsitePage,
         Rule {
             re: r"^https?://(?<domain>[^/?#\s]+)/(?:[^\s?#]*/)*(?<last>[^/?#\s]+?)(?:\.html|/)?(?:[?#][^\s]*)?$",
             ..Rule::default()
@@ -260,8 +307,8 @@ mod tests {
     use super::*;
 
     /// Returns the compiled matching rule named by `name`.
-    fn get_re(name: &str) -> &'static Regex {
-        COMPILED_RULES.get(name).expect("input should parse")
+    fn get_re(name: RuleKind) -> &'static Regex {
+        COMPILED_RULES.get(&name).expect("rule kind should exist")
     }
 
     /// Every rule compiles, and the rule looked up by name at run time exists,
@@ -269,14 +316,14 @@ mod tests {
     #[test]
     fn every_rule_compiles_and_the_github_repo_rule_exists() {
         assert_eq!(COMPILED_RULES.len(), GLOBAL_RULES.len());
-        assert!(GLOBAL_RULES.contains_key("github repo"));
-        assert!(COMPILED_RULES.contains_key("github repo"));
+        assert!(GLOBAL_RULES.contains_key(&RuleKind::GithubRepo));
+        assert!(COMPILED_RULES.contains_key(&RuleKind::GithubRepo));
     }
 
     /// Matches a crates.io category URL and captures its name.
     #[test]
     fn test_category_rule() {
-        let re = get_re("category");
+        let re = get_re(RuleKind::Category);
         let url = "https://crates.io/categories/web-programming::websocket/";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -286,7 +333,7 @@ mod tests {
     /// Matches the crates.io home and crates pages.
     #[test]
     fn test_crates_io_rule() {
-        let re = get_re("crates.io");
+        let re = get_re(RuleKind::CratesIo);
         assert!(re.is_match("https://crates.io/"));
         assert!(re.is_match("https://crates.io/crates"));
     }
@@ -294,7 +341,7 @@ mod tests {
     /// Matches a crates.io crate URL and captures the crate name.
     #[test]
     fn test_crate_rule() {
-        let re = get_re("crate");
+        let re = get_re(RuleKind::Crate);
         let url = "https://crates.io/crates/smol/";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -304,14 +351,14 @@ mod tests {
     /// Matches the docs.rs home page.
     #[test]
     fn test_docs_rs_rule() {
-        let re = get_re("docs.rs");
+        let re = get_re(RuleKind::DocsRs);
         assert!(re.is_match("https://docs.rs/"));
     }
 
     /// Matches a docs.rs item page.
     #[test]
     fn test_documentation_rule() {
-        let re = get_re("documentation");
+        let re = get_re(RuleKind::Documentation);
         let url = "https://docs.rs/sqlx/latest/sqlx/struct.Pool.html";
         assert!(re.is_match(url), "documentation rule failed to match {url}");
         let caps = re.captures(url).expect("input should parse");
@@ -326,14 +373,14 @@ mod tests {
     /// Matches the standard library documentation home.
     #[test]
     fn test_std_rule() {
-        let re = get_re("std");
+        let re = get_re(RuleKind::Std);
         assert!(re.is_match("https://doc.rust-lang.org/std/"));
     }
 
     /// Matches a standard library item page and captures its path.
     #[test]
     fn test_std_item_documentation_rule() {
-        let re = get_re("std item documentation");
+        let re = get_re(RuleKind::StdItemDocumentation);
         let url = "https://doc.rust-lang.org/std/option/";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -357,14 +404,14 @@ mod tests {
     /// Matches the lib.rs home page.
     #[test]
     fn test_lib_rs_rule() {
-        let re = get_re("lib.rs");
+        let re = get_re(RuleKind::LibRs);
         assert!(re.is_match("https://lib.rs/"));
     }
 
     /// Matches a crate page on lib.rs.
     #[test]
     fn test_crate_on_lib_rs_rule() {
-        let re = get_re("crate on lib.rs");
+        let re = get_re(RuleKind::CrateOnLibRs);
         let url = "https://lib.rs/crates/sqlx/";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -374,7 +421,7 @@ mod tests {
     /// Matches a GitHub wiki page and captures owner and repository.
     #[test]
     fn test_github_repo_wiki_rule() {
-        let re = get_re("github repo wiki");
+        let re = get_re(RuleKind::GithubRepoWiki);
         let url = "https://github.com/cross-rs/cross/wiki/Getting-Started";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -385,7 +432,7 @@ mod tests {
     /// Matches a file in a john-cd repository.
     #[test]
     fn test_github_john_cd_rule() {
-        let re = get_re("github.com/john-cd");
+        let re = get_re(RuleKind::GithubComJohnCd);
         let url = "https://github.com/john-cd/rust_howto/blob/main/CONTRIBUTING.md";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -395,7 +442,7 @@ mod tests {
     /// Matches a GitHub repository URL.
     #[test]
     fn test_github_repo_rule() {
-        let re = get_re("github repo");
+        let re = get_re(RuleKind::GithubRepo);
         let url = "https://github.com/john-cd/mdbook-utils";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -412,7 +459,7 @@ mod tests {
     /// Matches a GitHub Pages site.
     #[test]
     fn test_github_pages_rule() {
-        let re = get_re("github pages");
+        let re = get_re(RuleKind::GithubPages);
         let url = "https://rust-lang.github.io/rustup/";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -423,14 +470,14 @@ mod tests {
     /// Matches the Rust Book home page.
     #[test]
     fn test_rust_book_rule() {
-        let re = get_re("rust book");
+        let re = get_re(RuleKind::RustBook);
         assert!(re.is_match("https://doc.rust-lang.org/book/"));
     }
 
     /// Matches a Rust Book chapter and captures its name.
     #[test]
     fn test_rust_book_item_rule() {
-        let re = get_re("rust book item");
+        let re = get_re(RuleKind::RustBookItem);
         let url = "https://doc.rust-lang.org/book/ch15-01-box.html";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -440,7 +487,7 @@ mod tests {
     /// Matches a Rust Reference page.
     #[test]
     fn test_rust_reference_rule() {
-        let re = get_re("rust reference");
+        let re = get_re(RuleKind::RustReference);
         let url = "https://doc.rust-lang.org/reference/attributes.html";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -457,14 +504,14 @@ mod tests {
     /// Matches the Rust by Example home page.
     #[test]
     fn test_rust_by_example_book_rule() {
-        let re = get_re("rust by example book");
+        let re = get_re(RuleKind::RustByExampleBook);
         assert!(re.is_match("https://doc.rust-lang.org/rust-by-example/"));
     }
 
     /// Matches a Rust by Example chapter.
     #[test]
     fn test_rust_by_example_chapter_rule() {
-        let re = get_re("rust by example chapter");
+        let re = get_re(RuleKind::RustByExampleChapter);
         let url = "https://doc.rust-lang.org/rust-by-example/mod/visibility.html";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -474,7 +521,7 @@ mod tests {
     /// Matches a Cargo Book page.
     #[test]
     fn test_cargo_book_rule() {
-        let re = get_re("cargo book");
+        let re = get_re(RuleKind::CargoBook);
         let url = "https://doc.rust-lang.org/cargo/index.html";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -484,7 +531,7 @@ mod tests {
     /// Matches a bare website domain.
     #[test]
     fn test_website_rule() {
-        let re = get_re("website");
+        let re = get_re(RuleKind::Website);
         let url = "https://dev.to/";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -523,7 +570,7 @@ mod tests {
     /// query/fragment data.
     #[test]
     fn test_website_rule_handles_unicode_query_and_fragment() {
-        let re = get_re("website");
+        let re = get_re(RuleKind::Website);
         let url = "https://例え.テスト?topic=rust%2Fmarkdown#intro";
         let caps = re.captures(url).expect("input should parse");
         assert_eq!(&caps["domain"], "例え.テスト");
@@ -532,7 +579,7 @@ mod tests {
     /// Rejects generic root destinations with a missing host or raw whitespace.
     #[test]
     fn test_website_rule_rejects_malformed_destinations() {
-        let re = get_re("website");
+        let re = get_re(RuleKind::Website);
         for url in [
             "https://?query=1",
             "https:///path",
@@ -545,7 +592,7 @@ mod tests {
     /// Matches a page on an arbitrary website.
     #[test]
     fn test_website_page_rule() {
-        let re = get_re("website page");
+        let re = get_re(RuleKind::WebsitePage);
         let url = "https://dev.to/22mahmoud/my-terminal-became-more-rusty-4g8l";
         assert!(re.is_match(url));
         let caps = re.captures(url).expect("input should parse");
@@ -601,7 +648,7 @@ mod tests {
     /// whitespace.
     #[test]
     fn test_website_page_rule_rejects_malformed_destinations() {
-        let re = get_re("website page");
+        let re = get_re(RuleKind::WebsitePage);
         for url in [
             "https://?/page",
             "https:///page",
