@@ -30,6 +30,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
@@ -63,10 +65,16 @@ jobs:
           echo "archive=$archive" >> "$GITHUB_OUTPUT"
 
       - name: Smoke test the packaged binary
+        env:
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+          ARCHIVE_FORMAT: ${{ matrix.ext }}
         run: |
           mkdir smoke
-          if [ "${{ matrix.ext }}" = "zip" ]; then 7z x -osmoke "${{ steps.package.outputs.archive }}" > /dev/null; else tar -C smoke -xzf "${{ steps.package.outputs.archive }}"; fi
-          ./smoke/mdbook-utils* --help | head -n 5
+          if [ "$ARCHIVE_FORMAT" = "zip" ]; then 7z x -osmoke "$ARCHIVE" > /dev/null; else tar -C smoke -xzf "$ARCHIVE"; fi
+          smoke_binary=$(find smoke -maxdepth 1 -type f -name 'mdbook-utils*' -print -quit)
+          test -n "$smoke_binary"
+          "$smoke_binary" --help > smoke/help.txt
+          sed -n '1,5p' smoke/help.txt
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

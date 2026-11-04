@@ -29,8 +29,6 @@ on:
 ## Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 ## Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 ## However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -50,12 +48,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Basic information
-        run: echo "The job was automatically triggered by a ${{ github.event_name }} event from @${{ github.actor }}.
-          The OS is ${{ runner.os }}. The current dir is $(pwd)"
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+        run: echo "The job was automatically triggered by a ${EVENT_NAME} event from @${ACTOR}. The OS is ${RUNNER_OS}. The current dir is $(pwd)"
       - name: Code checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: "0" # 0 indicates all history for all branches and tags. Allows the use of `git`. See https://github.com/actions/checkout
+          persist-credentials: false
       - name: Git status and tags
         run: |
           git --version
@@ -95,7 +96,10 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.github_deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - name: Deploy to GitHub Pages
         id: github_deployment
