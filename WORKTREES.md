@@ -48,23 +48,30 @@ from a standalone `mdbook-utils` checkout.
 Reviewed 2026-11-01.
 TODO Reviewed ??-??-2026.
 
-Refresh this snapshot from live Git state before moving any
-checkout. The inventory itself is edited on the active local issue branch and is
-not yet integrated or published.
+Refresh this snapshot from live Git state before moving any checkout. This
+inventory update is on an unpublished local issue branch.
 
-| Checkout        | Branch or revision                                   | Status                                                                              |
-| --------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Repository root | `develop` at `e2914ad`                               | Clean; matches `origin/develop`.                                                    |
-| `.worktrees/a`  | `codex/issue-268-269-ci-cache-fixtures` at `c6698c1` | Clean; four local issue commits, not published.                                     |
-| `.worktrees/b`  | detached at `bc98697`                                | Clean; retains unique `1a0bec1` and `bc98697` commits. Do not move until preserved. |
-| `.worktrees/c`  | detached at `f833761`                                | Clean; retains unique `f833761` commit. Do not move until preserved.                |
+| Checkout        | Branch or revision                                   | Status                                                                     |
+| --------------- | ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| Repository root | `develop` at `e2914ad`                               | Clean; matches `origin/develop`.                                           |
+| `.worktrees/a`  | `codex/issue-268-269-ci-cache-fixtures` at `a9157ed` | Clean; 13 issue-scoped commits, unpublished and pending final integration. |
+| `.worktrees/b`  | detached at `bc98697`                                | Clean; retains patch-unique `1a0bec1`. Keep this checkout and cache.       |
+| `.worktrees/c`  | detached at `f833761`                                | Clean; retains patch-unique `8926394`. Keep this checkout and cache.       |
 
-Update (2026-11-03): `.worktrees/a` has advanced to `01bf403` and contains
-uncommitted #259 RuleKind work; the table's `.worktrees/a` row is superseded.
-The other checkout rows remain current.
+Other unmerged refs retained for review:
 
-The remote `codex/wsl-build-policy-f6bf7fd` branch at `f6bf7fd` remains
-unmerged and patch-unique; retain it for review. Historical backup refs are
-preserved. No checkout or branch was removed during this inventory. Use
-`git worktree list --porcelain`, `git status --short`, and `git log` to refresh
-this snapshot before making changes.
+- Local `codex/cargo-update` points to patch-unique `4a975c2` (Cargo lockfile).
+- Remote `codex/wsl-build-policy-f6bf7fd` points to patch-unique `f6bf7fd` (build/cache policy).
+- The local and remote `backup/tooling-20261031/*` refs remain archival snapshots.
+  `develop-before` and `working-state` retain unique patch ids `9b413c3`,
+  `934a522`, `a2c3f28`, `d36909d`, and `0ce88b2`; the worktree snapshots retain
+  `8926394`. The nested remote backups retain `2fd3a04`, `e3c148a`, `86b4ba0`,
+  `ea8a3ee`, `9731954`, and `8c3fc8f`.
+- `backup/develop-before-sync-20261031-5d9eaa67` has no patch-unique commits
+  compared with `develop`; retain it as a recovery snapshot.
+
+`main` remains the independent empty root history. No checkout, branch, or
+build cache was removed or repurposed. Detached worktrees `b` and `c` retain
+their unique commits in place. Refresh this inventory from
+`git worktree list --porcelain`, per-checkout `git status --short`, and
+`git cherry develop <ref>` before any checkout or branch retirement.
