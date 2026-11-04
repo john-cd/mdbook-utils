@@ -10,6 +10,8 @@ use std::hash::Hasher;
 use heck::ToKebabCase as _;
 use pulldown_cmark::LinkType;
 
+use super::super::rules::suggest_label_from_url;
+
 /// `Link` is a structure that collects all necessary information to
 /// write Markdown (inline or reference-style) links and reference
 /// definitions, including badges.
@@ -85,12 +87,26 @@ impl<'a> Link<'a> {
         }
     }
 
-    /// Returns the link's reference label, if it exists, or the
-    /// kebab-cased link's text
+    /// Returns the explicit label, kebab-cased text, or URL-derived suggestion.
     pub(crate) fn get_label(&self) -> Cow<'_, str> {
         if let Some(label) = &self.label {
             Cow::Borrowed(label.as_ref())
-        } else if let Some(txt) = &self.text {
+        } else if self
+            .text
+            .as_deref()
+            .is_none_or(|text| text.is_empty() || Some(text) == self.url.as_deref())
+        {
+            suggest_label_from_url(self.url.as_deref().unwrap_or_default()).map_or_else(
+                || {
+                    self.text
+                        .as_deref()
+                        .unwrap_or_default()
+                        .to_kebab_case()
+                        .into()
+                },
+                Cow::Owned,
+            )
+        } else if let Some(txt) = self.text.as_deref().filter(|text| !text.is_empty()) {
             txt.to_kebab_case().into()
         } else {
             Cow::Borrowed("")
@@ -113,8 +129,12 @@ impl<'a> Link<'a> {
     /// Return a reference-style Markdown link:
     /// \[text\]\[label\] or \[text/label\]
     pub(crate) fn to_reference_link(&self) -> Cow<'_, str> {
-        let txt: String = self.get_text().into();
         let label: String = self.get_label().into();
+        let txt: String = if self.get_text().is_empty() {
+            self.get_url().into()
+        } else {
+            self.get_text().into()
+        };
         if txt == label {
             format!("[{txt}]").into()
         } else {
