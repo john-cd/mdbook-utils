@@ -37,6 +37,7 @@ ENV RUSTFMT_TOOLCHAIN=${RUSTFMT_TOOLCHAIN}
 
 ARG MDBOOK_VERSION
 ARG SCCACHE_VERSION
+ARG JUST_VERSION
 
 ## Install cargo binstall (binary install)
 ## Install just, mdbook, etc... from the binary release
