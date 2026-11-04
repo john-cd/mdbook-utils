@@ -51,12 +51,12 @@ TODO Reviewed ??-??-2026.
 Refresh this snapshot from live Git state before moving any checkout. This
 inventory update is on an unpublished local issue branch.
 
-| Checkout        | Branch or revision                                   | Status                                                                     |
-| --------------- | ---------------------------------------------------- | -------------------------------------------------------------------------- |
-| Repository root | `develop` at `e2914ad`                               | Clean; matches `origin/develop`.                                           |
-| `.worktrees/a`  | `codex/issue-268-269-ci-cache-fixtures` at `a9157ed` | Clean; 13 issue-scoped commits, unpublished and pending final integration. |
-| `.worktrees/b`  | detached at `bc98697`                                | Clean; retains patch-unique `1a0bec1`. Keep this checkout and cache.       |
-| `.worktrees/c`  | detached at `f833761`                                | Clean; retains patch-unique `8926394`. Keep this checkout and cache.       |
+| Checkout        | Branch or revision                                      | Status                                                                    |
+| --------------- | ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Repository root | `develop` at `e2914ad`                                  | Clean; matches `origin/develop`.                                          |
+| `.worktrees/a`  | `codex/issue-268-269-ci-cache-fixtures` at current HEAD | Clean; local issue commits are unpublished and pending final integration. |
+| `.worktrees/b`  | detached at `bc98697`                                   | Clean; retains patch-unique `1a0bec1`. Keep this checkout and cache.      |
+| `.worktrees/c`  | detached at `f833761`                                   | Clean; retains patch-unique `8926394`. Keep this checkout and cache.      |
 
 Other unmerged refs retained for review:
 
