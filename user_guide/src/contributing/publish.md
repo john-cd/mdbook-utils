@@ -10,7 +10,7 @@
 - Review the packaging output in `target/mdbook-utils/package` or use `cargo package --list`.
 - When ready, `cargo publish --locked --dry-run; cargo publish --locked`
 
-2. Docker Compose method
+1. Docker Compose method
 
 - Pass the `publish.sh` script (and required argument `-y`) as a `command` to `docker compose run`.
 - Pass the `CRATES_TOKEN` env. variable (which is used by `publish.sh`) to Docker Compose using [`--env`][docker-compose-env-vars].
