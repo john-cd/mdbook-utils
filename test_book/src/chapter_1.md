@@ -22,7 +22,12 @@ Links:
 
 [Link to Github][github]
 
+<!-- The autolink syntax is intentionally included for parser coverage. -->
+<!-- markdownlint-disable MD054 -->
+
 <https://autolink>
+
+<!-- markdownlint-enable MD054 -->
 
 [ref]: https://reference-definition/
 
