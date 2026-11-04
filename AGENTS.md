@@ -48,7 +48,8 @@ These repositories use sccache with incremental compilation disabled. The shared
 
 Run commands from this repository root:
 
-- `just fmt` formats the workspace with nightly rustfmt.
+- `just fmt` formats the workspace with nightly rustfmt; `just fmt-check` verifies
+  the pinned formatter without changing files.
 - `just check` checks all targets with the locked dependency graph.
 - `just build` builds the Rust targets and both mdBooks.
 - `just clippy` runs Clippy with warnings denied.

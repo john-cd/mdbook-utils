@@ -119,6 +119,10 @@ fmt:
   cargo +{{rustfmt_toolchain}} fmt --all
   echo "DONE"
 
+# Check Rust formatting with the pinned formatter without changing files.
+fmt-check:
+  cargo +{{rustfmt_toolchain}} fmt --all -- --check
+
 # Check whether the code can compile
 check:
   cargo check --all-targets --locked
