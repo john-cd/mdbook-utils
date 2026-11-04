@@ -59,6 +59,10 @@ not yet integrated or published.
 | `.worktrees/b`  | detached at `bc98697`                                | Clean; retains unique `1a0bec1` and `bc98697` commits. Do not move until preserved. |
 | `.worktrees/c`  | detached at `f833761`                                | Clean; retains unique `f833761` commit. Do not move until preserved.                |
 
+Update (2026-11-03): `.worktrees/a` has advanced to `01bf403` and contains
+uncommitted #259 RuleKind work; the table's `.worktrees/a` row is superseded.
+The other checkout rows remain current.
+
 The remote `codex/wsl-build-policy-f6bf7fd` branch at `f6bf7fd` remains
 unmerged and patch-unique; retain it for review. Historical backup refs are
 preserved. No checkout or branch was removed during this inventory. Use
