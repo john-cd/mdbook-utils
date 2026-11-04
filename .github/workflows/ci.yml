@@ -55,7 +55,7 @@ jobs:
           cache-directories: ${{ github.workspace }}/.ci/build/mdbook-utils/main
           save-if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}',
             github.event.repository.default_branch) }}
-          workspaces: . -> ${{ github.workspace }}/.ci/target/mdbook-utils/main
+          workspaces: . -> .ci/target/mdbook-utils/main
 
       - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
@@ -108,7 +108,7 @@ jobs:
           cache-directories: ${{ github.workspace }}/.ci/build/mdbook-utils/main
           save-if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}',
             github.event.repository.default_branch) }}
-          workspaces: . -> ${{ github.workspace }}/.ci/target/mdbook-utils/main
+          workspaces: . -> .ci/target/mdbook-utils/main
 
       - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
