@@ -6,18 +6,27 @@ use std::fs;
 use std::process::Command;
 use std::process::Output;
 
+use anyhow::Context as _;
 use anyhow::Result;
 use tempfile::tempdir;
 
-/// Runs `links write-inline` on a fixture with external and internal links.
-fn run_write_inline(extra: &[&str]) -> Result<(Output, String)> {
+/// Runs `links write-inline` on a fixture containing external links and
+/// unsupported reference forms.
+fn run_write_inline(extra: &[&str]) -> Result<(Output, Option<String>)> {
     let dir = tempdir()?;
     let src = dir.path().join("src");
     fs::create_dir(&src)?;
     fs::write(
         src.join("page.md"),
-        "[ext](https://example.com/a) <https://example.org/b>\n\n\
-         [rel](other.md) [frag](#top)\n\n```md\n[code](https://example.net/c)\n```\n",
+        "[ext](https://example.com/a \"Example docs\") <https://example.org/b>\n\n\
+         [rel](other.md) [frag](#top)\n\n\
+         [full][full-ref] [collapsed][] [shortcut] ![image][image-ref]\n\n\
+         [full-ref]: https://example.net/full \"Full reference\"\n\
+         [collapsed]: https://example.net/collapsed\n\
+         [shortcut]: https://example.net/shortcut\n\
+         [image-ref]: https://example.net/image\n\n\
+         [docs](https://example.com/guide) [docs](https://example.org/guide)\n\n\
+         ```md\n[code](https://example.net/c)\n```\n",
     )?;
     let out_path = dir.path().join("out.md");
     let output = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
@@ -32,7 +41,11 @@ fn run_write_inline(extra: &[&str]) -> Result<(Output, String)> {
         .env_remove("DEFAULT_DEST_DIR_PATH")
         .env("RUST_LOG", "off")
         .output()?;
-    let content = fs::read_to_string(&out_path).unwrap_or_default();
+    let content = match fs::read_to_string(&out_path) {
+        Ok(content) => Some(content),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
+        Err(error) => return Err(error.into()),
+    };
     Ok((output, content))
 }
 
@@ -41,8 +54,28 @@ fn run_write_inline(extra: &[&str]) -> Result<(Output, String)> {
 fn write_inline_defaults_to_reference_format_for_external_links() -> Result<()> {
     let (output, content) = run_write_inline(&[])?;
     assert!(output.status.success());
+    let content = content.context("successful command did not write its report")?;
     assert!(content.contains("]: https://example.com/a"), "{content}");
-    for excluded in ["other.md", "#top", "example.net"] {
+    assert!(content.contains("[ext]"), "{content}");
+    assert!(
+        content.contains("[docs]\n\n[docs]: https://example.com/guide"),
+        "{content}"
+    );
+    assert!(content.contains("[docs][docs-2]"), "{content}");
+    assert!(
+        content.contains("[docs-2]: https://example.org/guide"),
+        "{content}"
+    );
+    assert!(content.contains("Example docs"), "{content}");
+    for excluded in [
+        "other.md",
+        "#top",
+        "example.net",
+        "full-ref",
+        "collapsed",
+        "shortcut",
+        "image-ref",
+    ] {
         assert!(!content.contains(excluded), "{content}");
     }
     Ok(())
@@ -53,15 +86,34 @@ fn write_inline_defaults_to_reference_format_for_external_links() -> Result<()> 
 fn write_inline_link_format_autolink() -> Result<()> {
     let (output, content) = run_write_inline(&["--link-format", "autolink"])?;
     assert!(output.status.success());
+    let content = content.context("successful command did not write its report")?;
     assert!(content.contains("<https://example.com/a>"), "{content}");
     assert!(!content.contains("]: "), "{content}");
+    Ok(())
+}
+
+/// `--link-format inline` preserves link text and titles without padding.
+#[test]
+fn write_inline_link_format_inline_preserves_title() -> Result<()> {
+    let (output, content) = run_write_inline(&["--link-format", "inline"])?;
+    assert!(output.status.success());
+    let content = content.context("successful command did not write its report")?;
+    assert!(
+        content.contains("[ext](https://example.com/a \"Example docs\")"),
+        "{content}"
+    );
+    assert!(!content.contains("( https://"), "{content}");
     Ok(())
 }
 
 /// An unknown format is rejected with a non-zero exit status.
 #[test]
 fn write_inline_rejects_unknown_link_format() -> Result<()> {
-    let (output, _) = run_write_inline(&["--link-format", "bogus"])?;
+    let (output, content) = run_write_inline(&["--link-format", "bogus"])?;
     assert!(!output.status.success());
+    assert!(
+        content.is_none(),
+        "failed command unexpectedly wrote a report"
+    );
     Ok(())
 }
