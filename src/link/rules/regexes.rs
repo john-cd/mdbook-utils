@@ -4,6 +4,7 @@
 
 use std::collections::HashMap;
 
+use heck::ToKebabCase as _;
 use regex::Regex;
 
 /// Identifies a URL-matching rule used by badge and reference helpers.
@@ -302,6 +303,55 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<RuleKind, Rule<'_>>>
         m
     });
 
+/// Suggests a stable reference label from a recognized URL pattern.
+///
+/// Known documentation and repository URLs use their crate, repository, or
+/// page identity. Other HTTP URLs use the last path segment, then the host.
+pub(crate) fn suggest_label_from_url(url: &str) -> Option<String> {
+    let candidates = [
+        (RuleKind::Category, "catg"),
+        (RuleKind::Crate, "crate"),
+        (RuleKind::Documentation, "crate"),
+        (RuleKind::StdItemDocumentation, "rest"),
+        (RuleKind::CrateOnLibRs, "crate"),
+        (RuleKind::GithubRepoWiki, "repo"),
+        (RuleKind::GithubComJohnCd, "last"),
+        (RuleKind::GithubRepo, "repo"),
+        (RuleKind::GithubPages, "repo"),
+        (RuleKind::RustBookItem, "item"),
+        (RuleKind::RustReference, "item"),
+        (RuleKind::RustByExampleChapter, "last"),
+        (RuleKind::CargoBook, "rest"),
+        (RuleKind::WebsitePage, "last"),
+    ];
+
+    for (kind, capture) in candidates {
+        let Some(rule) = COMPILED_RULES.get(&kind) else {
+            continue;
+        };
+        let Some(captures) = rule.captures(url) else {
+            continue;
+        };
+        let Some(value) = captures.name(capture).map(|value| value.as_str()) else {
+            continue;
+        };
+        let label = value.rsplit('/').next().unwrap_or_default().to_kebab_case();
+        if !label.is_empty() {
+            return Some(label);
+        }
+    }
+
+    let parsed = url::Url::parse(url).ok()?;
+    let host = parsed.host_str()?;
+    let value = parsed
+        .path_segments()?
+        .rfind(|segment| !segment.is_empty())
+        .unwrap_or(host)
+        .trim_end_matches(".html");
+    let label = value.to_kebab_case();
+    (!label.is_empty()).then_some(label)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -318,6 +368,37 @@ mod tests {
         assert_eq!(COMPILED_RULES.len(), GLOBAL_RULES.len());
         assert!(GLOBAL_RULES.contains_key(&RuleKind::GithubRepo));
         assert!(COMPILED_RULES.contains_key(&RuleKind::GithubRepo));
+    }
+
+    /// Recognized crates.io, docs.rs, and GitHub URLs use their primary names.
+    #[test]
+    fn suggests_labels_from_known_url_patterns() {
+        assert_eq!(
+            suggest_label_from_url("https://crates.io/crates/serde"),
+            Some("serde".to_owned())
+        );
+        assert_eq!(
+            suggest_label_from_url("https://docs.rs/tokio/latest/tokio/task/index.html"),
+            Some("tokio".to_owned())
+        );
+        assert_eq!(
+            suggest_label_from_url("https://github.com/launchbadge/sqlx"),
+            Some("sqlx".to_owned())
+        );
+    }
+
+    /// Generic URL labels use the final page segment or the host at the root.
+    #[test]
+    fn suggests_labels_from_generic_urls() {
+        assert_eq!(
+            suggest_label_from_url("https://example.com/guide.html?lang=en#start"),
+            Some("guide".to_owned())
+        );
+        assert_eq!(
+            suggest_label_from_url("https://example.com/"),
+            Some("example-com".to_owned())
+        );
+        assert_eq!(suggest_label_from_url("relative/path"), None);
     }
 
     /// Matches a crates.io category URL and captures its name.

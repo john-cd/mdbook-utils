@@ -94,8 +94,8 @@ fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
          [ref]: https://reference-definition/\n\n\
          [Link to Github][github]\n\n\
          [github]: https://github.com/john-cd/mdbook-utils\n\n\
-         [https://autolink][https-autolink]\n\n\
-         [https-autolink]: https://autolink\n\n"
+         [https://autolink][autolink]\n\n\
+         [autolink]: https://autolink\n\n"
     );
 
     let markdown_output = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))

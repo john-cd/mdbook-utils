@@ -33,7 +33,7 @@ Consult the [User Guide][mdbook-utils-user-guide] for installation and usage ins
   - `generate`: Generate reference definitions: GitHub badges (`--badges`, `--badge-style <STYLE>`) or definitions from the `Cargo.toml` dependencies of the code examples (`--from-dependencies`).
 - `links`: Manage links.
   - `write-all`: Write all existing links to a Markdown file.
-  - `write-inline`: Write the external (`http`/`https`) inline links and autolinks to a Markdown file, without modifying the sources. `--link-format reference|inline|autolink` selects the output syntax (default `reference`). Labels default to the kebab-cased link text; when two links with the same text point to different URLs, the later label gets a numeric suffix (`docs`, `docs-2`). To rewrite sources in place, use `book_tooling`'s `inline-links`.
+  - `write-inline`: Write the external (`http`/`https`) inline links and autolinks to a Markdown file, without modifying the sources. `--link-format reference|inline|autolink` selects the output syntax (default `reference`). Reference labels use the kebab-cased link text; URL-only autolinks use a crate/repository/page label inferred from known URL patterns or the final URL path segment. Collisions get a numeric suffix (`docs`, `docs-2`). To rewrite sources in place, use `book_tooling`'s `inline-links`.
   - `duplicate-links`: Identify duplicate links/labels.
   - `broken-links`: Identify broken links.
 - `markdown`: Manage code blocks and includes.

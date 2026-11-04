@@ -18,7 +18,7 @@ fn run_write_inline(extra: &[&str]) -> Result<(Output, Option<String>)> {
     fs::create_dir(&src)?;
     fs::write(
         src.join("page.md"),
-        "[ext](https://example.com/a \"Example docs\") <https://example.org/b>\n\n\
+        "[ext](https://example.com/a \"Example docs\") <https://example.org/b> <https://docs.rs/tokio/latest/tokio/task/index.html> <https://example.com/guide> <https://another.org/guide>\n\n\
          [rel](other.md) [frag](#top)\n\n\
          [full][full-ref] [collapsed][] [shortcut] ![image][image-ref]\n\n\
          [full-ref]: https://example.net/full \"Full reference\"\n\
@@ -57,6 +57,26 @@ fn write_inline_defaults_to_reference_format_for_external_links() -> Result<()> 
     let content = content.context("successful command did not write its report")?;
     assert!(content.contains("]: https://example.com/a"), "{content}");
     assert!(content.contains("[ext]"), "{content}");
+    assert!(
+        content.contains("[https://docs.rs/tokio/latest/tokio/task/index.html][tokio]"),
+        "autolink should retain its URL as visible text and use a URL-derived label: {content}"
+    );
+    assert!(
+        content.contains("[tokio]: https://docs.rs/tokio/latest/tokio/task/index.html"),
+        "{content}"
+    );
+    assert!(
+        content.contains("[https://example.com/guide][guide]"),
+        "{content}"
+    );
+    assert!(
+        content.contains("[https://another.org/guide][guide-2]"),
+        "{content}"
+    );
+    assert!(
+        content.contains("[guide-2]: https://another.org/guide"),
+        "{content}"
+    );
     assert!(
         content.contains("[docs]\n\n[docs]: https://example.com/guide"),
         "{content}"

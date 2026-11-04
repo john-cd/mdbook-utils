@@ -28,6 +28,11 @@ links inside code are excluded. Use `--link-format <reference|inline|autolink>`
 (default `reference`) to choose the output syntax. The `autolink` format drops
 link text and titles.
 
+Reference labels use the kebab-cased link text. URL-only autolinks use a label
+inferred from known crate, documentation, or repository URL patterns; other
+pages use the final URL path segment. When different destinations suggest the
+same label, later labels receive a numeric suffix.
+
 Link extraction follows CommonMark link syntax as implemented by
 `pulldown-cmark`, including inline links, reference links, images, and URI
 autolinks written in angle brackets. Plain URL text is not treated as an
