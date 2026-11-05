@@ -1,6 +1,6 @@
 //! Command-line subcommands to handle links
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use anyhow::Result;
 use clap::Args;

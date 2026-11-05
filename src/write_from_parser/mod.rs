@@ -1,7 +1,7 @@
 //! Functions that take a Markdown parser
 //! and write (parts of) its contents to a file.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 mod github;
 mod write_raw_to;

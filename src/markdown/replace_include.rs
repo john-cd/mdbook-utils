@@ -1,6 +1,6 @@
 //! Replace {{#include file.md}} by the file contents
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::fs;
 use std::path::Path;

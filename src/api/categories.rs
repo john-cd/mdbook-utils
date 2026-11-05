@@ -1,6 +1,6 @@
 //! Public operations that generate crates.io category and crate index pages.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::path::Path;
 

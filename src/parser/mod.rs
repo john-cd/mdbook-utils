@@ -2,7 +2,7 @@
 //! extract reference definitions and links
 //! from said parser
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 mod extract_links;
 

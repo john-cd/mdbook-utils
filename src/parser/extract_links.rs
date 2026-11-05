@@ -1,6 +1,6 @@
 //! Use a Markdown parser to extract links
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::borrow::Cow;
 

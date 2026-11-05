@@ -1,6 +1,6 @@
 //! Output markdown parsing debugging information.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::io::Write;
 

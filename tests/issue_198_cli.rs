@@ -1,6 +1,6 @@
 //! Executable regression tests for CLI behavior and generated file output.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::fs;
 use std::path::Path;

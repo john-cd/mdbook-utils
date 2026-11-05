@@ -1,6 +1,6 @@
 //! Command-line interface.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::env;
 

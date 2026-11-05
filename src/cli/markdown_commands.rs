@@ -1,6 +1,6 @@
 //! Command-line subcommands to manipulate Markdown
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use anyhow::Context as _;
 use anyhow::Result;

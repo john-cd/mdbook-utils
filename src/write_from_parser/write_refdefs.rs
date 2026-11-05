@@ -1,6 +1,6 @@
 //! Write reference definitions
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::io::Write;
 

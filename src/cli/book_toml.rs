@@ -4,7 +4,7 @@
 //! will always be taken relative from the root of the book
 //! where the configuration file is located.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::collections::HashMap;
 use std::fs;
