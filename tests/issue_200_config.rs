@@ -1,6 +1,6 @@
-// TODO Reviewed ??-??-2026
-
 //! CLI regression tests for mdBook source and renderer path resolution.
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::fs;
 use std::path::Path;
