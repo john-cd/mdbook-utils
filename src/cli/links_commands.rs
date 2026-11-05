@@ -157,3 +157,90 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> 
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::path::Path;
+
+    use anyhow::Result;
+    use tempfile::tempdir;
+
+    use super::*;
+    use crate::cli::args::DestFileArgs;
+    use crate::cli::args::MarkdownDirArgs;
+
+    /// Constructor of a `links` subcommand taking source and destination.
+    type Make = fn(MarkdownSrcDirAndDestFileArgs) -> LinksSubCommand;
+
+    /// Builds the source/destination arguments for a test.
+    fn paths(src: &Path, dest: &Path) -> MarkdownSrcDirAndDestFileArgs {
+        MarkdownSrcDirAndDestFileArgs {
+            src: MarkdownDirArgs {
+                markdown_dir_path: Some(src.to_path_buf()),
+            },
+            dest: DestFileArgs {
+                file_path: Some(dest.to_path_buf()),
+            },
+        }
+    }
+
+    /// Creates a source directory with one page and returns its path.
+    fn source_dir(root: &Path) -> Result<std::path::PathBuf> {
+        let src = root.join("src");
+        fs::create_dir(&src)?;
+        fs::write(
+            src.join("page.md"),
+            "See [Example][ex] and [Missing][nope].\n\n[ex]: https://example.com\n",
+        )?;
+        Ok(src)
+    }
+
+    /// Each `links` arm writes its destination file.
+    #[test]
+    fn test_links_arms_write_destination() -> Result<()> {
+        let dir = tempdir()?;
+        let src = source_dir(dir.path())?;
+        let arms: [(&str, Make); 3] = [
+            ("all.md", LinksSubCommand::WriteAll),
+            ("dup.md", LinksSubCommand::DuplicateLinks),
+            ("broken.md", LinksSubCommand::BrokenLinks),
+        ];
+        for (name, make) in arms {
+            let dest = dir.path().join(name);
+            run(make(paths(&src, &dest)), Configuration::default())?;
+            assert!(dest.is_file(), "{name} was not written");
+        }
+        Ok(())
+    }
+
+    /// `write-inline` writes its destination file.
+    #[test]
+    fn test_links_write_inline() -> Result<()> {
+        let dir = tempdir()?;
+        let src = source_dir(dir.path())?;
+        let dest = dir.path().join("inline.md");
+        let args = WriteInlineArgs {
+            paths: paths(&src, &dest),
+            link_format: LinkFormatArg::Inline,
+        };
+        run(LinksSubCommand::WriteInline(args), Configuration::default())?;
+        assert!(dest.is_file());
+        Ok(())
+    }
+
+    /// A missing source directory is reported as an error.
+    #[test]
+    fn test_links_missing_source_fails() -> Result<()> {
+        let dir = tempdir()?;
+        let missing = dir.path().join("nope");
+        let dest = dir.path().join("out.md");
+        let result = run(
+            LinksSubCommand::WriteAll(paths(&missing, &dest)),
+            Configuration::default(),
+        );
+        assert!(result.is_err());
+        assert!(!dest.exists());
+        Ok(())
+    }
+}
