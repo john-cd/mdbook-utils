@@ -1,6 +1,6 @@
-// TODO Reviewed ??-??-2026
-
 //! CLI regression tests for `links write-inline` external-link output.
+//!
+//! TODO Reviewed ??-??-2026
 
 use std::fs;
 use std::process::Command;
