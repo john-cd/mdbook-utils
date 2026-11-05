@@ -259,3 +259,97 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use anyhow::Result;
+    use tempfile::tempdir;
+
+    use super::*;
+    use crate::cli::args::DestDirArgs;
+
+    /// Builds directory arguments.
+    fn dir_args(path: &std::path::Path) -> MarkdownDirArgs {
+        MarkdownDirArgs {
+            markdown_dir_path: Some(path.to_path_buf()),
+        }
+    }
+
+    /// `identify-files-not-in-summary` succeeds on a book with a summary.
+    #[test]
+    fn test_identify_files_not_in_summary() -> Result<()> {
+        let dir = tempdir()?;
+        fs::write(dir.path().join("SUMMARY.md"), "# Summary\n\n- [A](a.md)\n")?;
+        fs::write(dir.path().join("a.md"), "# A\n")?;
+        fs::write(dir.path().join("orphan.md"), "# Orphan\n")?;
+        run(
+            MarkdownSubCommand::IdentifyFilesNotInSummary(dir_args(dir.path())),
+            Configuration::default(),
+        )
+    }
+
+    /// `extract-code-examples` writes Rust blocks to the destination.
+    #[test]
+    fn test_extract_code_examples() -> Result<()> {
+        let dir = tempdir()?;
+        let src = dir.path().join("drafts");
+        fs::create_dir(&src)?;
+        fs::write(src.join("a.md"), "# A\n\n```rust\nfn main() {}\n```\n")?;
+        let out = dir.path().join("code");
+        fs::create_dir(&out)?;
+        let args = MarkdownSrcDirAndDestDirArgs {
+            src: dir_args(&src),
+            dest: DestDirArgs {
+                dir_path: Some(out.clone()),
+            },
+        };
+        run(
+            MarkdownSubCommand::ExtractCodeExamples(args),
+            Configuration::default(),
+        )?;
+        assert!(fs::read_dir(out)?.next().is_some());
+        Ok(())
+    }
+
+    /// `identify-unused-rs-examples` runs over a source and code directory.
+    #[test]
+    fn test_identify_unused_rs_examples() -> Result<()> {
+        let dir = tempdir()?;
+        let src = dir.path().join("src");
+        let code = dir.path().join("code");
+        fs::create_dir(&src)?;
+        fs::create_dir(&code)?;
+        fs::write(src.join("a.md"), "# A\n")?;
+        fs::write(code.join("unused.rs"), "fn main() {}\n")?;
+        let args = MarkdownSrcDirAndDestDirArgs {
+            src: dir_args(&src),
+            dest: DestDirArgs {
+                dir_path: Some(code),
+            },
+        };
+        run(
+            MarkdownSubCommand::IdentifyUnusedRsExamples(args),
+            Configuration::default(),
+        )
+    }
+
+    /// Commands that modify files refuse to run without `--yes` and without a
+    /// terminal, leaving the files untouched.
+    #[test]
+    fn test_modifying_commands_require_confirmation() -> Result<()> {
+        let dir = tempdir()?;
+        let page = dir.path().join("a.md");
+        let original = "# A\n\n{{#include b.md}}\n";
+        fs::write(&page, original)?;
+        for cmd in [
+            MarkdownSubCommand::ReplaceIncludesByContents(dir_args(dir.path())),
+            MarkdownSubCommand::RemoveIncludes(dir_args(dir.path())),
+        ] {
+            assert!(run(cmd, Configuration::default()).is_err());
+            assert_eq!(fs::read_to_string(&page)?, original);
+        }
+        Ok(())
+    }
+}

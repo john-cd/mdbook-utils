@@ -176,3 +176,70 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use anyhow::Result;
+    use tempfile::tempdir;
+
+    use super::*;
+    use crate::cli::args::DestFileArgs;
+    use crate::cli::args::MarkdownDirArgs;
+
+    /// `refdefs write` copies the existing reference definitions.
+    #[test]
+    fn test_refdefs_write() -> Result<()> {
+        let dir = tempdir()?;
+        let src = dir.path().join("src");
+        fs::create_dir(&src)?;
+        fs::write(
+            src.join("page.md"),
+            "See [ex].\n\n[ex]: https://example.com\n",
+        )?;
+        let dest = dir.path().join("refs.md");
+        let args = MarkdownSrcDirAndDestFileArgs {
+            src: MarkdownDirArgs {
+                markdown_dir_path: Some(src),
+            },
+            dest: DestFileArgs {
+                file_path: Some(dest.clone()),
+            },
+        };
+        run(RefDefsSubCommand::Write(args), Configuration::default())?;
+        assert!(fs::read_to_string(dest)?.contains("https://example.com"));
+        Ok(())
+    }
+
+    /// A missing source directory is reported and nothing is written.
+    #[test]
+    fn test_refdefs_write_missing_source_fails() -> Result<()> {
+        let dir = tempdir()?;
+        let dest = dir.path().join("refs.md");
+        let args = MarkdownSrcDirAndDestFileArgs {
+            src: MarkdownDirArgs {
+                markdown_dir_path: Some(dir.path().join("missing")),
+            },
+            dest: DestFileArgs {
+                file_path: Some(dest.clone()),
+            },
+        };
+        assert!(run(RefDefsSubCommand::Write(args), Configuration::default()).is_err());
+        assert!(!dest.exists());
+        Ok(())
+    }
+
+    /// Badge styles map onto the library's styles.
+    #[test]
+    fn test_badge_style_conversion() {
+        assert!(matches!(
+            BadgeStyle::from(BadgeStyleArg::ForTheBadge),
+            BadgeStyle::ForTheBadge
+        ));
+        assert!(matches!(
+            BadgeStyle::from(BadgeStyleArg::default()),
+            BadgeStyle::Flat
+        ));
+    }
+}
