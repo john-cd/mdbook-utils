@@ -15,7 +15,7 @@
 //! - Extend its capabilities,
 //! - ...
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 #![deny(missing_docs)]
 #![deny(rust_2018_idioms)]

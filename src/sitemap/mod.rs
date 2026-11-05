@@ -1,6 +1,6 @@
 //! Sitemap file generation.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 mod xml;
 

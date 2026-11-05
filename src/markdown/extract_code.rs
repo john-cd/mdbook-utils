@@ -1,6 +1,6 @@
 //! Extract Rust code examples from Markdown
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::fmt::Write as _;
 use std::fs;

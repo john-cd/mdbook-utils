@@ -1,7 +1,7 @@
 //! Functions that generate reference definitions
 //! e.g. from code dependencies and links.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 pub(crate) mod crates;
 mod index;

@@ -1,6 +1,6 @@
 //! Public operations that write reports about the links in Markdown sources.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::path::Path;
 

@@ -1,7 +1,7 @@
 //! Merge existing reference definitions and new ones
 //! and write the result to a file
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use crate::link::Link;
 

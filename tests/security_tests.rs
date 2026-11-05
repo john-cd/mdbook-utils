@@ -1,6 +1,6 @@
 //! Integration tests for path-traversal safety and failed-include handling.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::fs;
 use std::process::Command;

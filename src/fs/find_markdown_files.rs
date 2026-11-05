@@ -1,6 +1,6 @@
 //! Locate Markdown files within a directory
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::path::Path;
 use std::path::PathBuf;

@@ -1,6 +1,6 @@
 //! The [`Link`] type and its Markdown renderings.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::borrow::Cow;
 use std::cmp::Ordering;

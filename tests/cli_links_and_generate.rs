@@ -1,7 +1,7 @@
 //! CLI tests for the `links`, `refdefs write`, `debug`, and crates.io index
 //! commands: exit codes and the files they write.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::fs;
 use std::path::Path;

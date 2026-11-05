@@ -1,6 +1,6 @@
 //! Top-level CLI commands for sitemap generation and parser diagnostics.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use anyhow::Result;
 use console::style;

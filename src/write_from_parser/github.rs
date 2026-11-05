@@ -1,6 +1,6 @@
 //! Generate links and reference definitions for GitHub repos.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;

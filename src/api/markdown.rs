@@ -1,6 +1,6 @@
 //! Markdown manipulation modules
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 pub use crate::fs::unused::identify_files_not_in_summary;
 pub use crate::fs::unused::identify_unused_rs_examples;

@@ -1,6 +1,6 @@
 //! CLI regression tests for SUMMARY chapter and Rust example references.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::fs;
 use std::process::Command;

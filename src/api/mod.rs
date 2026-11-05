@@ -4,7 +4,7 @@
 //! The binary's command-line modules handle argument parsing and configuration;
 //! callers that need the underlying work can use these functions directly.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 mod categories;
 mod debug;

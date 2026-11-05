@@ -1,6 +1,6 @@
 //! Rules to create a badge URL from a link URL
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 use std::collections::HashMap;
 

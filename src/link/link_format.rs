@@ -1,6 +1,6 @@
 //! Output format for links written by the `links` commands.
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 /// Markdown syntax used when writing links.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

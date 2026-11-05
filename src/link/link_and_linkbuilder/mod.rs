@@ -1,6 +1,6 @@
 //! Internal models for a Markdown [Link] and [`LinkBuilder`]
 //!
-//! TODO Reviewed ??-??-2026
+//! TODO Reviewed ??-??-2026.
 
 mod builder;
 mod link;
