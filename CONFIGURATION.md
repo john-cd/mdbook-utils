@@ -9,7 +9,7 @@ Keep this file, README, contributor guidance, and configuration comments synchro
 ## Consistency plan
 
 1. Share LF/UTF-8 editing defaults and language formatting conventions.
-2. Pin nightly Rustfmt to `nightly-2026-10-22` and align lint baselines while preserving stricter rules, domain limits, and teaching examples.
+2. Pin nightly Rustfmt to `nightly-2026-11-06` and align lint baselines while preserving stricter rules, domain limits, and teaching examples.
 3. Enumerate maintained dependency roots and use predictable monthly grouped updates.
 4. Isolate checkout outputs, align dependency compiler flags, and make CI caches configuration-aware.
 5. Validate format/lint and representative builds; measure cold/warm time and output size before
