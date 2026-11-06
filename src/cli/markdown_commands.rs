@@ -47,7 +47,8 @@ pub(crate) enum MarkdownSubCommand {
 }
 
 /// Process "markdown" subcommands of the command-line interface
-pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<()> {
+#[expect(clippy::too_many_lines, reason = "one match arm per subcommand")]
+pub(crate) fn run(subcmd: MarkdownSubCommand, config: &Configuration) -> Result<()> {
     match subcmd {
         MarkdownSubCommand::ExtractCodeExamples(args) => {
             let markdown_drafts_dir_path = config.markdown_src_dir_path(args.src, "./drafts/")?;
@@ -85,7 +86,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 style(code_dir_path.display()).cyan()
             );
             let confirmation = confirm(
-                &config,
+                config,
                 "This command will modify your Markdown files. Do you want to continue?",
             )?;
             if confirmation {
@@ -115,7 +116,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 style(markdown_src_dir_path.display()).cyan()
             );
             let confirmation = confirm(
-                &config,
+                config,
                 "This command will modify your Markdown files. Do you want to continue?",
             )?;
             if confirmation {
@@ -141,7 +142,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: Configuration) -> Result<(
                 style(book_markdown_build_dir_path.display()).cyan()
             );
             let confirmation = confirm(
-                &config,
+                config,
                 "This command will modify your Markdown files. Do you want to continue?",
             )?;
             if confirmation {
@@ -286,7 +287,7 @@ mod tests {
         fs::write(dir.path().join("orphan.md"), "# Orphan\n")?;
         run(
             MarkdownSubCommand::IdentifyFilesNotInSummary(dir_args(dir.path())),
-            Configuration::default(),
+            &Configuration::default(),
         )
     }
 
@@ -307,7 +308,7 @@ mod tests {
         };
         run(
             MarkdownSubCommand::ExtractCodeExamples(args),
-            Configuration::default(),
+            &Configuration::default(),
         )?;
         assert!(fs::read_dir(out)?.next().is_some());
         Ok(())
@@ -331,7 +332,7 @@ mod tests {
         };
         run(
             MarkdownSubCommand::IdentifyUnusedRsExamples(args),
-            Configuration::default(),
+            &Configuration::default(),
         )
     }
 
@@ -347,7 +348,7 @@ mod tests {
             MarkdownSubCommand::ReplaceIncludesByContents(dir_args(dir.path())),
             MarkdownSubCommand::RemoveIncludes(dir_args(dir.path())),
         ] {
-            assert!(run(cmd, Configuration::default()).is_err());
+            assert!(run(cmd, &Configuration::default()).is_err());
             assert_eq!(fs::read_to_string(&page)?, original);
         }
         Ok(())

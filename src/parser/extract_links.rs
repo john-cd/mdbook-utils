@@ -46,6 +46,10 @@ pub(crate) fn extract_reference_definitions(parser: &Parser<'_>) -> Vec<Link<'st
 
 /// Read from a Markdown parser, extract links from the event stream,
 /// and return said links.
+#[expect(
+    clippy::too_many_lines,
+    reason = "single event-state machine; splitting hurts readability"
+)]
 pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'input>> {
     let mut state: Vec<(Where, LinkBuilder<'input>)> = Vec::new();
     let mut links: Vec<Link<'input>> = Vec::new();

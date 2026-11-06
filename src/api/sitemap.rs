@@ -72,7 +72,7 @@ where
             sitemap_dest_file_path.display()
         )
     })?;
-    sitemap_mod::write_sitemap(page_urls, &mut f)?;
+    sitemap_mod::write_sitemap(&page_urls, &mut f)?;
     Ok(())
 }
 

@@ -51,19 +51,19 @@ fn main() -> Result<()> {
 
     match cmd {
         Command::RefDefs(subcmd) => {
-            cli::refdefs_commands::run(subcmd, config)?;
+            cli::refdefs_commands::run(subcmd, &config)?;
         }
         Command::Links(subcmd) => {
-            cli::links_commands::run(subcmd, config)?;
+            cli::links_commands::run(subcmd, &config)?;
         }
         Command::Markdown(subcmd) => {
-            cli::markdown_commands::run(subcmd, config)?;
+            cli::markdown_commands::run(subcmd, &config)?;
         }
         Command::SiteMap(args) => {
-            cli::utility_commands::run_sitemap(args, config)?;
+            cli::utility_commands::run_sitemap(args, &config)?;
         }
         Command::Debug(args) => {
-            cli::utility_commands::run_debug(args, config)?;
+            cli::utility_commands::run_debug(args, &config)?;
         } /* Add more subcommands here: Some(args::Commands::...) => { ... }
            * _ => {
            *     println!("NOT IMPLEMENTED");

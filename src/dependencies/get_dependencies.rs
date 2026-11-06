@@ -47,6 +47,10 @@ impl Dependency<'_> {
 /// crate name and package repository URL)
 ///
 /// `dir_path`: Path to the directory containing the Cargo.toml file.
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "public-facing signature takes Option<impl AsRef<Path>> by value"
+)]
 pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
     cargo_toml_dir_path: P,
     log_file_path: Option<Q>,

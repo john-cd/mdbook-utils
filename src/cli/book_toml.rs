@@ -140,6 +140,10 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
         let renderers: Vec<_> = output.extra.keys().map(String::as_str).collect();
         debug!(renderer_count = num_backends, renderers = ?renderers, "mdBook renderers configured");
 
+        #[expect(
+            clippy::comparison_chain,
+            reason = "branches differ in meaning, not just order"
+        )]
         if num_backends > 1 {
             if output.extra.contains_key("html") {
                 html_output = Some(book_build_dir_path.join("html"));

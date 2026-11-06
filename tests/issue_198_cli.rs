@@ -122,7 +122,7 @@ fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
             "missing fixture {file} in output"
         );
     }
-    assert!(markdown_output.stderr.is_empty());
+    assert_eq!(markdown_output.stderr.len(), 0);
     assert_eq!(fs::read_to_string(summary_path)?, original_summary);
     assert!(!source.join("broken_links.md").exists());
     Ok(())
@@ -222,7 +222,7 @@ fn links_and_markdown_failures_report_errors_without_partial_outputs() -> Result
         .env("RUST_LOG", "off")
         .output()?;
     assert!(!links_output.status.success());
-    assert!(links_output.stdout.is_empty());
+    assert_eq!(links_output.stdout.len(), 0);
     assert!(String::from_utf8_lossy(&links_output.stderr).contains("does not exist"));
     assert!(!links_output_path.exists());
 

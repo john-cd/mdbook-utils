@@ -18,6 +18,10 @@ use pulldown_cmark::Tag;
 ///
 /// See <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Event.html>
 /// and <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Tag.html>.
+#[expect(
+    clippy::too_many_lines,
+    reason = "single event-state machine; splitting hurts readability"
+)]
 pub(crate) fn write_raw_to<W>(parser: &mut Parser<'_>, w: &mut W) -> Result<()>
 where
     W: Write,

@@ -161,8 +161,8 @@ where
             // Read existing ref defs
             let existing_links = parser::extract_reference_definitions(parser);
 
-            let links = generate::merge_links(existing_links, &mut new_links);
-            link::write_refdefs_to(links, f)?;
+            let links = generate::merge_links(&existing_links, &mut new_links);
+            link::write_refdefs_to(&links, f)?;
             Ok(())
         },
     )?;

@@ -25,6 +25,10 @@ const SOURCE_ROOT_URL: &str = "https://mdbook-utils.invalid/__mdbook_source__/";
 /// A source page is included only when the selected renderer output contains
 /// its corresponding HTML file. This excludes chapters omitted by a
 /// preprocessor and source fragments that are not published pages.
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "mirrors the public API signature"
+)]
 pub(crate) fn collect_page_urls(
     links: Vec<crate::link::Link<'_>>,
     source_root: &Path,
@@ -113,7 +117,7 @@ pub(crate) fn collect_page_urls(
 /// # Errors
 ///
 /// Returns an error if the XML cannot be written.
-pub(crate) fn write_sitemap<W: std::io::Write>(page_urls: Vec<String>, w: &mut W) -> Result<()> {
+pub(crate) fn write_sitemap<W: std::io::Write>(page_urls: &[String], w: &mut W) -> Result<()> {
     xml::write_xml(page_urls, w).context("[generate_sitemap] Failed to write the XML.")?;
     info!("sitemap.xml created.");
     Ok(())
@@ -202,7 +206,10 @@ fn source_markdown_path(raw_url: &str, base_url: &Url) -> Result<Option<PathBuf>
     let Some(encoded_relative_path) = encoded_relative_path else {
         bail!("Local SUMMARY.md URL escapes the book source directory: {raw_url:?}");
     };
-    if !encoded_relative_path.ends_with(".md") {
+    if !std::path::Path::new(encoded_relative_path)
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("md"))
+    {
         return Ok(None);
     }
 
