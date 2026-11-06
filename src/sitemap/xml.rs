@@ -18,7 +18,7 @@ use quick_xml::writer::Writer;
 /// # Errors
 ///
 /// Returns an error if the XML cannot be written.
-pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Result<()> {
+pub(super) fn write_xml<W: Write>(links: &[String], w: &mut W) -> anyhow::Result<()> {
     let mut writer = Writer::new_with_indent(w, b' ', 2);
 
     writer.write_bom().map_err(|_e| {
@@ -34,7 +34,7 @@ pub(super) fn write_xml<W: Write>(links: Vec<String>, w: &mut W) -> anyhow::Resu
         .create_element("urlset")
         .with_attribute(("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9"))
         .write_inner_content(|writer| {
-            for link in &links {
+            for link in links {
                 // <url><loc>
                 writer.create_element("url").write_inner_content(|w| {
                     w.create_element("loc")
@@ -61,7 +61,7 @@ mod tests {
     fn test_write_xml_escapes_url() {
         let links = vec!["http://example.com/test?a=1&b=2<script>alert(1)</script>'\"".to_owned()];
         let mut w = Cursor::new(Vec::new());
-        write_xml(links, &mut w).expect("input should parse");
+        write_xml(&links, &mut w).expect("input should parse");
 
         let result = String::from_utf8(w.into_inner()).expect("input should parse");
         // The URL should be properly escaped

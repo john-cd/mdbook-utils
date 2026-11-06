@@ -46,6 +46,10 @@ impl<'a> LinkBuilder<'a> {
     }
 
     /// Appends to the link text; empty text is ignored.
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "builder takes ownership of the Cow"
+    )]
     pub(crate) fn add_text(mut self, text: Cow<'a, str>) -> Self {
         if !text.is_empty() {
             self.link.text = Some(format!("{}{text}", self.link.text.unwrap_or_default()).into());

@@ -27,7 +27,7 @@ where
 
     let link_flags = LinkWrite::ReferenceLink | LinkWrite::ReferenceDefinition;
     for l in &with_unique_labels(links) {
-        write(l, &link_flags, link_writer)?;
+        write(l, link_flags, link_writer)?;
         writeln!(link_writer)?;
     }
     Ok(())
@@ -91,32 +91,32 @@ where
         _ => LinkWrite::Autolink,
     }
     .into();
-    for l in &links {
-        write(l, &link_flags, link_writer)?;
+    for l in links {
+        write(&l, link_flags, link_writer)?;
         writeln!(link_writer)?;
     }
     Ok(())
 }
 
 /// Write a reference definition to a writer (e.g. file)
-pub(crate) fn write_refdefs_to<W>(links: Vec<Link<'_>>, refdef_writer: &mut W) -> Result<()>
+pub(crate) fn write_refdefs_to<W>(links: &[Link<'_>], refdef_writer: &mut W) -> Result<()>
 where
     W: Write,
 {
     writeln!(refdef_writer, "# Reference Definitions\n")
         .context("[write_refdefs_to] Failed to write reference definitions.")?;
 
-    let refdef_flags = (LinkWrite::ReferenceDefinition).into();
+    let refdef_flags: BitFlags<LinkWrite> = LinkWrite::ReferenceDefinition.into();
 
-    for l in &links {
-        write(l, &refdef_flags, refdef_writer)?;
+    for l in links {
+        write(l, refdef_flags, refdef_writer)?;
         writeln!(refdef_writer)?;
     }
     Ok(())
 }
 
 /// Write duplicate links to a writer
-pub(crate) fn write_duplicate_links_to<W>(links: Vec<Link<'_>>, link_writer: &mut W) -> Result<()>
+pub(crate) fn write_duplicate_links_to<W>(links: &[Link<'_>], link_writer: &mut W) -> Result<()>
 where
     W: Write,
 {
@@ -124,8 +124,8 @@ where
         .context("[write_duplicate_links_to] Failed to write duplicate links.")?;
 
     let link_flags = LinkWrite::ReferenceLink | LinkWrite::ReferenceDefinition;
-    for l in &links {
-        write(l, &link_flags, link_writer)?;
+    for l in links {
+        write(l, link_flags, link_writer)?;
         writeln!(link_writer)?;
     }
     Ok(())
@@ -170,7 +170,7 @@ where
 /// Write a badge-style link and associated reference definitions
 /// to two separate writers
 pub(crate) fn write_badge_refdefs_and_links_to_two<W1, W2>(
-    links: Vec<Link<'_>>,
+    links: &[Link<'_>],
     link_writer: &mut W1,
     refdef_writer: &mut W2,
 ) -> Result<()>
@@ -183,9 +183,9 @@ where
 
     let link_flags = LinkWrite::LinkWithBadge.into();
     let refdef_flags = LinkWrite::ReferenceDefinition | LinkWrite::BadgeReferenceDefinition;
-    for l in &links {
-        write(l, &link_flags, link_writer)?;
-        write(l, &refdef_flags, refdef_writer)?;
+    for l in links {
+        write(l, link_flags, link_writer)?;
+        write(l, refdef_flags, refdef_writer)?;
     }
     Ok(())
 }
@@ -198,7 +198,7 @@ where
 // {
 //     tracing::debug!("[write_refdef_to] {l:?}");
 //     let refdef_flags = (LinkWrite::ReferenceDefinition).into();
-//     write(l, &refdef_flags, refdef_writer).context("[write_refdef_to] Failed
+//     write(l, refdef_flags, refdef_writer).context("[write_refdef_to] Failed
 // to write a reference definition.")?;     Ok(())
 // }
 
@@ -210,7 +210,7 @@ where
 // {
 //     tracing::debug!("[write_link_to] {l:?}");
 //     let link_flags = (LinkWrite::ReferenceLink |
-// LinkWrite::ReferenceDefinition ).into();     write(l, &link_flags,
+// LinkWrite::ReferenceDefinition ).into();     write(l, link_flags,
 // link_writer).context("[write_link_to] Failed to write a link.")?;     Ok(())
 // }
 
@@ -237,7 +237,7 @@ enum LinkWrite {
 ///
 /// w: the writer e.g. a File or Vec\<u8\>
 #[inline]
-fn write<W: Write>(l: &Link<'_>, flags: &BitFlags<LinkWrite>, w: &mut W) -> Result<()> {
+fn write<W: Write>(l: &Link<'_>, flags: BitFlags<LinkWrite>, w: &mut W) -> Result<()> {
     if flags.contains(LinkWrite::InlineLink) {
         writeln!(w, "{}", l.to_inline_link())?;
     }
@@ -303,7 +303,7 @@ mod tests {
     #[test]
     fn writes_only_reference_definitions() -> Result<()> {
         let mut out = Vec::new();
-        write_refdefs_to(vec![link("Serde", "serde", "https://serde.rs")], &mut out)?;
+        write_refdefs_to(&[link("Serde", "serde", "https://serde.rs")], &mut out)?;
         let text = String::from_utf8(out)?;
 
         assert!(text.starts_with("# Reference Definitions\n"), "{text}");
@@ -316,7 +316,7 @@ mod tests {
     #[test]
     fn writes_duplicate_links_heading() -> Result<()> {
         let mut out = Vec::new();
-        write_duplicate_links_to(vec![link("A", "a", "https://a.example")], &mut out)?;
+        write_duplicate_links_to(&[link("A", "a", "https://a.example")], &mut out)?;
 
         assert!(String::from_utf8(out)?.starts_with("# Duplicate Links\n"));
         Ok(())
@@ -353,7 +353,7 @@ mod tests {
     fn writes_badge_links_and_definitions_to_two_writers() -> Result<()> {
         let (mut links, mut refdefs) = (Vec::new(), Vec::new());
         write_badge_refdefs_and_links_to_two(
-            vec![link("Serde", "serde", "https://serde.rs")],
+            &[link("Serde", "serde", "https://serde.rs")],
             &mut links,
             &mut refdefs,
         )?;

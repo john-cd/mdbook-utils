@@ -23,7 +23,7 @@ None currently open.
 
 ### Ready: priority order
 
-- [#259: Epic: optional library, CLI, and coverage follow-ups](https://github.com/john-cd/mdbook-utils/issues/259) — Optional follow-ups; choose one focused child at a time.
+- [#259: Epic: optional library, CLI, and coverage follow-ups](https://github.com/john-cd/mdbook-utils/issues/259) — Optional follow-ups; `clippy::pedantic` cleared 2026-11-06, `run_logged` helper done; remaining: llvm-cov, CLI arm tests, `RuleKind`, link-kind enum, `cargo_metadata`, rust_howto layout.
 
 ### Blocked or deferred
 

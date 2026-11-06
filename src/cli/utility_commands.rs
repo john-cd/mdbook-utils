@@ -13,7 +13,7 @@ use super::run_logged;
 /// Generate a sitemap from the book's Markdown source and configured output.
 pub(crate) fn run_sitemap(
     args: MarkdownSrcDirUrlAndDestFileArgs,
-    config: Configuration,
+    config: &Configuration,
 ) -> Result<()> {
     let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
     let base_url = config.base_url(args.base)?;
@@ -44,7 +44,7 @@ pub(crate) fn run_sitemap(
 }
 
 /// Write the Markdown parser events to a diagnostic file.
-pub(crate) fn run_debug(args: MarkdownSrcDirAndDestFileArgs, config: Configuration) -> Result<()> {
+pub(crate) fn run_debug(args: MarkdownSrcDirAndDestFileArgs, config: &Configuration) -> Result<()> {
     let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
     let log_dest_path = config.dest_file_path(args.dest, "debug.log");
     let paths = [

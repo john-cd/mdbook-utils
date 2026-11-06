@@ -77,7 +77,7 @@ pub(crate) struct GenerateArgs {
 }
 
 /// "refdefs" subcommands of the command-line interface
-pub(crate) fn run(subcmd: RefDefsSubCommand, config: Configuration) -> Result<()> {
+pub(crate) fn run(subcmd: RefDefsSubCommand, config: &Configuration) -> Result<()> {
     match subcmd {
         RefDefsSubCommand::Write(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
@@ -207,7 +207,7 @@ mod tests {
                 file_path: Some(dest.clone()),
             },
         };
-        run(RefDefsSubCommand::Write(args), Configuration::default())?;
+        run(RefDefsSubCommand::Write(args), &Configuration::default())?;
         assert!(fs::read_to_string(dest)?.contains("https://example.com"));
         Ok(())
     }
@@ -225,7 +225,7 @@ mod tests {
                 file_path: Some(dest.clone()),
             },
         };
-        assert!(run(RefDefsSubCommand::Write(args), Configuration::default()).is_err());
+        assert!(run(RefDefsSubCommand::Write(args), &Configuration::default()).is_err());
         assert!(!dest.exists());
         Ok(())
     }

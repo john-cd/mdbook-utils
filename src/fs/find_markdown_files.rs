@@ -128,7 +128,7 @@ mod tests {
     fn an_empty_directory_yields_nothing() -> Result<()> {
         let dir = tempdir()?;
 
-        assert!(find_markdown_files_in(dir.path())?.is_empty());
+        assert_eq!(find_markdown_files_in(dir.path())?.len(), 0);
         Ok(())
     }
 }

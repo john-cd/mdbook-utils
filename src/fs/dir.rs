@@ -19,7 +19,10 @@ where
 {
     let dir_path = dir_path.as_ref();
     if !dir_path.is_dir() {
-        bail!("{dir_path:?} should be a folder and exist on disk!");
+        bail!(
+            "{} should be a folder and exist on disk!",
+            dir_path.display()
+        );
     }
     Ok(dir_path.to_path_buf())
 }
@@ -55,8 +58,8 @@ where
         }
         Err(_) => {
             bail!(
-                "{:?}'s existence can neither be confirmed nor denied.",
-                dir_path.as_ref()
+                "{}'s existence can neither be confirmed nor denied.",
+                dir_path.as_ref().display()
             );
         }
     }

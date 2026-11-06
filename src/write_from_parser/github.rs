@@ -67,7 +67,7 @@ where
     // ...and write the reference definition and link to it.
     let mut refdef_buffer = Vec::new();
 
-    write_badge_refdefs_and_links_to_two(links, w, &mut refdef_buffer)?;
+    write_badge_refdefs_and_links_to_two(&links, w, &mut refdef_buffer)?;
 
     // Write reference definitions after links
     w.write_all(&refdef_buffer)?;

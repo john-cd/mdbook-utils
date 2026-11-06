@@ -149,7 +149,7 @@ where
             *counts.entry(l.clone()).or_insert(0) += 1;
         }
         let duplicates: Vec<_> = links.into_iter().filter(|l| counts[l] > 1).collect();
-        link::write_duplicate_links_to(duplicates, f)?;
+        link::write_duplicate_links_to(&duplicates, f)?;
         Ok(())
     })?;
 

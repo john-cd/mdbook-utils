@@ -21,7 +21,11 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
             if path_canon.starts_with(&base_dir_canon) {
                 Ok(path_canon)
             } else {
-                bail!("Path traversal detected: {path_canon:?} is outside of {base_dir_canon:?}");
+                bail!(
+                    "Path traversal detected: {} is outside of {}",
+                    path_canon.display(),
+                    base_dir_canon.display()
+                );
             }
         }
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
@@ -32,13 +36,19 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
                 .components()
                 .any(|c| c == std::path::Component::ParentDir)
             {
-                bail!("Path traversal detected: {path:?} does not exist and contains `..`");
+                bail!(
+                    "Path traversal detected: {} does not exist and contains `..`",
+                    path.display()
+                );
             }
 
             // If the path doesn't exist, it might be a dangling symlink or a
             // new file. Check if it's a dangling symlink.
             if path.symlink_metadata().is_ok() {
-                bail!("Path traversal detected: {path:?} is a dangling symlink");
+                bail!(
+                    "Path traversal detected: {} is a dangling symlink",
+                    path.display()
+                );
             }
 
             // Find the first existing ancestor
@@ -64,12 +74,15 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
                         return Ok(path.to_path_buf());
                     }
                     bail!(
-                        "Path traversal detected: ancestor {ancestor_canon:?} is outside of {base_dir_canon:?}"
+                        "Path traversal detected: ancestor {} is outside of {}",
+                        ancestor_canon.display(),
+                        base_dir_canon.display()
                     );
                 }
             }
             bail!(
-                "Path traversal detected: {path:?} has no existing ancestor within base directory"
+                "Path traversal detected: {} has no existing ancestor within base directory",
+                path.display()
             );
         }
         Err(e) => Err(e.into()),

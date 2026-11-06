@@ -67,7 +67,7 @@ pub(crate) enum LinksSubCommand {
 }
 
 /// Process "links" subcommands of the command-line interface
-pub(crate) fn run(subcmd: LinksSubCommand, config: Configuration) -> Result<()> {
+pub(crate) fn run(subcmd: LinksSubCommand, config: &Configuration) -> Result<()> {
     match subcmd {
         LinksSubCommand::WriteAll(args) => {
             let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
@@ -208,7 +208,7 @@ mod tests {
         ];
         for (name, make) in arms {
             let dest = dir.path().join(name);
-            run(make(paths(&src, &dest)), Configuration::default())?;
+            run(make(paths(&src, &dest)), &Configuration::default())?;
             assert!(dest.is_file(), "{name} was not written");
         }
         Ok(())
@@ -224,7 +224,10 @@ mod tests {
             paths: paths(&src, &dest),
             link_format: LinkFormatArg::Inline,
         };
-        run(LinksSubCommand::WriteInline(args), Configuration::default())?;
+        run(
+            LinksSubCommand::WriteInline(args),
+            &Configuration::default(),
+        )?;
         assert!(dest.is_file());
         Ok(())
     }
@@ -237,7 +240,7 @@ mod tests {
         let dest = dir.path().join("out.md");
         let result = run(
             LinksSubCommand::WriteAll(paths(&missing, &dest)),
-            Configuration::default(),
+            &Configuration::default(),
         );
         assert!(result.is_err());
         assert!(!dest.exists());

@@ -400,14 +400,14 @@ mod tests {
 
         let cycle_a = src_dir.join("cycle-a.md");
         let cycle_b = src_dir.join("cycle-b.md");
-        let cycle_a_contents = "a {{#include cycle-b.md}}\n";
-        let cycle_b_contents = "b {{#include cycle-a.md}}\n";
-        fs::write(&cycle_a, cycle_a_contents)?;
-        fs::write(&cycle_b, cycle_b_contents)?;
+        let first_contents = "a {{#include cycle-b.md}}\n";
+        let second_contents = "b {{#include cycle-a.md}}\n";
+        fs::write(&cycle_a, first_contents)?;
+        fs::write(&cycle_b, second_contents)?;
 
         assert!(include_in_all_markdown_files_in(&src_dir).is_err());
-        assert_eq!(fs::read_to_string(cycle_a)?, cycle_a_contents);
-        assert_eq!(fs::read_to_string(cycle_b)?, cycle_b_contents);
+        assert_eq!(fs::read_to_string(cycle_a)?, first_contents);
+        assert_eq!(fs::read_to_string(cycle_b)?, second_contents);
         Ok(())
     }
 

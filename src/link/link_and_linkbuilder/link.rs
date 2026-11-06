@@ -28,6 +28,10 @@ use super::super::rules::suggest_label_from_url;
 #[derive(Debug, Default, Clone)]
 pub(crate) struct Link<'a> {
     /// Link type reported by the parser (inline, reference, autolink, ...).
+    #[expect(
+        clippy::struct_field_names,
+        reason = "mirrors pulldown-cmark `LinkType`"
+    )]
     pub(crate) link_type: Option<LinkType>,
     /// Link text.
     pub(crate) text: Option<Cow<'a, str>>, // [text](...)

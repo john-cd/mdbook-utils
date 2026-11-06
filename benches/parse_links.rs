@@ -4,6 +4,7 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
+use std::fmt::Write as _;
 use std::fs;
 use std::hint::black_box;
 use std::path::Path;
@@ -29,9 +30,10 @@ fn main() -> anyhow::Result<()> {
     for f in 0..FILES {
         let mut text = String::new();
         for l in 0..LINKS_PER_FILE {
-            text.push_str(&format!(
-                "[l{f}-{l}](https://example.com/{f}/{l}) [r{l}][ref{l}]\n"
-            ));
+            writeln!(
+                text,
+                "[l{f}-{l}](https://example.com/{f}/{l}) [r{l}][ref{l}]"
+            )?;
         }
         fs::write(src.join(format!("f{f}.md")), text)?;
     }
