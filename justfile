@@ -12,7 +12,8 @@ alias l := lint
 alias lf := lint
 alias lc := lint-check
 alias clippy := lint-check
-alias clippy-all := check-all
+alias clippy-all := lint-check
+alias lint-fix := lint
 alias la := lint-all
 alias c := check
 alias ck := check
@@ -157,11 +158,11 @@ lint:
 # Lint with autofix, then lint Markdown.
 lint-all: lint markdownlint
 
-# Run all checks without modifying files: format, lint, check, test, deny.
-check-all: format-check lint-check check test deny
+# Run all checks without modifying files: format, lint, check, test (deny is separate).
+check-all: format-check lint-check check test
 
-# Run the local CI gates.
-ci: check-all
+# Run the local CI gates: check-all plus dependency policy.
+ci: check-all deny
 
 # Check dependency advisories, licenses, duplicate versions, and registry sources.
 deny:
