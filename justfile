@@ -2,32 +2,38 @@
 # Usage: Run just --list from this directory to inspect the available recipes.
 
 # TODO Reviewed ??-??-2026.
-# Format Rust code with the configured formatter toolchain. Alias: f.
-alias f := fmt
-# Format Rust code with the configured formatter toolchain. Alias: fa.
-alias fa := fmt
-# Run the build recipe. Alias: b.
-alias b := build
-# Run the build recipe. Alias: ba.
-alias ba := build
-# Run the clippy recipe. Alias: ca.
-alias ca := clippy
-# Run the check recipe. Alias: ck.
+# Uniform task names (short aliases; old names kept as aliases).
+alias f := format
+alias fmt := format
+alias fa := format-all
+alias fc := format-check
+alias fmt-check := format-check
+alias l := lint
+alias lf := lint
+alias lc := lint-check
+alias clippy := lint-check
+alias clippy-all := check-all
+alias la := lint-all
+alias c := check
 alias ck := check
-# Run the check recipe. Alias: cka.
 alias cka := check
-# Print the Just executable and directory paths used by this example. Alias: t.
+alias ca := check-all
+alias b := build
+alias ba := build
+alias br := release
+alias build-release := release
 alias t := test
-# Print the Just executable and directory paths used by this example. Alias: ta.
 alias ta := test
-# Run a command in the locked Python project environment. Alias: r.
+alias test-all := test
 alias r := run
-# Build and open the Rust API documentation. Alias: d.
 alias d := doc
-# Run the serve recipe. Alias: s.
 alias s := serve
-# Run the formatting, build, lint, and test checks before integration. Alias: p.
+alias cl := clean
+alias de := deny
+alias u := update
 alias p := prep
+alias hi := hooks-install
+alias hr := hooks-run
 
 # Storage-root overrides (existing environment values win over platform defaults):
 # CODE_REPOS_ROOT names the canonical checkout root for tools; CODE_TEMP_ROOT holds temporary files.
@@ -115,12 +121,15 @@ clean:
   mdbook clean ./test_book/
 
 # Format all code
-fmt:
+format:
   cargo +{{rustfmt_toolchain}} fmt --all
   echo "DONE"
 
+# Format everything.
+format-all: format
+
 # Check Rust formatting with the pinned formatter without changing files.
-fmt-check:
+format-check:
   cargo +{{rustfmt_toolchain}} fmt --all -- --check
 
 # Check whether the code can compile
@@ -137,9 +146,22 @@ build:
 # `--all-targets`` is equivalent to specifying `--lib --bins --tests --benches --examples`.
 # optional: --timings
 
-# Scan all code for common mistakes
-clippy:
+# Scan all code for common mistakes (no changes)
+lint-check:
   cargo clippy --all-targets --locked -- --deny warnings
+
+# Lint with autofix: apply Clippy suggestions
+lint:
+  cargo clippy --all-targets --locked --fix --allow-dirty --allow-staged -- --deny warnings
+
+# Lint with autofix, then lint Markdown.
+lint-all: lint markdownlint
+
+# Run all checks without modifying files: format, lint, check, test, deny.
+check-all: format-check lint-check check test deny
+
+# Run the local CI gates.
+ci: check-all
 
 # Check dependency advisories, licenses, duplicate versions, and registry sources.
 deny:
@@ -173,7 +195,7 @@ serve:
   mdbook serve ./user_guide/ -p 3001
 
 # Run all the steps required before pushing code to GitHub
-prep: fmt clean build clippy test _builddoc
+prep: format-all lint check-all build _builddoc
 
 # Build release binaries into the configured external artifact directory.
 @release:
