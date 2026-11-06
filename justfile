@@ -28,6 +28,7 @@ alias ta := test
 alias test-all := test
 alias r := run
 alias d := doc
+alias docall := doc-serve
 alias s := serve
 alias cl := clean
 alias de := deny
@@ -182,8 +183,11 @@ empty := ''
 run cmd=help subcmd=empty:
   cargo run --locked -- {{cmd}} {{subcmd}}
 
-# Build and display the `cargo doc` documentation
+# Build the cargo doc documentation
 doc: _builddoc
+
+# Build and display the cargo doc documentation
+doc-serve: doc
   cd "{{join(target_dir, "doc")}}" && (python3 -m http.server 9000 || python -m http.server 9000)
 
 # Remove old API documentation and rebuild the project docs without dependency docs.
