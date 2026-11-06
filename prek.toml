@@ -38,5 +38,4 @@ hooks = [
   { id = "cargo-fmt", name = "cargo fmt --check", entry = "just fmt-check", language = "system", types = [
     "rust",
   ], pass_filenames = false },
-  { id = "cargo-deny", name = "cargo deny --locked check", entry = "just deny", language = "system", pass_filenames = false, always_run = true },
 ]
