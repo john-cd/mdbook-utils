@@ -4,30 +4,21 @@
 
 <!-- recommended-issue-order:start -->
 
-## Recommended issue order
+## Ready and blocked issues
 
-Snapshot: November 6, 2026. Read each list from top to bottom: quick wins first,
-then the remaining ready work in priority/dependency order. Quick wins are bounded
-candidates, not time estimates. Recheck the live issue and current source before
-starting; this index does not mark acceptance complete. Existing notes below are
-context and may reference issues that have since closed.
+Snapshot: November 6, 2026, from live GitHub issues. Ready issues can start now, in priority order.
+Blocked issues are grouped by blocker; each group has one tracking issue labelled `tracking`.
+Epics are listed where they wait on a blocker. Recheck the live issue before starting.
 
-Ready means a concrete engineering slice can start without a new owner decision or
-external account/host. Where an issue mixes local work and external acceptance, only
-the named local slice is ready. Blocked entries state what releases the block;
-fixture preparation and investigation can continue independently.
+### Ready
 
-### Ready: quick wins
+- [#259: Epic: optional library, CLI, and coverage follow-ups](https://github.com/john-cd/mdbook-utils/issues/259)
 
-None currently open.
+### Blocked
 
-### Ready: priority order
+#### CI unavailable — tracker [#273](https://github.com/john-cd/mdbook-utils/issues/273)
 
-- [#259: Epic: optional library, CLI, and coverage follow-ups](https://github.com/john-cd/mdbook-utils/issues/259) — Optional follow-ups; `clippy::pedantic` cleared 2026-11-06, `run_logged` helper done; remaining: llvm-cov, CLI arm tests, `RuleKind`, link-kind enum, `cargo_metadata`, rust_howto layout.
-
-### Blocked or deferred
-
-- [#273: CI follow-up: deferred runs and checks](https://github.com/john-cd/mdbook-utils/issues/273) — waits for hosted CI to return.
+- Only the tracker itself (its body lists the deferred checks).
 
 <!-- recommended-issue-order:end -->
 
