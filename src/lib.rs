@@ -36,37 +36,5 @@ mod parser;
 mod sitemap;
 mod write_from_parser;
 
-use std::path::Path;
-
-use anyhow::Result;
-use pulldown_cmark::Parser;
-
-/// Helper function:
-///
-/// Checks if the source directory exists,
-/// parses all the Markdown files in the source directory,
-/// invokes a closure that uses the parser to write to an in-memory buffer,
-/// and atomically writes the buffer to the destination file (creating its
-/// parent directories). The destination is untouched if any step fails.
-///
-/// The closure borrows the parser for exactly its own lifetime
-/// (`&'a mut Parser<'a>`) because some writers, such as the GitHub badge
-/// writer, take the parser by that same signature; all I/O stays in this
-/// function, so the closures only format into the buffer.
-fn helper<P1, P2, F>(src_dir_path: P1, dest_file_path: P2, func: F) -> Result<()>
-where
-    P1: AsRef<Path>,
-    P2: AsRef<Path>,
-    F: for<'a, 'b> FnOnce(&'a mut Parser<'a>, &'b mut Vec<u8>) -> Result<()>,
-{
-    let src_dir_path = fs::check_is_dir(src_dir_path)?;
-    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
-    let mut parser = parser::get_parser(all_markdown.as_ref());
-
-    let mut buffer = Vec::new();
-    func(&mut parser, &mut buffer)?;
-    fs::write_atomically(dest_file_path.as_ref(), &buffer)
-}
-
 /// Flat re-exports of the grouped operations in the [`api`] module.
 pub use api::*;

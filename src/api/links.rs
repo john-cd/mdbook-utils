@@ -4,29 +4,51 @@
 
 use std::path::Path;
 
+use anyhow::Context as _;
 use anyhow::Result;
 use pulldown_cmark::LinkType;
 
 use crate::fs;
-use crate::helper;
 use crate::link;
 pub use crate::link::LinkFormat;
 use crate::parser;
 
 // LINKS
 
-/// Parse Markdown from all .md files in a given source directory,
-/// write all inline links and autolinks (i.e., not written as
-/// reference-style links) to external sites found therein to a file,
-/// as reference-style links and definitions.
+/// Render external inline links and autolinks from Markdown sources.
 ///
 /// Internal links (relative paths, fragments, and non-HTTP schemes) are
-/// excluded. See [`write_inline_links_with_format`] to choose the output
-/// format.
+/// excluded. `format` selects the Markdown syntax for the output.
 ///
-/// `src_dir_path`: path to the source directory.
+/// The caller chooses where and how to write the returned Markdown.
 ///
-/// `dest_file_path`: path to the file to create and write into.
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the Markdown
+/// output cannot be rendered.
+pub fn render_inline_links<P: AsRef<Path>>(src_dir_path: P, format: LinkFormat) -> Result<String> {
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let mut parser = parser::get_parser(all_markdown.as_ref());
+    let links: Vec<link::Link<'_>> = parser::extract_links(&mut parser);
+    let links: Vec<_> = links
+        .into_iter()
+        .filter(|link| {
+            matches!(
+                link.get_link_type(),
+                Some(LinkType::Inline | LinkType::Autolink)
+            )
+        })
+        .filter(|link| is_external_url(&link.get_url()))
+        .collect();
+
+    let mut output = Vec::new();
+    link::write_links_in_format_to(links, format, &mut output)?;
+    String::from_utf8(output).context("rendered links were not valid UTF-8")
+}
+
+/// Parse Markdown sources and atomically write the rendered external inline
+/// links and autolinks to a file.
 ///
 /// # Errors
 ///
@@ -40,13 +62,12 @@ where
     write_inline_links_with_format(src_dir_path, dest_file_path, LinkFormat::Reference)
 }
 
-/// Same as [`write_inline_links`], but writes the external inline links and
-/// autolinks in the requested [`LinkFormat`].
+/// Same as [`render_inline_links`], but atomically writes the result to a file.
 ///
 /// # Errors
 ///
-/// Returns an error if the source directory cannot be read or the destination
-/// file cannot be created or written.
+/// Returns an error if the source directory cannot be read, the Markdown
+/// output cannot be rendered, or the destination file cannot be written.
 pub fn write_inline_links_with_format<P1, P2>(
     src_dir_path: P1,
     dest_file_path: P2,
@@ -56,23 +77,8 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(src_dir_path, dest_file_path, |parser, f| {
-        let links: Vec<link::Link<'_>> = parser::extract_links(parser);
-        let links: Vec<_> = links
-            .into_iter()
-            .filter(|l| {
-                matches!(
-                    l.get_link_type(),
-                    Some(LinkType::Inline | LinkType::Autolink)
-                )
-            })
-            .filter(|l| is_external_url(&l.get_url()))
-            .collect();
-        link::write_links_in_format_to(links, format, f)?;
-        Ok(())
-    })?;
-
-    Ok(())
+    let output = render_inline_links(src_dir_path, format)?;
+    fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
 /// Returns true if the destination is an absolute `http` or `https` URL,
@@ -83,12 +89,30 @@ fn is_external_url(url: &str) -> bool {
     lower.starts_with("http://") || lower.starts_with("https://")
 }
 
-/// Parse Markdown from all .md files in a given source directory,
-/// write all links found therein to a file.
+/// Render HTTP and HTTPS links found in all Markdown files in a source directory.
 ///
-/// `src_dir_path`: path to the source directory.
+/// The caller chooses where and how to write the returned Markdown.
 ///
-/// `dest_file_path`: path to the file to create and write into.
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the Markdown
+/// output cannot be rendered.
+pub fn render_all_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let mut parser = parser::get_parser(all_markdown.as_ref());
+    let links: Vec<link::Link<'_>> = parser::extract_links(&mut parser);
+    let links: Vec<_> = links
+        .into_iter()
+        .filter(|link| link.get_url().starts_with("http"))
+        .collect();
+
+    let mut output = Vec::new();
+    link::write_reference_style_links_to(links, &mut output)?;
+    String::from_utf8(output).context("rendered links were not valid UTF-8")
+}
+
+/// Parse Markdown sources and atomically write the rendered links to a file.
 ///
 /// # Errors
 ///
@@ -99,32 +123,43 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(src_dir_path, dest_file_path, |parser, f| {
-        let links: Vec<link::Link<'_>> = parser::extract_links(parser);
-        let links: Vec<_> = links
-            .into_iter()
-            .filter(|l| {
-                let url = l.get_url();
-                url.starts_with("http")
-            })
-            .collect();
-        link::write_reference_style_links_to(links, f)?;
-        Ok(())
-    })?;
-
-    Ok(())
+    let output = render_all_links(src_dir_path)?;
+    fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
-/// Parse Markdown from all .md files in a given source directory,
-/// write duplicated links found therein to a file.
+/// Render duplicate links found in all Markdown files in a source directory.
 ///
 /// Two links are duplicates when they have the same label, URL and title.
 /// Inline links and autolinks have no label, so they are duplicates when they
 /// point to the same URL, whatever their text.
 ///
-/// `src_dir_path`: path to the source directory.
+/// The caller chooses where and how to write the returned Markdown.
 ///
-/// `dest_file_path`: path to the file to create and write into.
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the Markdown
+/// output cannot be rendered.
+pub fn render_duplicate_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let mut parser = parser::get_parser(all_markdown.as_ref());
+    let links: Vec<link::Link<'_>> = parser::extract_links(&mut parser);
+    let links: Vec<_> = links
+        .into_iter()
+        .filter(|link| link.get_url().starts_with("http"))
+        .collect();
+    let mut counts = std::collections::HashMap::new();
+    for link in &links {
+        *counts.entry(link.clone()).or_insert(0) += 1;
+    }
+    let duplicates: Vec<_> = links.into_iter().filter(|link| counts[link] > 1).collect();
+
+    let mut output = Vec::new();
+    link::write_duplicate_links_to(&duplicates, &mut output)?;
+    String::from_utf8(output).context("rendered duplicate links were not valid UTF-8")
+}
+
+/// Parse Markdown sources and atomically write duplicate links to a file.
 ///
 /// # Errors
 ///
@@ -135,43 +170,19 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(src_dir_path, dest_file_path, |parser, f| {
-        let links: Vec<link::Link<'_>> = parser::extract_links(parser);
-        let links: Vec<_> = links
-            .into_iter()
-            .filter(|l| {
-                let url = l.get_url();
-                url.starts_with("http")
-            })
-            .collect();
-        let mut counts = std::collections::HashMap::new();
-        for l in &links {
-            *counts.entry(l.clone()).or_insert(0) += 1;
-        }
-        let duplicates: Vec<_> = links.into_iter().filter(|l| counts[l] > 1).collect();
-        link::write_duplicate_links_to(&duplicates, f)?;
-        Ok(())
-    })?;
-
-    Ok(())
+    let output = render_duplicate_links(src_dir_path)?;
+    fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
-/// Parse Markdown from all .md files in a given source directory,
-/// write broken links found therein to a file.
+/// Render broken reference links found in all Markdown files in a source directory.
 ///
-/// `src_dir_path`: path to the source directory.
-///
-/// `dest_file_path`: path to the file to create and write into.
+/// The caller chooses where and how to write the returned Markdown.
 ///
 /// # Errors
 ///
-/// Returns an error if the source directory cannot be read or the destination
-/// file cannot be created or written.
-pub fn write_broken_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
-where
-    P1: AsRef<Path>,
-    P2: AsRef<Path>,
-{
+/// Returns an error if the source directory cannot be read or the Markdown
+/// output cannot be rendered.
+pub fn render_broken_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
     let sources = fs::read_markdown_sources_in(src_dir_path)?;
     let handler = parser::Handler::new();
@@ -195,9 +206,22 @@ where
 
     let mut buffer = Vec::new();
     link::write_broken_links_to(broken_links, &mut buffer)?;
-    fs::write_atomically(dest_file_path.as_ref(), &buffer)?;
+    String::from_utf8(buffer).context("rendered broken links were not valid UTF-8")
+}
 
-    Ok(())
+/// Parse Markdown sources and atomically write broken links to a file.
+///
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the destination
+/// file cannot be created or written.
+pub fn write_broken_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
+where
+    P1: AsRef<Path>,
+    P2: AsRef<Path>,
+{
+    let output = render_broken_links(src_dir_path)?;
+    fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
 #[cfg(test)]

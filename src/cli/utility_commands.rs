@@ -60,6 +60,9 @@ pub(crate) fn run_debug(args: MarkdownSrcDirAndDestFileArgs, config: &Configurat
             style(log_dest_path.display()).cyan()
         ),
         "[main] Failed to generate the debug log.",
-        || mdbook_utils::api::debug_parse_to(&markdown_src_dir_path, &log_dest_path),
+        || {
+            let report = mdbook_utils::api::render_debug_events(&markdown_src_dir_path)?;
+            super::write_output::write_text_atomically(&log_dest_path, &report)
+        },
     )
 }

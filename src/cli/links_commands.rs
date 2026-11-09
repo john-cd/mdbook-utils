@@ -84,7 +84,10 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: &Configuration) -> Result<()>
                     style(links_dest_path.display()).cyan()
                 ),
                 "[run] Failed to write links to a file.",
-                || mdbook_utils::api::write_all_links(&markdown_src_dir_path, &links_dest_path),
+                || {
+                    let report = mdbook_utils::api::render_all_links(&markdown_src_dir_path)?;
+                    super::write_output::write_text_atomically(&links_dest_path, &report)
+                },
             )?;
         }
         LinksSubCommand::WriteInline(args) => {
@@ -105,11 +108,11 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: &Configuration) -> Result<()>
                 ),
                 "[run] Failed to write inline links to a file.",
                 || {
-                    mdbook_utils::api::write_inline_links_with_format(
+                    let report = mdbook_utils::api::render_inline_links(
                         &markdown_src_dir_path,
-                        &links_dest_path,
                         link_format.into(),
-                    )
+                    )?;
+                    super::write_output::write_text_atomically(&links_dest_path, &report)
                 },
             )?;
         }
@@ -129,10 +132,8 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: &Configuration) -> Result<()>
                 ),
                 "[run] Failed to write duplicate links to a file.",
                 || {
-                    mdbook_utils::api::write_duplicate_links(
-                        &markdown_src_dir_path,
-                        &links_dest_path,
-                    )
+                    let report = mdbook_utils::api::render_duplicate_links(&markdown_src_dir_path)?;
+                    super::write_output::write_text_atomically(&links_dest_path, &report)
                 },
             )?;
         }
@@ -151,7 +152,10 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: &Configuration) -> Result<()>
                     style(links_dest_path.display()).cyan()
                 ),
                 "[run] Failed to write broken links to a file.",
-                || mdbook_utils::api::write_broken_links(&markdown_src_dir_path, &links_dest_path),
+                || {
+                    let report = mdbook_utils::api::render_broken_links(&markdown_src_dir_path)?;
+                    super::write_output::write_text_atomically(&links_dest_path, &report)
+                },
             )?;
         }
     }

@@ -1,8 +1,10 @@
 //! Reusable public library operations for processing mdBook sources and
 //! outputs.
 //!
-//! The binary's command-line modules handle argument parsing and configuration;
-//! callers that need the underlying work can use these functions directly.
+//! The binary's command-line modules handle argument parsing, configuration,
+//! and output files. Report renderers return owned text so each caller can
+//! choose its output destination and writing policy. File-writing convenience
+//! operations remain available for callers that prefer that boundary.
 //!
 //! TODO Reviewed ??-??-2026.
 

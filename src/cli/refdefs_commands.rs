@@ -94,7 +94,10 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: &Configuration) -> Result<(
                     style(refdef_dest_path.display()).cyan()
                 ),
                 "[run] Failed to write reference definitions to a file.",
-                || mdbook_utils::api::write_refdefs_to(&markdown_src_dir_path, &refdef_dest_path),
+                || {
+                    let report = mdbook_utils::api::render_refdefs(&markdown_src_dir_path)?;
+                    super::write_output::write_text_atomically(&refdef_dest_path, &report)
+                },
             )?;
         }
         RefDefsSubCommand::Generate(args) => {
@@ -129,11 +132,11 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: &Configuration) -> Result<(
                     ),
                     "[run] Failed to generate badges.",
                     || {
-                        mdbook_utils::api::generate_badges_with_style(
+                        let report = mdbook_utils::api::render_badges(
                             &markdown_src_dir_path,
-                            &refdef_dest_path,
                             badge_style.into(),
-                        )
+                        )?;
+                        super::write_output::write_text_atomically(&refdef_dest_path, &report)
                     },
                 )?;
             }
@@ -163,12 +166,12 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: &Configuration) -> Result<(
                     ),
                     "[run] Failed to generate reference definitions from dependencies.",
                     || {
-                        mdbook_utils::api::generate_refdefs_to(
+                        let report = mdbook_utils::api::render_dependency_refdefs(
                             &cargo_toml_dir_path,
                             &markdown_src_dir_path,
-                            &refdef_dest_file_path,
                             args.args.log_file.as_ref(),
-                        )
+                        )?;
+                        super::write_output::write_text_atomically(&refdef_dest_file_path, &report)
                     },
                 )?;
             }
