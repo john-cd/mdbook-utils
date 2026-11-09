@@ -6,17 +6,17 @@
 
 ## Ready and blocked issues
 
-Snapshot: November 6, 2026, from live GitHub issues. Ready issues can start now, in priority order.
+Snapshot: November 9, 2026, from live GitHub issues. Ready issues can start now, in priority order.
 Blocked issues are grouped by blocker; each group has one tracking issue labelled `tracking`.
 Epics are listed where they wait on a blocker. Recheck the live issue before starting.
 
 ### Ready
 
-- [#259: Epic: optional library, CLI, and coverage follow-ups](https://github.com/john-cd/mdbook-utils/issues/259)
+None currently.
 
 ### Blocked
 
-#### CI unavailable — tracker [#273](https://github.com/john-cd/mdbook-utils/issues/273)
+#### Container build validation — tracker [#273](https://github.com/john-cd/mdbook-utils/issues/273)
 
 - Only the tracker itself (its body lists the deferred checks).
 
