@@ -4,19 +4,33 @@
 
 use std::path::Path;
 
+use anyhow::Context as _;
 use anyhow::Result;
 
-use crate::helper;
+use crate::fs;
+use crate::parser;
 use crate::write_from_parser;
 
 // DEBUG
 
-/// Parse Markdown from all .md files in a given source directory and
-/// write all raw events to a file for debugging purposes.
+/// Render the raw parser events for all Markdown files in a source directory.
 ///
-/// `src_dir_path`: path to the source directory.
+/// The caller chooses where and how to write the returned diagnostic text.
 ///
-/// `dest_file_path`: path to the file to create and write into.
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the diagnostic
+/// output cannot be rendered.
+pub fn render_debug_events<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let mut parser = parser::get_parser(all_markdown.as_ref());
+    let mut output = Vec::new();
+    write_from_parser::write_raw_to(&mut parser, &mut output)?;
+    String::from_utf8(output).context("rendered parser events were not valid UTF-8")
+}
+
+/// Parse Markdown sources and atomically write raw parser events to a file.
 ///
 /// # Errors
 ///
@@ -27,12 +41,8 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(
-        src_dir_path,
-        dest_file_path,
-        write_from_parser::write_raw_to,
-    )?;
-    Ok(())
+    let output = render_debug_events(src_dir_path)?;
+    fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
 #[cfg(test)]

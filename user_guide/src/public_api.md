@@ -10,7 +10,14 @@ Add the crate to your `Cargo.toml`:
 cargo add mdbook-utils
 ```
 
-The grouped library operations are under `mdbook_utils::api`. The CLI uses these same functions after its private `src/cli` layer parses arguments, resolves command options, and reports results. The library owns reusable Markdown processing, link and reference generation, file scans, and sitemap generation.
+The grouped library operations are under `mdbook_utils::api`. The CLI uses these same functions after its private `src/cli` layer parses arguments, resolves command options, and reports results. Report renderers return owned text, leaving callers to choose output paths and write policies; file-writing convenience operations remain available for compatibility.
+
+Render a link report and choose the output file in the calling application:
+
+```rust,ignore
+let report = mdbook_utils::api::render_all_links("src")?;
+std::fs::write("all_links.md", report)?;
+```
 
 For example, generate the categories index from a Markdown source directory:
 

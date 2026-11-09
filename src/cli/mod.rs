@@ -16,6 +16,7 @@ pub(crate) mod links_commands;
 pub(crate) mod markdown_commands;
 pub(crate) mod refdefs_commands;
 pub(crate) mod utility_commands;
+mod write_output;
 
 use args::MarkdownSrcDirAndDestFileArgs;
 use args::MarkdownSrcDirUrlAndDestFileArgs;

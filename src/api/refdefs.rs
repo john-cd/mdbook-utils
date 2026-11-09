@@ -4,11 +4,12 @@
 
 use std::path::Path;
 
+use anyhow::Context as _;
 use anyhow::Result;
 
 use crate::dependencies;
+use crate::fs;
 use crate::generate;
-use crate::helper;
 use crate::link;
 use crate::parser;
 use crate::write_from_parser;
@@ -44,12 +45,24 @@ impl BadgeStyle {
 
 // REFERENCE DEFINITIONS
 
-/// Parse Markdown from all .md files in a given source directory
-/// and write reference definitions found therein to a file.
+/// Render the reference definitions found in all Markdown files in a source directory.
 ///
-/// `src_dir_path`: path to the source directory.
+/// The caller chooses where and how to write the returned Markdown.
 ///
-/// `dest_file_path`: path to the file to create and write into.
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the Markdown
+/// output cannot be rendered.
+pub fn render_refdefs<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let mut parser = parser::get_parser(all_markdown.as_ref());
+    let mut output = Vec::new();
+    write_from_parser::write_refdefs_to(&mut parser, &mut output)?;
+    String::from_utf8(output).context("rendered reference definitions were not valid UTF-8")
+}
+
+/// Parse Markdown sources and atomically write reference definitions to a file.
 ///
 /// # Errors
 ///
@@ -60,23 +73,29 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(
-        src_dir_path,
-        dest_file_path,
-        write_from_parser::write_refdefs_to,
-    )?;
-    Ok(())
+    let output = render_refdefs(src_dir_path)?;
+    fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
-/// Parse Markdown from all .md files in a given source directory,
-/// extract existing reference definitions,
-/// identify URLs that are GitHub repos,
-/// create default flat-style Shields.io badge URLs for these links,
-/// and write to a file.
+/// Render GitHub badge reference definitions found in all Markdown sources.
 ///
-/// `src_dir_path`: path to the source directory.
+/// The caller chooses where and how to write the returned Markdown.
 ///
-/// `dest_file_path`: path to the file to create and write into.
+/// # Errors
+///
+/// Returns an error if the source directory cannot be read or the Markdown
+/// output cannot be rendered.
+pub fn render_badges<P: AsRef<Path>>(src_dir_path: P, style: BadgeStyle) -> Result<String> {
+    let src_dir_path = fs::check_is_dir(src_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
+    let mut parser = parser::get_parser(all_markdown.as_ref());
+    let mut output = Vec::new();
+    write_from_parser::write_github_repo_badge_refdefs(&mut parser, &mut output, style)?;
+    String::from_utf8(output).context("rendered badge reference definitions were not valid UTF-8")
+}
+
+/// Parse Markdown sources and atomically write default-style GitHub badge
+/// reference definitions to a file.
 ///
 /// # Errors
 ///
@@ -90,11 +109,8 @@ where
     generate_badges_with_style(src_dir_path, dest_file_path, BadgeStyle::Flat)
 }
 
-/// Generate GitHub badge reference definitions using a Shields.io style.
-///
-/// `src_dir_path` is the directory containing Markdown source files.
-/// `dest_file_path` is the output file to create or replace.
-/// `style` is the visual style applied to generated GitHub badge image URLs.
+/// Parse Markdown sources and atomically write GitHub badge reference
+/// definitions using a Shields.io style.
 ///
 /// # Errors
 ///
@@ -109,27 +125,50 @@ where
     P1: AsRef<Path>,
     P2: AsRef<Path>,
 {
-    helper(src_dir_path, dest_file_path, |parser, writer| {
-        write_from_parser::write_github_repo_badge_refdefs(parser, writer, style)
-    })?;
-    Ok(())
+    let output = render_badges(src_dir_path, style)?;
+    fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
 // GENERATE REF DEFS FROM DEPENDENCIES
 
-/// Given a Cargo.toml path,
-/// generate reference definitions from code dependencies
-/// and write them to a file.
+/// Render reference definitions from Cargo dependencies and existing sources.
 ///
-/// `cargo_toml_dir_path`: path to the directory containing `Cargo.toml`.
+/// The caller chooses where and how to write the returned Markdown. An
+/// optional `log_file_path` receives the `cargo tree` output.
 ///
-/// `markdown_dir_path`: path to the directory containing Markdown files.
+/// # Errors
 ///
-/// `refdef_dest_file_path`: path to the file to create and
-/// write into.
-///
-/// `log_file_path`: optional path to a log file where the output of `cargo
-/// tree` will be written.
+/// Returns an error if Cargo cannot read the manifest or run `cargo tree`, the
+/// Markdown source cannot be read, the requested log cannot be written, or the
+/// Markdown output cannot be rendered.
+pub fn render_dependency_refdefs<P1, P2, P3>(
+    cargo_toml_dir_path: P1,
+    markdown_dir_path: P2,
+    log_file_path: Option<P3>,
+) -> Result<String>
+where
+    P1: AsRef<Path>,
+    P2: AsRef<Path>,
+    P3: AsRef<Path>,
+{
+    tracing::debug!("loading dependencies from Cargo.toml");
+    // Generate ref defs from dependencies
+    let deps = dependencies::get_dependencies(&cargo_toml_dir_path, log_file_path)?;
+    let mut new_links = generate::generate_refdefs_from(deps);
+
+    // Reads all markdown files in the source directory, then merges existing
+    // definitions with newly generated dependency definitions.
+    let markdown_dir_path = fs::check_is_dir(markdown_dir_path)?;
+    let all_markdown = fs::read_to_string_all_markdown_files_in(markdown_dir_path)?;
+    let parser = parser::get_parser(all_markdown.as_ref());
+    let existing_links = parser::extract_reference_definitions(&parser);
+    let links = generate::merge_links(&existing_links, &mut new_links);
+    let mut output = Vec::new();
+    link::write_refdefs_to(&links, &mut output)?;
+    String::from_utf8(output).context("rendered dependency references were not valid UTF-8")
+}
+
+/// Render dependency reference definitions and atomically write them to a file.
 ///
 /// # Errors
 ///
@@ -147,24 +186,6 @@ where
     P3: AsRef<Path>,
     P4: AsRef<Path>,
 {
-    tracing::debug!("loading dependencies from Cargo.toml");
-    // Generate ref defs from dependencies
-    let deps = dependencies::get_dependencies(&cargo_toml_dir_path, log_file_path)?;
-    let mut new_links = generate::generate_refdefs_from(deps);
-
-    // Reads all markdown files in the source directory, then merges existing
-    // definitions with newly generated dependency definitions.
-    helper(
-        markdown_dir_path,
-        refdef_dest_file_path,
-        move |parser, f| {
-            // Read existing ref defs
-            let existing_links = parser::extract_reference_definitions(parser);
-
-            let links = generate::merge_links(&existing_links, &mut new_links);
-            link::write_refdefs_to(&links, f)?;
-            Ok(())
-        },
-    )?;
-    Ok(())
+    let output = render_dependency_refdefs(cargo_toml_dir_path, markdown_dir_path, log_file_path)?;
+    fs::write_atomically(refdef_dest_file_path.as_ref(), output.as_bytes())
 }
