@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "problemMatcher": [
+        "$rustc"
+      ],
+      "label": "Rust: check",
+      "args": ["check"],
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "command": "just"
+    },
+    {
+      "problemMatcher": [
+        "$rustc"
+      ],
+      "label": "Rust: tests",
+      "args": ["test"],
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
+      "command": "just"
+    },
+    {
+      "problemMatcher": [],
+      "label": "Repository: CI",
+      "args": ["ci"],
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "command": "just"
+    }
+  ]
+}

@@ -54,7 +54,7 @@ jobs:
           bin="mdbook-utils"
           [ "${{ runner.os }}" = "Windows" ] && bin="mdbook-utils.exe"
           mkdir dist
-          cp "target/${{ matrix.target }}/release/$bin" LICENSE README.md dist/
+          cp "$CARGO_TARGET_DIR/${{ matrix.target }}/release/$bin" LICENSE README.md dist/
           if [ "${{ matrix.ext }}" = "zip" ]; then
             (cd dist && 7z a "../$name.zip" . > /dev/null)
           else
