@@ -45,8 +45,16 @@ allow = [
   "Zlib",
   "bzip2-1.0.6",
   "LicenseRef-Slint-Royalty-free-2.0",
+  "LicenseRef-Mdbook-Utils-Proprietary",
 ]
 confidence-threshold = 0.8
+
+[[licenses.clarify]]
+crate = "mdbook-utils"
+expression = "LicenseRef-Mdbook-Utils-Proprietary"
+license-files = [
+  { path = "LICENSE", hash = 0xf27c71c5 },
+]
 
 [licenses.private]
 ignore = true
