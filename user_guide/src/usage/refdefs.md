@@ -37,4 +37,11 @@ Supported values are `flat`, `flat-square`, `plastic`, `for-the-badge`, and
 `social`. Omitting the option keeps the default flat output and leaves the
 `style` query parameter out of generated URLs.
 
+With `--from-dependencies`, `mdbook-utils` reads resolved direct normal dependencies from Cargo
+metadata; development and build dependencies are excluded. Running from a workspace root collects
+dependencies from its default members, while running from a member directory uses that member.
+Generated labels use each dependency's library target name, and URLs use its Cargo package name.
+If multiple resolved packages expose the same library target name, the lexicographically smallest
+Cargo package ID is selected to keep the generated result deterministic.
+
 {{#include ../refs.md}}

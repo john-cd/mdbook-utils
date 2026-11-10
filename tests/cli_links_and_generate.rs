@@ -329,30 +329,86 @@ fn modifying_commands_fail_without_terminal_or_yes() -> Result<()> {
     Ok(())
 }
 
-/// `refdefs generate --from-dependencies` reads the dependencies of a crate
-/// with `cargo tree` and writes docs.rs and crates.io definitions that use the
-/// package name, keeping definitions the book already has.
+/// Writes a local library crate fixture with an optional explicit target name and repository.
+fn write_local_library(
+    path: &Path,
+    package_name: &str,
+    library_name: Option<&str>,
+    repository: Option<&str>,
+) -> Result<()> {
+    let src = path.join("src");
+    fs::create_dir_all(&src)?;
+    let mut manifest =
+        format!("[package]\nname = \"{package_name}\"\nversion = \"0.1.0\"\nedition = \"2021\"\n");
+    if let Some(repository) = repository {
+        manifest.push_str(&format!("repository = \"{repository}\"\n"));
+    }
+    if let Some(library_name) = library_name {
+        manifest.push_str(&format!("\n[lib]\nname = \"{library_name}\"\n"));
+    }
+    fs::write(path.join("Cargo.toml"), manifest)?;
+    fs::write(src.join("lib.rs"), "")?;
+    Ok(())
+}
+
+/// `refdefs generate --from-dependencies` handles virtual workspaces, renamed packages,
+/// library names called `deps`, comma paths, and deterministic library-name collisions.
 #[test]
-fn refdefs_from_dependencies_uses_package_names_and_keeps_existing() -> Result<()> {
+fn refdefs_from_dependencies_handles_workspace_and_metadata_edge_cases() -> Result<()> {
     let dir = tempdir()?;
-    let dep = dir.path().join("local-dep");
-    fs::create_dir_all(dep.join("src"))?;
+    let workspace = dir.path().join("workspace");
+    fs::create_dir_all(&workspace)?;
     fs::write(
-        dep.join("Cargo.toml"),
-        "[package]\nname = \"local-dep\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+        workspace.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"members/*\"]\ndefault-members = [\"members/first\", \"members/second\"]\nresolver = \"2\"\n",
     )?;
-    fs::write(dep.join("src/lib.rs"), "")?;
-    let krate = dir.path().join("deps");
-    fs::create_dir_all(krate.join("src"))?;
+
+    let dependencies = workspace.join("deps");
+    write_local_library(
+        &dependencies.join("deps-crate"),
+        "deps-package",
+        Some("deps"),
+        Some("https://example.test/project,with,comma"),
+    )?;
+    write_local_library(
+        &dependencies.join("path, with, commas").join("md5"),
+        "md-5",
+        Some("md5"),
+        None,
+    )?;
+    write_local_library(
+        &dependencies.join("collision-a"),
+        "collision-a",
+        Some("collision"),
+        None,
+    )?;
+    write_local_library(
+        &dependencies.join("collision-z"),
+        "collision-z",
+        Some("collision"),
+        None,
+    )?;
+
+    let first = workspace.join("members/first");
+    fs::create_dir_all(first.join("src"))?;
     fs::write(
-        krate.join("Cargo.toml"),
-        "[package]\nname = \"deps\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\nlocal-dep = { path = \"../local-dep\" }\n",
+        first.join("Cargo.toml"),
+        "[package]\nname = \"some-root-name\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\ndeps = { package = \"deps-package\", path = \"../../deps/deps-crate\" }\ncollision_z = { package = \"collision-z\", path = \"../../deps/collision-z\" }\n",
     )?;
-    fs::write(krate.join("src/lib.rs"), "")?;
-    // The lockfile is generated offline: both crates are local.
+    fs::write(first.join("src/lib.rs"), "")?;
+
+    let second = workspace.join("members/second");
+    fs::create_dir_all(second.join("src"))?;
+    fs::write(
+        second.join("Cargo.toml"),
+        "[package]\nname = \"another-root\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\nrenamed_md5 = { package = \"md-5\", path = \"../../deps/path, with, commas/md5\" }\ncollision_a = { package = \"collision-a\", path = \"../../deps/collision-a\" }\n",
+    )?;
+    fs::write(second.join("src/lib.rs"), "")?;
+
+    // The lockfile is generated offline because all dependencies are local fixtures.
     let lock = Command::new("cargo")
         .args(["generate-lockfile", "--offline"])
-        .current_dir(&krate)
+        .current_dir(&workspace)
         .output()?;
     assert!(
         lock.status.success(),
@@ -377,7 +433,7 @@ fn refdefs_from_dependencies_uses_package_names_and_keeps_existing() -> Result<(
         ])
         .arg(&src)
         .arg("--cargo-toml-dir")
-        .arg(&krate)
+        .arg(&workspace)
         .arg("--output")
         .arg(&out)
         .arg("--log-file")
@@ -399,9 +455,67 @@ fn refdefs_from_dependencies_uses_package_names_and_keeps_existing() -> Result<(
         "{content}"
     );
     assert!(
-        content.contains("[local_dep-crate]: https://crates.io/crates/local-dep"),
+        content.contains("[deps-crate]: https://crates.io/crates/deps-package"),
+        "{content}"
+    );
+    assert!(
+        content.contains("[deps-github]: https://example.test/project,with,comma"),
+        "{content}"
+    );
+    assert!(
+        content.contains("[md5-crate]: https://crates.io/crates/md-5"),
+        "{content}"
+    );
+    assert!(
+        content.contains("[collision-crate]: https://crates.io/crates/collision-a"),
         "{content}"
     );
     assert!(log.is_file(), "the cargo log should be written");
+    Ok(())
+}
+
+/// Reports Cargo metadata failures and writes their diagnostics to a requested log file.
+#[test]
+fn refdefs_from_dependencies_reports_and_logs_cargo_failures() -> Result<()> {
+    let dir = tempdir()?;
+    let cargo_dir = dir.path().join("invalid-crate");
+    fs::create_dir_all(&cargo_dir)?;
+    fs::write(cargo_dir.join("Cargo.toml"), "[package]\n")?;
+    let src = dir.path().join("src");
+    fs::create_dir(&src)?;
+    fs::write(src.join("page.md"), "[example]: https://example.test\n")?;
+    let output_path = dir.path().join("refs.md");
+    let log = dir.path().join("cargo.log");
+    let output = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
+        .args([
+            "refdefs",
+            "generate",
+            "--from-dependencies",
+            "--markdown-dir",
+        ])
+        .arg(&src)
+        .arg("--cargo-toml-dir")
+        .arg(&cargo_dir)
+        .arg("--output")
+        .arg(&output_path)
+        .arg("--log-file")
+        .arg(&log)
+        .current_dir(dir.path())
+        .env_remove("BOOK_ROOT_DIR_PATH")
+        .env_remove("MARKDOWN_DIR_PATH")
+        .env("RUST_LOG", "off")
+        .output()?;
+
+    assert!(!output.status.success());
+    assert!(
+        String::from_utf8_lossy(&output.stderr).contains("cargo metadata"),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let log_contents = fs::read_to_string(log)?;
+    assert!(
+        log_contents.contains("manifest") || log_contents.contains("Cargo.toml"),
+        "{log_contents}"
+    );
     Ok(())
 }

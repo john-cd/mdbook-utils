@@ -47,17 +47,11 @@ exclude = [
 [[bin]]
 doc = false
 name = "mdbook-utils"
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[[bench]]
-name = "parse_links"
-harness = false
 
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive", "env"] }
 console = "0.16.6"
-csv = "1.4.0"
 dialoguer = { version = "0.12.0", features = ["history", "completion"] }
 dotenvy = "0.15.7"
 enumflags2 = "0.7.12"
@@ -70,6 +64,7 @@ quick-xml = "0.42.0"
 rayon = "1.12.0"
 regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.149"
 tempfile = "3.27.0"
 toml = { version = "1.1.8", features = ["parse"] }
 tracing = "0.1.44"
@@ -78,6 +73,10 @@ url = "2.5.8"
 walkdir = "2.5.0"
 
 [dev-dependencies]
+
+[[bench]]
+name = "parse_links"
+harness = false
 
 [lints.rust]
 
