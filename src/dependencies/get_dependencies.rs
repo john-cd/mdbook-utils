@@ -157,13 +157,19 @@ fn parse_cargo_metadata(
             cargo_toml_dir_path.display()
         )
     })?;
-    let selected_roots = if requested_dir == metadata.workspace_root {
+    let metadata_workspace_root = canonical_or_original(&metadata.workspace_root);
+    let selected_roots = if requested_dir == metadata_workspace_root {
         metadata.workspace_default_members.clone()
     } else {
         let selected_package = metadata
             .packages
             .iter()
-            .find(|package| package.manifest_path.parent() == Some(requested_dir.as_path()))
+            .find(|package| {
+                package
+                    .manifest_path
+                    .parent()
+                    .is_some_and(|path| canonical_or_original(path) == requested_dir)
+            })
             .with_context(|| {
                 format!(
                     "No Cargo package found in selected directory {}",
@@ -230,6 +236,11 @@ fn parse_cargo_metadata(
         .into_iter()
         .map(|(library_name, (_, dependency))| (library_name, dependency))
         .collect())
+}
+
+/// Canonicalizes paths from Cargo when possible so Windows extended paths compare consistently.
+fn canonical_or_original(path: &Path) -> std::path::PathBuf {
+    std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf())
 }
 
 /// Write e.g. stdout / stderr to a file.
