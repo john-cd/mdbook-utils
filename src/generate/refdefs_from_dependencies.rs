@@ -14,7 +14,7 @@ use crate::link::Link;
 ///
 /// dependencies: sorted map of dependencies
 pub(crate) fn generate_refdefs_from(
-    dependencies: BTreeMap<Cow<'_, str>, Dependency<'_>>,
+    dependencies: BTreeMap<Cow<'_, str>, Dependency>,
 ) -> Vec<Link<'static>> {
     let mut buf = Vec::new();
     info!(
