@@ -315,24 +315,39 @@ mod tests {
     /// Parses a JSON fixture as Cargo metadata for the selected directory.
     fn parse_fixture(
         metadata: serde_json::Value,
-        selected_dir: &str,
+        selected_dir: &Path,
     ) -> Result<BTreeMap<Cow<'static, str>, Dependency>> {
         std::fs::create_dir_all(selected_dir)?;
-        parse_cargo_metadata(serde_json::to_vec(&metadata)?, Path::new(selected_dir))
+        parse_cargo_metadata(serde_json::to_vec(&metadata)?, selected_dir)
+    }
+
+    /// Creates a canonical temporary directory for metadata fixtures.
+    fn fixture_dir(name: &str) -> Result<(tempfile::TempDir, std::path::PathBuf)> {
+        let temp = tempfile::tempdir()?;
+        let path = temp.path().join(name);
+        std::fs::create_dir_all(&path)?;
+        Ok((temp, std::fs::canonicalize(path)?))
+    }
+
+    /// Returns a Cargo manifest path beneath a package fixture directory.
+    fn manifest_path(directory: &Path) -> String {
+        directory.join("Cargo.toml").to_string_lossy().into_owned()
     }
 
     /// Package names and repository URLs stay intact when names and paths contain punctuation.
     #[test]
     fn extracts_by_package_identity_without_fixture_name_assumptions() -> Result<()> {
+        let (_temp, root) = fixture_dir("odd-root")?;
+        let dependency_dir = root.join("path, with, commas");
         let metadata = serde_json::json!({
-            "workspace_root": "/tmp/odd-root",
+            "workspace_root": root.display().to_string(),
             "workspace_default_members": ["root-id"],
             "packages": [
-                package("root-id", "odd-root", "/tmp/odd-root/Cargo.toml", Some("odd_root"), None),
+                package("root-id", "odd-root", &manifest_path(&root), Some("odd_root"), None),
                 package(
                     "dep-id",
                     "md-5",
-                    "/tmp/odd-root/path, with, commas/Cargo.toml",
+                    &manifest_path(&dependency_dir),
                     Some("md5"),
                     Some("https://example.test/repo,with,commas")
                 )
@@ -343,7 +358,7 @@ mod tests {
             ] }
         });
 
-        let dependencies = parse_fixture(metadata, "/tmp/odd-root")?;
+        let dependencies = parse_fixture(metadata, &root)?;
         assert_eq!(dependencies.len(), 1);
         let md5 = &dependencies["md5"];
         assert_eq!(md5.package_name(), "md-5");
@@ -358,17 +373,25 @@ mod tests {
     /// edges.
     #[test]
     fn virtual_workspace_collects_default_members_and_normal_dependencies() -> Result<()> {
+        let (_temp, workspace) = fixture_dir("workspace")?;
+        let member_a = workspace.join("a");
+        let member_b = workspace.join("b");
+        let excluded = workspace.join("excluded");
+        let dependencies_dir = workspace.join("deps");
+        let dev_dir = workspace.join("dev");
+        let build_dir = workspace.join("build");
+        let other_dir = workspace.join("other");
         let metadata = serde_json::json!({
-            "workspace_root": "/tmp/workspace",
+            "workspace_root": workspace.display().to_string(),
             "workspace_default_members": ["member-a", "member-b"],
             "packages": [
-                package("member-a", "first-member", "/tmp/workspace/a/Cargo.toml", Some("first_member"), None),
-                package("member-b", "second-member", "/tmp/workspace/b/Cargo.toml", Some("second_member"), None),
-                package("excluded", "excluded-member", "/tmp/workspace/excluded/Cargo.toml", Some("excluded_member"), None),
-                package("deps-id", "deps-package", "/tmp/workspace/deps/Cargo.toml", Some("deps"), None),
-                package("dev-id", "dev-only", "/tmp/workspace/dev/Cargo.toml", Some("dev_only"), None),
-                package("build-id", "build-only", "/tmp/workspace/build/Cargo.toml", Some("build_only"), None),
-                package("other-id", "other-package", "/tmp/workspace/other/Cargo.toml", Some("other_package"), None)
+                package("member-a", "first-member", &manifest_path(&member_a), Some("first_member"), None),
+                package("member-b", "second-member", &manifest_path(&member_b), Some("second_member"), None),
+                package("excluded", "excluded-member", &manifest_path(&excluded), Some("excluded_member"), None),
+                package("deps-id", "deps-package", &manifest_path(&dependencies_dir), Some("deps"), None),
+                package("dev-id", "dev-only", &manifest_path(&dev_dir), Some("dev_only"), None),
+                package("build-id", "build-only", &manifest_path(&build_dir), Some("build_only"), None),
+                package("other-id", "other-package", &manifest_path(&other_dir), Some("other_package"), None)
             ],
             "resolve": { "nodes": [
                 { "id": "member-a", "deps": [
@@ -385,7 +408,7 @@ mod tests {
             ] }
         });
 
-        let dependencies = parse_fixture(metadata.clone(), "/tmp/workspace")?;
+        let dependencies = parse_fixture(metadata.clone(), &workspace)?;
         assert_eq!(dependencies.len(), 2);
         assert_eq!(dependencies["deps"].package_name(), "deps-package");
         assert_eq!(
@@ -396,7 +419,7 @@ mod tests {
         assert!(!dependencies.contains_key("build_only"));
         assert!(!dependencies.contains_key("excluded_member"));
 
-        let member_dependencies = parse_fixture(metadata, "/tmp/workspace/a")?;
+        let member_dependencies = parse_fixture(metadata, &member_a)?;
         assert_eq!(member_dependencies.len(), 1);
         assert_eq!(member_dependencies["deps"].package_name(), "deps-package");
         Ok(())
@@ -405,43 +428,46 @@ mod tests {
     /// Repeated library names choose the same package regardless of Cargo node order.
     #[test]
     fn duplicate_library_names_choose_smallest_package_id() -> Result<()> {
+        let (_temp, workspace) = fixture_dir("workspace")?;
+        let package_z = workspace.join("z-package");
+        let package_a = workspace.join("a-package");
         let metadata = serde_json::json!({
-            "workspace_root": "/tmp/workspace",
+            "workspace_root": workspace.display().to_string(),
             "workspace_default_members": ["root-id"],
             "packages": [
-                package("root-id", "some-root", "/tmp/workspace/Cargo.toml", Some("some_root"), None),
-                package("path+file:///tmp/z-package#zeta@1.0.0", "zeta", "/tmp/z-package/Cargo.toml", Some("shared"), None),
-                package("path+file:///tmp/a-package#alpha@2.0.0", "alpha", "/tmp/a-package/Cargo.toml", Some("shared"), None)
+                package("root-id", "some-root", &manifest_path(&workspace), Some("some_root"), None),
+                package("z-id", "zeta", &manifest_path(&package_z), Some("shared"), None),
+                package("a-id", "alpha", &manifest_path(&package_a), Some("shared"), None)
             ],
             "resolve": { "nodes": [
                 { "id": "root-id", "deps": [
-                    edge("path+file:///tmp/z-package#zeta@1.0.0", None),
-                    edge("path+file:///tmp/a-package#alpha@2.0.0", None)
+                    edge("z-id", None),
+                    edge("a-id", None)
                 ] },
-                { "id": "path+file:///tmp/z-package#zeta@1.0.0", "deps": [] },
-                { "id": "path+file:///tmp/a-package#alpha@2.0.0", "deps": [] }
+                { "id": "z-id", "deps": [] },
+                { "id": "a-id", "deps": [] }
             ] }
         });
         let reversed = serde_json::json!({
-            "workspace_root": "/tmp/workspace",
+            "workspace_root": workspace.display().to_string(),
             "workspace_default_members": ["root-id"],
             "packages": [
-                package("path+file:///tmp/a-package#alpha@2.0.0", "alpha", "/tmp/a-package/Cargo.toml", Some("shared"), None),
-                package("path+file:///tmp/z-package#zeta@1.0.0", "zeta", "/tmp/z-package/Cargo.toml", Some("shared"), None),
-                package("root-id", "some-root", "/tmp/workspace/Cargo.toml", Some("some_root"), None)
+                package("a-id", "alpha", &manifest_path(&package_a), Some("shared"), None),
+                package("z-id", "zeta", &manifest_path(&package_z), Some("shared"), None),
+                package("root-id", "some-root", &manifest_path(&workspace), Some("some_root"), None)
             ],
             "resolve": { "nodes": [
-                { "id": "path+file:///tmp/a-package#alpha@2.0.0", "deps": [] },
-                { "id": "path+file:///tmp/z-package#zeta@1.0.0", "deps": [] },
+                { "id": "a-id", "deps": [] },
+                { "id": "z-id", "deps": [] },
                 { "id": "root-id", "deps": [
-                    edge("path+file:///tmp/a-package#alpha@2.0.0", None),
-                    edge("path+file:///tmp/z-package#zeta@1.0.0", None)
+                    edge("a-id", None),
+                    edge("z-id", None)
                 ] }
             ] }
         });
 
-        let first = parse_fixture(metadata, "/tmp/workspace")?;
-        let second = parse_fixture(reversed, "/tmp/workspace")?;
+        let first = parse_fixture(metadata, &workspace)?;
+        let second = parse_fixture(reversed, &workspace)?;
         assert_eq!(first["shared"].package_name(), "alpha");
         assert_eq!(second["shared"].package_name(), "alpha");
         Ok(())
