@@ -186,4 +186,29 @@ No includes here.
 
         Ok(())
     }
+
+    /// An in-place Markdown rewrite preserves each existing Unix access mode.
+    #[cfg(unix)]
+    #[test]
+    fn in_place_rewrite_preserves_existing_unix_modes() -> anyhow::Result<()> {
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = tempdir()?;
+        let src_dir = dir.path().join("src");
+        fs::create_dir(&src_dir)?;
+        let path = src_dir.join("shared.md");
+
+        for mode in [0o644, 0o664, 0o600] {
+            fs::write(&path, "Before {{#include sample.rs}} after")?;
+            fs::set_permissions(&path, fs::Permissions::from_mode(mode))?;
+
+            let changed = remove_includes_in_all_markdown_files_in(&src_dir, "included")?;
+
+            assert_eq!(changed, [path.clone()]);
+            assert_eq!(fs::read_to_string(&path)?, "Before included after");
+            assert_eq!(fs::metadata(&path)?.permissions().mode() & 0o777, mode);
+        }
+
+        Ok(())
+    }
 }
