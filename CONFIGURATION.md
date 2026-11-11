@@ -109,7 +109,7 @@ Build scripts/macros are optimized because they execute during compilation. Carg
 package overrides precedence over build overrides, so unspecified external build dependencies
 use the size-optimized wildcard and explicitly tuned macro parsing crates use level 3. sccache caches
 eligible library compilations, not linking of binaries, dynamic libraries, or procedural macros.
-Keep the shared 35 GiB cache and stable per-slot directories. Inspect running Cargo/rustc
+Keep the shared 45 GiB cache and stable per-slot directories. Inspect running Cargo/rustc
 processes before restarting sccache. Clean only demonstrated stale/corrupt content, never by
 recursively deleting a checkout link or another active slot.
 

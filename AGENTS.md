@@ -42,7 +42,7 @@ Run ad hoc Cargo commands through the root justfile as just cargo <subcommand> [
 
 On Windows, target artifacts go to CODE_TARGET_ROOT/mdbook-utils/<slot> and intermediate build artifacts go to CODE_BUILD_ROOT/mdbook-utils/slot. On Linux/macOS, use the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/slot and cargo-build/mdbook-utils/slot.
 
-These repositories use sccache with incremental compilation disabled. The shared cache is limited to 35G. The Just runner sets `SCCACHE_BASEDIRS` to the main checkout and registered allowed `.worktrees/<letter>` paths only, discarding inherited paths. Use its Cargo command to select external per-worktree build paths.
+These repositories use sccache with incremental compilation disabled. The shared cache is limited to 45G. The Just runner sets `SCCACHE_BASEDIRS` to the main checkout and registered allowed `.worktrees/<letter>` paths only, discarding inherited paths. Use its Cargo command to select external per-worktree build paths.
 
 ## Build, lint, and test
 
@@ -115,7 +115,7 @@ The `user_guide\` and `test_book\` directories are independent mdBook projects a
 - Windows: target outputs go to CODE_TARGET_ROOT/mdbook-utils/<slot> and intermediate build outputs go to CODE_BUILD_ROOT/mdbook-utils/slot. Keep CODE_BUILD_ROOT on an NTFS volume; do not use a ReFS volume for builds.
 - Linux/macOS: target outputs go to the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/<slot>; intermediate outputs go under cargo-build/mdbook-utils/<slot>.
 - Run ad hoc commands as just cargo <subcommand> [args...]; existing cargo-make tasks also receive the configured paths.
-- sccache is enabled with incremental compilation disabled. Cache size is 35G; the Windows cache directory is CODE_SCCACHE_ROOT and the Linux/macOS cache directory is under the user's XDG cache folder.
+- sccache is enabled with incremental compilation disabled. Cache size is 45G; the Windows cache directory is CODE_SCCACHE_ROOT and the Linux/macOS cache directory is under the user's XDG cache folder.
 - The Just runner sets `SCCACHE_BASEDIRS` to the main checkout and registered allowed letter worktrees only. Large-build repositories allow `main`, `a`, and `b`; inherited paths are discarded. Use its Cargo command to select external per-worktree build paths.
 
 ## Machine storage roots

@@ -124,9 +124,9 @@ Build paths and diagnostics are implemented directly in the justfile.
 ### Compiler cache
 
 Direct Cargo defaults and `just` use sccache with incremental compilation
-disabled and a 35G cache limit. The runner exports `RUSTC_WRAPPER=sccache`,
+disabled and a 45G cache limit. The runner exports `RUSTC_WRAPPER=sccache`,
 `CARGO_BUILD_RUSTC_WRAPPER=sccache`, `CARGO_INCREMENTAL=0`, and
-`SCCACHE_CACHE_SIZE=35G`, replacing inherited values. Explicit shell or Cargo
+`SCCACHE_CACHE_SIZE=45G`, replacing inherited values. Explicit shell or Cargo
 command-line overrides still take precedence for direct Cargo invocations.
 
 `CODE_SCCACHE_ROOT` overrides `SCCACHE_DIR`; otherwise the default below applies.
