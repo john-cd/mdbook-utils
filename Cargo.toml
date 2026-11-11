@@ -49,27 +49,47 @@ doc = false
 name = "mdbook-utils"
 
 [dependencies]
+# Flexible concrete Error type built on std::error::Error
 anyhow = "1.0.104"
+# A simple to use, efficient, and full-featured Command Line Argument Parser
 clap = { version = "4.6.7", features = ["derive", "env"] }
+# A terminal and console abstraction for Rust
 console = "0.16.6"
+# A command line prompting library.
 dialoguer = { version = "0.12.0", features = ["history", "completion"] }
+# A well-maintained fork of the dotenv crate
 dotenvy = "0.15.7"
+# Represents sets of enum variants as compact, type-safe bit flags.
 enumflags2 = "0.7.12"
+# deserialize env vars into typesafe structs
 envy = "0.4.2"
+# heck is a case conversion library.
 heck = "0.5.0"
+# Percent encoding and decoding
 percent-encoding = "2.3.2"
+# A pull parser for CommonMark
 pulldown-cmark = "0.13.6"
 # pulldown-cmark = { version = "0.12", default-features = false, features = ["simd"] }
 quick-xml = "0.42.0"
+# Either acts as rayon or creates a single-threaded facade
 rayon = "1.12.0"
+# A lightweight regex engine that optimizes for binary size and compilation time.
 regex = "1.13.1"
+# A generic serialization/deserialization framework
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.149"
+# A JSON serialization file format
+serde_json = "1.0.154"
+# A library for managing temporary files and directories.
 tempfile = "3.27.0"
-toml = { version = "1.1.8", features = ["parse"] }
+# A native Rust encoder and decoder of TOML-formatted files and streams. Provides implementations of the standard Serialize/Deserialize traits for...
+toml = { version = "1.2.1", features = ["parse"] }
+# Application-level tracing for Rust.
 tracing = "0.1.44"
+# Utilities for implementing and composing `tracing` subscribers.
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+# URL library for Rust, based on the WHATWG URL Standard
 url = "2.5.8"
+# Recursively walk a directory.
 walkdir = "2.5.0"
 
 [dev-dependencies]
