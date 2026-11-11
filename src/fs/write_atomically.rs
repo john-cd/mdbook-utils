@@ -139,6 +139,11 @@ mod tests {
 
     /// A Windows read-only destination is rejected without changing its content or attribute.
     #[cfg(windows)]
+    // Windows clears only FILE_ATTRIBUTE_READONLY here; it does not broaden Unix mode bits.
+    #[expect(
+        clippy::permissions_set_readonly_false,
+        reason = "Windows clears only FILE_ATTRIBUTE_READONLY, not Unix mode bits"
+    )]
     #[test]
     fn read_only_windows_destination_is_left_unchanged() -> Result<()> {
         let dir = tempfile::tempdir()?;
