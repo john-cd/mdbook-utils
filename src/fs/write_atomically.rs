@@ -108,7 +108,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn new_unix_file_keeps_restrictive_mode() -> Result<()> {
-        use std::os::unix::fs::PermissionsExt;
+        use std::os::unix::fs::PermissionsExt as _;
 
         let dir = tempfile::tempdir()?;
         let path = dir.path().join("new.md");

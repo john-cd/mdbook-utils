@@ -191,7 +191,7 @@ No includes here.
     #[cfg(unix)]
     #[test]
     fn in_place_rewrite_preserves_existing_unix_modes() -> anyhow::Result<()> {
-        use std::os::unix::fs::PermissionsExt;
+        use std::os::unix::fs::PermissionsExt as _;
 
         let dir = tempdir()?;
         let src_dir = dir.path().join("src");
@@ -204,7 +204,7 @@ No includes here.
 
             let changed = remove_includes_in_all_markdown_files_in(&src_dir, "included")?;
 
-            assert_eq!(changed, [path.clone()]);
+            assert_eq!(changed, std::slice::from_ref(&path));
             assert_eq!(fs::read_to_string(&path)?, "Before included after");
             assert_eq!(fs::metadata(&path)?.permissions().mode() & 0o777, mode);
         }
