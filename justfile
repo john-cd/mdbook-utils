@@ -93,7 +93,7 @@ export RUSTC_WRAPPER := "sccache"
 export CARGO_BUILD_RUSTC_WRAPPER := "sccache"
 export CARGO_INCREMENTAL := "0"
 export SCCACHE_DIR := code_sccache_root
-export SCCACHE_CACHE_SIZE := "35G"
+export SCCACHE_CACHE_SIZE := "45G"
 export SCCACHE_BASEDIRS := sccache_basedirs
 export TEMP := if os() == "windows" { code_temp_root } else { env("TEMP", "/tmp") }
 export TMP := if os() == "windows" { code_temp_root } else { env("TMP", "/tmp") }
