@@ -17,7 +17,7 @@
 
 ```bash
 export CRATES_TOKEN="<token from crates.io>"
-docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run \
+docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose.ci.yaml run \
        --rm --env CRATES_TOKEN mdbook-utils .devcontainer/publish.sh -y
 ```
 
