@@ -30,10 +30,7 @@ RUN apt-get update \
 ## Update Rust if needed
 ## Install nightly fmt
 ARG RUSTFMT_TOOLCHAIN
-COPY rustfmt-toolchain.toml /usr/local/share/rustfmt-toolchain.toml
-RUN rustup update \
-    && rustup component add clippy \
-    && RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(sed -n 's/^channel *= *"\([^"]*\)".*/\1/p' /usr/local/share/rustfmt-toolchain.toml)}" \
+RUN rustup component add clippy \
     && rustup toolchain install "$RUSTFMT_TOOLCHAIN" \
     && rustup component add rustfmt --toolchain "$RUSTFMT_TOOLCHAIN"
 ENV RUSTFMT_TOOLCHAIN=${RUSTFMT_TOOLCHAIN}
@@ -41,10 +38,11 @@ ENV RUSTFMT_TOOLCHAIN=${RUSTFMT_TOOLCHAIN}
 ARG MDBOOK_VERSION
 ARG SCCACHE_VERSION
 ARG JUST_VERSION
+ARG CARGO_BINSTALL_VERSION
 
 ## Install cargo binstall (binary install)
 ## Install just, mdbook, etc... from the binary release
-RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash \
+RUN cargo install --locked --version "${CARGO_BINSTALL_VERSION}" cargo-binstall \
     && cargo binstall --no-confirm --version ${JUST_VERSION} just \
     && cargo binstall --no-confirm --version ${MDBOOK_VERSION} mdbook \
     && cargo binstall --no-confirm --secure --version ${SCCACHE_VERSION} sccache
