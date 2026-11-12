@@ -1,4 +1,7 @@
 # syntax=docker/dockerfile:1
+# Dockerfile build inputs are required and supplied by Compose from tracked .devcontainer/.env.
+# From the repo root pass --env-file .devcontainer/.env and add --env-file .devcontainer/.env.local when present.
+# Dockerfile build inputs for mdbook-utils.
 # TODO Reviewed ??-??-2026.
 
 # Dockerfile reference guide at
