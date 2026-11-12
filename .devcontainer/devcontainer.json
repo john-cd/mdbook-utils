@@ -1,4 +1,5 @@
 // Dev Container setup
+// mdbook-utils devcontainer configuration uses a project-prefixed Compose service.
 // Keep this file as simple as possible and use Docker Compose files to configure the container instead.
 // For format details, see https://aka.ms/devcontainer.json.
 {

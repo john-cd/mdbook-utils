@@ -1,16 +1,22 @@
+# Project-scoped Compose stack: mdbook-utils.
+# Build inputs come from tracked .devcontainer/.env; from the repo root pass --env-file .devcontainer/.env.
+# Keep credentials in ignored .devcontainer/.env.local; from the repo root pass it as a second --env-file when present.
 # TODO Reviewed ??-??-2026.
 # Docker Compose reference guide: https://docs.docker.com/go/compose-spec-reference/
+name: mdbook-utils
 services:
   mdbook-utils:
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile # path relative to context
       args:
-        RUST_IMAGE_LABEL: ${RUST_IMAGE_LABEL}
-        RUSTFMT_TOOLCHAIN: ${RUSTFMT_TOOLCHAIN:-}
-        MDBOOK_VERSION: ${MDBOOK_VERSION}
-        SCCACHE_VERSION: ${SCCACHE_VERSION:?sccache version must be defined}
-        JUST_VERSION: ${JUST_VERSION:?just version must be defined}
-        CARGO_BUMP_VERSION: ${CARGO_BUMP_VERSION:?cargo-bump version must be defined}
+        RUST_IMAGE_LABEL: ${RUST_IMAGE_LABEL:?Set RUST_IMAGE_LABEL in .devcontainer/.env or the host environment}
+        RUSTFMT_TOOLCHAIN: ${RUSTFMT_TOOLCHAIN:?Set RUSTFMT_TOOLCHAIN in .devcontainer/.env or the host environment}
+        MDBOOK_VERSION: ${MDBOOK_VERSION:?Set MDBOOK_VERSION in .devcontainer/.env or the host environment}
+        SCCACHE_VERSION: ${SCCACHE_VERSION:?Set SCCACHE_VERSION in .devcontainer/.env or the host environment}
+        JUST_VERSION: ${JUST_VERSION:?Set JUST_VERSION in .devcontainer/.env or the host environment}
+        CARGO_BUMP_VERSION: ${CARGO_BUMP_VERSION:?Set CARGO_BUMP_VERSION in .devcontainer/.env or the host environment}
+        EMAIL: ${EMAIL:?Set EMAIL in .devcontainer/.env or the host environment}
+        GIT_AUTHOR_NAME: ${GIT_AUTHOR_NAME:?Set GIT_AUTHOR_NAME in .devcontainer/.env or the host environment}
     environment:
-      RUSTFMT_TOOLCHAIN: ${RUSTFMT_TOOLCHAIN:-}
+      RUSTFMT_TOOLCHAIN: ${RUSTFMT_TOOLCHAIN:?Set RUSTFMT_TOOLCHAIN in .devcontainer/.env or the host environment}

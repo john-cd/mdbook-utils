@@ -1,24 +1,32 @@
+# Project-scoped Compose stack: mdbook-utils-dev.
+# Build inputs come from tracked .devcontainer/.env; from the repo root pass --env-file .devcontainer/.env.
+# Keep credentials in ignored .devcontainer/.env.local; from the repo root pass it as a second --env-file when present.
 # TODO Reviewed ??-??-2026.
 ## DEV settings
 ##
 ## Override / merges with settings in compose.yaml
 ## Docker Compose reference guide: https://docs.docker.com/go/compose-spec-reference/
-name: mdbook_utils_devcontainer
+name: mdbook-utils-dev
 services:
   mdbook-utils:
-    image: mdbook_utils_dev:${IMAGE_VERSION} # Name and tag of the image that will be built
+    image: mdbook_utils_dev:${IMAGE_VERSION:?Set IMAGE_VERSION in .devcontainer/.env or the host environment} # Name and tag of the image that will be built
     build:
       target: development
       args:
-        EMAIL: ${EMAIL}
-        GIT_AUTHOR_NAME: ${GIT_AUTHOR_NAME}
-        CARGO_BUMP_VERSION: ${CARGO_BUMP_VERSION}
+        EMAIL: ${EMAIL:?Set EMAIL in .devcontainer/.env or the host environment}
+        GIT_AUTHOR_NAME: ${GIT_AUTHOR_NAME:?Set GIT_AUTHOR_NAME in .devcontainer/.env or the host environment}
+        CARGO_BUMP_VERSION: ${CARGO_BUMP_VERSION:?Set CARGO_BUMP_VERSION in .devcontainer/.env or the host environment}
+        JUST_VERSION: ${JUST_VERSION:?Set JUST_VERSION in .devcontainer/.env or the host environment}
+        MDBOOK_VERSION: ${MDBOOK_VERSION:?Set MDBOOK_VERSION in .devcontainer/.env or the host environment}
+        RUSTFMT_TOOLCHAIN: ${RUSTFMT_TOOLCHAIN:?Set RUSTFMT_TOOLCHAIN in .devcontainer/.env or the host environment}
+        RUST_IMAGE_LABEL: ${RUST_IMAGE_LABEL:?Set RUST_IMAGE_LABEL in .devcontainer/.env or the host environment}
+        SCCACHE_VERSION: ${SCCACHE_VERSION:?Set SCCACHE_VERSION in .devcontainer/.env or the host environment}
     volumes:
-      - ${ROOT_PROJECT_PATH}:/code
-      - cargo_home_cache:/usr/local/cargo/ # https://doc.rust-lang.org/cargo/guide/cargo-home.html?highlight=crate%20cache
-      - cargo_target_cache:/target/mdbook-utils/ # See .cargo/config.toml
-      - cargo_sccache_cache:/root/.cache/sccache/
-      - command_history:/command_history
+      - ${ROOT_PROJECT_PATH:?Set ROOT_PROJECT_PATH in .devcontainer/.env or the host environment}:/code
+      - mdbook-utils-cargo-home-cache:/usr/local/cargo/ # https://doc.rust-lang.org/cargo/guide/cargo-home.html?highlight=crate%20cache
+      - mdbook-utils-cargo-target-cache:/target/mdbook-utils/ # See .cargo/config.toml
+      - mdbook-utils-cargo-sccache-cache:/root/.cache/sccache/
+      - mdbook-utils-command-history:/command_history
     environment:
       SCCACHE_DIR: /root/.cache/sccache
 
@@ -30,12 +38,12 @@ services:
 
 # Create volumes in dev only, since the CI virtual machine is emepheral
 volumes:
-  cargo_home_cache:
-    name: "${COMPOSE_PROJECT_NAME}_cargo_home_cache_${RUST_VERSION}"
-  cargo_target_cache:
-    name: "${COMPOSE_PROJECT_NAME}_cargo_target_cache_${RUST_VERSION}"
-  cargo_sccache_cache:
-    name: "${COMPOSE_PROJECT_NAME}_cargo_sccache_cache_${RUST_VERSION}"
-  command_history:
-    name: "${COMPOSE_PROJECT_NAME}_command_history"
+  mdbook-utils-cargo-home-cache:
+    name: ${COMPOSE_PROJECT_NAME:?Set COMPOSE_PROJECT_NAME in .devcontainer/.env or the host environment}_mdbook-utils-cargo_home_cache
+  mdbook-utils-cargo-target-cache:
+    name: ${COMPOSE_PROJECT_NAME:?Set COMPOSE_PROJECT_NAME in .devcontainer/.env or the host environment}_mdbook-utils-cargo_target_cache
+  mdbook-utils-cargo-sccache-cache:
+    name: ${COMPOSE_PROJECT_NAME:?Set COMPOSE_PROJECT_NAME in .devcontainer/.env or the host environment}_mdbook-utils-cargo_sccache_cache
+  mdbook-utils-command-history:
+    name: ${COMPOSE_PROJECT_NAME:?Set COMPOSE_PROJECT_NAME in .devcontainer/.env or the host environment}_mdbook-utils-command_history
 ## Without custom names, the docker volumes will be prefixed by the compose project name + _

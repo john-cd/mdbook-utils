@@ -112,3 +112,8 @@ rustc-ice-*.txt
 .env.*
 !.env.example
 !.env.*.example
+
+# Shared non-secret Docker configuration is tracked; local credentials are ignored.
+!.devcontainer/
+!.devcontainer/.env
+.devcontainer/.env.local
