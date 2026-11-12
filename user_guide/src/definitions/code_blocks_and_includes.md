@@ -27,7 +27,8 @@ including a blank line immediately before `ANCHOR_END`; place the end marker on
 the next line after the last desired line when no trailing blank line is wanted.
 See the [mdBook include reference][mdbook-include] for the complete syntax.
 
-`mdbook-utils` expands `{{#include ...}}` directives only. Other expressions,
+`mdbook-utils` expands include directives such as
+<code>&#123;&#123;#include path&#125;&#125;</code> only. Other expressions,
 including `{{!crate }}`, are left unchanged and have no special meaning in this
 tool.
 

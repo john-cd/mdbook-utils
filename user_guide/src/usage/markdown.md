@@ -11,8 +11,8 @@ Usage: mdbook-utils markdown [OPTIONS] <COMMAND>
 
 Commands:
   extract-code-examples              Copy Rust code examples from the Markdown into .rs files
-  replace-code-examples-by-includes  Replace Rust code examples from the Markdown by \{{#include ...}} statements
-  replace-includes-by-contents       Replace \{{#include file.md}} by the file contents
+  replace-code-examples-by-includes  Replace Rust code examples from the Markdown by escaped include statements
+  replace-includes-by-contents       Replace escaped include statements by the file contents
   remove-includes                    Remove \{{#include }} statements (and replace them by a hard-coded string)
   generate-categories                Generate a listing of crates.io dependencies and write to a Markdown file
   generate-crates                    Generate a crate index and write to a Markdown file
