@@ -110,6 +110,6 @@ RUN chmod +x ./.devcontainer/ci.sh ./.devcontainer/publish.sh
 
 ## `ci.sh` builds / tests the code and builds / tests the user guide.
 ## The user guide HTML that has been built is exported
-## via the bind mount in `compose-ci.yaml` back to the CI host,
+## via the bind mount in `compose.ci.yaml` back to the CI host,
 ## so that it could be deployed to GitHub Pages.
 ENTRYPOINT [ "./.devcontainer/ci.sh" ]

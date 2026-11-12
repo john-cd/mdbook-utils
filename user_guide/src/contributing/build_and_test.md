@@ -55,7 +55,7 @@ docker compose up --build -d
 Use the following commands to build and test the code and user guide using the Continuous Integration configuration:
 
 ```bash
-docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose-ci.yaml run \
+docker compose -f .devcontainer/compose.yaml -f .devcontainer/compose.ci.yaml run \
 --build --rm mdbook-utils
 ```
 
