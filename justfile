@@ -51,6 +51,7 @@ set windows-shell := ["C:/Program Files/Git/bin/bash.exe", "-uc"]
 rustfmt_toolchain_default := trim(replace_regex(read(join(source_directory(), "rustfmt-toolchain.toml")), '(?s).*channel\s*=\s*"([^"]+)".*', "$1"))
 rustfmt_toolchain_override := env("RUSTFMT_TOOLCHAIN", "")
 rustfmt_toolchain := if rustfmt_toolchain_override == "" { rustfmt_toolchain_default } else { rustfmt_toolchain_override }
+export RUSTFMT_TOOLCHAIN := rustfmt_toolchain
 checkout_name := file_name(source_directory())
 worktree_name := if file_name(parent_directory(repo_root)) == ".worktrees" { checkout_name } else { "main" }
 cache_home := env("XDG_CACHE_HOME", join(home_directory(), ".cache"))
@@ -114,7 +115,9 @@ _default:
 # Run any cargo command with this justfile's target/build dirs, e.g. `just cargo tree`
 [positional-arguments]
 cargo *args:
+  @printf '[cargo] start: %s\n' "$*"
   cargo "$@"
+  @printf '[cargo] done: %s\n' "$*"
 
 # Clean Cargo's `target` and mdbook's `book` folders
 clean:
@@ -124,7 +127,9 @@ clean:
 
 # Format all code
 format:
+  @echo "[format] start (rustfmt={{rustfmt_toolchain}})"
   cargo +{{rustfmt_toolchain}} fmt --all
+  @echo "[format] done"
   echo "DONE"
 
 # Format everything.
@@ -132,17 +137,23 @@ format-all: format
 
 # Check Rust formatting with the pinned formatter without changing files.
 format-check:
+  @echo "[format-check] start (rustfmt={{rustfmt_toolchain}})"
   cargo +{{rustfmt_toolchain}} fmt --all -- --check
+  @echo "[format-check] done"
 
 # Check whether the code can compile
 check:
+  @echo "[check] start"
   cargo check --all-targets --locked
+  @echo "[check] done"
   echo "DONE"
 # `--all-targets`` is equivalent to specifying `--lib --bins --tests --benches --examples`.
 
 # Build all code and books
 build:
+  @echo "[build] start"
   cargo build --all-targets --locked
+  @echo "[build] done"
   mdbook build ./user_guide/
   mdbook build ./test_book/
 # `--all-targets`` is equivalent to specifying `--lib --bins --tests --benches --examples`.
@@ -150,11 +161,15 @@ build:
 
 # Scan all code for common mistakes (no changes)
 lint-check:
+  @echo "[lint-check] start"
   cargo clippy --all-targets --locked -- --deny warnings
+  @echo "[lint-check] done"
 
 # Lint with autofix: apply Clippy suggestions
 lint:
+  @echo "[lint] start"
   cargo clippy --all-targets --locked --fix --allow-dirty --allow-staged -- --deny warnings
+  @echo "[lint] done"
 
 # Lint with autofix, then lint Markdown.
 lint-all: lint markdownlint
@@ -171,7 +186,9 @@ deny:
 
 # Test all code and books
 test:
+  @echo "[test] start"
   cargo test --all-targets --locked
+  @echo "[test] done"
   mdbook test ./user_guide/
   mdbook test ./test_book/
 # `--all-targets`` is equivalent to specifying `--lib --bins --tests --benches --examples`.
