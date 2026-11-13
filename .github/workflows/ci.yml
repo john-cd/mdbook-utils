@@ -28,9 +28,21 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Load pinned stable Rust version
+        id: load-stable-rust
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          rust_version="$(sed -n 's/^[[:space:]]*channel[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' rust-toolchain.toml | head -n 1)"
+          if [[ -z "$rust_version" ]]; then
+            echo "Could not read channel from rust-toolchain.toml" >&2
+            exit 1
+          fi
+          echo "RUST_VERSION=$rust_version" >> "$GITHUB_ENV"
+          echo "version=$rust_version" >> "$GITHUB_OUTPUT"
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
-          toolchain: 1.99.1
+          toolchain: ${{ steps.load-stable-rust.outputs.version }}
           components: clippy
 
       - name: Install pinned nightly rustfmt
@@ -92,9 +104,21 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Load pinned stable Rust version
+        id: load-stable-rust
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          rust_version="$(sed -n 's/^[[:space:]]*channel[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' rust-toolchain.toml | head -n 1)"
+          if [[ -z "$rust_version" ]]; then
+            echo "Could not read channel from rust-toolchain.toml" >&2
+            exit 1
+          fi
+          echo "RUST_VERSION=$rust_version" >> "$GITHUB_ENV"
+          echo "version=$rust_version" >> "$GITHUB_OUTPUT"
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
-          toolchain: 1.99.1
+          toolchain: ${{ steps.load-stable-rust.outputs.version }}
           components: llvm-tools-preview
 
       - name: Install compiler cache
