@@ -112,7 +112,7 @@ The `user_guide\` and `test_book\` directories are independent mdBook projects a
 
 - Keep auxiliary Git worktrees directly under `.worktrees/` in slots `a`, `b`, or `c` only; keep the primary checkout separate.
 - Keep the main worktree on `develop`. Keep topic branches in auxiliary worktrees.
-- Windows: target outputs go to CODE_TARGET_ROOT/mdbook-utils/<slot> and intermediate build outputs go to CODE_BUILD_ROOT/mdbook-utils/slot. Keep CODE_BUILD_ROOT on an NTFS volume; do not use a ReFS volume for builds.
+- Windows: target outputs go to CODE_TARGET_ROOT/mdbook-utils/<slot> and intermediate build outputs go to CODE_BUILD_ROOT/mdbook-utils/slot. CODE_BUILD_ROOT supports NTFS or ReFS with Rust 1.100.0 or newer.
 - Linux/macOS: target outputs go to the XDG cache folder (or ~/.cache) under cargo-target/mdbook-utils/<slot>; intermediate outputs go under cargo-build/mdbook-utils/<slot>.
 - Run ad hoc commands as just cargo <subcommand> [args...]; existing cargo-make tasks also receive the configured paths.
 - sccache is enabled with incremental compilation disabled. Cache size is 45G; the Windows cache directory is CODE_SCCACHE_ROOT and the Linux/macOS cache directory is under the user's XDG cache folder.
@@ -130,7 +130,7 @@ The `user_guide\` and `test_book\` directories are independent mdBook projects a
 The current Windows defaults below can be overridden per machine or shell with environment variables. The per-repository Rust Justfile or Cargo Make helper, when present, reads these variables. Non-Rust repositories do not need a Cargo build runner; use the environment roots only for tools or scripts that consume them.
 
 - CODE_REPOS_ROOT: D:/code on Windows; ~/code by default on Unix.
-- CODE_BUILD_ROOT: C:/code_build on Windows; XDG cache or ~/.cache/cargo-build by default on Unix. Keep Windows build output on NTFS.
+- CODE_BUILD_ROOT: D:/code_build on Windows; XDG cache or ~/.cache/cargo-build by default on Unix. Keep Windows build output on NTFS or ReFS with Rust 1.100.0 or newer.
 - CODE_TARGET_ROOT: D:/target on Windows; XDG cache or ~/.cache/cargo-target by default on Unix.
 - CODE_SCCACHE_ROOT: D:/sccache on Windows; XDG cache or ~/.cache/sccache by default on Unix.
 - CODE_TEMP_ROOT: D:/temp on Windows, with C:/temp as a fallback where a script needs one; Unix uses the existing TMPDIR or /tmp.
@@ -152,8 +152,8 @@ Windows drive paths elsewhere in this file are defaults. Set a root variable to 
 - Use `CODE_TEMP_ROOT` for Windows temp files: `D:/temp` when available, otherwise `C:/temp`. Unix uses its native `TMPDIR` or `/tmp`.
 - Use `CODE_PACKAGES_ROOT` for package data (Windows `D:/packages`) and `CODE_TOOLS_ROOT` for portable tools (Windows `C:/tools`). Existing tool-specific environment overrides take precedence; changing a root does not move installed packages.
 - Run Cargo through `just cargo`. The runner must export central per-repo/per-slot target and build paths, sccache with incremental disabled, and only registered allowed sccache base directories.
-- Windows intermediate builds must use NTFS. The runner validates `CODE_BUILD_ROOT` before Cargo starts; a ReFS override is an error. Defaults are `C:/code_build/<repo>/<slot>` and `D:/target/<repo>/<slot>`.
-- Run `just configure-cargo-host` once per host and after changing roots to set shared compiler defaults in `CARGO_HOME/config.toml`; it removes global target/build output overrides. Run build-setup once per checkout to create its `target` and `build` links to `D:/target/<repo>/<slot>` and `C:/code_build/<repo>/<slot>`. Task-runner Cargo commands pass those same per-slot paths directly. For plain Cargo or rust-analyzer, use the checkout links or explicit absolute `CARGO_TARGET_DIR`/`CARGO_BUILD_BUILD_DIR` values where filesystem behavior requires them.
+- Windows intermediate builds can use NTFS or ReFS with Rust 1.100.0 or newer. The runner validates `CODE_BUILD_ROOT` before Cargo starts; NTFS and ReFS are supported. Defaults are `D:/code_build/<repo>/<slot>` and `D:/target/<repo>/<slot>`.
+- Run `just configure-cargo-host` once per host and after changing roots to set shared compiler defaults in `CARGO_HOME/config.toml`; it removes global target/build output overrides. Run build-setup once per checkout to create its `target` and `build` links to `D:/target/<repo>/<slot>` and `D:/code_build/<repo>/<slot>`. Task-runner Cargo commands pass those same per-slot paths directly. For plain Cargo or rust-analyzer, use the checkout links or explicit absolute `CARGO_TARGET_DIR`/`CARGO_BUILD_BUILD_DIR` values where filesystem behavior requires them.
 
 ## Configuration consistency
 
