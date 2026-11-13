@@ -198,8 +198,7 @@ pub fn render_broken_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
         .map(|broken| {
             let location = sources
                 .locate(broken.offset)
-                .map(|(path, line)| format!("{}:{line}", path.display()))
-                .unwrap_or_default();
+                .map_or_default(|(path, line)| format!("{}:{line}", path.display()));
             (broken.reference.clone(), location, broken.link_type.clone())
         })
         .collect();
