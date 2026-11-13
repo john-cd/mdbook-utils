@@ -28,13 +28,13 @@ installations or rewrite independent package-manager settings.
 Use `just build-env` to inspect the effective environment and
 `just cargo <arguments>` to run Cargo. Windows targets use
 `CODE_TARGET_ROOT/mdbook-utils/<slot>` (default root `D:/target`);
-intermediates use `CODE_BUILD_ROOT/mdbook-utils/<slot>` (`C:/code_build`).
-The intermediate volume must be NTFS; the runner rejects ReFS.
+intermediates use `CODE_BUILD_ROOT/mdbook-utils/<slot>` (`D:/code_build`).
+The intermediate volume may use NTFS or ReFS with Rust 1.100.0 or newer.
 Unix defaults use XDG cache or `~/.cache` under `cargo-target` and
 `cargo-build`. The runner enables sccache with incremental compilation disabled
 and computes base directories from registered allowed worktrees.
 
-Run `just configure-cargo-host` once per host and after changing roots. It keeps shared compiler defaults in `CARGO_HOME/config.toml` and removes global target/build output overrides. Run build-setup once per checkout. Task-runner Cargo commands pass absolute `D:/target/<repo>/<slot>` and `C:/code_build/<repo>/<slot>` paths; use the checkout links or explicit Cargo environment paths for direct Cargo and rust-analyzer as required by the host filesystem. See [README](README.md).
+Run `just configure-cargo-host` once per host and after changing roots. It keeps shared compiler defaults in `CARGO_HOME/config.toml` and removes global target/build output overrides. Run build-setup once per checkout. Task-runner Cargo commands pass absolute `D:/target/<repo>/<slot>` and `D:/code_build/<repo>/<slot>` paths; use the checkout links or explicit Cargo environment paths for direct Cargo and rust-analyzer as required by the host filesystem. See [README](README.md).
 
 When this repository is checked out inside `rust_howto`, the runner uses
 `rust_howto-mdbook-utils` as its cache namespace to keep its slots separate
