@@ -142,8 +142,6 @@ SCCACHE_BASEDIRS = { value = ".", relative = true }
 value = "45G"
 force = true
 
-
-
 [profile.dev]
 lto = "off"
 debug = 0
@@ -190,11 +188,6 @@ regex-automata = { opt-level = 3, debug = 0 }
 regex-syntax = { opt-level = 3, debug = 0 }
 smallvec = { opt-level = 3, debug = 0 }
 syn = { opt-level = 3, debug = 0 }
-
-[profile.tools]
-inherits = "dev"
-opt-level = 2
-
 
 # Cargo defaults reference (Cargo 1.100.0). Comments only.
 #
