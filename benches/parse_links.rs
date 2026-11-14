@@ -23,6 +23,12 @@ const LINKS_PER_FILE: usize = 50;
 /// Timed repetitions per function.
 const ITERATIONS: u32 = 10;
 
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// An error is returned if main, create_dir fails.
 fn main() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;
     let src = dir.path().join("src");

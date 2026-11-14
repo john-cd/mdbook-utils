@@ -12,6 +12,12 @@ use anyhow::Result;
 use tempfile::tempdir;
 
 /// Returns a fixture path inside this package's test data directory.
+///
+/// # Arguments
+/// * `name` - Human-readable value used to identify or display the selected issue 198 cli.
+///
+/// # Returns
+/// The path buf computed for the calling workflow.
 fn fixture_path(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
@@ -19,8 +25,19 @@ fn fixture_path(name: &str) -> PathBuf {
         .join("issue_198")
         .join(name)
 }
+///
+/// # Arguments
+/// * `subcommand` - Str carrying the subcommand information consumed by the issue 198 cli workflow.
+/// * `markdown_dir` - Filesystem location used as the source or destination for this issue_198_cli operation.
+/// * `output_path` - Filesystem location used as the source or destination for this issue_198_cli operation.
+/// * `working_dir` - Filesystem location used as the source or destination for this issue_198_cli operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// An error is returned if Ok fails.
 
-/// Runs one Markdown index command with explicit source and destination paths.
 fn run_markdown_index(
     subcommand: &str,
     markdown_dir: &Path,
@@ -39,9 +56,19 @@ fn run_markdown_index(
         .env("RUST_LOG", "off")
         .output()?)
 }
-
-/// Checks a successful CLI result has the expected completion text and no error
 /// output.
+
+
+/// # Arguments
+/// * `output` - Data produced for the caller by the surrounding issue 198 cli workflow.
+/// * `action` - Str used as the action input to the issue 198 cli workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
+
 fn assert_successful_output(output: &Output, action: &str) {
     assert!(
         output.status.success(),
@@ -60,8 +87,13 @@ fn assert_successful_output(output: &Output, action: &str) {
     );
 }
 
-/// Runs links and Markdown scan commands against the repository's `test_book`
 /// fixtures.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
     let temp = tempdir()?;
@@ -128,8 +160,13 @@ fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
     Ok(())
 }
 
-/// Checks category and crate index CLI output against exact fixtures and repeat
 /// runs.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn generate_index_cli_outputs_match_fixtures_and_repeat_exactly() -> Result<()> {
     let temp = tempdir()?;
@@ -157,7 +194,12 @@ fn generate_index_cli_outputs_match_fixtures_and_repeat_exactly() -> Result<()> 
     Ok(())
 }
 
-/// Checks the sitemap CLI writes the configured output with stable exact XML.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// An error is returned if sitemap_cli_output_matches_exact_xml_on_repeated_runs, create_dir_all fails.
 #[test]
 fn sitemap_cli_output_matches_exact_xml_on_repeated_runs() -> Result<()> {
     let temp = tempdir()?;
@@ -204,8 +246,13 @@ fn sitemap_cli_output_matches_exact_xml_on_repeated_runs() -> Result<()> {
     Ok(())
 }
 
-/// Checks CLI errors, standard streams, and output-file effects for both
 /// command groups.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn links_and_markdown_failures_report_errors_without_partial_outputs() -> Result<()> {
     let temp = tempdir()?;

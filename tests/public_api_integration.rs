@@ -12,6 +12,12 @@ use mdbook_utils::api::generate_crates;
 use mdbook_utils::api::write_refdefs_to;
 
 /// Generates category and crate indexes through the grouped public API.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn integration_generate_categories_and_crates() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;
@@ -45,7 +51,12 @@ fn integration_generate_categories_and_crates() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Writes reference definitions from source Markdown through the grouped API.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// An error is returned if integration_write_refdefs, create_dir fails.
 #[test]
 fn integration_write_refdefs() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;
@@ -68,6 +79,12 @@ fn integration_write_refdefs() -> anyhow::Result<()> {
 }
 
 /// Generates escaped GitHub badge paths with the default flat style.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn integration_generate_badges_defaults_to_flat_and_escapes_repo_names() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;
@@ -94,6 +111,12 @@ fn integration_generate_badges_defaults_to_flat_and_escapes_repo_names() -> anyh
 }
 
 /// Applies a selected Shields.io style through the grouped public API.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn integration_generate_badges_with_style() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;

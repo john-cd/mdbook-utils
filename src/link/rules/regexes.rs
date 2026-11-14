@@ -304,9 +304,14 @@ pub(crate) static GLOBAL_RULES: std::sync::LazyLock<HashMap<RuleKind, Rule<'_>>>
     });
 
 /// Suggests a stable reference label from a recognized URL pattern.
-///
 /// Known documentation and repository URLs use their crate, repository, or
 /// page identity. Other HTTP URLs use the last path segment, then the host.
+///
+/// # Arguments
+/// * `url` - Str carrying the url information consumed by the regexes workflow.
+///
+/// # Returns
+/// The matching value when available; `None` when no value satisfies the lookup or selection rules.
 pub(crate) fn suggest_label_from_url(url: &str) -> Option<String> {
     let candidates = [
         (RuleKind::Category, "catg"),
@@ -356,13 +361,22 @@ pub(crate) fn suggest_label_from_url(url: &str) -> Option<String> {
 mod tests {
     use super::*;
 
-    /// Returns the compiled matching rule named by `name`.
+    /// Retrieves the re for the current regexes from its current state, returning the value needed by the caller.
+    ///
+    /// # Arguments
+    /// * `name` - Human-readable value used to identify or display the selected regexes.
+    ///
+    /// # Returns
+    /// The &'static regex computed for the calling workflow.
+    ///
+    /// # Panics
+    /// Panics if rule kind should exist.
     fn get_re(name: RuleKind) -> &'static Regex {
         COMPILED_RULES.get(&name).expect("rule kind should exist")
     }
-
     /// Every rule compiles, and the rule looked up by name at run time exists,
     /// so the string-keyed lookups cannot panic.
+
     #[test]
     fn every_rule_compiles_and_the_github_repo_rule_exists() {
         assert_eq!(COMPILED_RULES.len(), GLOBAL_RULES.len());

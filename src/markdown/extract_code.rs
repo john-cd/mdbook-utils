@@ -30,6 +30,12 @@ static REG: std::sync::LazyLock<Regex> =
     std::sync::LazyLock::new(|| Regex::new("(?m)^# (?<rest>.*)$").expect("regex literal is valid"));
 
 /// Strip the mdBook hidden-line marker (`# `) so the code compiles as a file.
+///
+/// # Arguments
+/// * `code` - Str carrying the code information consumed by the extract code workflow.
+///
+/// # Returns
+/// The formatted text produced for the caller.
 fn hidden_lines_removed(code: &str) -> String {
     REG.replace_all(code, "$rest").into_owned()
 }
@@ -44,10 +50,21 @@ struct PlannedFile {
 }
 
 /// Return the stable output path for one code block in a Markdown chapter.
-///
 /// Keeping the complete Markdown path in a per-chapter directory prevents
 /// chapters with the same basename (for example, `a/index.md` and
 /// `b/index.md`) from sharing output files.
+///
+/// # Arguments
+/// * `markdown_root` - Filesystem location used as the source or destination for this extract_code operation.
+/// * `markdown_file` - Filesystem location used as the source or destination for this extract_code operation.
+/// * `code_root` - Filesystem location used as the source or destination for this extract_code operation.
+/// * `block` - Usize carrying the block information consumed by the extract code workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 fn code_block_path(
     markdown_root: &Path,
     markdown_file: &Path,
@@ -66,6 +83,16 @@ fn code_block_path(
 }
 
 /// Build a relative path from `from_dir` to `target` on the same volume.
+///
+/// # Arguments
+/// * `from_dir` - Filesystem location used as the source or destination for this extract_code operation.
+/// * `target` - Filesystem location used as the source or destination for this extract_code operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 fn relative_path(from_dir: &Path, target: &Path) -> Result<PathBuf> {
     let from_components: Vec<_> = from_dir.components().collect();
     let target_components: Vec<_> = target.components().collect();
@@ -111,10 +138,11 @@ fn relative_path(from_dir: &Path, target: &Path) -> Result<PathBuf> {
 
 /// Returns every Markdown file under `root` as `(absolute path, path relative
 /// to root)` pairs.
-///
 /// # Errors
-///
 /// Returns an error if `root` cannot be resolved or traversed.
+///
+/// # Arguments
+/// * `root` - Filesystem location used as the source or destination for this extract_code operation.
 fn markdown_files_under(root: &Path) -> Result<Vec<(PathBuf, PathBuf)>> {
     let root = root.canonicalize().with_context(|| {
         format!(
@@ -141,6 +169,15 @@ fn markdown_files_under(root: &Path) -> Result<Vec<(PathBuf, PathBuf)>> {
 }
 
 /// Fails if two planned files target the same path.
+///
+/// # Arguments
+/// * `plans` - Mutable [planned file] whose state is updated by this operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 fn check_plan_collisions(plans: &mut [PlannedFile]) -> Result<()> {
     plans.sort_by(|left, right| left.path.cmp(&right.path));
     for pair in plans.windows(2) {
@@ -155,10 +192,12 @@ fn check_plan_collisions(plans: &mut [PlannedFile]) -> Result<()> {
 }
 
 /// Returns true if `path` already holds exactly `contents`; refuses symlinks.
-///
 /// # Errors
-///
 /// Returns an error if the path is a symlink or cannot be read.
+///
+/// # Arguments
+/// * `path` - Filesystem location used as the source or destination for this extract_code operation.
+/// * `contents` - [u8] carrying the contents information consumed by the extract code workflow.
 fn existing_file_matches(path: &Path, contents: &[u8]) -> Result<bool> {
     match fs::symlink_metadata(path) {
         Ok(metadata) if metadata.file_type().is_symlink() => {
@@ -190,10 +229,19 @@ fn existing_file_matches(path: &Path, contents: &[u8]) -> Result<bool> {
 }
 
 /// Write a generated file without replacing unrelated user data.
-///
 /// Repeating extraction with identical source is idempotent. If an output
 /// already exists with different contents, the operation fails before any
 /// output is written.
+///
+/// # Arguments
+/// * `path` - Filesystem location used as the source or destination for this extract_code operation.
+/// * `contents` - [u8] carrying the contents information consumed by the extract code workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if error, error.error when a request is rejected.
 fn write_generated_file(path: &Path, contents: &[u8]) -> Result<()> {
     if existing_file_matches(path, contents)? {
         return Ok(());
@@ -229,20 +277,19 @@ fn write_generated_file(path: &Path, contents: &[u8]) -> Result<()> {
 
 /// Extract code examples from all Markdown files within a source
 /// directory and write them to separate files.
-///
 /// Output paths preserve each chapter's source-relative path and use a
 /// deterministic block index. Existing identical outputs are kept; conflicting
 /// files are reported instead of being truncated.
-///
 /// `markdown_src_dir_path`: path to the source directory
-///
 /// `code_dest_dir_path`: path to the directory, where destination files
 /// will be created
-///
 /// # Errors
-///
 /// Returns an error if the Markdown source cannot be read or a code file
 /// cannot be created or written.
+///
+/// # Arguments
+/// * `markdown_src_dir_path` - P1 carrying the markdown src dir path information consumed by the extract code workflow.
+/// * `code_dest_dir_path` - P2 carrying the code dest dir path information consumed by the extract code workflow.
 pub fn extract_code_from_all_markdown_files_in<P1, P2>(
     markdown_src_dir_path: P1,
     code_dest_dir_path: P2,
@@ -312,16 +359,16 @@ where
 /// Remove Rust code blocks from Markdown files, replacing each by an
 /// `{{#include ...}}` statement that points to the corresponding generated
 /// code file.
-///
 /// `markdown_src_dir_path`: path to the source directory containing the
 /// Markdown files
-///
 /// `code_dir_path`: path to the folder containing the extracted Rust code
-///
 /// # Errors
-///
 /// Returns an error if the Markdown source or extracted code directory cannot
 /// be read, or a Markdown file cannot be written.
+///
+/// # Arguments
+/// * `markdown_src_dir_path` - P1 carrying the markdown src dir path information consumed by the extract code workflow.
+/// * `code_dir_path` - P2 carrying the code dir path information consumed by the extract code workflow.
 pub fn remove_code_from_all_markdown_files_in<P1, P2>(
     markdown_src_dir_path: P1,
     code_dir_path: P2,
@@ -434,7 +481,12 @@ mod tests {
 
     use super::*;
 
-    /// Builds a Markdown chapter with one Rust code fence per supplied block.
+    ///
+    /// # Arguments
+    /// * `blocks` - [str] carrying the blocks information consumed by the extract code workflow.
+    ///
+    /// # Returns
+    /// The formatted text produced for the caller.
     fn chapter_with_blocks(blocks: &[&str]) -> String {
         let mut content = String::from("# Chapter\n");
         for block in blocks {
@@ -447,6 +499,12 @@ mod tests {
 
     /// Chapters with the same file name extract to separate files, and a second
     /// run changes nothing.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn extracts_same_basename_chapters_without_collisions_and_is_repeatable() -> Result<()> {
         let dir = tempdir()?;
@@ -483,6 +541,12 @@ mod tests {
 
     /// An existing conflicting output file aborts the run before any chapter is
     /// written.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn rejects_existing_output_conflicts_before_writing_other_chapters() -> Result<()> {
         let dir = tempdir()?;
@@ -516,6 +580,12 @@ mod tests {
     }
 
     /// Replacement points each block at the file extraction would write.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn replacement_uses_the_same_per_chapter_mapping() -> Result<()> {
         let dir = tempdir()?;
@@ -537,7 +607,15 @@ mod tests {
         Ok(())
     }
 
-    /// Writes a chapter, extracts its blocks, and replaces them by includes.
+    ///
+    /// # Arguments
+    /// * `markdown` - Str carrying the markdown information consumed by the extract code workflow.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if round_trip, create_dir_all fails.
     fn round_trip(markdown: &str) -> Result<(String, std::path::PathBuf)> {
         let dir = tempdir()?;
         let src_dir = dir.keep().join("src");
@@ -551,6 +629,12 @@ mod tests {
     }
 
     /// An empty block must not swallow the text and blocks that follow it.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn empty_block_does_not_corrupt_following_content() -> Result<()> {
         let (updated, code_dir) = round_trip(
@@ -569,6 +653,12 @@ mod tests {
 
     /// Tilde fences, attributes and indented list fences are replaced, other
     /// languages are untouched, and a second run changes nothing.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn handles_fence_variants_and_is_idempotent() -> Result<()> {
         let (updated, code_dir) = round_trip(
@@ -585,6 +675,12 @@ mod tests {
     }
 
     /// A chapter edited after extraction is not replaced by stale code.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn refuses_to_replace_a_block_edited_after_extraction() -> Result<()> {
         let dir = tempdir()?;

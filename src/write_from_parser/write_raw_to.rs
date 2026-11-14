@@ -11,11 +11,8 @@ use pulldown_cmark::Tag;
 
 /// Parse Markdown and write all raw events to e.g. a file
 /// for debugging purposes.
-///
 /// parser: source Markdown parser.
-///
 /// w: writer / file to write to.
-///
 /// See <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Event.html>
 /// and <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Tag.html>.
 #[expect(

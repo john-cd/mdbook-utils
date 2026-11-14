@@ -11,8 +11,16 @@ use anyhow::bail;
 use tracing::info;
 
 /// Check if a path is a directory
-///
 /// Return a `PathBuf` if it is.
+///
+/// # Arguments
+/// * `dir_path` - P carrying the dir path information consumed by the dir workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn check_is_dir<P>(dir_path: P) -> Result<PathBuf, Error>
 where
     P: AsRef<Path>,
@@ -29,6 +37,15 @@ where
 
 /// Create the parent directory(ies) for a given file (that will be
 /// created later), if they don't exist.
+///
+/// # Arguments
+/// * `file_path` - Filesystem location used as the source or destination for this dir operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn create_parent_dir_for<P>(file_path: P) -> Result<(), Error>
 where
     P: AsRef<Path>,
@@ -43,6 +60,15 @@ where
 }
 
 /// Create a directory (including parent directories as needed).
+///
+/// # Arguments
+/// * `dir_path` - P carrying the dir path information consumed by the dir workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if _ when a request is rejected.
 pub(crate) fn create_dir<P>(dir_path: P) -> Result<(), Error>
 where
     P: AsRef<Path>,
@@ -75,6 +101,12 @@ mod tests {
     use super::*;
 
     /// Accepts directories and rejects files.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_check_is_dir() -> Result<(), Error> {
         let dir = tempdir()?;
@@ -88,7 +120,13 @@ mod tests {
         Ok(())
     }
 
-    /// Creates missing parent directories.
+    /// Checks the create parent dir for behavior and its externally visible result in the dir workflow. It checks the expected predicate outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if test_create_parent_dir_for, create_parent_dir_for fails.
     #[test]
     fn test_create_parent_dir_for() -> Result<(), Error> {
         let dir = tempdir()?;
@@ -98,7 +136,13 @@ mod tests {
         Ok(())
     }
 
-    /// Creates a directory and tolerates an existing one.
+    /// Checks the create dir behavior and its externally visible result in the dir workflow. It checks the expected predicate outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if test_create_dir, create_dir fails.
     #[test]
     fn test_create_dir() -> Result<(), Error> {
         let dir = tempdir()?;

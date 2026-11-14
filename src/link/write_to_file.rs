@@ -15,6 +15,12 @@ use super::LinkFormat;
 // PUBLIC FUNCTIONS
 
 /// Write links to a writer (e.g. file)
+///
+/// # Arguments
+/// * `links` - Mutable vec whose state is updated by this operation.
+///
+/// # Returns
+/// The collection of values selected or produced by the described workflow.
 pub(crate) fn write_reference_style_links_to<W>(
     links: Vec<Link<'_>>,
     link_writer: &mut W,
@@ -34,7 +40,6 @@ where
 }
 
 /// Give every link a label that identifies a single destination.
-///
 /// Labels default to the kebab-cased link text, so two links with the same
 /// text but different URLs would share one label (`CommonMark` keeps only the
 /// first definition). The later ones get a numeric suffix: `docs`, `docs-2`.
@@ -68,10 +73,18 @@ fn with_unique_labels(links: Vec<Link<'_>>) -> Vec<Link<'_>> {
 }
 
 /// Write links to a writer (e.g. file) in the requested [`LinkFormat`].
-///
 /// Reference format writes each reference link followed by its definition,
 /// inline format writes `[text](url "title")`, and autolink format writes
 /// `<url>`.
+///
+/// # Arguments
+/// * `links` - Mutable vec whose state is updated by this operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn write_links_in_format_to<W>(
     links: Vec<Link<'_>>,
     format: LinkFormat,
@@ -99,6 +112,16 @@ where
 }
 
 /// Write a reference definition to a writer (e.g. file)
+///
+/// # Arguments
+/// * `links` - Mutable [link whose state is updated by this operation.
+/// * `link_writer` - Mutable w whose state is updated by this operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn write_refdefs_to<W>(links: &[Link<'_>], refdef_writer: &mut W) -> Result<()>
 where
     W: Write,
@@ -116,6 +139,15 @@ where
 }
 
 /// Write duplicate links to a writer
+///
+/// # Arguments
+/// * `links` - Mutable [link whose state is updated by this operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn write_duplicate_links_to<W>(links: &[Link<'_>], link_writer: &mut W) -> Result<()>
 where
     W: Write,
@@ -132,6 +164,16 @@ where
 }
 
 /// Write broken links to a writer
+///
+/// # Arguments
+/// * `broken_links` - Vec carrying the broken links information consumed by the write to file workflow.
+/// * `link_writer` - Mutable w whose state is updated by this operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn write_broken_links_to<W>(
     broken_links: Vec<(String, String, String)>,
     link_writer: &mut W,
@@ -169,6 +211,15 @@ where
 
 /// Write a badge-style link and associated reference definitions
 /// to two separate writers
+///
+/// # Arguments
+/// * `links` - Mutable [link whose state is updated by this operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn write_badge_refdefs_and_links_to_two<W1, W2>(
     links: &[Link<'_>],
     link_writer: &mut W1,
@@ -230,12 +281,15 @@ enum LinkWrite {
 }
 
 /// Write a link to a writer in the format specified by flags.
-///
 /// l: the Link struct
-///
 /// flags: Bitflags
-///
 /// w: the writer e.g. a File or Vec\<u8\>
+///
+/// # Arguments
+/// * `l` - Mutable link whose state is updated by this operation.
+///
+/// # Returns
+/// The link computed for the calling workflow.
 #[inline]
 fn write<W: Write>(l: &Link<'_>, flags: BitFlags<LinkWrite>, w: &mut W) -> Result<()> {
     if flags.contains(LinkWrite::InlineLink) {
@@ -273,7 +327,6 @@ mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 
-    /// Builds a link with text, label, URL and title.
     fn link(text: &'static str, label: &'static str, url: &'static str) -> Link<'static> {
         LinkBuilder::from_type_url_title(
             LinkType::Inline,
@@ -284,9 +337,15 @@ mod tests {
         .add_text(Cow::Borrowed(text))
         .build()
     }
-
     /// Reference-style output has a heading, the reference link, and its
     /// definition.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
+
     #[test]
     fn writes_reference_links_and_definitions() -> Result<()> {
         let mut out = Vec::new();
@@ -300,6 +359,12 @@ mod tests {
     }
 
     /// Reference definition output omits the reference links.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn writes_only_reference_definitions() -> Result<()> {
         let mut out = Vec::new();
@@ -313,6 +378,12 @@ mod tests {
     }
 
     /// Duplicate-link output uses its own heading.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn writes_duplicate_links_heading() -> Result<()> {
         let mut out = Vec::new();
@@ -323,6 +394,12 @@ mod tests {
     }
 
     /// Broken links are written as a list of reference, text, and type.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn writes_broken_links_list() -> Result<()> {
         let mut out = Vec::new();
@@ -339,6 +416,12 @@ mod tests {
     }
 
     /// An empty list of broken links still writes the heading.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn writes_heading_for_no_broken_links() -> Result<()> {
         let mut out = Vec::new();
@@ -349,6 +432,12 @@ mod tests {
     }
 
     /// Badge output sends links and definitions to separate writers.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn writes_badge_links_and_definitions_to_two_writers() -> Result<()> {
         let (mut links, mut refdefs) = (Vec::new(), Vec::new());
@@ -366,6 +455,12 @@ mod tests {
 
     /// Same text with different URLs gets distinct labels; the same
     /// destination keeps its label.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn colliding_labels_get_numeric_suffixes() -> Result<()> {
         let links = vec![

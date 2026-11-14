@@ -10,18 +10,19 @@ use anyhow::Result;
 use tempfile::NamedTempFile;
 
 /// Replace or create `path` with `contents`.
-///
 /// The contents are staged in a temporary file next to `path` and moved into
 /// place, so a failure leaves any existing file untouched. Missing parent
 /// directories are created. Existing regular files keep their permissions;
 /// new files keep the temporary file's restrictive default permissions. A
 /// symlink path is replaced itself, without following or changing its target.
 /// On Windows, read-only destinations are rejected and left unchanged.
-///
 /// # Errors
-///
 /// Returns an error if the parent directory or the staged file cannot be
 /// created or written, or if the file cannot be moved into place.
+///
+/// # Arguments
+/// * `path` - Filesystem location used as the source or destination for this write_atomically operation.
+/// * `contents` - [u8] carrying the contents information consumed by the write atomically workflow.
 pub(crate) fn write_atomically(path: &Path, contents: &[u8]) -> Result<()> {
     super::create_parent_dir_for(path)?;
     let existing_permissions = match std::fs::symlink_metadata(path) {
@@ -72,6 +73,13 @@ mod tests {
     use super::*;
 
     /// A new file is created together with its missing parent directories.
+    /// A Windows read-only destination is rejected without changing its content or attribute.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn creates_file_and_parent_directories() -> Result<()> {
         let dir = tempfile::tempdir()?;
@@ -82,6 +90,12 @@ mod tests {
     }
 
     /// An existing file is replaced, and no staged files are left behind.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn replaces_existing_file_without_leftovers() -> Result<()> {
         let dir = tempfile::tempdir()?;
@@ -94,6 +108,12 @@ mod tests {
     }
 
     /// A failed write (destination is a directory) keeps the original.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn failure_leaves_the_destination_unchanged() -> Result<()> {
         let dir = tempfile::tempdir()?;
@@ -105,6 +125,12 @@ mod tests {
     }
 
     /// A newly created Unix file keeps the temporary file's private default mode.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[cfg(unix)]
     #[test]
     fn new_unix_file_keeps_restrictive_mode() -> Result<()> {
@@ -118,6 +144,12 @@ mod tests {
     }
 
     /// Replacing a Unix symlink replaces the link itself and leaves its target intact.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[cfg(unix)]
     #[test]
     fn replaces_symlink_without_following_target() -> Result<()> {
@@ -137,9 +169,15 @@ mod tests {
         Ok(())
     }
 
-    /// A Windows read-only destination is rejected without changing its content or attribute.
     #[cfg(windows)]
     // Windows clears only FILE_ATTRIBUTE_READONLY here; it does not broaden Unix mode bits.
+    /// Loads the only windows destination is left unchanged required by the write atomically workflow and reports failures from the underlying source.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if read_only_windows_destination_is_left_unchanged, write fails.
     #[expect(
         clippy::permissions_set_readonly_false,
         reason = "Windows clears only FILE_ATTRIBUTE_READONLY, not Unix mode bits"

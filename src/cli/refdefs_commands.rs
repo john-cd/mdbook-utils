@@ -44,6 +44,12 @@ pub(crate) enum BadgeStyleArg {
 }
 
 impl From<BadgeStyleArg> for BadgeStyle {
+    ///
+    /// # Arguments
+    /// * `style` - Badge style arg carrying the style information consumed by the badge style workflow.
+    ///
+    /// # Returns
+    /// The self computed for the calling workflow.
     fn from(style: BadgeStyleArg) -> Self {
         match style {
             BadgeStyleArg::Flat => Self::Flat,
@@ -77,6 +83,16 @@ pub(crate) struct GenerateArgs {
 }
 
 /// "refdefs" subcommands of the command-line interface
+///
+/// # Arguments
+/// * `subcmd` - Ref defs sub command carrying the subcmd information consumed by the badge style workflow.
+/// * `config` - Settings that control the behavior and limits of this badge style workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn run(subcmd: RefDefsSubCommand, config: &Configuration) -> Result<()> {
     match subcmd {
         RefDefsSubCommand::Write(args) => {
@@ -192,6 +208,12 @@ mod tests {
     use crate::cli::args::MarkdownDirArgs;
 
     /// `refdefs write` copies the existing reference definitions.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_refdefs_write() -> Result<()> {
         let dir = tempdir()?;
@@ -216,6 +238,12 @@ mod tests {
     }
 
     /// A missing source directory is reported and nothing is written.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_refdefs_write_missing_source_fails() -> Result<()> {
         let dir = tempdir()?;

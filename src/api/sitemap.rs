@@ -14,20 +14,22 @@ use crate::parser;
 use crate::sitemap as sitemap_mod;
 
 /// Create a sitemap from published HTML pages linked in SUMMARY.md.
-///
 /// The parent directory of `sitemap_dest_file_path` must be the existing output
 /// directory for the selected HTML renderer, such as book/html.
-///
 /// Pages are included only when their Markdown source exists and the matching
 /// HTML file is present in that renderer output. Unrendered chapters and
 /// shared source fragments are omitted. URLs in `base_url` are rooted at the
 /// hosted book directory, for example <https://john-cd.com/rust_howto/>.
-///
 /// # Errors
-///
 /// Returns an error if `base_url` is invalid for a sitemap, the source or
 /// renderer directory is unavailable, `SUMMARY.md` cannot be read, or the
 /// destination file cannot be created or written.
+///
+/// # Arguments
+/// * `markdown_src_dir_path` - P1 carrying the markdown src dir path information consumed by the sitemap workflow.
+/// * `base_url` - Url carrying the base url information consumed by the sitemap workflow.
+/// * `sitemap_dest_file_path` - P2 carrying the sitemap dest file path information consumed by the sitemap workflow.
+/// * `map_index` - Option carrying the map index information consumed by the sitemap workflow.
 pub fn generate_sitemap<P1, P2>(
     markdown_src_dir_path: P1,
     base_url: url::Url,
@@ -87,6 +89,12 @@ mod tests {
     use super::*;
 
     /// Rejects a base URL that cannot be a base, such as `mailto:`.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_sitemap_invalid_base_url() {
         let markdown_src_dir_path = PathBuf::from("non_existent_src");
@@ -109,8 +117,13 @@ mod tests {
         );
     }
 
-    /// Reads pages from the configured renderer's output rather than the
     /// default `html` directory.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn sitemap_uses_the_selected_custom_renderer_directory() -> Result<()> {
         let temp = tempdir()?;

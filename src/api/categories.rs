@@ -12,11 +12,13 @@ use crate::generate;
 
 /// Generate a listing of crates.io categories
 /// and write to a Markdown file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the categories workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the categories workflow.
 #[tracing::instrument(skip_all)]
 pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
@@ -24,13 +26,15 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
 ) -> Result<()> {
     generate::crates::generate_categories(src_dir_path, dest_file_path)
 }
-
 /// Generate a crate index and write to a Markdown file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the categories workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the categories workflow.
+
 #[tracing::instrument(skip_all)]
 pub fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,

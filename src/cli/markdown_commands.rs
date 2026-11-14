@@ -47,6 +47,16 @@ pub(crate) enum MarkdownSubCommand {
 }
 
 /// Process "markdown" subcommands of the command-line interface
+///
+/// # Arguments
+/// * `subcmd` - Markdown sub command carrying the subcmd information consumed by the markdown commands workflow.
+/// * `config` - Settings that control the behavior and limits of this markdown commands workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[expect(clippy::too_many_lines, reason = "one match arm per subcommand")]
 pub(crate) fn run(subcmd: MarkdownSubCommand, config: &Configuration) -> Result<()> {
     match subcmd {
@@ -271,7 +281,12 @@ mod tests {
     use super::*;
     use crate::cli::args::DestDirArgs;
 
-    /// Builds directory arguments.
+    ///
+    /// # Arguments
+    /// * `path` - Filesystem location used as the source or destination for this markdown_commands operation.
+    ///
+    /// # Returns
+    /// The markdown dir args computed for the calling workflow.
     fn dir_args(path: &std::path::Path) -> MarkdownDirArgs {
         MarkdownDirArgs {
             markdown_dir_path: Some(path.to_path_buf()),
@@ -279,6 +294,12 @@ mod tests {
     }
 
     /// `identify-files-not-in-summary` succeeds on a book with a summary.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_files_not_in_summary() -> Result<()> {
         let dir = tempdir()?;
@@ -292,6 +313,12 @@ mod tests {
     }
 
     /// `extract-code-examples` writes Rust blocks to the destination.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_extract_code_examples() -> Result<()> {
         let dir = tempdir()?;
@@ -315,6 +342,12 @@ mod tests {
     }
 
     /// `identify-unused-rs-examples` runs over a source and code directory.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_unused_rs_examples() -> Result<()> {
         let dir = tempdir()?;
@@ -338,6 +371,12 @@ mod tests {
 
     /// Commands that modify files refuse to run without `--yes` and without a
     /// terminal, leaving the files untouched.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_modifying_commands_require_confirmation() -> Result<()> {
         let dir = tempdir()?;

@@ -221,7 +221,7 @@ mod tests {
         assert_eq!(defs[0].title.as_deref(), Some("T"));
     }
 
-    /// Extracts a link with a title.
+    /// Checks the extract links simple behavior and its externally visible result in the extract links workflow. It checks the expected equality outcomes.
     #[test]
     fn test_extract_links_simple() {
         let markdown = "[text](url \"title\")";
@@ -232,7 +232,7 @@ mod tests {
         assert_eq!(link.get_url(), "url");
     }
 
-    /// Extracts an image nested in a link.
+    /// Checks the extract links with image behavior and its externally visible result in the extract links workflow. It checks the expected equality outcomes.
     #[test]
     fn test_extract_links_with_image() {
         let markdown = "[![alt](img_url)](url)";
@@ -271,7 +271,7 @@ mod tests {
         assert_eq!(link.to_link_with_badge(), "[![badge alt][badge alt]][]");
     }
 
-    /// Handles several links, images and nested brackets in one document.
+    /// Checks the extract links complex behavior and its externally visible result in the extract links workflow. It checks the expected equality outcomes.
     #[test]
     fn test_extract_links_complex() {
         let markdown = "[`code`](url) [![`image_code`](img_url)](url) [[link_in_link](url2)](url) [![[link_in_img](url2)](img_url)](url) [foo **bold**](url)";
@@ -285,7 +285,6 @@ mod tests {
         assert_eq!(links[4].get_url(), "url");
     }
 
-    /// Extracts `CommonMark` destinations while preserving code and mdBook
     /// helper text.
     #[test]
     fn test_extract_links_commonmark_url_edge_cases_and_code_fences() {

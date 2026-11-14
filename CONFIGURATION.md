@@ -1,8 +1,8 @@
+<!-- TODO Reviewed ??-??-2026. -->
+
 # Repository configuration
 
 Reviewed 2026-11-01. This is the consistency plan and reference for `mdbook-utils`.
-
-<!-- TODO Reviewed ??-??-2026 -->
 
 Keep this file, README, contributor guidance, and configuration comments synchronized.
 

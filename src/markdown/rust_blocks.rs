@@ -35,13 +35,26 @@ pub(super) struct RustBlock {
 }
 
 /// Return whether a fenced block's info string selects Rust.
+///
+/// # Arguments
+/// * `info` - Str carrying the info information consumed by the rust blocks workflow.
+///
+/// # Returns
+/// Whether the condition described above holds.
 fn is_rust_info(info: &str) -> bool {
     info.split(|c: char| c == ',' || c.is_whitespace())
         .next()
         .is_some_and(|language| language == "rust")
 }
-
 /// Find every fenced Rust code block in `markdown`, in document order.
+
+
+/// # Arguments
+/// * `markdown` - Str used as the markdown input to the rust blocks workflow.
+///
+/// # Returns
+/// The collection of values selected or produced by the described workflow.
+
 pub(super) fn find_rust_blocks(markdown: &str) -> Vec<RustBlock> {
     let mut blocks = Vec::new();
     let mut current: Option<(Range<usize>, String)> = None;
@@ -68,6 +81,14 @@ pub(super) fn find_rust_blocks(markdown: &str) -> Vec<RustBlock> {
 }
 
 /// Compute the fence line ranges and indentation of one block.
+///
+/// # Arguments
+/// * `markdown` - Str carrying the markdown information consumed by the rust blocks workflow.
+/// * `range` - Range carrying the range information consumed by the rust blocks workflow.
+/// * `code` - String carrying the code information consumed by the rust blocks workflow.
+///
+/// # Returns
+/// The rust block computed for the calling workflow.
 fn build_block(markdown: &str, range: Range<usize>, code: String) -> RustBlock {
     let end = range.start + markdown[range.clone()].trim_end_matches(['\n', '\r']).len();
     let text = &markdown[range.start..end];

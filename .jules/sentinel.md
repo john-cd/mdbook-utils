@@ -1,4 +1,4 @@
-<!-- TODO Reviewed ??-??-2026 -->
+<!-- TODO Reviewed ??-??-2026. -->
 
 <!-- markdownlint-disable MD024 -->
 

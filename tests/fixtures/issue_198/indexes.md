@@ -1,4 +1,4 @@
-<!-- TODO Reviewed ??-??-2026 -->
+<!-- TODO Reviewed ??-??-2026. -->
 
 [serde](https://crates.io/crates/serde)
 [rayon](https://crates.io/crates/rayon?sort=downloads)
