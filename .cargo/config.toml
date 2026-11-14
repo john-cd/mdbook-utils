@@ -143,7 +143,6 @@ linker = "rust-lld.exe"
 
 [profile.dev]
 lto = "off"
-codegen-units = 256
 debug = 0
 incremental = false
 
