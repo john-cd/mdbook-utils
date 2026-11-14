@@ -92,7 +92,13 @@ For a path with a command-line option, the precedence is command-line option, ma
 
 ## Development and Testing
 
-`just test` runs the unit, integration, and doc tests, and the mdBook tests of the user guide and `test_book`. For the Rust tests alone, run `cargo test --all-targets --locked`. Unit tests live next to the code in `src/`; the `tests/` directory holds integration tests that run the compiled binary and the public API against temporary directories and the fixtures in `tests/fixtures/`. See the user guide's contributing section for details.
+From the repository root, run `rustup show` to install the pinned toolchain if needed, then run these checks:
+
+- `just check` checks all Rust targets with the lockfile.
+- `just test` runs Cargo tests for all targets and mdBook tests for the user guide and the fixture book.
+- `just fmt` formats Rust code with the nightly version pinned in [rustfmt-toolchain.toml](rustfmt-toolchain.toml).
+
+For the Rust tests alone, run `cargo test --all-targets --locked`. Run `cargo test --doc --locked` separately for doctests. Unit tests live alongside the code in `src/`. Integration tests in `tests/` exercise the compiled binary and the public API using temporary directories and fixtures from `tests/fixtures/`. See the user guide's contributing section for details.
 
 ## Public API
 

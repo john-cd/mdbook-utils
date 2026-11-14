@@ -1,5 +1,3 @@
-<!-- TODO Reviewed ??-??-2026. -->
-
 # Worktrees
 
 Updated 2026-11-03 (America/Los_Angeles). This file describes the managed layout;
@@ -31,7 +29,7 @@ Use `just build-env` to inspect the effective environment and
 `just cargo <arguments>` to run Cargo. Windows targets use
 `CODE_TARGET_ROOT/mdbook-utils/<slot>` (default root `D:/target`);
 intermediates use `CODE_BUILD_ROOT/mdbook-utils/<slot>` (`D:/code_build`).
-The intermediate volume may use NTFS or ReFS with Rust 1.100.0 or newer.
+The intermediate volume can use NTFS or ReFS with Rust 1.100.0 or newer.
 Unix defaults use XDG cache or `~/.cache` under `cargo-target` and
 `cargo-build`. The runner enables sccache with incremental compilation disabled
 and computes base directories from registered allowed worktrees.
@@ -45,7 +43,8 @@ from a standalone `mdbook-utils` checkout.
 ## Current state
 
 Reviewed 2026-11-01.
-TODO Reviewed ??-??-2026.
+
+<!-- TODO Reviewed ??-??-2026. -->
 
 Refresh this snapshot from live Git state before moving any checkout. This
 inventory update is on an unpublished local issue branch.

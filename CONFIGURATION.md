@@ -1,8 +1,8 @@
-<!-- TODO Reviewed ??-??-2026. -->
-
 # Repository configuration
 
 Reviewed 2026-11-01. This is the consistency plan and reference for `mdbook-utils`.
+
+<!-- TODO Reviewed ??-??-2026. -->
 
 Keep this file, README, contributor guidance, and configuration comments synchronized.
 
@@ -78,13 +78,13 @@ config discovery starts at the command's working directory; run from the owning 
 especially when that workspace has a child config. Config values override manifest profiles,
 and environment/command-line overrides take precedence over config values.
 
-| Profile                                | Workspace code                                           | Dependencies and build tools                                                                                                                 |
-| -------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dev` / `test` | Level 0, no symbols, incremental disabled | Level 1 by default, selected compute-heavy dependencies at level 3, no symbols. |
-| `debug` | Level 2 symbols for workspace crates | Same optimized dependency settings as `dev`, with dependency symbols disabled. |
-| `ci`                                   | Inherits `dev`, incremental disabled                     | Same flags as `dev` for dependency cache reuse. Use release jobs for performance validation.                                                 |
-| `tools` | Level 2 for repository tools | Same dependency settings as `dev`. |
-| `release` / other specialized profiles | Preserve existing shipping/profiling choices             | Preserve existing shipping/profiling choices.                                                                                                |
+| Profile                                | Workspace code                               | Dependencies and build tools                                                                 |
+| -------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `dev` / `test`                         | Level 0, no symbols, incremental disabled    | Level 1 by default, selected compute-heavy dependencies at level 3, no symbols.              |
+| `debug`                                | Level 2 symbols for workspace crates         | Same optimized dependency settings as `dev`, with dependency symbols disabled.               |
+| `ci`                                   | Inherits `dev`, incremental disabled         | Same flags as `dev` for dependency cache reuse. Use release jobs for performance validation. |
+| `tools`                                | Level 2 for repository tools                 | Same dependency settings as `dev`.                                                           |
+| `release` / other specialized profiles | Preserve existing shipping/profiling choices | Preserve existing shipping/profiling choices.                                                |
 
 `test` inherits `dev`. Package overrides take precedence over build overrides; macro parsing
 crates are tuned explicitly. Optimization can increase cold compile time, and size optimization
@@ -94,7 +94,7 @@ The built-in `debug` profile keeps full symbols on workspace crates while the sh
 
 Run `just build-setup` once per checkout. It creates ignored `target`, `build`, and `.sccache`
 links and refuses to replace existing files, directories, or links to another slot. PowerShell 7
-is required by `scripts/cargo-host.ps1`. Windows uses junctions and NTFS intermediates; Unix
+is required by `scripts/cargo-host.ps1`. Windows uses junctions and supports NTFS or ReFS intermediates with Rust 1.100.0 or newer. Unix
 uses native cache roots and symlinks. Existing Rust How-To setup recipes also provide native
 shell setup. Do not copy platform-specific links between Windows and Linux checkouts.
 
