@@ -10,9 +10,11 @@ use anyhow::Error;
 use anyhow::bail;
 use tracing::info;
 
-/// Check if a path is a directory
+/// Returns an owned copy of `dir_path` if it identifies an existing directory.
 ///
-/// Return a `PathBuf` if it is.
+/// # Errors
+///
+/// Returns an error if the path cannot be verified as a directory.
 pub(crate) fn check_is_dir<P>(dir_path: P) -> Result<PathBuf, Error>
 where
     P: AsRef<Path>,
@@ -27,8 +29,11 @@ where
     Ok(dir_path.to_path_buf())
 }
 
-/// Create the parent directory(ies) for a given file (that will be
-/// created later), if they don't exist.
+/// Creates missing ancestors of `file_path`. A bare filename needs no directory.
+///
+/// # Errors
+///
+/// Returns an error if the parent path cannot be checked or created.
 pub(crate) fn create_parent_dir_for<P>(file_path: P) -> Result<(), Error>
 where
     P: AsRef<Path>,
@@ -42,7 +47,11 @@ where
     Ok(())
 }
 
-/// Create a directory (including parent directories as needed).
+/// Creates `dir_path` and any missing parents when the path is absent.
+///
+/// # Errors
+///
+/// Returns an error if the existence check or directory creation fails.
 pub(crate) fn create_dir<P>(dir_path: P) -> Result<(), Error>
 where
     P: AsRef<Path>,
@@ -66,6 +75,7 @@ where
     Ok(())
 }
 
+/// Tests for directory validation and creation.
 #[cfg(test)]
 mod tests {
     use std::fs;

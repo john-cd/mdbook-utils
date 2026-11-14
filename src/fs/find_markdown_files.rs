@@ -60,6 +60,7 @@ where
     Ok(paths)
 }
 
+/// Tests for Markdown discovery order and hidden path handling.
 #[cfg(test)]
 mod tests {
     use std::fs;

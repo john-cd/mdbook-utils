@@ -136,6 +136,7 @@ fn parse_map_index(s: &str) -> Result<String, String> {
     }
 }
 
+/// Tests for validation of command-line index mappings.
 #[cfg(test)]
 mod tests {
     use super::*;

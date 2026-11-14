@@ -88,6 +88,7 @@ where
     ))
 }
 
+/// Tests for file boundaries and source offsets in combined Markdown.
 #[cfg(test)]
 mod tests {
     use super::*;

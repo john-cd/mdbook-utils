@@ -425,6 +425,7 @@ where
     Ok(())
 }
 
+/// Tests for example extraction and include replacement across fence variants.
 #[cfg(test)]
 mod tests {
     use std::fs;

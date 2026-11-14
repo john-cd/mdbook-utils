@@ -352,6 +352,7 @@ pub(crate) fn suggest_label_from_url(url: &str) -> Option<String> {
     (!label.is_empty()).then_some(label)
 }
 
+/// Tests for URL rule matches, capture groups, and malformed destinations.
 #[cfg(test)]
 mod tests {
     use super::*;

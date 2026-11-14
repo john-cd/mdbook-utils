@@ -11,8 +11,13 @@ use pulldown_cmark::Tag;
 
 /// Parse Markdown and write all raw events to e.g. a file
 /// for debugging purposes.
-/// parser: source Markdown parser.
-/// w: writer / file to write to.
+///
+/// Consumes events from `parser` and writes their diagnostic descriptions to `w`.
+///
+/// # Errors
+///
+/// Returns the first write error; `w` may already contain a partial report.
+///
 /// See <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Event.html>
 /// and <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/enum.Tag.html>.
 #[expect(
@@ -215,6 +220,7 @@ where
     Ok(())
 }
 
+/// Tests for the event report emitted by the raw parser writer.
 #[cfg(test)]
 mod tests {
     // use super::*;

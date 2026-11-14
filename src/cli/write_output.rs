@@ -42,6 +42,7 @@ pub(crate) fn write_text_atomically(path: &Path, contents: &str) -> Result<()> {
         .with_context(|| format!("Failed to write {}", path.display()))
 }
 
+/// Tests for atomic replacement and destination preservation on write failure.
 #[cfg(test)]
 mod tests {
     use std::fs;

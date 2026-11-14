@@ -225,21 +225,28 @@ where
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum LinkWrite {
+    /// Inline link containing the destination.
     InlineLink = 1,
+    /// Reference link pointing to a separate label definition.
     ReferenceLink = 2,
+    /// Definition mapping a reference label to its destination and optional title.
     ReferenceDefinition = 4,
+    /// Link containing a badge image.
     LinkWithBadge = 8,
+    /// Definition mapping the badge label to its image URL.
     BadgeReferenceDefinition = 16,
+    /// Angle-bracket autolink containing the destination.
     Autolink = 32,
 }
 
-/// Write a link to a writer in the format specified by flags.
+/// Writes the representations of `l` selected by `flags` to `w`.
 ///
-/// l: the Link struct
+/// Each selected representation occupies a line, with a blank separator
+/// before any reference definitions.
 ///
-/// flags: Bitflags
+/// # Errors
 ///
-/// w: the writer e.g. a File or Vec\<u8\>
+/// Returns the first write error. The writer may already contain partial output.
 #[inline]
 fn write<W: Write>(l: &Link<'_>, flags: BitFlags<LinkWrite>, w: &mut W) -> Result<()> {
     if flags.contains(LinkWrite::InlineLink) {
@@ -267,6 +274,7 @@ fn write<W: Write>(l: &Link<'_>, flags: BitFlags<LinkWrite>, w: &mut W) -> Resul
     Ok(())
 }
 
+/// Tests for link and badge rendering, unresolved links, and label collisions.
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;

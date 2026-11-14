@@ -76,6 +76,7 @@ where
     Ok(())
 }
 
+/// Tests for sitemap URL validation and renderer directory selection.
 #[cfg(test)]
 mod tests {
     use std::fs;

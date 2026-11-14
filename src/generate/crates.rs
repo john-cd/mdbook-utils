@@ -51,6 +51,7 @@ pub(crate) fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     Ok(())
 }
 
+/// Tests for crates.io index output and filtering of invalid inputs.
 #[cfg(test)]
 mod tests {
     use std::fs;

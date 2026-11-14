@@ -105,6 +105,7 @@ pub(crate) fn write_index<W: Write>(
     Ok(())
 }
 
+/// Tests for index name extraction, deduplication, and rendering.
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;

@@ -223,6 +223,8 @@ where
     fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
+/// Tests for report formatting, duplicate detection, and preservation of existing output on
+/// failure.
 #[cfg(test)]
 mod tests {
     use std::fs;

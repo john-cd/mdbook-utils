@@ -86,6 +86,7 @@ fn escape_shields_badge_component(value: &str) -> String {
     escaped
 }
 
+/// Tests for escaping special characters in Shields.io badge components.
 #[cfg(test)]
 mod tests {
     use super::*;

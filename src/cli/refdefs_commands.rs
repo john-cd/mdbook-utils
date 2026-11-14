@@ -180,6 +180,7 @@ pub(crate) fn run(subcmd: RefDefsSubCommand, config: &Configuration) -> Result<(
     Ok(())
 }
 
+/// Tests for reference definition output and badge style conversion.
 #[cfg(test)]
 mod tests {
     use std::fs;

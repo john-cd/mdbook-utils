@@ -49,6 +49,7 @@ pub(super) fn write_xml<W: Write>(links: &[String], w: &mut W) -> anyhow::Result
     Ok(())
 }
 
+/// Tests for escaping URL content in sitemap XML.
 #[cfg(test)]
 mod tests {
     use std::io::Cursor;

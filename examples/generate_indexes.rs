@@ -9,6 +9,11 @@ use std::fs;
 use mdbook_utils::api::generate_categories;
 use mdbook_utils::api::generate_crates;
 
+/// Builds and prints category and crate indexes from a temporary Markdown tree.
+///
+/// # Errors
+///
+/// Returns an error if the tree or indexes cannot be created, or an index cannot be read.
 fn main() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;
     let src = dir.path().join("src");

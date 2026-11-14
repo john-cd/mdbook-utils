@@ -23,6 +23,11 @@ const LINKS_PER_FILE: usize = 50;
 /// Timed repetitions per function.
 const ITERATIONS: u32 = 10;
 
+/// Times link inventory and unresolved-reference reports over generated Markdown files.
+///
+/// # Errors
+///
+/// Returns an error if fixture creation, report generation, or file I/O fails.
 fn main() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;
     let src = dir.path().join("src");

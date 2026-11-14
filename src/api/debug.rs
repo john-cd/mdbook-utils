@@ -45,6 +45,7 @@ where
     fs::write_atomically(dest_file_path.as_ref(), output.as_bytes())
 }
 
+/// Tests for event report output and source directory validation.
 #[cfg(test)]
 mod tests {
     use std::fs;

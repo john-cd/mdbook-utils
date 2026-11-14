@@ -9,10 +9,13 @@ use anyhow::Result;
 use anyhow::bail;
 
 /// Returns the canonicalized path if it is within the canonicalized `base_dir`.
-/// Otherwise returns an error.
+/// For a path that does not exist, returns the original path after checking
+/// that its nearest existing ancestor is within the canonicalized base.
 ///
-/// This function handles non-existent files by validating their parent
-/// directory. Dangling symlinks are rejected for security.
+/// # Errors
+///
+/// Returns an error when the path escapes the base directory, contains a
+/// dangling symlink or an invalid missing component, or cannot be resolved.
 pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
     let base_dir_canon = base_dir.canonicalize()?;
 
@@ -89,6 +92,7 @@ pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
     }
 }
 
+/// Tests for containment of existing files and paths awaiting creation.
 #[cfg(test)]
 mod tests {
     use std::fs;

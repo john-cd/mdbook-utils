@@ -14,6 +14,11 @@ use mdbook_utils::api::write_duplicate_links;
 /// A link-writing library function.
 type Writer = fn(&Path, &Path) -> anyhow::Result<()>;
 
+/// Builds and prints all-link, duplicate-link, and unresolved-reference reports.
+///
+/// # Errors
+///
+/// Returns an error if fixture creation, report generation, or reading a report fails.
 fn main() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;
     let src = dir.path().join("src");
