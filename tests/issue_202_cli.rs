@@ -9,12 +9,6 @@ use anyhow::Result;
 use tempfile::tempdir;
 
 /// Lists the supported Shields.io styles in refdefs generate help.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn refdefs_generate_help_lists_badge_styles() -> Result<()> {
     let output = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
@@ -32,12 +26,6 @@ fn refdefs_generate_help_lists_badge_styles() -> Result<()> {
 }
 
 /// Generates badges using an explicit style and escapes GitHub name separators.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn refdefs_generate_applies_badge_style_without_the_badges_flag() -> Result<()> {
     let dir = tempdir()?;

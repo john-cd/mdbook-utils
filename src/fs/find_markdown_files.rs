@@ -11,33 +11,19 @@ use tracing::debug;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
 
-/// Returns `true` if the directory entry is hidden (starts with a `.`).
-
-
-/// # Arguments
-/// * `entry` - Value the find markdown files operation validates, transforms, or stores.
-///
-/// # Returns
-/// `true` when the condition described above holds, and `false` otherwise.
+/// Returns whether the entry has a UTF-8 filename starting with a dot.
 fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
         .is_some_and(|s| s.starts_with('.'))
 }
-/// Locate Markdown files within a directory
-/// If `root_dir_path` is a file, then it is the first and only item
-/// yielded
-///
-/// # Arguments
-/// * `root_dir_path` - P carrying the root dir path information consumed by the find markdown files workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
+/// Returns Markdown files in filename order within the supplied root.
+/// Skips hidden descendants. A Markdown file passed as the root is returned on its own.
 ///
 /// # Errors
-/// Returns an error if a fallible operation cannot complete.
-
+///
+/// Returns an error if the directory walk cannot read an entry.
 pub(crate) fn find_markdown_files_in<P>(root_dir_path: P) -> Result<Vec<PathBuf>>
 where
     P: AsRef<Path>,
@@ -85,12 +71,6 @@ mod tests {
 
     /// Returns only Markdown files, in file-name order, skipping hidden
     /// files and directories and other extensions.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn finds_sorted_markdown_files_and_skips_hidden_and_other_files() -> Result<()> {
         let dir = tempdir()?;
@@ -122,12 +102,6 @@ mod tests {
     }
 
     /// A single Markdown file is yielded as the only item.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn a_file_root_yields_only_that_file() -> Result<()> {
         let dir = tempdir()?;
@@ -139,12 +113,6 @@ mod tests {
     }
 
     /// A root directory whose own name starts with a dot is still searched.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn a_hidden_root_directory_is_still_searched() -> Result<()> {
         let dir = tempdir()?;
@@ -157,12 +125,6 @@ mod tests {
     }
 
     /// An empty directory yields no files.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn an_empty_directory_yields_nothing() -> Result<()> {
         let dir = tempdir()?;

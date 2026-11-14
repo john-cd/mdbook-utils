@@ -9,12 +9,6 @@ use std::fs;
 use mdbook_utils::api::generate_categories;
 use mdbook_utils::api::generate_crates;
 
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// An error is returned if main, create_dir fails.
 fn main() -> anyhow::Result<()> {
     let dir = tempfile::tempdir()?;
     let src = dir.path().join("src");

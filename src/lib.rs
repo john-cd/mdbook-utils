@@ -24,24 +24,31 @@
 // #![doc(html_favicon_url = "https://example.com/favicon.ico")]
 // #![doc(html_logo_url = "https://example.com/logo.jpg")]
 
-/// Implements api behavior for the the crate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+/// Public entry points for scanning and transforming mdBook projects.
 pub mod api;
-/// Implements dependencies behavior for the the crate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Cargo metadata loading and dependency selection.
 mod dependencies;
-/// Implements fs behavior for the the crate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Source discovery, path validation, and atomic file replacement.
 mod fs;
-/// Implements generate behavior for the the crate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Generators for indexes and reference definitions.
 mod generate;
-/// Implements link behavior for the the crate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Link representation, URL classification, and Markdown rendering.
 mod link;
 
 /// Markdown manipulation modules
 pub mod markdown;
-/// Turns the crate input into structured syntax data while preserving source locations and reporting malformed input. Analysis and validation code use these routines before applying domain-specific rules.
+
+/// Markdown event parsing and unresolved reference collection.
 mod parser;
-/// Implements sitemap behavior for the the crate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Published page discovery and sitemap generation.
 mod sitemap;
-/// Turns the crate input into structured syntax data while preserving source locations and reporting malformed input. Analysis and validation code use these routines before applying domain-specific rules.
+
+/// Writers that consume parsed links and Markdown events.
 mod write_from_parser;
 
 /// Flat re-exports of the grouped operations in the [`api`] module.

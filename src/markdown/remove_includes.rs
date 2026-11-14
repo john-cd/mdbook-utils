@@ -1,5 +1,4 @@
 //! Remove left-over {{#include file.ext}} from mdbook-style Markdown sources.
-//!
 //! Use to clean up Markdown sources or when the [output.markdown] renderer is
 //! enabled in `book.toml`.
 //!
@@ -22,18 +21,19 @@ static REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
 /// Within each mdBook-style Markdown file in a source directory,
 /// remove any left-over {{#include file.md}} statements
 /// (and replace by a hard-coded string).
+///
 /// See the [mdBook documentation](https://rust-lang.github.io/mdBook/format/mdbook.html#including-files).
+///
 /// `markdown_src_dir_path`: path to the source directory containing the
 /// Markdown files.
+///
 /// `contents_to_insert`: replacement of {{#include ...}} statements (same value
 /// for all statements). Can be "".
+///
 /// # Errors
+///
 /// Returns an error if the Markdown directory cannot be scanned, a file cannot
 /// be read, or a changed file cannot be written.
-///
-/// # Arguments
-/// * `markdown_dir_path` - P carrying the markdown dir path information consumed by the remove includes workflow.
-/// * `contents_to_insert` - Str carrying the contents to insert information consumed by the remove includes workflow.
 pub fn remove_includes_in_all_markdown_files_in<P>(
     markdown_dir_path: P,
     contents_to_insert: &str,
@@ -77,13 +77,7 @@ mod tests {
 
     use super::*;
 
-    /// Checks the remove includes in all markdown files in behavior and its externally visible result in the remove includes workflow. It checks the expected equality, predicate outcomes.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// An error is returned if test_remove_includes_in_all_markdown_files_in, create_dir fails.
+    /// Removes `{{#include}}` directives from every Markdown file.
     #[test]
     fn test_remove_includes_in_all_markdown_files_in() -> anyhow::Result<()> {
         let dir = tempdir()?;
@@ -193,12 +187,6 @@ No includes here.
     }
 
     /// An in-place Markdown rewrite preserves each existing Unix access mode.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[cfg(unix)]
     #[test]
     fn in_place_rewrite_preserves_existing_unix_modes() -> anyhow::Result<()> {

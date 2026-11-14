@@ -11,16 +11,18 @@ use tracing_subscriber::EnvFilter;
 use crate::cli::Cli;
 use crate::cli::Command;
 
-/// Implements cli behavior for the the crate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide main behavior.
+/// Argument parsing, configuration, and command dispatch helpers.
 mod cli;
 
-/// Entrypoint of the command-line interface.
-///
-/// # Returns
-/// The successful result value produced by this operation.
+/// Loads environment settings, initializes logging, and runs the requested command.
 ///
 /// # Errors
-/// Returns an error if e when a request is rejected.
+///
+/// Returns configuration and command failures to the process entry point.
+///
+/// # Panics
+///
+/// Panics if another global tracing subscriber has already been installed.
 fn main() -> Result<()> {
     // Load environment variables from a `.env` file in the current directory,
     // if it exists. If variables with the same names already

@@ -8,17 +8,22 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
-/// Implements categories behavior for the api component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+/// Indexes of linked crates.io categories.
 mod categories;
-/// Implements debug behavior for the api component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Markdown parser event reports.
 mod debug;
-/// Implements links behavior for the api component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Link inventories, duplicate detection, and unresolved reference reports.
 mod links;
-/// Implements markdown behavior for the api component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Public exports for Markdown scans and transformations.
 mod markdown;
-/// Implements refdefs behavior for the api component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Reference definition generation, merging, and output.
 mod refdefs;
-/// Implements sitemap behavior for the api component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Sitemap generation from a book's summary and rendered pages.
 mod sitemap;
 
 pub use categories::*;

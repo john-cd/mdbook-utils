@@ -3,13 +3,16 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
-/// Implements crates behavior for the generate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+/// Entry points for generating crates.io indexes from book links.
 pub(crate) mod crates;
-/// Implements index behavior for the generate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Index name extraction and Markdown rendering.
 mod index;
-/// Implements merge refdefs behavior for the generate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Reference definition merging with precedence for existing labels.
 mod merge_refdefs;
-/// Implements refdefs from dependencies behavior for the generate component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Reference labels and URLs derived from Cargo dependencies.
 mod refdefs_from_dependencies;
 
 pub(crate) use merge_refdefs::*;

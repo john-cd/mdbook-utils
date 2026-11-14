@@ -10,16 +10,15 @@ use anyhow::Result;
 use tempfile::NamedTempFile;
 
 /// Replace or create a report file after its contents have been rendered.
+///
 /// Staging the output next to the destination keeps an existing report intact
 /// if rendering or writing fails. Missing parent directories are created.
+///
 /// # Errors
+///
 /// Returns an error if the parent directory or staged file cannot be created,
 /// the contents cannot be written, or the staged file cannot replace the
 /// destination.
-///
-/// # Arguments
-/// * `path` - Filesystem location used as the source or destination for this write_output operation.
-/// * `contents` - Str carrying the contents information consumed by the write output workflow.
 pub(crate) fn write_text_atomically(path: &Path, contents: &str) -> Result<()> {
     let parent = path
         .parent()
@@ -52,15 +51,6 @@ mod tests {
     use super::*;
 
     /// Replaces existing report contents without leaving a staging file.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
-    ///
-    /// # Panics
-    /// Panics if the condition documented by `expect` is not met.
     #[test]
     fn replaces_existing_report_atomically() -> Result<()> {
         let dir = tempfile::tempdir()?;
@@ -79,12 +69,6 @@ mod tests {
     }
 
     /// A destination that is a directory remains unchanged after a failed replacement.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn failed_report_write_preserves_destination_directory() -> Result<()> {
         let dir = tempfile::tempdir()?;

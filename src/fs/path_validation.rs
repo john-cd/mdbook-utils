@@ -8,19 +8,11 @@ use std::path::PathBuf;
 use anyhow::Result;
 use anyhow::bail;
 
+/// Returns the canonicalized path if it is within the canonicalized `base_dir`.
 /// Otherwise returns an error.
+///
 /// This function handles non-existent files by validating their parent
 /// directory. Dangling symlinks are rejected for security.
-///
-/// # Arguments
-/// * `base_dir` - Filesystem location used as the source or destination for this path_validation operation.
-/// * `path` - Filesystem location used as the source or destination for this path_validation operation.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if e, e.into( when a request is rejected.
 pub(crate) fn is_path_within(base_dir: &Path, path: &Path) -> Result<PathBuf> {
     let base_dir_canon = base_dir.canonicalize()?;
 
@@ -106,12 +98,6 @@ mod tests {
     use super::*;
 
     /// Accepts paths under the base directory and rejects escapes.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_is_path_within() -> Result<()> {
         let dir = tempdir()?;
@@ -152,15 +138,6 @@ mod tests {
     }
 
     /// A not-yet-existing path may not use `..` to leave the base directory.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
-    ///
-    /// # Panics
-    /// Panics if the condition documented by `expect` is not met.
     #[test]
     fn rejects_parent_components_in_missing_paths() -> Result<()> {
         let dir = tempfile::tempdir()?;

@@ -9,17 +9,10 @@ use pulldown_cmark::Parser;
 
 /// Write reference definitions parsed from a Markdown parser to a
 /// file / writer.
+///
 /// parser: Markdown parser.
+///
 /// w: Writer e.g. File
-///
-/// # Arguments
-/// * `parser` - Mutable parser whose state is updated by this operation.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn write_refdefs_to<W>(parser: &mut Parser<'_>, w: &mut W) -> Result<()>
 where
     W: Write,
@@ -43,12 +36,6 @@ mod tests {
     use crate::parser::get_parser;
 
     /// Titles are written as plain quoted strings, with quotes escaped.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn writes_titles_without_debug_formatting() -> Result<()> {
         let md = "[a]: http://x.com \"My Title\"\n[b]: http://y.com\n";
