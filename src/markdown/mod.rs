@@ -2,13 +2,16 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
-/// Implements extract code behavior for the markdown component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+/// Extraction of fenced Rust examples and conversion to mdBook includes.
 pub mod extract_code;
-/// Implements remove includes behavior for the markdown component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Removal of mdBook include directives.
 pub mod remove_includes;
-/// Implements replace include behavior for the markdown component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Expansion of mdBook includes, line ranges, and named anchors.
 pub mod replace_include;
-/// Implements rust blocks behavior for the markdown component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Rust fence discovery and source byte ranges.
 mod rust_blocks;
 
 #[doc(inline)]

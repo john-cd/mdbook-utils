@@ -14,16 +14,6 @@ use crate::generate::index::write_index;
 use crate::parser;
 
 /// Generate a category index and write to a Markdown file.
-///
-/// # Arguments
-/// * `src_dir_path` - P1 carrying the src dir path information consumed by the crates workflow.
-/// * `dest_file_path` - P2 carrying the dest file path information consumed by the crates workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[tracing::instrument(skip_all)]
 pub(crate) fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
@@ -43,16 +33,6 @@ pub(crate) fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
 }
 
 /// Generate a crate index and write to a Markdown file.
-///
-/// # Arguments
-/// * `src_dir_path` - P1 carrying the src dir path information consumed by the crates workflow.
-/// * `dest_file_path` - P2 carrying the dest file path information consumed by the crates workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[tracing::instrument(skip_all)]
 pub(crate) fn generate_crates<P1: AsRef<Path>, P2: AsRef<Path>>(
     src_dir_path: P1,
@@ -81,12 +61,6 @@ mod tests {
 
     /// Collects distinct categories, ignoring query strings and trailing
     /// slashes.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_categories_happy_path() -> Result<()> {
         let dir = tempdir()?;
@@ -116,12 +90,6 @@ mod tests {
     }
 
     /// Fails when the source directory does not exist.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_categories_invalid_dir() -> Result<()> {
         let dir = tempdir()?;
@@ -134,12 +102,6 @@ mod tests {
     }
 
     /// Skips category links that name no category.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_categories_edge_cases() -> Result<()> {
         let dir = tempdir()?;
@@ -163,12 +125,6 @@ mod tests {
     }
 
     /// Collects distinct crates, ignoring query strings and trailing slashes.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_crates_happy_path() -> Result<()> {
         let dir = tempdir()?;
@@ -198,12 +154,6 @@ mod tests {
     }
 
     /// Fails when the source directory does not exist.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_crates_invalid_dir() -> Result<()> {
         let dir = tempdir()?;
@@ -216,12 +166,6 @@ mod tests {
     }
 
     /// Skips crate links that name no crate.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_crates_edge_cases() -> Result<()> {
         let dir = tempdir()?;
@@ -245,12 +189,6 @@ mod tests {
     }
 
     /// Does not let a crafted crate URL inject a link into the output.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_crates_injection() -> Result<()> {
         let dir = tempdir()?;
@@ -277,12 +215,6 @@ mod tests {
     }
 
     /// Does not let a crafted category URL inject a link into the output.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_generate_categories_injection() -> Result<()> {
         let dir = tempdir()?;

@@ -48,15 +48,6 @@ pub(crate) struct UrlArgs {
 }
 
 /// Parse a URL
-///
-/// # Arguments
-/// * `s` - Str carrying the s information consumed by the args workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 fn parse_url(s: &str) -> Result<url::Url, Box<dyn std::error::Error + Send + Sync + 'static>> {
     // Parse an absolute URL from a string.
     let url = url::Url::parse(s).map_err(|_| anyhow!("Invalid URL: {s}"))?;

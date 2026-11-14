@@ -33,14 +33,6 @@ pub(crate) fn generate_refdefs_from(
 /// Create, for a given crate, multiple reference definitions for
 /// common websites such as docs.rs, crates.io, github,
 /// and the associated badge URLs
-///
-/// # Arguments
-/// * `library_name` - Str carrying the library name information consumed by the refdefs from dependencies workflow.
-/// * `package_name` - Str carrying the package name information consumed by the refdefs from dependencies workflow.
-/// * `package_repo_url` - Option carrying the package repo url information consumed by the refdefs from dependencies workflow.
-///
-/// # Returns
-/// The collection of values selected or produced by the described workflow.
 fn generate_refdefs_for_one_library(
     library_name: &str,
     package_name: &str,

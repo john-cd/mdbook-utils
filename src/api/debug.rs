@@ -14,13 +14,13 @@ use crate::write_from_parser;
 // DEBUG
 
 /// Render the raw parser events for all Markdown files in a source directory.
+///
 /// The caller chooses where and how to write the returned diagnostic text.
+///
 /// # Errors
+///
 /// Returns an error if the source directory cannot be read or the diagnostic
 /// output cannot be rendered.
-///
-/// # Arguments
-/// * `src_dir_path` - P carrying the src dir path information consumed by the debug workflow.
 pub fn render_debug_events<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
@@ -31,13 +31,11 @@ pub fn render_debug_events<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
 }
 
 /// Parse Markdown sources and atomically write raw parser events to a file.
+///
 /// # Errors
+///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be created or written.
-///
-/// # Arguments
-/// * `src_dir_path` - P1 carrying the src dir path information consumed by the debug workflow.
-/// * `dest_file_path` - P2 carrying the dest file path information consumed by the debug workflow.
 pub fn debug_parse_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -54,12 +52,6 @@ mod tests {
     use super::*;
 
     /// Raw parser events are written to the destination file.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn writes_raw_events() -> Result<()> {
         let dir = tempfile::tempdir()?;

@@ -33,12 +33,6 @@ pub(crate) struct MarkdownSources {
 impl MarkdownSources {
     /// Return the file and 1-based line that contain the byte `offset` of
     /// [`MarkdownSources::text`].
-    ///
-    /// # Arguments
-    /// * `offset` - Usize carrying the offset information consumed by the markdown sources workflow.
-    ///
-    /// # Returns
-    /// The matching value when available; `None` when no value satisfies the lookup or selection rules.
     pub(crate) fn locate(&self, offset: usize) -> Option<(&Path, usize)> {
         let index = self.files.partition_point(|(_, start)| *start <= offset);
         let (path, start) = self.files.get(index.checked_sub(1)?)?;
@@ -49,15 +43,6 @@ impl MarkdownSources {
 }
 
 /// Read all Markdown files in a directory, remembering where each file starts.
-///
-/// # Arguments
-/// * `markdown_root_dir_path` - P carrying the markdown root dir path information consumed by the markdown sources workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn read_markdown_sources_in<P>(markdown_root_dir_path: P) -> Result<MarkdownSources>
 where
     P: AsRef<Path>,
@@ -92,15 +77,6 @@ where
 }
 
 /// Read all Markdown files in a directory into one big string.
-///
-/// # Arguments
-/// * `markdown_root_dir_path` - P carrying the markdown root dir path information consumed by the markdown sources workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn read_to_string_all_markdown_files_in<'a, P>(
     markdown_root_dir_path: P,
 ) -> Result<Cow<'a, str>>
@@ -117,12 +93,6 @@ mod tests {
     use super::*;
 
     /// A file without a trailing newline does not merge with the next file.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn separates_files_that_lack_a_trailing_newline() -> Result<()> {
         let dir = tempfile::tempdir()?;
@@ -134,12 +104,6 @@ mod tests {
     }
 
     /// Offsets map back to the file and line they came from.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn locates_offsets_in_the_originating_file() -> Result<()> {
         let dir = tempfile::tempdir()?;

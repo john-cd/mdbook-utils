@@ -9,21 +9,28 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
-/// Implements args behavior for the cli component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide log command paths, log command outcome, run logged, confirm behavior.
+/// Shared argument groups and value parsers.
 mod args;
-/// Implements book toml behavior for the cli component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide log command paths, log command outcome, run logged, confirm behavior.
+
+/// mdBook configuration loading and renderer path resolution.
 mod book_toml;
-/// Loads and validates the settings that control cli behavior. Composition code uses this module before starting services so invalid configuration is reported early.
+
+/// Environment settings and CLI path precedence.
 pub(crate) mod config;
-/// Implements links commands behavior for the cli component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide log command paths, log command outcome, run logged, confirm behavior.
+
+/// Link report command definitions and dispatch.
 pub(crate) mod links_commands;
-/// Implements markdown commands behavior for the cli component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide log command paths, log command outcome, run logged, confirm behavior.
+
+/// Markdown scan, transformation, and index commands.
 pub(crate) mod markdown_commands;
-/// Implements refdefs commands behavior for the cli component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide log command paths, log command outcome, run logged, confirm behavior.
+
+/// Reference definition command definitions and dispatch.
 pub(crate) mod refdefs_commands;
-/// Implements utility commands behavior for the cli component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide log command paths, log command outcome, run logged, confirm behavior.
+
+/// Sitemap and parser debug command handlers.
 pub(crate) mod utility_commands;
-/// Implements write output behavior for the cli component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide log command paths, log command outcome, run logged, confirm behavior.
+
+/// Atomic output for generated CLI reports.
 mod write_output;
 
 use args::MarkdownSrcDirAndDestFileArgs;
@@ -36,16 +43,6 @@ use markdown_commands::MarkdownSubCommand;
 use refdefs_commands::RefDefsSubCommand;
 
 /// Log the paths selected for a CLI command without logging file contents.
-///
-/// # Arguments
-/// * `command` - 'static str, paths: [('static str carrying the command information consumed by the mod workflow.
-/// * `std` - Filesystem location used as the source or destination for this mod operation.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn log_command_paths(command: &'static str, paths: &[(&'static str, &std::path::Path)]) {
     tracing::debug!(
         command,
@@ -73,6 +70,7 @@ pub(crate) fn log_command_outcome<T>(
 
 /// Run one CLI operation: log the selected paths, print `progress`, run `op`,
 /// log the outcome, then print `Done.`.
+///
 /// `failure` is the context attached to an error from `op`.
 pub(crate) fn run_logged(
     command: &'static str,
@@ -93,15 +91,14 @@ pub(crate) fn run_logged(
 }
 
 /// Ask the user to confirm a command that modifies files.
+///
 /// `--yes` answers yes without asking. Without `--yes`, a terminal is
 /// required: when standard input is not a terminal the command fails instead
 /// of guessing, so a script never modifies files by accident.
-/// # Errors
-/// Returns an error when no terminal is available or the prompt fails.
 ///
-/// # Arguments
-/// * `config` - Settings that control the behavior and limits of this mod workflow.
-/// * `prompt` - Str carrying the prompt information consumed by the mod workflow.
+/// # Errors
+///
+/// Returns an error when no terminal is available or the prompt fails.
 pub(crate) fn confirm(config: &config::Configuration, prompt: &str) -> anyhow::Result<bool> {
     use std::io::IsTerminal as _;
 
@@ -135,14 +132,6 @@ pub(crate) fn log_command_cancelled(
 }
 
 /// Format named paths for structured tracing fields.
-
-
-/// # Arguments
-/// * `paths` - [('static str used as the paths input to the mod workflow.
-/// * `&std` - Path)] used as the &std input to the mod workflow.
-///
-/// # Returns
-/// The collection of values selected or produced by the described workflow.
 fn format_command_paths(paths: &[(&'static str, &std::path::Path)]) -> Vec<String> {
     paths
         .iter()
@@ -150,20 +139,17 @@ fn format_command_paths(paths: &[(&'static str, &std::path::Path)]) -> Vec<Strin
         .collect()
 }
 
-/// Parse command-line arguments
-/// Command-line interface for the available commands and global options.
+/// Parses process arguments and returns the selected command and global flags.
 ///
-/// # Returns
-/// The cli computed for the calling workflow.
+/// Clap exits after printing help, version information, or an argument error.
 pub(crate) fn parse_arguments() -> Cli {
     Cli::parse()
 }
 
-// Reads the following attributes from the package's `Cargo.toml`.
-// Displays help when no arguments are provided.
-// #[command(arg_required_else_help = true)]
+/// Root clap parser for subcommands and global options.
+///
+/// The command's author, version, and description come from the package manifest.
 #[derive(Parser, Debug)]
-/// Carries `command`, `global opts` data used by the cli workflow.
 #[command(author, version, about, long_about = None)]
 pub(crate) struct Cli {
     /// Selected top-level command.
@@ -211,6 +197,7 @@ pub(crate) struct GlobalOpts {
     pub(crate) log: Option<String>,
 }
 
+/// Tests for the consistency of the clap command definitions.
 #[cfg(test)]
 mod tests {
     use clap::CommandFactory as _;

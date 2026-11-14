@@ -23,19 +23,10 @@ use crate::link::write_badge_refdefs_and_links_to_two;
 /// Get existing reference definitions from a Markdown parser,
 /// identify URLs that are GitHub repos, create badge URLs for these
 /// links, and write to a writer / file.
+///
 /// parser: Markdown parser.
+///
 /// w: writer (e.g. File) to write to.
-///
-/// # Arguments
-/// * `parser` - Mutable 'input mut parser whose state is updated by this operation.
-/// * `w` - Mutable w whose state is updated by this operation.
-/// * `style` - Badge style carrying the style information consumed by the github workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn write_github_repo_badge_refdefs<'input, W>(
     parser: &'input mut Parser<'input>,
     w: &mut W,
@@ -83,12 +74,7 @@ where
     Ok(())
 }
 
-/// Escapes Shields.io path separators within a repository name.
-///
-/// # Arguments
-///
-/// # Returns
-/// The formatted text produced for the caller.
+/// Doubles hyphens and underscores so Shields.io parses them as repository-name characters.
 fn escape_shields_badge_component(value: &str) -> String {
     let mut escaped = String::with_capacity(value.len());
     for character in value.chars() {

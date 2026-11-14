@@ -9,12 +9,6 @@ use anyhow::Result;
 use tempfile::tempdir;
 
 /// Prints only unlisted nested Markdown chapters from a SUMMARY scan.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn identify_files_not_in_summary_reports_nested_unlisted_chapters() -> Result<()> {
     let dir = tempdir()?;
@@ -58,12 +52,6 @@ fn identify_files_not_in_summary_reports_nested_unlisted_chapters() -> Result<()
 
 /// Detects all supported mdBook Rust helpers and ignores ordinary path
 /// mentions.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn identify_unused_rs_examples_recognizes_mdbook_helpers() -> Result<()> {
     let dir = tempdir()?;
@@ -118,12 +106,6 @@ The path `../code/unreferenced.rs` appears here as text.\n\
 }
 
 /// Returns a CLI error when the Markdown directory has no SUMMARY.md.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn identify_files_not_in_summary_reports_missing_summary() -> Result<()> {
     let dir = tempdir()?;

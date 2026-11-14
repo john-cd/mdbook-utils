@@ -17,9 +17,7 @@ pub(crate) enum IndexKind {
 }
 
 impl IndexKind {
-    ///
-    /// # Returns
-    /// The &'static str computed for the calling workflow.
+    /// Returns the Markdown heading for this index.
     pub(crate) fn title(self) -> &'static str {
         match self {
             Self::Categories => "Categories",
@@ -27,7 +25,6 @@ impl IndexKind {
         }
     }
 
-    ///
     /// # Arguments
     /// * `name` - Human-readable value used to identify or display the selected index kind.
     ///
@@ -41,9 +38,6 @@ impl IndexKind {
     }
 
     /// First path segment of a crates.io URL that introduces this kind of name.
-    ///
-    /// # Returns
-    /// The &'static str computed for the calling workflow.
     fn path_prefix(self) -> &'static str {
         match self {
             Self::Categories => "categories",
@@ -54,13 +48,6 @@ impl IndexKind {
 
 /// Return whether `name` is a plausible crate or category name
 /// (categories use `::` between a category and its subcategory).
-///
-/// # Arguments
-/// * `name` - Human-readable value used to identify or display the selected index kind.
-/// * `kind` - Index kind carrying the kind information consumed by the index kind workflow.
-///
-/// # Returns
-/// Whether the condition described above holds.
 fn is_valid_name(name: &str, kind: IndexKind) -> bool {
     !name.is_empty()
         && name.chars().all(|c| {
@@ -72,15 +59,9 @@ fn is_valid_name(name: &str, kind: IndexKind) -> bool {
 }
 
 /// Return the crate or category name of a crates.io URL, if it has one.
+///
 /// Only the segment right after `/crates/` or `/categories/` counts, so
 /// `https://crates.io/crates/serde/versions` yields `serde`.
-///
-/// # Arguments
-/// * `url` - Str carrying the url information consumed by the index kind workflow.
-/// * `kind` - Index kind carrying the kind information consumed by the index kind workflow.
-///
-/// # Returns
-/// The matching value when available; `None` when no value satisfies the lookup or selection rules.
 fn name_from_url(url: &str, kind: IndexKind) -> Option<String> {
     let url = url::Url::parse(url).ok()?;
     if !matches!(url.host_str(), Some("crates.io" | "www.crates.io")) {
@@ -106,15 +87,12 @@ pub(crate) fn extract_index_names<'a>(
         .filter_map(|link| name_from_url(&link.get_url(), kind))
         .collect()
 }
+/// Writes a Markdown heading followed by one list item linking each name to
 /// crates.io.
-/// # Errors
-/// Returns an error if writing to `writer` fails.
 ///
-/// # Arguments
-/// * `writer` - Destination that receives the serialized or formatted result.
-/// * `kind` - Index kind carrying the kind information consumed by the index kind workflow.
-/// * `names` - Impl into iterator carrying the names information consumed by the index kind workflow.
-
+/// # Errors
+///
+/// Returns an error if writing to `writer` fails.
 pub(crate) fn write_index<W: Write>(
     mut writer: W,
     kind: IndexKind,
@@ -134,12 +112,7 @@ mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 
-    ///
-    /// # Arguments
-    /// * `url` - Str carrying the url information consumed by the index kind workflow.
-    ///
-    /// # Returns
-    /// The link computed for the calling workflow.
+    /// Builds a test link with the supplied URL and a fixed label.
     fn link(url: &str) -> Link<'_> {
         LinkBuilder::default()
             .set_label(Cow::Borrowed("x"))
@@ -147,7 +120,6 @@ mod tests {
             .build()
     }
     /// Keeps one entry per valid crate name and drops malformed URLs.
-
     #[test]
     fn test_extract_index_names_skips_invalid_and_duplicates() {
         let links = vec![
@@ -166,12 +138,6 @@ mod tests {
 
     /// Only the segment after `/crates/` is a crate name; deeper pages and
     /// other hosts that merely contain the string are ignored.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_crate_name_is_the_segment_after_crates() {
         let links = vec![
@@ -187,12 +153,6 @@ mod tests {
     }
 
     /// Subcategories such as `web-programming::websocket` are kept.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_subcategories_are_kept() {
         let links = vec![link(
@@ -205,13 +165,7 @@ mod tests {
         );
     }
 
-    /// Checks the write index writes header and links behavior and its externally visible result in the index workflow. It checks the expected equality outcomes.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// An error is returned if write_index, from_utf8 fails.
+    /// Writes the header followed by one link per name.
     #[test]
     fn test_write_index_writes_header_and_links() -> anyhow::Result<()> {
         let mut out = Vec::new();

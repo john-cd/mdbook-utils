@@ -5,13 +5,8 @@
 
 use crate::link::Link;
 
-/// Append, sort and dedupe reference definitions.
-///
-/// # Arguments
-/// * `existing_links` - Mutable [link whose state is updated by this operation.
-///
-/// # Returns
-/// The collection of values selected or produced by the described workflow.
+/// Returns sorted, deduplicated reference definitions from both inputs.
+/// Existing labels take precedence. Drains `new_links` while merging.
 pub(crate) fn merge_links<'a>(
     existing_links: &[Link<'a>],
     new_links: &mut Vec<Link<'a>>,
@@ -45,7 +40,7 @@ mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 
-    /// Checks the merge links behavior and its externally visible result in the merge refdefs workflow. It checks the expected equality outcomes.
+    /// Adds new definitions and keeps existing ones.
     #[test]
     fn test_merge_links() {
         let link1 = LinkBuilder::from_type_url_title(
@@ -93,9 +88,6 @@ mod tests {
     }
 
     /// Merging two empty lists yields an empty list.
-    ///
-    /// # Returns
-    /// The link computed for the calling workflow.
     #[test]
     fn test_merge_links_empty() {
         let existing = vec![];
@@ -104,13 +96,7 @@ mod tests {
         assert_eq!(merged.len(), 0);
     }
 
-    ///
-    /// # Arguments
-    /// * `label` - Human-readable value used to identify or display the selected merge refdefs.
-    /// * `url` - Str carrying the url information consumed by the merge refdefs workflow.
-    ///
-    /// # Returns
-    /// The link computed for the calling workflow.
+    /// Builds a definition with a label and URL.
     fn definition(label: &str, url: &str) -> Link<'static> {
         LinkBuilder::default()
             .set_label(label.to_owned().into())
@@ -118,7 +104,6 @@ mod tests {
             .build()
     }
     /// A generated definition does not duplicate an existing label.
-
     #[test]
     fn existing_label_wins_over_generated_definition() {
         let existing = vec![definition("serde", "https://docs.rs/serde/")];

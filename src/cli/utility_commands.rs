@@ -11,16 +11,6 @@ use super::config::Configuration;
 use super::run_logged;
 
 /// Generate a sitemap from the book's Markdown source and configured output.
-///
-/// # Arguments
-/// * `args` - Markdown src dir url and dest file args carrying the args information consumed by the utility commands workflow.
-/// * `config` - Settings that control the behavior and limits of this utility commands workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn run_sitemap(
     args: MarkdownSrcDirUrlAndDestFileArgs,
     config: &Configuration,
@@ -54,16 +44,6 @@ pub(crate) fn run_sitemap(
 }
 
 /// Write the Markdown parser events to a diagnostic file.
-///
-/// # Arguments
-/// * `args` - Markdown src dir and dest file args carrying the args information consumed by the utility commands workflow.
-/// * `config` - Settings that control the behavior and limits of this utility commands workflow.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn run_debug(args: MarkdownSrcDirAndDestFileArgs, config: &Configuration) -> Result<()> {
     let markdown_src_dir_path = config.markdown_src_dir_path(args.src, "./src/")?;
     let log_dest_path = config.dest_file_path(args.dest, "debug.log");

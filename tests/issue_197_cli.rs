@@ -10,17 +10,14 @@ use anyhow::Context as _;
 use anyhow::Result;
 use tempfile::tempdir;
 
-/// unsupported reference forms.
-
-
-/// # Arguments
-/// * `extra` - [str] used as the extra input to the issue 197 cli workflow.
+/// Runs `links write-inline` with extra arguments and captures any output file.
 ///
-/// # Returns
-/// The successful value produced by the operation; failures are described below.
+/// `extra` contains options appended to the command.
 ///
 /// # Errors
-/// Returns an error if the underlying read, write operation fails.
+///
+/// Returns an error if the temporary files cannot be created, written, or read,
+/// or if the CLI process cannot be started.
 fn run_write_inline(extra: &[&str]) -> Result<(Output, Option<String>)> {
     let dir = tempdir()?;
     let src = dir.path().join("src");
@@ -59,12 +56,6 @@ fn run_write_inline(extra: &[&str]) -> Result<(Output, Option<String>)> {
 }
 
 /// Reference output lists external links only, with definitions.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn write_inline_defaults_to_reference_format_for_external_links() -> Result<()> {
     let (output, content) = run_write_inline(&[])?;
@@ -117,12 +108,6 @@ fn write_inline_defaults_to_reference_format_for_external_links() -> Result<()> 
 }
 
 /// `--link-format autolink` writes `<url>` lines.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn write_inline_link_format_autolink() -> Result<()> {
     let (output, content) = run_write_inline(&["--link-format", "autolink"])?;
@@ -134,12 +119,6 @@ fn write_inline_link_format_autolink() -> Result<()> {
 }
 
 /// `--link-format inline` preserves link text and titles without padding.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn write_inline_link_format_inline_preserves_title() -> Result<()> {
     let (output, content) = run_write_inline(&["--link-format", "inline"])?;
@@ -154,12 +133,6 @@ fn write_inline_link_format_inline_preserves_title() -> Result<()> {
 }
 
 /// An unknown format is rejected with a non-zero exit status.
-///
-/// # Returns
-/// The successful result value produced by this operation.
-///
-/// # Errors
-/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn write_inline_rejects_unknown_link_format() -> Result<()> {
     let (output, content) = run_write_inline(&["--link-format", "bogus"])?;

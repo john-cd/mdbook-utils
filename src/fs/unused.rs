@@ -25,13 +25,6 @@ static RUST_FILE_REFERENCE_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Return whether a helper match is inside a quoted string or inline code span.
-///
-/// # Arguments
-/// * `content` - Str carrying the content information consumed by the unused workflow.
-/// * `match_start` - Usize carrying the match start information consumed by the unused workflow.
-///
-/// # Returns
-/// Whether the condition described above holds.
 fn is_inside_literal(content: &str, match_start: usize) -> bool {
     let line_start = content[..match_start]
         .rfind('\n')
@@ -51,12 +44,6 @@ fn is_inside_literal(content: &str, match_start: usize) -> bool {
 }
 
 /// Return a normalized relative chapter path from a SUMMARY link, if supported.
-///
-/// # Arguments
-/// * `url` - Str carrying the url information consumed by the unused workflow.
-///
-/// # Returns
-/// The matching value when available; `None` when no value satisfies the lookup or selection rules.
 fn summary_chapter_path(url: &str) -> Option<PathBuf> {
     let path_end = url.find(['?', '#']).unwrap_or(url.len());
     let url_path = &url[..path_end];
@@ -79,12 +66,11 @@ fn summary_chapter_path(url: &str) -> Option<PathBuf> {
 }
 
 /// Identify .md files not in SUMMARY.md
+///
 /// # Errors
+///
 /// Returns an error if the source directory is unavailable or its
 /// `SUMMARY.md` file cannot be read.
-///
-/// # Arguments
-/// * `markdown_src_dir_path` - P carrying the markdown src dir path information consumed by the unused workflow.
 #[tracing::instrument]
 pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
     markdown_src_dir_path: P,
@@ -133,13 +119,11 @@ pub fn identify_files_not_in_summary<P: AsRef<Path> + std::fmt::Debug>(
 }
 
 /// Identify .rs examples not used in Markdown files
+///
 /// # Errors
+///
 /// Returns an error if either source directory is unavailable or a Markdown
 /// file cannot be read.
-///
-/// # Arguments
-/// * `markdown_src_dir_path` - P1 carrying the markdown src dir path information consumed by the unused workflow.
-/// * `code_dir_path` - P2 carrying the code dir path information consumed by the unused workflow.
 #[tracing::instrument]
 pub fn identify_unused_rs_examples<
     P1: AsRef<Path> + std::fmt::Debug,
@@ -205,12 +189,6 @@ mod tests {
     use super::*;
 
     /// Returns nothing when every page is listed in `SUMMARY.md`.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_files_not_in_summary_all_included() -> Result<()> {
         let dir = tempdir()?;
@@ -234,12 +212,6 @@ mod tests {
     }
 
     /// Returns only the pages that `SUMMARY.md` omits.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_files_not_in_summary_some_missing() -> Result<()> {
         let dir = tempdir()?;
@@ -267,12 +239,6 @@ mod tests {
     }
 
     /// Treats every page as unlisted when there is no `SUMMARY.md`.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_files_not_in_summary_no_summary() -> Result<()> {
         let dir = tempdir()?;
@@ -294,13 +260,7 @@ mod tests {
         Ok(())
     }
 
-    /// Checks the identify files not in summary nested files behavior and its externally visible result in the unused workflow. It checks the expected equality outcomes.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// An error is returned if test_identify_files_not_in_summary_nested_files, create_dir fails.
+    /// Finds unlisted pages in nested directories.
     #[test]
     fn test_identify_files_not_in_summary_nested_files() -> Result<()> {
         let dir = tempdir()?;
@@ -334,13 +294,8 @@ mod tests {
         Ok(())
     }
 
+    /// Resolves nested, encoded, and fragment-bearing SUMMARY links while
     /// rejecting traversal.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_files_not_in_summary_nested_encoded_and_traversal_paths() -> Result<()> {
         let dir = tempdir()?;
@@ -367,12 +322,6 @@ mod tests {
     }
 
     /// Fails when the Markdown directory does not exist.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_unused_rs_examples_invalid_markdown_dir() {
         let dir = tempdir().expect("input should parse");
@@ -391,12 +340,6 @@ mod tests {
     }
 
     /// Fails when the code directory does not exist.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_unused_rs_examples_invalid_code_dir() {
         let dir = tempdir().expect("input should parse");
@@ -414,13 +357,7 @@ mod tests {
         );
     }
 
-    /// Checks the identify unused rs examples happy path behavior and its externally visible result in the unused workflow. It checks the expected equality outcomes.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// An error is returned if test_identify_unused_rs_examples_happy_path, create_dir fails.
+    /// Returns the example files that no Markdown page references.
     #[test]
     fn test_identify_unused_rs_examples_happy_path() -> Result<()> {
         let dir = tempdir()?;
@@ -452,12 +389,6 @@ mod tests {
 
     /// Recognizes mdBook Rust helpers and ignores incidental paths in prose and
     /// code.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_unused_rs_examples_supported_helpers_and_incidental_paths() -> Result<()> {
         let dir = tempdir()?;

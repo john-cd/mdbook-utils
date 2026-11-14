@@ -2,7 +2,7 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
-/// Implements xml behavior for the sitemap component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide collect page urls, write sitemap, normalize base url, validate index mapping behavior.
+/// XML serialization for sitemap URLs.
 mod xml;
 
 use std::collections::BTreeSet;
@@ -22,9 +22,20 @@ use url::Url;
 const SOURCE_ROOT_URL: &str = "https://mdbook-utils.invalid/__mdbook_source__/";
 
 /// Return the published page URLs referenced by SUMMARY.md.
+///
 /// A source page is included only when the selected renderer output contains
 /// its corresponding HTML file. This excludes chapters omitted by a
-/// preprocessor and source fragments that are not published pages.
+/// preprocessor and source fragments that are not published pages. The output
+/// is sorted and deduplicated.
+///
+/// Resolve `links` against `source_root`, check the corresponding files under
+/// `rendered_root`, and join the rendered paths to `base_url`. If supplied,
+/// `map_index` renames a rendered page's filename before adding its HTML extension.
+///
+/// # Errors
+///
+/// Returns an error for an invalid base URL or index mapping, an unresolvable
+/// root, a missing source page, or a path that escapes its root.
 #[expect(
     clippy::needless_pass_by_value,
     reason = "mirrors the public API signature"
@@ -112,24 +123,23 @@ pub(crate) fn collect_page_urls(
     Ok(page_urls.into_iter().collect())
 }
 
-/// # Errors
-/// Returns an error if the XML cannot be written.
+/// Writes the page URLs as a `sitemap.xml` document.
 ///
-/// # Arguments
-/// * `page_urls` - [string] carrying the page urls information consumed by the mod workflow.
-/// * `w` - Mutable w whose state is updated by this operation.
+/// # Errors
+///
+/// Returns an error if the XML cannot be written.
 pub(crate) fn write_sitemap<W: std::io::Write>(page_urls: &[String], w: &mut W) -> Result<()> {
     xml::write_xml(page_urls, w).context("[generate_sitemap] Failed to write the XML.")?;
     info!("sitemap.xml created.");
     Ok(())
 }
 
+/// Validates the sitemap base URL and ensures its path ends with `/`.
+///
 /// # Errors
+///
 /// Returns an error unless the URL is an HTTP(S) directory URL without query or
 /// fragment.
-///
-/// # Arguments
-/// * `base_url` - Url carrying the base url information consumed by the mod workflow.
 pub(crate) fn normalize_base_url(mut base_url: Url) -> Result<Url> {
     if base_url.cannot_be_a_base() || !matches!(base_url.scheme(), "http" | "https") {
         bail!("Invalid sitemap base URL; expected an HTTP or HTTPS directory URL: {base_url}");
@@ -145,11 +155,11 @@ pub(crate) fn normalize_base_url(mut base_url: Url) -> Result<Url> {
     Ok(base_url)
 }
 
-/// # Errors
-/// Returns an error if a name is empty or contains path components.
+/// Checks that an index mapping, if any, names plain file names.
 ///
-/// # Arguments
-/// * `map_index` - Option carrying the map index information consumed by the mod workflow.
+/// # Errors
+///
+/// Returns an error if a name is empty or contains path components.
 fn validate_index_mapping(map_index: Option<&(String, String)>) -> Result<()> {
     if let Some((from, to)) = map_index {
         for name in [from, to] {
@@ -166,16 +176,16 @@ fn validate_index_mapping(map_index: Option<&(String, String)>) -> Result<()> {
     Ok(())
 }
 
+/// Maps a link destination to the Markdown source path it points to, or `None`
 /// for external or non-source links.
+///
 /// # Errors
+///
 /// Returns an error if the destination cannot be resolved against the base URL.
 ///
-/// # Arguments
-/// * `raw_url` - Str carrying the raw url information consumed by the mod workflow.
-/// * `base_url` - Url carrying the base url information consumed by the mod workflow.
-///
 /// # Panics
-/// Panics if the condition documented by `expect` is not met.
+///
+/// Panics if the built-in source root URL is invalid.
 fn source_markdown_path(raw_url: &str, base_url: &Url) -> Result<Option<PathBuf>> {
     let source_root = Url::parse(SOURCE_ROOT_URL).expect("constant source URL is valid");
     let target = match Url::parse(raw_url) {
@@ -237,12 +247,11 @@ fn source_markdown_path(raw_url: &str, base_url: &Url) -> Result<Option<PathBuf>
     Ok(Some(relative_path))
 }
 
-/// # Errors
-/// Returns an error if the base URL cannot accept path segments.
+/// Builds the published URL of a page from the base URL and its relative path.
 ///
-/// # Arguments
-/// * `base_url` - Url carrying the base url information consumed by the mod workflow.
-/// * `relative_path` - Filesystem location used as the source or destination for this mod operation.
+/// # Errors
+///
+/// Returns an error if the base URL cannot accept path segments.
 fn hosted_page_url(base_url: &Url, relative_path: &Path) -> Result<String> {
     let mut url = base_url.clone();
     {
@@ -262,6 +271,7 @@ fn hosted_page_url(base_url: &Url, relative_path: &Path) -> Result<String> {
     Ok(url.into())
 }
 
+/// Tests for rendered page discovery, URL normalization, and index mapping.
 #[cfg(test)]
 mod tests {
     use std::fs;
@@ -272,24 +282,13 @@ mod tests {
     use super::*;
     use crate::parser;
 
-    ///
-    /// # Arguments
-    /// * `markdown` - Str carrying the markdown information consumed by the mod workflow.
-    ///
-    /// # Returns
-    /// The collection of values selected or produced by the described workflow.
+    /// Parses links from a Markdown string for sitemap tests.
     fn links(markdown: &str) -> Vec<crate::link::Link<'_>> {
         let mut parser = parser::get_parser(markdown);
         parser::extract_links(&mut parser)
     }
 
     /// URLs come from the rendered pages, are normalized and appear once.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn sitemap_urls_follow_rendered_inventory_and_are_normalized_and_deduplicated() -> Result<()> {
         let temp = tempdir()?;
@@ -370,12 +369,6 @@ mod tests {
     }
 
     /// Malformed URLs and pages missing from the output are reported.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn malformed_urls_and_missing_summary_pages_are_reported() -> Result<()> {
         let temp = tempdir()?;
@@ -407,12 +400,6 @@ mod tests {
     }
 
     /// The index mapping rewrites only a matching final path component.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn index_mapping_changes_only_the_matching_file_component() -> Result<()> {
         let temp = tempdir()?;
@@ -446,12 +433,6 @@ mod tests {
     }
 
     /// `README.md` is rendered as `index.html` without any configured mapping.
-    ///
-    /// # Returns
-    /// The successful result value produced by this operation.
-    ///
-    /// # Errors
-    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn readme_is_rendered_as_index() -> Result<()> {
         let temp = tempdir()?;

@@ -46,9 +46,6 @@ pub(crate) struct Link<'a> {
     // [![image_alt_text][image_label]][...]
     // [image_label]: image_url "image_title"
     /// Link type of the image, if the link text is an image.
-    ///
-    /// # Returns
-    /// The cow computed for the calling workflow.
     #[expect(dead_code, reason = "recorded for image links; no consumer yet")]
     pub(crate) image_link_type: Option<LinkType>,
     /// Image alt text.
@@ -64,46 +61,24 @@ pub(crate) struct Link<'a> {
 impl<'a> Link<'a> {
     // Methods that write Markdown directly
 
-/// Retrieves the link type for the current link from its current state, returning the value needed by the caller.
-///
-/// # Returns
-/// The matching value when available; `None` when no value satisfies the lookup or selection rules.
-
-    /// # Returns
-    /// `Some` when the requested value is available; otherwise returns `None`.
+    /// Returns the link type
     pub(crate) fn get_link_type(&self) -> Option<LinkType> {
         self.link_type
-    /// Retrieves the text for the current link from its current state, returning the value needed by the caller.
-    ///
-    /// # Returns
-    /// The cow computed for the calling workflow.
     }
-    /// Return the link's text
 
+    /// Return the link's text
     fn get_text(&self) -> Cow<'_, str> {
         self.text
             .as_deref()
             .map_or(Cow::Borrowed(""), Cow::Borrowed)
     }
-    /// Retrieves the url for the current link from its current state, returning the value needed by the caller.
-    ///
-    /// # Returns
-    /// The cow computed for the calling workflow.
 
-    /// # Returns
-    /// The cow produced for the calling workflow.
-
+    /// Returns the link's url
     pub(crate) fn get_url(&self) -> Cow<'_, str> {
         self.url.as_deref().map_or(Cow::Borrowed(""), Cow::Borrowed)
     }
-    /// Retrieves the url and title for the current link from its current state, returning the value needed by the caller.
-    ///
-    /// # Returns
-    /// The cow computed for the calling workflow.
 
-    /// # Returns
-    /// The cow produced for the calling workflow.
-
+    /// Returns the link's url (and title if present)
     fn get_url_and_title(&self) -> Cow<'_, str> {
         if let Some(u) = &self.url {
             if let Some(t) = &self.title {
@@ -116,13 +91,7 @@ impl<'a> Link<'a> {
         }
     }
 
-/// Retrieves the label for the current link from its current state, returning the value needed by the caller.
-///
-/// # Returns
-/// The cow computed for the calling workflow.
-
-    /// # Returns
-    /// The cow produced for the calling workflow.
+    /// Returns the explicit label, kebab-cased text, or URL-derived suggestion.
     pub(crate) fn get_label(&self) -> Cow<'_, str> {
         if let Some(label) = &self.label {
             Cow::Borrowed(label.as_ref())
@@ -147,30 +116,19 @@ impl<'a> Link<'a> {
             Cow::Borrowed("")
         }
     }
-/// Converts between the link representation and inline link while preserving the invariants required by callers.
-///
-/// # Returns
-/// The cow computed for the calling workflow.
 
     /// Return a Markdown inline link:
     /// [text](url) or [text](url "title")
     pub(crate) fn to_inline_link(&self) -> Cow<'_, str> {
         format!("[{}]({})", self.get_text(), self.get_url_and_title()).into()
     }
-/// Converts between the link representation and autolink while preserving the invariants required by callers.
-///
-/// # Returns
-/// The cow computed for the calling workflow.
 
     /// Return a Markdown autolink: \<url\>
+    ///
     /// Link text and title cannot be expressed in this form and are dropped.
     pub(crate) fn to_autolink(&self) -> Cow<'_, str> {
         format!("<{}>", self.get_url()).into()
     }
-/// Converts between the link representation and reference link while preserving the invariants required by callers.
-///
-/// # Returns
-/// The cow computed for the calling workflow.
 
     /// Return a reference-style Markdown link:
     /// \[text\]\[label\] or \[text/label\]
@@ -187,10 +145,6 @@ impl<'a> Link<'a> {
             format!("[{txt}][{label}]").into()
         }
     }
-/// Converts between the link representation and reference definition while preserving the invariants required by callers.
-///
-/// # Returns
-/// The cow computed for the calling workflow.
 
     /// Return a Markdown reference definition:
     /// \[label\]: url or \[label\]: url "title"
@@ -199,10 +153,6 @@ impl<'a> Link<'a> {
     }
 
     // BADGES / IMAGES
-/// Retrieves the badge alt text for the current link from its current state, returning the value needed by the caller.
-///
-/// # Returns
-/// The cow computed for the calling workflow.
 
     /// Return the badge alt text, if it exists, or the badge's label
     /// or the link's label
@@ -217,10 +167,6 @@ impl<'a> Link<'a> {
             "".into()
         }
     }
-/// Retrieves the badge label for the current link from its current state, returning the value needed by the caller.
-///
-/// # Returns
-/// The cow computed for the calling workflow.
 
     /// Return the label for the badge reference
     /// e.g. `image_label` or \<label\>-badge
@@ -234,10 +180,6 @@ impl<'a> Link<'a> {
         } else {
             "badge".into()
         }
-    /// Retrieves the badge url and title for the current link from its current state, returning the value needed by the caller.
-    ///
-    /// # Returns
-    /// The cow computed for the calling workflow.
     }
 
     /// Return the badge's url and title (if present)
@@ -266,9 +208,6 @@ impl<'a> Link<'a> {
     }
 
     /// Return the reference definition for a badge image: [badge-label]: <https://badge-image-url>...  "`image_title`"
-    ///
-    /// # Returns
-    /// The cow computed for the calling workflow.
     pub(crate) fn to_badge_reference_definition(&self) -> Cow<'a, str> {
         format!(
             "[{}]: {}",
@@ -281,12 +220,6 @@ impl<'a> Link<'a> {
 
 impl PartialOrd for Link<'_> {
     /// `PartialOrd` implementation for Link
-    ///
-    /// # Arguments
-    /// * `other` - Self carrying the other information consumed by the link workflow.
-    ///
-    /// # Returns
-    /// The matching value when available; `None` when no value satisfies the lookup or selection rules.
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         // The type is `Ord``,
         // thus we can implement `partial_cmp` by using `cmp`
@@ -296,12 +229,6 @@ impl PartialOrd for Link<'_> {
 
 impl Ord for Link<'_> {
     /// Ord implementation for Link
-    ///
-    /// # Arguments
-    /// * `other` - Self carrying the other information consumed by the link workflow.
-    ///
-    /// # Returns
-    /// The ordering computed for the calling workflow.
     fn cmp(&self, other: &Self) -> Ordering {
         self.label
             .cmp(&other.label)
@@ -312,24 +239,15 @@ impl Ord for Link<'_> {
 
 impl PartialEq for Link<'_> {
     /// `PartialEq` implementation for Link
-    /// Eq implementation for Link
-    ///
-    /// # Arguments
-    /// * `other` - Self carrying the other information consumed by the link workflow.
-    ///
-    /// # Returns
-    /// Whether the condition described above holds.
     fn eq(&self, other: &Self) -> bool {
         (self.label == other.label) && (self.url == other.url) && (self.title == other.title)
     }
 }
 
+/// Eq implementation for Link
 impl Eq for Link<'_> {}
 
 impl Hash for Link<'_> {
-    ///
-    /// # Arguments
-    /// * `state` - Shared state and services used to complete the link workflow.
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.label.hash(state);
         self.url.hash(state);
@@ -414,7 +332,7 @@ mod tests {
         assert!(link_a < link_a_url2);
     }
 
-    /// Checks the to reference definition behavior and its externally visible result in the link workflow. It checks the expected equality outcomes.
+    /// Renders a link as a reference definition.
     #[test]
     fn test_to_reference_definition() {
         let link = LinkBuilder::from_type_url_title(

@@ -3,17 +3,22 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
-/// Implements dir behavior for the fs component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+/// Directory validation and creation.
 mod dir;
-/// Implements find markdown files behavior for the fs component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Deterministic discovery of Markdown source files.
 mod find_markdown_files;
-/// Implements path validation behavior for the fs component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Path containment checks for existing and planned files.
 mod path_validation;
-/// Implements read files behavior for the fs component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Combined Markdown input and mapping of parser offsets back to source files.
 mod read_files;
-/// Implements unused behavior for the fs component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Reports for files omitted from a book or unused by examples.
 pub(crate) mod unused;
-/// Implements write atomically behavior for the fs component, keeping the related rules and data transformations at one boundary. The parent module calls these routines when it needs this component’s behavior.
+
+/// Temporary sibling writes and destination replacement.
 mod write_atomically;
 
 pub(crate) use dir::*;
