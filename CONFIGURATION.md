@@ -80,17 +80,17 @@ and environment/command-line overrides take precedence over config values.
 
 | Profile                                | Workspace code                                           | Dependencies and build tools                                                                                                                 |
 | -------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dev` / `test`                         | `opt-level = 0`, line tables, LTO off, 256 codegen units | `opt-level = "s"`, no debug info, 16 units; selected hashing, collections, math, regex, parallelism, allocator and macro crates use level 3. |
-| `debugging`                            | Level 0 and full symbols                                 | Level 0 and full symbols, including build scripts/procedural macros; intentionally uses a separate cache variant.                            |
+| `dev` / `test` | Level 0, no symbols, incremental disabled | Level 1 by default, selected compute-heavy dependencies at level 3, no symbols. |
+| `debug` | Level 2 symbols for workspace crates | Same optimized dependency settings as `dev`, with dependency symbols disabled. |
 | `ci`                                   | Inherits `dev`, incremental disabled                     | Same flags as `dev` for dependency cache reuse. Use release jobs for performance validation.                                                 |
-| `tools`                                | Level 2 for repeatedly executed repository tools         | Same dependency flags as `dev`; build overrides request level 3 with no debug info; named package overrides take precedence.                 |
+| `tools` | Level 2 for repository tools | Same dependency settings as `dev`. |
 | `release` / other specialized profiles | Preserve existing shipping/profiling choices             | Preserve existing shipping/profiling choices.                                                                                                |
 
 `test` inherits `dev`. Package overrides take precedence over build overrides; macro parsing
 crates are tuned explicitly. Optimization can increase cold compile time, and size optimization
 is not guaranteed to make every crate smaller. Matching profile flags improves cache eligibility;
 compiler versions, target/features, source paths, native tools, and rustflags also affect hits.
-The `debugging` profile intentionally rebuilds dependencies to make them debuggable.
+The built-in `debug` profile keeps full symbols on workspace crates while the shared dependency override keeps third-party dependencies symbol-free.
 
 Run `just build-setup` once per checkout. It creates ignored `target`, `build`, and `.sccache`
 links and refuses to replace existing files, directories, or links to another slot. PowerShell 7
@@ -113,7 +113,7 @@ Keep the shared 45 GiB cache and stable per-slot directories. Inspect running Ca
 processes before restarting sccache. Clean only demonstrated stale/corrupt content, never by
 recursively deleting a checkout link or another active slot.
 
-Select profiles with `just cargo build --profile debugging` or `--profile tools`; ordinary
+Select profiles with `just cargo build --profile debug` or `--profile tools`; ordinary
 build/test uses `dev`/`test`. Select a Cargo profile in nextest with `--cargo-profile ci`, independently
 of nextest's test-runner `--profile ci`.
 
