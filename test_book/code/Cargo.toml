@@ -1,6 +1,7 @@
 # TODO Reviewed ??-??-2026.
 
 [package]
+rust-version = "1.98.1"
 license-file = "../../LICENSE"
 name = "dependencies"
 version = "0.1.0"
