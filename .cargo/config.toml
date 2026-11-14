@@ -2,6 +2,13 @@
 # Build configuration: see CONFIGURATION.md at the repository root.
 # Run the repository build-setup recipe to link target/build to the central checkout slot.
 
+# Linker policy: use rustc's target defaults for native builds.
+# Windows MSVC: use link.exe from Visual Studio Build Tools and the Windows SDK.
+# macOS: use the Apple toolchain via cc and the Xcode or Command Line Tools SDK.
+# x86_64 GNU/Linux: Rust 1.90+ selects bundled LLD through the system C driver.
+# Other Linux targets use their target defaults. Set cross-linkers in local
+# Cargo configuration or CARGO_TARGET_<TRIPLE>_LINKER for the selected toolchain.
+
 [build]
 # jobs = 1                      # number of parallel jobs, defaults to # of CPUs
 # rustc = "rustc"               # the rust compiler tool
@@ -23,7 +30,6 @@ build-dir = "build"
 
 [env]
 # rustflags = ["…", "…"]        # custom flags to pass to all compiler invocations
-# rustflags = ["-C", "link-arg=-fuse-ld=lld"]
 # rustdocflags = ["…", "…"]     # custom flags to pass to rustdoc
 # incremental = true            # whether or not to enable incremental compilation
 # dep-info-basedir = "…"        # path for the base directory for targets in depfiles
@@ -135,11 +141,7 @@ SCCACHE_BASEDIRS = { value = ".", relative = true }
 value = "45G"
 force = true
 
-[target.x86_64-pc-windows-msvc]
-linker = "rust-lld.exe"
 
-[target.aarch64-pc-windows-msvc]
-linker = "rust-lld.exe"
 
 [profile.dev]
 lto = "off"
