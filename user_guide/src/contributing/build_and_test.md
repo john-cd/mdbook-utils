@@ -1,4 +1,4 @@
-<!-- TODO Reviewed ??-??-2026 -->
+<!-- TODO Reviewed ??-??-2026. -->
 
 ## Build and test the code and user guide
 

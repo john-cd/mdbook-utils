@@ -34,8 +34,17 @@ const LEGACY_ENV_NAMES: [&str; 9] = [
     "MDBOOK_PATH",
 ];
 
-/// Stores environment variables into a Configuration struct.
 /// Defaults apply if not present.
+
+
+/// # Arguments
+/// * `global_opts` - Global opts used as the global opts input to the config workflow.
+///
+/// # Returns
+/// The successful value produced by the operation; failures are described below.
+///
+/// # Errors
+/// Returns an error if the underlying serialize operation fails.
 pub(crate) fn init(global_opts: GlobalOpts) -> Result<Configuration> {
     let (vars, deprecated) = with_legacy_names(std::env::vars());
     for name in deprecated {
@@ -53,6 +62,12 @@ pub(crate) fn init(global_opts: GlobalOpts) -> Result<Configuration> {
 
 /// Add the prefixed form of each legacy variable that is set while its
 /// prefixed form is not. Returns the variables and the legacy names used.
+///
+/// # Arguments
+/// * `vars` - Impl iterator carrying the vars information consumed by the config workflow.
+///
+/// # Returns
+/// The collection of values selected or produced by the described workflow.
 fn with_legacy_names(
     vars: impl Iterator<Item = (String, String)>,
 ) -> (Vec<(String, String)>, Vec<&'static str>) {
@@ -120,6 +135,10 @@ pub(crate) struct Configuration {
 
 /// Defaults if the environment variables are not set
 impl Default for Configuration {
+    /// Constructs a usable initial configuration value with the defaults required by the config component.
+    ///
+    /// # Returns
+    /// The self computed for the calling workflow.
     fn default() -> Self {
         Self {
             book_root_dir_path: PathBuf::from("."),
@@ -137,15 +156,23 @@ impl Default for Configuration {
 }
 
 impl Configuration {
-    /// Returns the Markdown source directory provided by the
     /// command-line argument (if set);
     /// the `MARKDOWN_DIR_PATH` environment variable (if set);
     /// the "book.src" field (which defaults to {`book_root_dir_path}/src`) in
     /// `book.toml` (if `book.toml` is found); otherwise the default value
     /// passed as function argument (./src/ or ./drafts/ typically).
-    ///
     /// `book.toml` is looked up in `BOOK_ROOT_DIR_PATH`, if set,
     /// or the current working directory.
+    ///
+    /// # Arguments
+    /// * `args` - Markdown dir args carrying the args information consumed by the configuration workflow.
+    /// * `default_dir_path` - S carrying the default dir path information consumed by the configuration workflow.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     pub(crate) fn markdown_src_dir_path<S: AsRef<OsStr>>(
         &self,
         args: MarkdownDirArgs,
@@ -227,10 +254,15 @@ impl Configuration {
         Ok(p)
     }
 
-    /// Returns the destination directory where to store mdbook-utils
     /// outputs, as provided by the command-line argument (if set),
     /// the `DEFAULT_DEST_DIR_PATH` environment variable (if set),
     /// or the current working directory otherwise.
+    ///
+    /// # Arguments
+    /// * `args` - Dest dir args carrying the args information consumed by the configuration workflow.
+    ///
+    /// # Returns
+    /// The path buf computed for the calling workflow.
     pub(crate) fn dest_dir_path(&self, args: DestDirArgs) -> PathBuf {
         let (path, source) = if let Some(path) = args.dir_path {
             (path, "command-line")
@@ -243,9 +275,15 @@ impl Configuration {
         path
     }
 
-    /// Returns the destination file path, as provided by
     /// the command-line argument (if set) or the default destination path and
     /// default filename otherwise (see `default_dest_dir_path`).
+    ///
+    /// # Arguments
+    /// * `args` - Dest file args carrying the args information consumed by the configuration workflow.
+    /// * `filename` - Str carrying the filename information consumed by the configuration workflow.
+    ///
+    /// # Returns
+    /// The path buf computed for the calling workflow.
     pub(crate) fn dest_file_path(&self, args: DestFileArgs, filename: &str) -> PathBuf {
         let (path, source) = if let Some(path) = args.file_path {
             (path, "command-line")
@@ -258,10 +296,18 @@ impl Configuration {
         path
     }
 
-    /// Returns the directory where `Cargo.toml` may be found,
     /// as provided by the command-line argument (if set),
     /// the `CARGO_TOML_DIR_PATH` environment variable (if set),
     /// or `BOOK_ROOT_DIR_PATH` (which defaults to '.') otherwise.
+    ///
+    /// # Arguments
+    /// * `args` - Cargo toml dir args carrying the args information consumed by the configuration workflow.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     pub(crate) fn cargo_toml_dir_path(&self, args: CargoTomlDirArgs) -> Result<PathBuf> {
         let (p, source) = if let Some(path) = args.cargo_toml_dir_path {
             (path, "command-line")
@@ -279,14 +325,14 @@ impl Configuration {
         Ok(p)
     }
 
-    /// Returns the base url of the website where the book will be deployed
     /// (used to build sitemaps): the command-line option, otherwise the
     /// `BASE_URL` environment variable, otherwise `output.html.site-url` in
     /// `book.toml`.
-    ///
     /// # Errors
-    ///
     /// Returns an error if none of them is set, or the URL cannot be parsed.
+    ///
+    /// # Arguments
+    /// * `args` - Url args carrying the args information consumed by the configuration workflow.
     pub(crate) fn base_url(&self, args: UrlArgs) -> Result<url::Url> {
         if let Some(url) = args.url {
             return Ok(url);
@@ -302,8 +348,14 @@ impl Configuration {
         url::Url::parse(&configured).context("[base_url] Could not parse the base url provided.")
     }
 
-    /// Splits the `--map-index` value into its (source, target) pair, if
     /// present.
+
+
+    /// # Arguments
+    /// * `map_index` - Option used as the map index input to the configuration workflow.
+    ///
+    /// # Returns
+    /// `Some` when the requested value is available; otherwise returns `None`.
     pub(crate) fn sitemap_map_index(&self, map_index: Option<String>) -> Option<(String, String)> {
         let s = map_index.or_else(|| self.sitemap_map_index.clone())?;
         let parts: Vec<&str> = s.split(':').collect();
@@ -312,12 +364,13 @@ impl Configuration {
 
     /// Resolve the sitemap output file from the command-line argument,
     /// environment, mdBook HTML output, or the default `./book` directory.
-    ///
     /// # Errors
-    ///
     /// Returns an error when the explicit `book.toml` is unreadable or
     /// malformed, or when it disables the HTML renderer without an explicit
     /// destination override.
+    ///
+    /// # Arguments
+    /// * `args` - Dest file args carrying the args information consumed by the configuration workflow.
     pub(crate) fn sitemap_file_path(&self, args: DestFileArgs) -> Result<PathBuf> {
         let (path, source) = if let Some(file_path) = args.file_path {
             (file_path, "command-line")
@@ -343,6 +396,9 @@ impl Configuration {
     }
 
     /// if true, skip confirmation prompts
+    ///
+    /// # Returns
+    /// Whether the condition described above holds.
     pub(crate) fn skip_confirm(&self) -> bool {
         self.global_opts.yes
     }
@@ -357,7 +413,13 @@ mod tests {
 
     use super::*;
 
-    /// Checks the built-in defaults.
+    /// Checks the configuration default behavior and its externally visible result in the config workflow. It checks the expected equality outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned when the test configuration default operation cannot complete.
     #[test]
     fn test_configuration_default() {
         let config = Configuration::default();
@@ -366,8 +428,13 @@ mod tests {
         assert_eq!(config.sitemap_map_index, None);
     }
 
-    /// Resolves the Markdown source directory from the default, the environment
     /// and the argument.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -427,8 +494,13 @@ src = "toml_src"
         Ok(())
     }
 
-    /// Resolves the Markdown build directory from the default, the environment
     /// and the argument.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -524,6 +596,12 @@ src = "toml_src"
 
     /// Prefers the argument over the environment, then the book root, for the
     /// destination file.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_dest_file_path() {
         let mut config = Configuration::default();
@@ -553,7 +631,13 @@ src = "toml_src"
         );
     }
 
-    /// Resolves the directory that holds `Cargo.toml`.
+    /// Checks the cargo toml dir path behavior and its externally visible result in the config workflow. It checks the expected equality outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if test_cargo_toml_dir_path, cargo_toml_dir_path fails.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -591,7 +675,13 @@ src = "toml_src"
         Ok(())
     }
 
-    /// Parses the base URL from the argument or the default.
+    /// Checks the base url behavior and its externally visible result in the config workflow. It checks the expected equality outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if base_url, parse fails.
     #[test]
     fn test_base_url() -> Result<()> {
         let config = Configuration::default();
@@ -620,7 +710,13 @@ src = "toml_src"
         Ok(())
     }
 
-    /// Parses the `from:to` index mapping from the argument or the default.
+    /// Checks the sitemap map index behavior and its externally visible result in the config workflow. It checks the expected equality outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned when the test sitemap map index operation cannot complete.
     #[test]
     fn test_sitemap_map_index() {
         let mut config = Configuration::default();
@@ -646,7 +742,13 @@ src = "toml_src"
         );
     }
 
-    /// Resolves the sitemap output path.
+    /// Checks the sitemap file path behavior and its externally visible result in the config workflow. It checks the expected equality outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if test_sitemap_file_path, sitemap_file_path fails.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -701,8 +803,13 @@ build-dir = "toml_book"
         Ok(())
     }
 
-    /// Verifies malformed configuration fails unless the sitemap destination is
     /// explicit.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -730,8 +837,13 @@ build-dir = "toml_book"
         Ok(())
     }
 
-    /// Verifies the sitemap requires an HTML renderer when no destination is
     /// overridden.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,

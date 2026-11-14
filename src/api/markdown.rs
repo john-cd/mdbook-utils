@@ -15,6 +15,12 @@ mod tests {
     use super::*;
 
     /// Returns nothing when every page is listed in `SUMMARY.md`.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_files_not_in_summary_all_included() -> Result<()> {
         let dir = tempdir()?;
@@ -38,6 +44,12 @@ mod tests {
     }
 
     /// Returns only the pages that `SUMMARY.md` omits.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_files_not_in_summary_some_missing() -> Result<()> {
         let dir = tempdir()?;
@@ -64,6 +76,12 @@ mod tests {
     }
 
     /// Treats every page as unlisted when there is no `SUMMARY.md`.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_identify_files_not_in_summary_no_summary() -> Result<()> {
         let dir = tempdir()?;
@@ -85,7 +103,13 @@ mod tests {
         Ok(())
     }
 
-    /// Finds unlisted pages in nested directories.
+    /// Checks the identify files not in summary nested files behavior and its externally visible result in the markdown workflow. It checks the expected equality outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if test_identify_files_not_in_summary_nested_files, create_dir fails.
     #[test]
     fn test_identify_files_not_in_summary_nested_files() -> Result<()> {
         let dir = tempdir()?;

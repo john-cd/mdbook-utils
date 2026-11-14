@@ -18,8 +18,17 @@ pub(crate) struct LinkBuilder<'a> {
 }
 
 impl<'a> LinkBuilder<'a> {
-    /// Starts a builder from a link's type, destination URL, title, and
     /// reference label; empty values are left unset.
+
+
+    /// # Arguments
+    /// * `link_type` - Link type used as the link type input to the link builder workflow.
+    /// * `url` - Cow used as the url input to the link builder workflow.
+    /// * `title` - Human-readable value used to identify or display the selected link builder.
+    /// * `label` - Human-readable value used to identify or display the selected link builder.
+    ///
+    /// # Returns
+    /// The self produced for the calling workflow.
     pub(crate) fn from_type_url_title(
         link_type: LinkType,
         url: Cow<'a, str>,
@@ -37,7 +46,13 @@ impl<'a> LinkBuilder<'a> {
         }
     }
 
-    /// Sets the destination URL; an empty URL is ignored.
+    /// Changes the url held by the link builder; subsequent operations use the updated value.
+    ///
+    /// # Arguments
+    /// * `url` - Mutable cow whose state is updated by this operation.
+    ///
+    /// # Returns
+    /// The self computed for the calling workflow.
     pub(crate) fn set_url(mut self, url: Cow<'a, str>) -> Self {
         if !url.is_empty() {
             self.link.url = Some(url);
@@ -46,6 +61,12 @@ impl<'a> LinkBuilder<'a> {
     }
 
     /// Appends to the link text; empty text is ignored.
+    ///
+    /// # Arguments
+    /// * `text` - Mutable cow whose state is updated by this operation.
+    ///
+    /// # Returns
+    /// The self computed for the calling workflow.
     #[expect(
         clippy::needless_pass_by_value,
         reason = "builder takes ownership of the Cow"
@@ -57,7 +78,14 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
-    /// Sets the reference label; an empty label is ignored.
+    /// Changes the label held by the link builder; subsequent operations use the updated value.
+    ///
+    /// # Arguments
+    /// * `label` - Human-readable value used to identify or display the selected link builder.
+    /// * `image_title` - Cow carrying the image title information consumed by the link builder workflow.
+    ///
+    /// # Returns
+    /// The self computed for the calling workflow.
     pub(crate) fn set_label(mut self, label: Cow<'a, str>) -> Self {
         if !label.is_empty() {
             self.link.label = Some(label);
@@ -65,8 +93,17 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
-    /// Sets the image type, URL, title, and label of a badge-style link whose
     /// text is an image.
+
+
+    /// # Arguments
+    /// * `image_link_type` - Link type used as the image link type input to the link builder workflow.
+    /// * `image_url` - Cow used as the image url input to the link builder workflow.
+    /// * `image_title` - Cow used as the image title input to the link builder workflow.
+    /// * `image_label` - Cow used as the image label input to the link builder workflow.
+    ///
+    /// # Returns
+    /// The self produced for the calling workflow.
     pub(crate) fn set_image(
         self,
         image_link_type: LinkType,
@@ -97,7 +134,13 @@ impl<'a> LinkBuilder<'a> {
         }
     }
 
-    /// Sets the image URL; an empty URL is ignored.
+    /// Changes the image url held by the link builder; subsequent operations use the updated value.
+    ///
+    /// # Arguments
+    /// * `image_url` - Mutable cow whose state is updated by this operation.
+    ///
+    /// # Returns
+    /// The self computed for the calling workflow.
     pub(crate) fn set_image_url(mut self, image_url: Cow<'a, str>) -> Self {
         if !image_url.is_empty() {
             self.link.image_url = Some(image_url);
@@ -114,7 +157,9 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
-    /// Returns the accumulated [`Link`].
+    ///
+    /// # Returns
+    /// The link computed for the calling workflow.
     pub(crate) fn build(self) -> Link<'a> {
         self.link
     }
@@ -196,7 +241,7 @@ mod tests {
         assert!(link_a < link_a_url2);
     }
 
-    /// Renders a link as a reference definition.
+    /// Checks the to reference definition behavior and its externally visible result in the builder workflow. It checks the expected equality outcomes.
     #[test]
     fn test_to_reference_definition() {
         let link = LinkBuilder::from_type_url_title(

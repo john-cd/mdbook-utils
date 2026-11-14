@@ -32,6 +32,9 @@ pub enum BadgeStyle {
 
 impl BadgeStyle {
     /// Return the query value for non-default Shields.io styles.
+    ///
+    /// # Returns
+    /// The matching value when available; `None` when no value satisfies the lookup or selection rules.
     pub(crate) fn shields_query_value(self) -> Option<&'static str> {
         match self {
             Self::Flat => None,
@@ -46,13 +49,13 @@ impl BadgeStyle {
 // REFERENCE DEFINITIONS
 
 /// Render the reference definitions found in all Markdown files in a source directory.
-///
 /// The caller chooses where and how to write the returned Markdown.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the Markdown
 /// output cannot be rendered.
+///
+/// # Arguments
+/// * `src_dir_path` - P carrying the src dir path information consumed by the badge style workflow.
 pub fn render_refdefs<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
@@ -63,11 +66,13 @@ pub fn render_refdefs<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
 }
 
 /// Parse Markdown sources and atomically write reference definitions to a file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be created or written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the badge style workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the badge style workflow.
 pub fn write_refdefs_to<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -78,13 +83,14 @@ where
 }
 
 /// Render GitHub badge reference definitions found in all Markdown sources.
-///
 /// The caller chooses where and how to write the returned Markdown.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the Markdown
 /// output cannot be rendered.
+///
+/// # Arguments
+/// * `src_dir_path` - P carrying the src dir path information consumed by the badge style workflow.
+/// * `style` - Badge style carrying the style information consumed by the badge style workflow.
 pub fn render_badges<P: AsRef<Path>>(src_dir_path: P, style: BadgeStyle) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
@@ -96,11 +102,13 @@ pub fn render_badges<P: AsRef<Path>>(src_dir_path: P, style: BadgeStyle) -> Resu
 
 /// Parse Markdown sources and atomically write default-style GitHub badge
 /// reference definitions to a file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be created or written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the badge style workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the badge style workflow.
 pub fn generate_badges<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -111,11 +119,14 @@ where
 
 /// Parse Markdown sources and atomically write GitHub badge reference
 /// definitions using a Shields.io style.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be created or written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the badge style workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the badge style workflow.
+/// * `style` - Badge style carrying the style information consumed by the badge style workflow.
 pub fn generate_badges_with_style<P1, P2>(
     src_dir_path: P1,
     dest_file_path: P2,
@@ -132,15 +143,17 @@ where
 // GENERATE REF DEFS FROM DEPENDENCIES
 
 /// Render reference definitions from Cargo dependencies and existing sources.
-///
 /// The caller chooses where and how to write the returned Markdown. An
 /// optional `log_file_path` receives the `cargo tree` output.
-///
 /// # Errors
-///
 /// Returns an error if Cargo cannot read the manifest or run `cargo tree`, the
 /// Markdown source cannot be read, the requested log cannot be written, or the
 /// Markdown output cannot be rendered.
+///
+/// # Arguments
+/// * `cargo_toml_dir_path` - P1 carrying the cargo toml dir path information consumed by the badge style workflow.
+/// * `markdown_dir_path` - P2 carrying the markdown dir path information consumed by the badge style workflow.
+/// * `log_file_path` - Option carrying the log file path information consumed by the badge style workflow.
 pub fn render_dependency_refdefs<P1, P2, P3>(
     cargo_toml_dir_path: P1,
     markdown_dir_path: P2,
@@ -169,11 +182,15 @@ where
 }
 
 /// Render dependency reference definitions and atomically write them to a file.
-///
 /// # Errors
-///
 /// Returns an error if Cargo cannot read the manifest or run `cargo tree`, the
 /// Markdown source cannot be read, or the destination cannot be written.
+///
+/// # Arguments
+/// * `cargo_toml_dir_path` - P1 carrying the cargo toml dir path information consumed by the badge style workflow.
+/// * `markdown_dir_path` - P2 carrying the markdown dir path information consumed by the badge style workflow.
+/// * `refdef_dest_file_path` - P3 carrying the refdef dest file path information consumed by the badge style workflow.
+/// * `log_file_path` - Option carrying the log file path information consumed by the badge style workflow.
 pub fn generate_refdefs_to<P1, P2, P3, P4>(
     cargo_toml_dir_path: P1,
     markdown_dir_path: P2,

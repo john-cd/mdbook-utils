@@ -9,7 +9,18 @@ use std::process::Command;
 use anyhow::Result;
 use tempfile::tempdir;
 
-/// Runs a links command with an explicit output and returns its process output.
+/// Persists the links produced by the issue 200 config workflow so later operations can retrieve it.
+///
+/// # Arguments
+/// * `markdown_dir` - Filesystem location used as the source or destination for this issue_200_config operation.
+/// * `output_path` - Filesystem location used as the source or destination for this issue_200_config operation.
+/// * `book_root` - Filesystem location used as the source or destination for this issue_200_config operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// An error is returned if Ok fails.
 fn write_links(
     markdown_dir: Option<&Path>,
     output_path: &Path,
@@ -103,7 +114,12 @@ fn markdown_source_precedence_is_cli_then_environment_then_book_toml() -> Result
     Ok(())
 }
 
-/// Checks a configured multi-renderer sitemap path and rejects malformed TOML.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// An error is returned if sitemap_uses_renderer_output_path_and_reports_invalid_config, create_dir_all fails.
 #[test]
 fn sitemap_uses_renderer_output_path_and_reports_invalid_config() -> Result<()> {
     let dir = tempdir()?;

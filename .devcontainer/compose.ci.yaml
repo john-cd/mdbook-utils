@@ -2,6 +2,7 @@
 # Build inputs come from tracked .devcontainer/.env; from the repo root pass --env-file .devcontainer/.env.
 # Keep credentials in ignored .devcontainer/.env.local; from the repo root pass it as a second --env-file when present.
 # TODO Reviewed ??-??-2026.
+
 name: mdbook-utils-ci
 services:
   mdbook-utils:

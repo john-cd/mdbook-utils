@@ -190,6 +190,12 @@ mod tests {
     use super::*;
 
     /// Falls back to `src` and `book` when `book.toml` sets nothing.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_default() -> Result<()> {
         let dir = tempdir()?;
@@ -204,6 +210,12 @@ mod tests {
     }
 
     /// Honors custom source and build directories.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_custom_dirs() -> Result<()> {
         let dir = tempdir()?;
@@ -224,8 +236,13 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies a sole explicitly configured HTML renderer writes to the build
     /// root.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_only_html_output() -> Result<()> {
         let dir = tempdir()?;
@@ -237,8 +254,13 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies that multiple renderers receive renderer-specific
     /// subdirectories.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_multiple_outputs() -> Result<()> {
         let dir = tempdir()?;
@@ -263,6 +285,12 @@ build-dir = "my_book"
     }
 
     /// Uses the Markdown renderer's directory when it is the only output.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_only_markdown_output() -> Result<()> {
         let dir = tempdir()?;
@@ -280,6 +308,12 @@ build-dir = "my_book"
     }
 
     /// Ignores renderers that produce neither HTML nor Markdown.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_only_other_output() -> Result<()> {
         let dir = tempdir()?;
@@ -296,8 +330,13 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies that an empty output table retains mdBook's default HTML
     /// renderer.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_empty_output_uses_default_html_renderer() -> Result<()> {
         let dir = tempdir()?;
@@ -309,8 +348,13 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies a missing optional book configuration does not produce an
     /// error.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_missing_is_optional() -> Result<()> {
         let dir = tempdir()?;
@@ -318,7 +362,13 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies malformed TOML errors identify the configuration file.
+    /// Checks the try parse book toml malformed reports configuration path behavior and its externally visible result in the book toml workflow. It checks the expected predicate outcomes.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if test_try_parse_book_toml_malformed_reports_configuration_path, write fails.
     #[test]
     fn test_try_parse_book_toml_malformed_reports_configuration_path() -> Result<()> {
         let dir = tempdir()?;
@@ -330,6 +380,12 @@ build-dir = "my_book"
     }
 
     /// `output.html.site-url` is exposed to callers.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_try_parse_book_toml_site_url() -> Result<()> {
         let dir = tempdir()?;

@@ -4,6 +4,7 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
+/// Implements extract links behavior for the parser component, keeping the related rules and data transformations at one boundary. The parent module calls these routines to provide get parser, get options, new, handle broken link behavior.
 mod extract_links;
 
 pub(crate) use extract_links::*;
@@ -19,15 +20,23 @@ use tracing::warn;
 // RETURN A PARSER WITH APPROPRIATE OPTIONS
 
 /// Return a parser with suitable options
-///
 /// `markdown_input`: the unprocessed markdown text
+///
+/// # Arguments
+/// * `markdown_input` - Str carrying the markdown input information consumed by the mod workflow.
+///
+/// # Returns
+/// The parser computed for the calling workflow.
 pub(crate) fn get_parser(markdown_input: &str) -> Parser<'_> {
     Parser::new_ext(markdown_input, get_options())
 }
 
 // Private Functions
-
 /// Return suitable Parser options
+///
+/// # Returns
+/// The options computed for the calling workflow.
+
 fn get_options() -> Options {
     // Set up options and parser.
     // Strikethroughs, etc... are not part of the CommonMark standard
@@ -63,7 +72,10 @@ pub(crate) struct Handler {
 }
 
 impl Handler {
-    /// Creates a handler with an empty list of broken links.
+    /// Constructs a usable initial handler value with the defaults required by the mod component.
+    ///
+    /// # Returns
+    /// The self computed for the calling workflow.
     pub(crate) fn new() -> Self {
         Self {
             broken_links: Arc::new(Mutex::new(Vec::new())),
@@ -100,7 +112,6 @@ impl<'input> BrokenLinkCallback<'input> for Handler {
 }
 
 /// Return a parser with suitable options and a broken link handler.
-///
 /// `markdown_input`: the Markdown contents to parse
 pub(crate) fn get_parser_with_broken_links_handler<'input>(
     markdown_input: &'input str,

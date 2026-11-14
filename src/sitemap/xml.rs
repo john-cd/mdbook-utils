@@ -13,11 +13,12 @@ use quick_xml::events::BytesText;
 use quick_xml::writer::Writer;
 
 // Write in the sitemap.xml format to a file, given a list of links.
-/// Writes the links in `sitemap.xml` format.
-///
 /// # Errors
-///
 /// Returns an error if the XML cannot be written.
+///
+/// # Arguments
+/// * `links` - [string] carrying the links information consumed by the xml workflow.
+/// * `w` - Mutable w whose state is updated by this operation.
 pub(super) fn write_xml<W: Write>(links: &[String], w: &mut W) -> anyhow::Result<()> {
     let mut writer = Writer::new_with_indent(w, b' ', 2);
 

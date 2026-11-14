@@ -1,6 +1,6 @@
-# Architecture
+<!-- TODO Reviewed ??-??-2026. -->
 
-<!-- TODO Reviewed ??-??-2026 -->
+# Architecture
 
 `mdbook-utils` is one crate with a library (`src/lib.rs`) and a thin CLI
 (`src/main.rs`, `src/cli/`).

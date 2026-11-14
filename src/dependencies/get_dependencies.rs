@@ -28,7 +28,9 @@ pub(crate) struct Dependency {
 }
 
 impl Dependency {
-    /// Returns the crates.io package name, which may differ from the library name.
+    ///
+    /// # Returns
+    /// The &str computed for the calling workflow.
     pub(crate) fn package_name(&self) -> &str {
         self.package_name.as_ref()
     }
@@ -103,15 +105,12 @@ struct CargoDependencyKind {
     kind: Option<String>,
 }
 
-/// Extracts selected Cargo packages' resolved direct normal dependencies.
-///
 /// Cargo metadata supplies package identities, library targets, and repository URLs as JSON.
 /// The selected package's resolved direct normal dependencies are returned; dev and build
 /// dependencies are excluded. At a workspace root, Cargo's default members are selected.
 /// If multiple resolved packages expose the same library name, the package with the
 /// lexicographically smallest Cargo package ID wins so results do not depend on output order.
 /// The `--locked` option prevents Cargo from modifying the lockfile.
-///
 /// `dir_path`: Path to the directory containing the Cargo.toml file.
 #[expect(
     clippy::needless_pass_by_value,
@@ -145,6 +144,16 @@ pub(crate) fn get_dependencies<P: AsRef<Path>, Q: AsRef<Path>>(
 }
 
 /// Parse Cargo metadata and collect direct normal dependencies for the selected package roots.
+///
+/// # Arguments
+/// * `stdout` - Vec carrying the stdout information consumed by the dependency workflow.
+/// * `cargo_toml_dir_path` - Filesystem location used as the source or destination for this get_dependencies operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 fn parse_cargo_metadata(
     stdout: Vec<u8>,
     cargo_toml_dir_path: &Path,
@@ -239,14 +248,30 @@ fn parse_cargo_metadata(
 }
 
 /// Canonicalizes paths from Cargo when possible so Windows extended paths compare consistently.
+
+/// # Arguments
+/// * `path` - Filesystem location the operation reads, updates, or uses as its scope.
+///
+/// # Returns
+/// The path buf produced for the calling workflow.
 fn canonical_or_original(path: &Path) -> std::path::PathBuf {
     std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf())
 }
-
 /// Write e.g. stdout / stderr to a file.
-///
 /// An explicitly requested log file must be inside the current directory and
 /// writable; failures are returned. The default temporary log is best effort.
+///
+/// # Arguments
+/// * `out` - [u8] carrying the out information consumed by the get dependencies workflow.
+/// * `err` - Underlying failure whose details are preserved or converted into the returned error.
+/// * `log_file_path` - Filesystem location used as the source or destination for this get_dependencies operation.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
+
 fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()> {
     let Some(path) = log_file_path else {
         write_default_log(out, err);
@@ -268,6 +293,13 @@ fn write_log(out: &[u8], err: &[u8], log_file_path: Option<&Path>) -> Result<()>
 }
 
 /// Keep Cargo's output in a temporary file; failures are only logged.
+///
+/// # Arguments
+/// * `out` - [u8] carrying the out information consumed by the get dependencies workflow.
+/// * `err` - Underlying failure whose details are preserved or converted into the returned error.
+///
+/// # Returns
+/// The value computed for the calling workflow.
 fn write_default_log(out: &[u8], err: &[u8]) {
     let result = Builder::new()
         .prefix("mdbook-utils-dependencies-")
@@ -291,7 +323,16 @@ fn write_default_log(out: &[u8], err: &[u8]) {
 mod tests {
     use super::*;
 
-    /// Builds a Cargo package record for focused metadata parser tests.
+    ///
+    /// # Arguments
+    /// * `id` - Identifier used to select the get dependencies record or cache entry affected by this operation.
+    /// * `name` - Human-readable value used to identify or display the selected get dependencies.
+    /// * `manifest_path` - Str carrying the manifest path information consumed by the get dependencies workflow.
+    /// * `library_name` - Option carrying the library name information consumed by the get dependencies workflow.
+    /// * `repository` - Option carrying the repository information consumed by the get dependencies workflow.
+    ///
+    /// # Returns
+    /// The value computed for the calling workflow.
     fn package(
         id: &str,
         name: &str,
@@ -315,7 +356,13 @@ mod tests {
         })
     }
 
-    /// Builds a Cargo dependency edge with one dependency kind.
+    ///
+    /// # Arguments
+    /// * `pkg` - Str carrying the pkg information consumed by the get dependencies workflow.
+    /// * `kind` - Option carrying the kind information consumed by the get dependencies workflow.
+    ///
+    /// # Returns
+    /// The value computed for the calling workflow.
     fn edge(pkg: &str, kind: Option<&str>) -> serde_json::Value {
         serde_json::json!({
             "pkg": pkg,
@@ -323,7 +370,17 @@ mod tests {
         })
     }
 
-    /// Parses a JSON fixture as Cargo metadata for the selected directory.
+    /// Turns the supplied fixture representation into the structured value consumed by get dependencies, rejecting malformed input.
+    ///
+    /// # Arguments
+    /// * `metadata` - Value carrying the metadata information consumed by the get dependencies workflow.
+    /// * `selected_dir` - Filesystem location used as the source or destination for this get_dependencies operation.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if create_dir_all, parse_cargo_metadata fails.
     fn parse_fixture(
         metadata: serde_json::Value,
         selected_dir: &Path,
@@ -332,7 +389,15 @@ mod tests {
         parse_cargo_metadata(serde_json::to_vec(&metadata)?, selected_dir)
     }
 
-    /// Creates a canonical temporary directory for metadata fixtures.
+    ///
+    /// # Arguments
+    /// * `name` - Human-readable value used to identify or display the selected get dependencies.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if fixture_dir, create_dir_all fails.
     fn fixture_dir(name: &str) -> Result<(tempfile::TempDir, std::path::PathBuf)> {
         let temp = tempfile::tempdir()?;
         let path = temp.path().join(name);
@@ -341,11 +406,23 @@ mod tests {
     }
 
     /// Returns a Cargo manifest path beneath a package fixture directory.
+    ///
+    /// # Arguments
+    /// * `directory` - Filesystem location used as the source or destination for this get_dependencies operation.
+    ///
+    /// # Returns
+    /// The formatted text produced for the caller.
     fn manifest_path(directory: &Path) -> String {
         directory.join("Cargo.toml").to_string_lossy().into_owned()
     }
-
     /// Package names and repository URLs stay intact when names and paths contain punctuation.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
+
     #[test]
     fn extracts_by_package_identity_without_fixture_name_assumptions() -> Result<()> {
         let (_temp, root) = fixture_dir("odd-root")?;
@@ -382,6 +459,12 @@ mod tests {
 
     /// Workspace roots collect normal dependencies from all default members and exclude dev/build
     /// edges.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn virtual_workspace_collects_default_members_and_normal_dependencies() -> Result<()> {
         let (_temp, workspace) = fixture_dir("workspace")?;
@@ -437,6 +520,12 @@ mod tests {
     }
 
     /// Repeated library names choose the same package regardless of Cargo node order.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn duplicate_library_names_choose_smallest_package_id() -> Result<()> {
         let (_temp, workspace) = fixture_dir("workspace")?;
@@ -485,6 +574,13 @@ mod tests {
     }
 
     /// A log path outside the current directory is rejected, not ignored.
+    /// An explicit log inside the current directory receives stdout and stderr.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn rejects_log_path_outside_current_directory() -> Result<()> {
         let dir = tempfile::tempdir()?;
@@ -494,7 +590,6 @@ mod tests {
         Ok(())
     }
 
-    /// An explicit log inside the current directory receives stdout and stderr.
     #[test]
     fn writes_explicit_log_inside_current_directory() -> Result<()> {
         let dir = tempfile::tempdir_in(std::env::current_dir()?)?;

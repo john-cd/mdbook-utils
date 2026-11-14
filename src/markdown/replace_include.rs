@@ -38,11 +38,8 @@ struct PlannedReplacement {
     contents: Vec<u8>,
 }
 
-/// Returns the part of `content` chosen by an include selector (anchor or line
 /// range), or all of it without one.
-///
 /// # Errors
-///
 /// Returns an error if the selector is malformed or does not match.
 fn selected_contents<'a>(content: &'a str, selector: Option<&str>, path: &Path) -> Result<&'a str> {
     let Some(selector) = selector else {
@@ -141,11 +138,15 @@ fn selected_contents<'a>(content: &'a str, selector: Option<&str>, path: &Path) 
 
 /// Recursively expands `{{#include}}` directives in a file, tracking active
 /// includes to reject cycles.
-///
 /// # Errors
-///
 /// Returns an error if an included file cannot be read, a selector fails, or an
 /// include cycle is found.
+///
+/// # Arguments
+/// * `path` - Filesystem location used as the source or destination for this replace_include operation.
+/// * `selector` - Option carrying the selector information consumed by the replace include workflow.
+/// * `base_dir` - Filesystem location used as the source or destination for this replace_include operation.
+/// * `active` - Filesystem location used as the source or destination for this replace_include operation.
 fn expand_includes(
     path: &Path,
     selector: Option<&str>,
@@ -233,20 +234,18 @@ fn expand_includes(
 ///  Within each mdBook-style Markdown file in a source directory,
 /// replace {{#include file.md}} statements by the contents of the
 /// included file.
-///
 /// See the [mdBook documentation](https://rust-lang.github.io/mdBook/format/mdbook.html#including-files).
-///
 /// Note: {{#include *-refs.md}} are excluded.
-///
 /// `markdown_src_dir_path`: path to the source directory containing the
 /// Markdown files.
 /// Process files and replace include macros.
-///
 /// # Errors
-///
 /// Returns an error if the Markdown directory cannot be read, an include path
 /// or anchor is invalid, an included file cannot be read, or a changed file
 /// cannot be written.
+///
+/// # Arguments
+/// * `markdown_src_dir_path` - P carrying the markdown src dir path information consumed by the replace include workflow.
 #[tracing::instrument(skip(markdown_src_dir_path))]
 pub fn include_in_all_markdown_files_in<P>(markdown_src_dir_path: P) -> Result<()>
 where
@@ -303,6 +302,12 @@ mod tests {
     use super::*;
 
     /// Expands includes in every Markdown file.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_include_in_all_markdown_files_in() -> Result<()> {
         let dir = tempdir()?;
@@ -342,6 +347,12 @@ mod tests {
     }
 
     /// A missing include leaves the source file untouched.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn failed_include_expansion_preserves_the_source_file() -> Result<()> {
         for content in [
@@ -364,6 +375,12 @@ mod tests {
     }
 
     /// Relative include paths resolve against the including file.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn nested_include_paths_resolve_from_the_including_chapter() -> Result<()> {
         let dir = tempdir()?;
@@ -381,6 +398,12 @@ mod tests {
     }
 
     /// Expands nested includes and refuses cycles without writing.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn recursively_expands_nested_includes_and_rejects_cycles_without_writes() -> Result<()> {
         let dir = tempdir()?;
@@ -412,6 +435,12 @@ mod tests {
     }
 
     /// Line ranges and anchors are expanded with their original line endings.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn expands_line_ranges_and_named_anchors_without_normalizing_line_endings() -> Result<()> {
         let dir = tempdir()?;
@@ -437,6 +466,12 @@ mod tests {
     }
 
     /// A blank line before an anchor end marker is part of the selected content.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn anchor_selection_preserves_a_blank_line_before_the_end_marker() -> Result<()> {
         let dir = tempdir()?;
@@ -456,6 +491,12 @@ mod tests {
     }
 
     /// Expressions other than include directives are preserved verbatim.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn leaves_crate_marker_syntax_unchanged() -> Result<()> {
         let dir = tempdir()?;

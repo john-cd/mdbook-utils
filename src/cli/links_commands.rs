@@ -25,6 +25,12 @@ pub(crate) enum LinkFormatArg {
 }
 
 impl From<LinkFormatArg> for LinkFormat {
+    ///
+    /// # Arguments
+    /// * `format` - Link format arg carrying the format information consumed by the link format workflow.
+    ///
+    /// # Returns
+    /// The self computed for the calling workflow.
     fn from(format: LinkFormatArg) -> Self {
         match format {
             LinkFormatArg::Reference => Self::Reference,
@@ -67,6 +73,16 @@ pub(crate) enum LinksSubCommand {
 }
 
 /// Process "links" subcommands of the command-line interface
+///
+/// # Arguments
+/// * `subcmd` - Links sub command carrying the subcmd information consumed by the link format workflow.
+/// * `config` - Settings that control the behavior and limits of this link format workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 pub(crate) fn run(subcmd: LinksSubCommand, config: &Configuration) -> Result<()> {
     match subcmd {
         LinksSubCommand::WriteAll(args) => {
@@ -177,7 +193,13 @@ mod tests {
     /// Constructor of a `links` subcommand taking source and destination.
     type Make = fn(MarkdownSrcDirAndDestFileArgs) -> LinksSubCommand;
 
-    /// Builds the source/destination arguments for a test.
+    ///
+    /// # Arguments
+    /// * `src` - Filesystem location used as the source or destination for this links_commands operation.
+    /// * `dest` - Filesystem location used as the source or destination for this links_commands operation.
+    ///
+    /// # Returns
+    /// The markdown src dir and dest file args computed for the calling workflow.
     fn paths(src: &Path, dest: &Path) -> MarkdownSrcDirAndDestFileArgs {
         MarkdownSrcDirAndDestFileArgs {
             src: MarkdownDirArgs {
@@ -189,7 +211,15 @@ mod tests {
         }
     }
 
-    /// Creates a source directory with one page and returns its path.
+    ///
+    /// # Arguments
+    /// * `root` - Filesystem location used as the source or destination for this links_commands operation.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if create_dir, write fails.
     fn source_dir(root: &Path) -> Result<std::path::PathBuf> {
         let src = root.join("src");
         fs::create_dir(&src)?;
@@ -201,6 +231,12 @@ mod tests {
     }
 
     /// Each `links` arm writes its destination file.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_links_arms_write_destination() -> Result<()> {
         let dir = tempdir()?;
@@ -219,6 +255,12 @@ mod tests {
     }
 
     /// `write-inline` writes its destination file.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_links_write_inline() -> Result<()> {
         let dir = tempdir()?;
@@ -237,6 +279,12 @@ mod tests {
     }
 
     /// A missing source directory is reported as an error.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_links_missing_source_fails() -> Result<()> {
         let dir = tempdir()?;

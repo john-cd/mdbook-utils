@@ -16,16 +16,16 @@ use crate::parser;
 // LINKS
 
 /// Render external inline links and autolinks from Markdown sources.
-///
 /// Internal links (relative paths, fragments, and non-HTTP schemes) are
 /// excluded. `format` selects the Markdown syntax for the output.
-///
 /// The caller chooses where and how to write the returned Markdown.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the Markdown
 /// output cannot be rendered.
+///
+/// # Arguments
+/// * `src_dir_path` - P carrying the src dir path information consumed by the links workflow.
+/// * `format` - Link format carrying the format information consumed by the links workflow.
 pub fn render_inline_links<P: AsRef<Path>>(src_dir_path: P, format: LinkFormat) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
@@ -49,11 +49,13 @@ pub fn render_inline_links<P: AsRef<Path>>(src_dir_path: P, format: LinkFormat) 
 
 /// Parse Markdown sources and atomically write the rendered external inline
 /// links and autolinks to a file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be created or written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the links workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the links workflow.
 pub fn write_inline_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -63,11 +65,14 @@ where
 }
 
 /// Same as [`render_inline_links`], but atomically writes the result to a file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read, the Markdown
 /// output cannot be rendered, or the destination file cannot be written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the links workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the links workflow.
+/// * `format` - Link format carrying the format information consumed by the links workflow.
 pub fn write_inline_links_with_format<P1, P2>(
     src_dir_path: P1,
     dest_file_path: P2,
@@ -84,19 +89,25 @@ where
 /// Returns true if the destination is an absolute `http` or `https` URL,
 /// i.e. a link to an external site rather than a relative path, fragment,
 /// or other scheme.
+///
+/// # Arguments
+/// * `url` - Str carrying the url information consumed by the links workflow.
+///
+/// # Returns
+/// Whether the condition described above holds.
 fn is_external_url(url: &str) -> bool {
     let lower = url.trim().to_ascii_lowercase();
     lower.starts_with("http://") || lower.starts_with("https://")
 }
 
 /// Render HTTP and HTTPS links found in all Markdown files in a source directory.
-///
 /// The caller chooses where and how to write the returned Markdown.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the Markdown
 /// output cannot be rendered.
+///
+/// # Arguments
+/// * `src_dir_path` - P carrying the src dir path information consumed by the links workflow.
 pub fn render_all_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
@@ -113,11 +124,13 @@ pub fn render_all_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
 }
 
 /// Parse Markdown sources and atomically write the rendered links to a file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be created or written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the links workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the links workflow.
 pub fn write_all_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -128,17 +141,16 @@ where
 }
 
 /// Render duplicate links found in all Markdown files in a source directory.
-///
 /// Two links are duplicates when they have the same label, URL and title.
 /// Inline links and autolinks have no label, so they are duplicates when they
 /// point to the same URL, whatever their text.
-///
 /// The caller chooses where and how to write the returned Markdown.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the Markdown
 /// output cannot be rendered.
+///
+/// # Arguments
+/// * `src_dir_path` - P carrying the src dir path information consumed by the links workflow.
 pub fn render_duplicate_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
     let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
@@ -160,11 +172,13 @@ pub fn render_duplicate_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String>
 }
 
 /// Parse Markdown sources and atomically write duplicate links to a file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be created or written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the links workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the links workflow.
 pub fn write_duplicate_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -175,13 +189,13 @@ where
 }
 
 /// Render broken reference links found in all Markdown files in a source directory.
-///
 /// The caller chooses where and how to write the returned Markdown.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the Markdown
 /// output cannot be rendered.
+///
+/// # Arguments
+/// * `src_dir_path` - P carrying the src dir path information consumed by the links workflow.
 pub fn render_broken_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
     let sources = fs::read_markdown_sources_in(src_dir_path)?;
@@ -209,11 +223,13 @@ pub fn render_broken_links<P: AsRef<Path>>(src_dir_path: P) -> Result<String> {
 }
 
 /// Parse Markdown sources and atomically write broken links to a file.
-///
 /// # Errors
-///
 /// Returns an error if the source directory cannot be read or the destination
 /// file cannot be created or written.
+///
+/// # Arguments
+/// * `src_dir_path` - P1 carrying the src dir path information consumed by the links workflow.
+/// * `dest_file_path` - P2 carrying the dest file path information consumed by the links workflow.
 pub fn write_broken_links<P1, P2>(src_dir_path: P1, dest_file_path: P2) -> Result<()>
 where
     P1: AsRef<Path>,
@@ -230,6 +246,12 @@ mod tests {
     use super::*;
 
     /// Reports a reference link that has no definition.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_write_broken_links() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;
@@ -260,7 +282,16 @@ mod tests {
         Ok(())
     }
 
-    /// Writes a fixture with external, internal, fragment and reference links.
+    /// Persists the inline fixture produced by the links workflow so later operations can retrieve it.
+    ///
+    /// # Arguments
+    /// * `src_dir` - Filesystem location used as the source or destination for this links operation.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// An error is returned if write_inline_fixture, write fails.
     fn write_inline_fixture(src_dir: &std::path::Path) -> Result<()> {
         fs::create_dir(src_dir)?;
         fs::write(
@@ -273,6 +304,12 @@ mod tests {
     }
 
     /// Internal links and reference links are excluded from inline output.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_write_inline_links_excludes_internal_links() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;
@@ -290,6 +327,12 @@ mod tests {
     }
 
     /// The inline format writes `[text](url)` lines only.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_write_inline_links_inline_format() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;
@@ -307,6 +350,12 @@ mod tests {
     }
 
     /// The autolink format writes `<url>` lines only.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_write_inline_links_autolink_format() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;
@@ -322,6 +371,12 @@ mod tests {
     }
 
     /// A failing run keeps an existing destination file.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_failed_run_keeps_existing_destination() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;
@@ -336,6 +391,12 @@ mod tests {
     }
 
     /// Reports URLs that appear in several links.
+    ///
+    /// # Returns
+    /// The successful result value produced by this operation.
+    ///
+    /// # Errors
+    /// Returns an error if a fallible operation cannot complete.
     #[test]
     fn test_write_duplicate_links() -> Result<()> {
         let temp_dir = tempfile::tempdir()?;

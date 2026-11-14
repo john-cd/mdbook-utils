@@ -23,7 +23,15 @@ struct Fixture {
     out: PathBuf,
 }
 
-/// Creates a fixture whose only source file is `page.md` with the given text.
+///
+/// # Arguments
+/// * `markdown` - Str carrying the markdown information consumed by the cli links and generate workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// An error is returned if fixture, create_dir fails.
 fn fixture(markdown: &str) -> Result<Fixture> {
     let dir = tempdir()?;
     let src = dir.path().join("src");
@@ -33,13 +41,35 @@ fn fixture(markdown: &str) -> Result<Fixture> {
     Ok(Fixture { dir, src, out })
 }
 
-/// Runs `mdbook-utils <args> --markdown-dir <src> --output <out>` in the
 /// fixture directory with a clean environment.
+
+
+/// # Arguments
+/// * `fixture` - Fixture used as the fixture input to the cli links and generate workflow.
+/// * `args` - [str] used as the args input to the cli links and generate workflow.
+///
+/// # Returns
+/// The successful value produced by the operation; failures are described below.
+///
+/// # Errors
+/// Returns an error if the run operation cannot satisfy its required invariants.
 fn run(fixture: &Fixture, args: &[&str]) -> Result<Output> {
     run_with_src(fixture, args, &fixture.src)
 }
-
 /// Same as [`run`], with an explicit source directory.
+
+
+/// # Arguments
+/// * `fixture` - Fixture used as the fixture input to the cli links and generate workflow.
+/// * `args` - [str] used as the args input to the cli links and generate workflow.
+/// * `src` - Path used as the src input to the cli links and generate workflow.
+///
+/// # Returns
+/// The successful value produced by the operation; failures are described below.
+///
+/// # Errors
+/// Returns an error if the run with src operation cannot satisfy its required invariants.
+
 fn run_with_src(fixture: &Fixture, args: &[&str], src: &Path) -> Result<Output> {
     Ok(Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
         .args(args)
@@ -54,8 +84,18 @@ fn run_with_src(fixture: &Fixture, args: &[&str], src: &Path) -> Result<Output> 
         .env("RUST_LOG", "off")
         .output()?)
 }
-
 /// Asserts success and returns the content of the output file.
+///
+/// # Arguments
+/// * `fixture` - Fixture carrying the fixture information consumed by the cli links and generate workflow.
+/// * `output` - Data produced for the caller by the surrounding cli_links_and_generate workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
+
 fn succeeded(fixture: &Fixture, output: &Output) -> Result<String> {
     assert!(
         output.status.success(),
@@ -66,6 +106,12 @@ fn succeeded(fixture: &Fixture, output: &Output) -> Result<String> {
 }
 
 /// `links write-all` lists external links as reference links and definitions.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn links_write_all_writes_external_links() -> Result<()> {
     let f = fixture("[Serde](https://serde.rs) and [local](other.md)\n")?;
@@ -78,6 +124,12 @@ fn links_write_all_writes_external_links() -> Result<()> {
 }
 
 /// `links duplicate-links` reports only repeated links.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn links_duplicate_links_reports_only_repeats() -> Result<()> {
     let f = fixture("[a](https://a.example) [a](https://a.example) [b](https://b.example)\n")?;
@@ -90,6 +142,12 @@ fn links_duplicate_links_reports_only_repeats() -> Result<()> {
 }
 
 /// `links broken-links` reports references that have no definition.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn links_broken_links_reports_missing_definitions() -> Result<()> {
     let f = fixture("[good] and [bad]\n\n[good]: https://example.com\n")?;
@@ -101,6 +159,12 @@ fn links_broken_links_reports_missing_definitions() -> Result<()> {
 }
 
 /// `refdefs write` writes the reference definitions found in the sources.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn refdefs_write_writes_existing_definitions() -> Result<()> {
     let f = fixture("[serde]: https://serde.rs\n")?;
@@ -111,6 +175,12 @@ fn refdefs_write_writes_existing_definitions() -> Result<()> {
 }
 
 /// `debug` writes the parser events to the output file.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn debug_writes_parser_events() -> Result<()> {
     let f = fixture("# Heading\n")?;
@@ -121,6 +191,12 @@ fn debug_writes_parser_events() -> Result<()> {
 }
 
 /// `markdown generate-crates` writes a sorted, deduplicated crate index.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn generate_crates_writes_index() -> Result<()> {
     let f = fixture(
@@ -137,6 +213,12 @@ fn generate_crates_writes_index() -> Result<()> {
 }
 
 /// `markdown generate-categories` writes a category index.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn generate_categories_writes_index() -> Result<()> {
     let f = fixture("[p](https://crates.io/categories/parsing)\n")?;
@@ -150,6 +232,12 @@ fn generate_categories_writes_index() -> Result<()> {
 }
 
 /// A missing source directory exits non-zero and writes no output file.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn missing_source_directory_fails_without_writing() -> Result<()> {
     let f = fixture("text\n")?;
@@ -169,6 +257,15 @@ fn missing_source_directory_fails_without_writing() -> Result<()> {
 
 /// Every command that writes an output file fails on a missing source
 /// directory with a nonzero status and leaves an existing output untouched.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
+///
+/// # Panics
+/// Panics if the condition documented by `expect` is not met.
 #[test]
 fn failed_runs_keep_the_existing_output_file() -> Result<()> {
     let commands: &[&[&str]] = &[
@@ -196,6 +293,12 @@ fn failed_runs_keep_the_existing_output_file() -> Result<()> {
 
 /// Extracting then replacing Rust code blocks through the CLI keeps the
 /// surrounding Markdown, and a second replacement changes nothing.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
     let dir = tempdir()?;
@@ -248,6 +351,12 @@ fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
 /// `remove-includes` asks for confirmation; without a terminal and without
 /// `--yes` it fails and leaves the files alone, and with `--yes` it replaces
 /// each include and reports the modified file.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn remove_includes_requires_confirmation_and_replaces_includes() -> Result<()> {
     let dir = tempdir()?;
@@ -290,6 +399,12 @@ fn remove_includes_requires_confirmation_and_replaces_includes() -> Result<()> {
 
 /// Every command that modifies Markdown refuses to run without `--yes` when
 /// there is no terminal, and leaves the files untouched.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn modifying_commands_fail_without_terminal_or_yes() -> Result<()> {
     let dir = tempdir()?;
@@ -329,7 +444,19 @@ fn modifying_commands_fail_without_terminal_or_yes() -> Result<()> {
     Ok(())
 }
 
-/// Writes a local library crate fixture with an optional explicit target name and repository.
+/// Persists the local library produced by the cli links and generate workflow so later operations can retrieve it.
+///
+/// # Arguments
+/// * `path` - Filesystem location used as the source or destination for this cli_links_and_generate operation.
+/// * `package_name` - Str carrying the package name information consumed by the cli links and generate workflow.
+/// * `library_name` - Option carrying the library name information consumed by the cli links and generate workflow.
+/// * `repository` - Option carrying the repository information consumed by the cli links and generate workflow.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// An error is returned if create_dir_all, write fails.
 fn write_local_library(
     path: &Path,
     package_name: &str,
@@ -353,6 +480,12 @@ fn write_local_library(
 
 /// `refdefs generate --from-dependencies` handles virtual workspaces, renamed packages,
 /// library names called `deps`, comma paths, and deterministic library-name collisions.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn refdefs_from_dependencies_handles_workspace_and_metadata_edge_cases() -> Result<()> {
     let dir = tempdir()?;
@@ -475,6 +608,12 @@ fn refdefs_from_dependencies_handles_workspace_and_metadata_edge_cases() -> Resu
 }
 
 /// Reports Cargo metadata failures and writes their diagnostics to a requested log file.
+///
+/// # Returns
+/// The successful result value produced by this operation.
+///
+/// # Errors
+/// Returns an error if a fallible operation cannot complete.
 #[test]
 fn refdefs_from_dependencies_reports_and_logs_cargo_failures() -> Result<()> {
     let dir = tempdir()?;
