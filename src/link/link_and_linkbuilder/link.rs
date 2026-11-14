@@ -255,6 +255,7 @@ impl Hash for Link<'_> {
     }
 }
 
+/// Tests for link equality, hashing, ordering, and reference output.
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -103,6 +103,7 @@ fn build_block(markdown: &str, range: Range<usize>, code: String) -> RustBlock {
     }
 }
 
+/// Tests for Rust fence recognition, indentation, and unclosed blocks.
 #[cfg(test)]
 mod tests {
     use super::*;

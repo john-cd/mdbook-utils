@@ -33,6 +33,7 @@ pub(crate) fn merge_links<'a>(
     buf
 }
 
+/// Tests for reference merging and precedence for existing labels.
 #[cfg(test)]
 mod tests {
     use pulldown_cmark::LinkType;

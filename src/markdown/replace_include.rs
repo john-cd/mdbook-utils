@@ -293,6 +293,7 @@ where
     Ok(())
 }
 
+/// Tests for include expansion, anchor selection, and cycle detection.
 #[cfg(test)]
 mod tests {
     use tempfile::tempdir;

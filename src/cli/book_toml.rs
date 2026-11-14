@@ -81,8 +81,11 @@ pub(crate) struct BookTomlPaths {
 /// Parse an optional mdBook `book.toml` and resolve its configured paths.
 ///
 /// Relative paths are resolved from `book_root_dir_path`. A missing file is
-/// reported as `Ok(None)`; file access and TOML parsing failures are returned
-/// with the configuration path as context.
+/// reported as `Ok(None)`.
+///
+/// # Errors
+///
+/// Returns read and TOML parsing failures with the configuration path as context.
 pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     book_root_dir_path: P,
 ) -> Result<Option<BookTomlPaths>> {
@@ -180,6 +183,7 @@ pub(crate) fn try_parse_book_toml<P: AsRef<Path>>(
     }))
 }
 
+/// Tests for mdBook defaults, renderer layouts, and configuration errors.
 #[cfg(test)]
 mod tests {
     use std::fs;

@@ -261,6 +261,7 @@ pub(crate) fn run(subcmd: MarkdownSubCommand, config: &Configuration) -> Result<
     Ok(())
 }
 
+/// Tests for Markdown command dispatch, generated files, and confirmation.
 #[cfg(test)]
 mod tests {
     use std::fs;

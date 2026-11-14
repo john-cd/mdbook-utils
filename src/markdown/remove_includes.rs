@@ -69,6 +69,7 @@ where
     Ok(modified)
 }
 
+/// Tests for include removal and preservation of file permissions.
 #[cfg(test)]
 mod tests {
     use std::fs;

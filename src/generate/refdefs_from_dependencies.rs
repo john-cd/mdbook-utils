@@ -71,6 +71,7 @@ fn generate_refdefs_for_one_library(
     buf
 }
 
+/// Tests for reference URLs for renamed Cargo libraries.
 #[cfg(test)]
 mod tests {
     use super::*;

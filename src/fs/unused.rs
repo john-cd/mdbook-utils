@@ -180,6 +180,7 @@ pub fn identify_unused_rs_examples<
     Ok(unused)
 }
 
+/// Tests for unused Rust example discovery and input directory validation.
 #[cfg(test)]
 mod tests {
     use std::fs;

@@ -30,6 +30,7 @@ where
     Ok(())
 }
 
+/// Tests for reference definition rendering with titles.
 #[cfg(test)]
 mod tests {
     use super::*;

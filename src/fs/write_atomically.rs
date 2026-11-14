@@ -65,6 +65,7 @@ pub(crate) fn write_atomically(path: &Path, contents: &[u8]) -> Result<()> {
         .with_context(|| format!("Failed to write {}", path.display()))
 }
 
+/// Tests for replacement, file permissions, and cleanup on failure.
 #[cfg(test)]
 mod tests {
     use std::fs;
@@ -137,13 +138,8 @@ mod tests {
         Ok(())
     }
 
+    /// A Windows read-only destination is rejected without changing its content or attribute.
     #[cfg(windows)]
-    // Windows clears only FILE_ATTRIBUTE_READONLY here; it does not broaden Unix mode bits.
-    /// Loads the only windows destination is left unchanged required by the write atomically
-    /// workflow and reports failures from the underlying source.
-    ///
-    /// # Errors
-    /// An error is returned if read_only_windows_destination_is_left_unchanged, write fails.
     #[expect(
         clippy::permissions_set_readonly_false,
         reason = "Windows clears only FILE_ATTRIBUTE_READONLY, not Unix mode bits"

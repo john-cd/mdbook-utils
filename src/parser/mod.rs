@@ -4,6 +4,7 @@
 //!
 //! TODO Reviewed ??-??-2026.
 
+/// Collection of links and images from Markdown events.
 mod extract_links;
 
 pub(crate) use extract_links::*;
@@ -127,6 +128,7 @@ pub(crate) fn get_parser_with_broken_links_handler<'input>(
 //     println!("{count} events");
 // }
 
+/// Tests for parser extensions and unresolved reference tracking.
 #[cfg(test)]
 mod tests {
     use pulldown_cmark::Event;

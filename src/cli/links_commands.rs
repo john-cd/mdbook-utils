@@ -162,6 +162,7 @@ pub(crate) fn run(subcmd: LinksSubCommand, config: &Configuration) -> Result<()>
     Ok(())
 }
 
+/// Tests for link command dispatch and output.
 #[cfg(test)]
 mod tests {
     use std::fs;
