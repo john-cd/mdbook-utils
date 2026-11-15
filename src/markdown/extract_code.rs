@@ -566,8 +566,7 @@ mod tests {
         Ok(())
     }
 
-    /// Replaces supported Rust fence variants, preserves other languages, and leaves repeats
-    /// unchanged.
+    /// Replaces Rust fences without changing other languages on repeated runs.
     #[test]
     fn handles_fence_variants_and_is_idempotent() -> Result<()> {
         let (updated, code_dir) = round_trip(
