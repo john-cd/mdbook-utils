@@ -15,7 +15,6 @@ use tempfile::tempdir;
 
 /// A temporary book with one Markdown file in `src/`.
 struct Fixture {
-
     /// Temporary directory containing the fixture files.
     dir: TempDir,
 

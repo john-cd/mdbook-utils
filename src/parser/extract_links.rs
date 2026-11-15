@@ -17,7 +17,6 @@ use super::super::link::LinkBuilder;
 /// Tracks where we are in the Markdown parser event stream.
 #[derive(Debug, PartialEq, Copy, Clone)]
 enum Where {
-
     /// Not inside a link.
     Elsewhere,
 

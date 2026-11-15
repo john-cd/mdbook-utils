@@ -19,7 +19,6 @@ use tracing::warn;
 /// Stores a resolved direct dependency to a crate.
 #[derive(Debug)]
 pub(crate) struct Dependency {
-
     /// Package name, which differs from the library name for crates such as `md-5` (`md5`).
     package_name: Cow<'static, str>,
 
@@ -31,7 +30,6 @@ pub(crate) struct Dependency {
 }
 
 impl Dependency {
-
     /// Returns the crates.io package name, which may differ from the library name.
     pub(crate) fn package_name(&self) -> &str {
         self.package_name.as_ref()
@@ -41,7 +39,6 @@ impl Dependency {
 /// Cargo metadata package information needed to identify selected workspace members and libraries.
 #[derive(Debug, Deserialize)]
 struct CargoMetadata {
-
     /// Canonical path to the workspace root.
     workspace_root: std::path::PathBuf,
 
@@ -58,7 +55,6 @@ struct CargoMetadata {
 /// Cargo package fields used to report dependency references.
 #[derive(Debug, Deserialize)]
 struct CargoPackage {
-
     /// Stable Cargo package identifier, including source and version.
     id: String,
 
@@ -78,7 +74,6 @@ struct CargoPackage {
 /// Cargo target fields needed to identify importable libraries.
 #[derive(Debug, Deserialize)]
 struct CargoTarget {
-
     /// Target name used as the Rust library name.
     name: String,
 
@@ -89,7 +84,6 @@ struct CargoTarget {
 /// Resolved dependency graph from Cargo metadata.
 #[derive(Debug, Deserialize)]
 struct CargoResolve {
-
     /// Resolved workspace package nodes.
     nodes: Vec<CargoNode>,
 }
@@ -97,7 +91,6 @@ struct CargoResolve {
 /// A package node and its direct resolved dependencies.
 #[derive(Debug, Deserialize)]
 struct CargoNode {
-
     /// Package identifier for this node.
     id: String,
 
@@ -108,7 +101,6 @@ struct CargoNode {
 /// A dependency edge from one resolved package to another.
 #[derive(Debug, Deserialize)]
 struct CargoNodeDependency {
-
     /// Package identifier of the dependency target.
     pkg: String,
 
@@ -119,7 +111,6 @@ struct CargoNodeDependency {
 /// A dependency edge's Cargo dependency kind.
 #[derive(Debug, Deserialize)]
 struct CargoDependencyKind {
-
     /// `None` denotes a normal dependency; other values include `dev` and `build`.
     kind: Option<String>,
 }

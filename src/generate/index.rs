@@ -10,7 +10,6 @@ use crate::link::Link;
 /// Kind of crates.io index to generate.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum IndexKind {
-
     /// Index of crates.io categories.
     Categories,
 
@@ -19,7 +18,6 @@ pub(crate) enum IndexKind {
 }
 
 impl IndexKind {
-
     /// Returns the Markdown heading for this index.
     pub(crate) fn title(self) -> &'static str {
         match self {
@@ -29,13 +27,13 @@ impl IndexKind {
     }
 
     /// Builds the crates.io URL for the selected index category or keyword.
-///
+    ///
     /// # Arguments
-///
+    ///
     /// * `name` - Human-readable value used to identify or display the selected index kind.
     ///
     /// # Returns
-///
+    ///
     /// The formatted text produced for the caller.
     pub(crate) fn list_url(self, name: &str) -> String {
         match self {

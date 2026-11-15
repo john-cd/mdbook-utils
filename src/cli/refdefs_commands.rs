@@ -15,7 +15,6 @@ use super::run_logged;
 /// Command-line subcommands to handle reference definitions
 #[derive(Subcommand, Debug)]
 pub(crate) enum RefDefsSubCommand {
-
     /// Write existing reference definitions to a file
     Write(MarkdownSrcDirAndDestFileArgs),
 
@@ -29,7 +28,6 @@ pub(crate) enum RefDefsSubCommand {
 /// Shields.io badge style, as accepted on the command line.
 #[derive(Debug, Clone, Copy, Default, clap::ValueEnum)]
 pub(crate) enum BadgeStyleArg {
-
     /// The standard flat style used by Shields.io by default.
     #[default]
     Flat,
@@ -64,7 +62,6 @@ impl From<BadgeStyleArg> for BadgeStyle {
 /// Arguments for generating reference definitions
 #[derive(Debug, clap::Args)]
 pub(crate) struct GenerateArgs {
-
     /// Generate badges (reference definitions) for e.g. Github links
     #[arg(long)]
     pub(crate) badges: bool,

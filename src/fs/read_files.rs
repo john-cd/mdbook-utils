@@ -24,7 +24,6 @@ use anyhow::Result;
 /// All Markdown files of a directory joined into one string, with the
 /// offset at which each file starts.
 pub(crate) struct MarkdownSources {
-
     /// The concatenated contents, each file ending with a newline.
     pub(crate) text: String,
 
@@ -33,7 +32,6 @@ pub(crate) struct MarkdownSources {
 }
 
 impl MarkdownSources {
-
     /// Return the file and 1-based line that contain the byte `offset` of
     /// [`MarkdownSources::text`].
     pub(crate) fn locate(&self, offset: usize) -> Option<(&Path, usize)> {

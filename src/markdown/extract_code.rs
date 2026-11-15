@@ -37,7 +37,6 @@ fn hidden_lines_removed(code: &str) -> String {
 /// A file to be written, planned before any write so that collisions are
 /// detected first.
 struct PlannedFile {
-
     /// Destination path of the file.
     path: PathBuf,
 

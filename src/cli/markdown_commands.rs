@@ -19,7 +19,6 @@ use super::log_command_paths;
 /// Command-line subcommands to manipulate Markdown
 #[derive(Subcommand, Debug)]
 pub(crate) enum MarkdownSubCommand {
-
     /// Copy Rust code examples from the Markdown into .rs files.
     ExtractCodeExamples(MarkdownSrcDirAndDestDirArgs),
 

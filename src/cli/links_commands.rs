@@ -15,7 +15,6 @@ use super::run_logged;
 /// Link syntax, as accepted on the command line.
 #[derive(clap::ValueEnum, Debug, Clone, Copy, Default)]
 pub(crate) enum LinkFormatArg {
-
     /// Reference-style links with their reference definitions.
     #[default]
     Reference,
@@ -41,7 +40,6 @@ impl From<LinkFormatArg> for LinkFormat {
 #[derive(Args, Debug)]
 #[command(flatten_help = true)]
 pub(crate) struct WriteInlineArgs {
-
     /// Source and destination
     #[command(flatten)]
     pub(crate) paths: MarkdownSrcDirAndDestFileArgs,
@@ -54,7 +52,6 @@ pub(crate) struct WriteInlineArgs {
 /// Command-line subcommands to handle links
 #[derive(Subcommand, Debug)]
 pub(crate) enum LinksSubCommand {
-
     /// Write all existing links to a Markdown file
     WriteAll(MarkdownSrcDirAndDestFileArgs),
 
