@@ -110,8 +110,7 @@ mod tests {
         );
     }
 
-    /// Reads pages from the configured renderer's output rather than the
-    /// default `html` directory.
+    /// Reads pages from the configured renderer's output rather than the default `html` directory.
     #[test]
     fn sitemap_uses_the_selected_custom_renderer_directory() -> Result<()> {
         let temp = tempdir()?;

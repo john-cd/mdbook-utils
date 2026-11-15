@@ -446,8 +446,7 @@ mod tests {
         content
     }
 
-    /// Chapters with the same file name extract to separate files, and a second
-    /// run changes nothing.
+    /// Extracts same-named chapters into separate files and leaves repeat runs unchanged.
     #[test]
     fn extracts_same_basename_chapters_without_collisions_and_is_repeatable() -> Result<()> {
         let dir = tempdir()?;
@@ -482,8 +481,7 @@ mod tests {
         Ok(())
     }
 
-    /// An existing conflicting output file aborts the run before any chapter is
-    /// written.
+    /// An existing conflicting output file aborts the run before any chapter is written.
     #[test]
     fn rejects_existing_output_conflicts_before_writing_other_chapters() -> Result<()> {
         let dir = tempdir()?;
@@ -568,8 +566,8 @@ mod tests {
         Ok(())
     }
 
-    /// Tilde fences, attributes and indented list fences are replaced, other
-    /// languages are untouched, and a second run changes nothing.
+    /// Replaces supported Rust fence variants, preserves other languages, and leaves repeats
+    /// unchanged.
     #[test]
     fn handles_fence_variants_and_is_idempotent() -> Result<()> {
         let (updated, code_dir) = round_trip(

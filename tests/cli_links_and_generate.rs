@@ -181,8 +181,7 @@ fn missing_source_directory_fails_without_writing() -> Result<()> {
     Ok(())
 }
 
-/// Every command that writes an output file fails on a missing source
-/// directory with a nonzero status and leaves an existing output untouched.
+/// Leaves existing output files untouched when source directories are missing.
 #[test]
 fn failed_runs_keep_the_existing_output_file() -> Result<()> {
     let commands: &[&[&str]] = &[
@@ -208,8 +207,7 @@ fn failed_runs_keep_the_existing_output_file() -> Result<()> {
     Ok(())
 }
 
-/// Extracting then replacing Rust code blocks through the CLI keeps the
-/// surrounding Markdown, and a second replacement changes nothing.
+/// Preserves surrounding Markdown and makes repeated code block replacement a no-op.
 #[test]
 fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
     let dir = tempdir()?;
@@ -259,9 +257,7 @@ fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
     Ok(())
 }
 
-/// `remove-includes` asks for confirmation; without a terminal and without
-/// `--yes` it fails and leaves the files alone, and with `--yes` it replaces
-/// each include and reports the modified file.
+/// Requires confirmation before replacing includes and reports changes after approval.
 #[test]
 fn remove_includes_requires_confirmation_and_replaces_includes() -> Result<()> {
     let dir = tempdir()?;
@@ -302,8 +298,7 @@ fn remove_includes_requires_confirmation_and_replaces_includes() -> Result<()> {
     Ok(())
 }
 
-/// Every command that modifies Markdown refuses to run without `--yes` when
-/// there is no terminal, and leaves the files untouched.
+/// Refuses modifying commands without `--yes` when no terminal is available.
 #[test]
 fn modifying_commands_fail_without_terminal_or_yes() -> Result<()> {
     let dir = tempdir()?;
@@ -365,8 +360,7 @@ fn write_local_library(
     Ok(())
 }
 
-/// `refdefs generate --from-dependencies` handles virtual workspaces, renamed packages,
-/// library names called `deps`, comma paths, and deterministic library-name collisions.
+/// Resolves workspace dependencies with renamed packages and colliding library names.
 #[test]
 fn refdefs_from_dependencies_handles_workspace_and_metadata_edge_cases() -> Result<()> {
     let dir = tempdir()?;

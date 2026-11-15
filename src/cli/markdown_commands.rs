@@ -337,8 +337,7 @@ mod tests {
         )
     }
 
-    /// Commands that modify files refuse to run without `--yes` and without a
-    /// terminal, leaving the files untouched.
+    /// Requires confirmation before replacing includes and reports changes after approval.
     #[test]
     fn test_modifying_commands_require_confirmation() -> Result<()> {
         let dir = tempdir()?;
