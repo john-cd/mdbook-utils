@@ -203,7 +203,7 @@ pub(crate) fn extract_links<'input>(parser: &mut Parser<'input>) -> Vec<Link<'in
     links
 }
 
-/// Tests for link and image extraction across CommonMark edge cases.
+/// Tests for link and image extraction across `CommonMark` edge cases.
 #[cfg(test)]
 mod tests {
     use pulldown_cmark::Parser;
