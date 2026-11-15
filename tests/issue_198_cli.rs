@@ -61,8 +61,7 @@ fn assert_successful_output(output: &Output, action: &str) {
     );
 }
 
-/// Runs links and Markdown scan commands against the repository's `test_book`
-/// fixtures.
+/// Runs links and Markdown scan commands against the repository's `test_book` fixtures.
 #[test]
 fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
     let temp = tempdir()?;
@@ -129,8 +128,7 @@ fn test_book_fixtures_run_through_links_and_markdown_cli() -> Result<()> {
     Ok(())
 }
 
-/// Checks category and crate index CLI output against exact fixtures and repeat
-/// runs.
+/// Checks category and crate index CLI output against exact fixtures and repeat runs.
 #[test]
 fn generate_index_cli_outputs_match_fixtures_and_repeat_exactly() -> Result<()> {
     let temp = tempdir()?;
@@ -206,8 +204,7 @@ fn sitemap_cli_output_matches_exact_xml_on_repeated_runs() -> Result<()> {
     Ok(())
 }
 
-/// Checks CLI errors, standard streams, and output-file effects for both
-/// command groups.
+/// Checks CLI errors, standard streams, and output-file effects for both command groups.
 #[test]
 fn links_and_markdown_failures_report_errors_without_partial_outputs() -> Result<()> {
     let temp = tempdir()?;

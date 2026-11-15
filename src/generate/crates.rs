@@ -60,8 +60,7 @@ mod tests {
 
     use super::*;
 
-    /// Collects distinct categories, ignoring query strings and trailing
-    /// slashes.
+    /// Collects distinct categories, ignoring query strings and trailing slashes.
     #[test]
     fn test_generate_categories_happy_path() -> Result<()> {
         let dir = tempdir()?;

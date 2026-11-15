@@ -50,8 +50,7 @@ fn identify_files_not_in_summary_reports_nested_unlisted_chapters() -> Result<()
     Ok(())
 }
 
-/// Detects all supported mdBook Rust helpers and ignores ordinary path
-/// mentions.
+/// Detects all supported mdBook Rust helpers and ignores ordinary path mentions.
 #[test]
 fn identify_unused_rs_examples_recognizes_mdbook_helpers() -> Result<()> {
     let dir = tempdir()?;

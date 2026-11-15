@@ -70,8 +70,7 @@ mod tests {
 
     use super::*;
 
-    /// Returns only Markdown files, in file-name order, skipping hidden
-    /// files and directories and other extensions.
+    /// Finds sorted markdown files and skips hidden and other files.
     #[test]
     fn finds_sorted_markdown_files_and_skips_hidden_and_other_files() -> Result<()> {
         let dir = tempdir()?;

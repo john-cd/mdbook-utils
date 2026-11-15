@@ -120,8 +120,8 @@ mod tests {
         assert_eq!(&md[blocks[1].range.clone()], "```rust\nfn main() {}\n```");
     }
 
-    /// Tilde fences, attributes and longer fences are recognized; other
-    /// languages and ```` ```rustc ```` are not.
+    /// Recognizes Rust fences with tildes, attributes, or longer markers while excluding other
+    /// languages.
     #[test]
     fn recognizes_fence_variants_and_languages() {
         let md = "~~~rust\na\n~~~\n\n```rust,ignore\nb\n```\n\n````rust\n```\nc\n```\n````\n\n```rustc\nd\n```\n\n```python\ne\n```\n";

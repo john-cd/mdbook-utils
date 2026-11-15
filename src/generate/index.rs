@@ -137,8 +137,7 @@ mod tests {
         assert_eq!(names, expected);
     }
 
-    /// Only the segment after `/crates/` is a crate name; deeper pages and
-    /// other hosts that merely contain the string are ignored.
+    /// Extracts the crate name after `/crates/` and ignores deeper pages or other hosts.
     #[test]
     fn test_crate_name_is_the_segment_after_crates() {
         let links = vec![

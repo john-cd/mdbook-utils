@@ -388,8 +388,8 @@ mod tests {
         Ok(())
     }
 
-    /// Workspace roots collect normal dependencies from all default members and exclude dev/build
-    /// edges.
+    /// Collects normal dependencies from default workspace members and excludes dev and build
+    /// dependencies.
     #[test]
     fn virtual_workspace_collects_default_members_and_normal_dependencies() -> Result<()> {
         let (_temp, workspace) = fixture_dir("workspace")?;

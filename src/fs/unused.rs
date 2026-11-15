@@ -295,8 +295,7 @@ mod tests {
         Ok(())
     }
 
-    /// Resolves nested, encoded, and fragment-bearing SUMMARY links while
-    /// rejecting traversal.
+    /// Resolves nested, encoded, and fragment-bearing SUMMARY links while rejecting traversal.
     #[test]
     fn test_identify_files_not_in_summary_nested_encoded_and_traversal_paths() -> Result<()> {
         let dir = tempdir()?;
@@ -388,8 +387,7 @@ mod tests {
         Ok(())
     }
 
-    /// Recognizes mdBook Rust helpers and ignores incidental paths in prose and
-    /// code.
+    /// Recognizes mdBook Rust helpers and ignores incidental paths in prose and code.
     #[test]
     fn test_identify_unused_rs_examples_supported_helpers_and_incidental_paths() -> Result<()> {
         let dir = tempdir()?;

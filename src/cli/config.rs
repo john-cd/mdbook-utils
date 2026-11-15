@@ -367,8 +367,7 @@ mod tests {
         assert_eq!(config.sitemap_map_index, None);
     }
 
-    /// Resolves the Markdown source directory from the default, the environment
-    /// and the argument.
+    /// Resolves the Markdown source directory from the default, the environment and the argument.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -428,8 +427,7 @@ src = "toml_src"
         Ok(())
     }
 
-    /// Resolves the Markdown build directory from the default, the environment
-    /// and the argument.
+    /// Resolves the Markdown build directory from the default, the environment and the argument.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -488,8 +486,8 @@ src = "toml_src"
         Ok(())
     }
 
-    /// Prefers the argument over the environment, then the book root, for the
-    /// destination directory.
+    /// Prefers the argument over the environment, then the book root, for the destination
+    /// directory.
     #[test]
     fn test_dest_dir_path() {
         let mut config = Configuration::default();
@@ -523,8 +521,7 @@ src = "toml_src"
         assert_eq!(config.dest_dir_path(args), PathBuf::from(arg_dest));
     }
 
-    /// Prefers the argument over the environment, then the book root, for the
-    /// destination file.
+    /// Prefers the argument over the environment, then the book root, for the destination file.
     #[test]
     fn test_dest_file_path() {
         let mut config = Configuration::default();
@@ -702,8 +699,7 @@ build-dir = "toml_book"
         Ok(())
     }
 
-    /// Verifies malformed configuration fails unless the sitemap destination is
-    /// explicit.
+    /// Verifies malformed configuration fails unless the sitemap destination is explicit.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,
@@ -731,8 +727,7 @@ build-dir = "toml_book"
         Ok(())
     }
 
-    /// Verifies the sitemap requires an HTML renderer when no destination is
-    /// overridden.
+    /// Verifies the sitemap requires an HTML renderer when no destination is overridden.
     #[test]
     #[expect(
         clippy::field_reassign_with_default,

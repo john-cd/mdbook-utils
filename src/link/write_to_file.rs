@@ -295,8 +295,7 @@ mod tests {
         .add_text(Cow::Borrowed(text))
         .build()
     }
-    /// Reference-style output has a heading, the reference link, and its
-    /// definition.
+    /// Reference-style output has a heading, the reference link, and its definition.
     #[test]
     fn writes_reference_links_and_definitions() -> Result<()> {
         let mut out = Vec::new();
@@ -374,8 +373,7 @@ mod tests {
         Ok(())
     }
 
-    /// Same text with different URLs gets distinct labels; the same
-    /// destination keeps its label.
+    /// Same text with different URLs gets distinct labels; the same destination keeps its label.
     #[test]
     fn colliding_labels_get_numeric_suffixes() -> Result<()> {
         let links = vec![

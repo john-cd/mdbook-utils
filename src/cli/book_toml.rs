@@ -227,8 +227,7 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies a sole explicitly configured HTML renderer writes to the build
-    /// root.
+    /// Verifies a sole explicitly configured HTML renderer writes to the build root.
     #[test]
     fn test_try_parse_book_toml_only_html_output() -> Result<()> {
         let dir = tempdir()?;
@@ -240,8 +239,7 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies that multiple renderers receive renderer-specific
-    /// subdirectories.
+    /// Verifies that multiple renderers receive renderer-specific subdirectories.
     #[test]
     fn test_try_parse_book_toml_multiple_outputs() -> Result<()> {
         let dir = tempdir()?;
@@ -299,8 +297,7 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies that an empty output table retains mdBook's default HTML
-    /// renderer.
+    /// Verifies that an empty output table retains mdBook's default HTML renderer.
     #[test]
     fn test_try_parse_book_toml_empty_output_uses_default_html_renderer() -> Result<()> {
         let dir = tempdir()?;
@@ -312,8 +309,7 @@ build-dir = "my_book"
         Ok(())
     }
 
-    /// Verifies a missing optional book configuration does not produce an
-    /// error.
+    /// Verifies a missing optional book configuration does not produce an error.
     #[test]
     fn test_try_parse_book_toml_missing_is_optional() -> Result<()> {
         let dir = tempdir()?;

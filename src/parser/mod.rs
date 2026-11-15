@@ -159,8 +159,7 @@ mod tests {
         );
     }
 
-    /// Unresolved references are recorded with their label and link type;
-    /// resolved ones are not.
+    /// Unresolved references are recorded with their label and link type; resolved ones are not.
     #[test]
     fn handler_records_only_unresolved_references() {
         let handler = Handler::new();

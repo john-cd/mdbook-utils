@@ -361,8 +361,7 @@ mod tests {
     fn get_re(name: RuleKind) -> &'static Regex {
         COMPILED_RULES.get(&name).expect("rule kind should exist")
     }
-    /// Every rule compiles, and the rule looked up by name at run time exists,
-    /// so the string-keyed lookups cannot panic.
+    /// Confirms all link rules compile and the GitHub repository rule is registered.
     #[test]
     fn every_rule_compiles_and_the_github_repo_rule_exists() {
         assert_eq!(COMPILED_RULES.len(), GLOBAL_RULES.len());
@@ -647,8 +646,7 @@ mod tests {
         assert!(!re.is_match(url_path));
     }
 
-    /// Matches generic root URLs with Unicode hosts and separated
-    /// query/fragment data.
+    /// Matches generic root URLs with Unicode hosts and separated query/fragment data.
     #[test]
     fn test_website_rule_handles_unicode_query_and_fragment() {
         let re = get_re(RuleKind::Website);
@@ -725,8 +723,7 @@ mod tests {
         assert_eq!(&caps_versioned_page["last"], "v1.2");
     }
 
-    /// Rejects malformed generic page destinations without a host or with
-    /// whitespace.
+    /// Rejects malformed generic page destinations without a host or with whitespace.
     #[test]
     fn test_website_page_rule_rejects_malformed_destinations() {
         let re = get_re(RuleKind::WebsitePage);
