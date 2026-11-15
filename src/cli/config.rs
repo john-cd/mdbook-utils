@@ -486,8 +486,7 @@ src = "toml_src"
         Ok(())
     }
 
-    /// Prefers the argument over the environment, then the book root, for the destination
-    /// directory.
+    /// Chooses the destination from the argument, environment, or book root.
     #[test]
     fn test_dest_dir_path() {
         let mut config = Configuration::default();
