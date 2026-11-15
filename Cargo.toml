@@ -49,6 +49,10 @@ exclude = [
 doc = false
 name = "mdbook-utils"
 
+[[bench]]
+name = "parse_links"
+harness = false
+
 [dependencies]
 # Flexible concrete Error type built on std::error::Error
 anyhow = "1.0.104"
@@ -94,10 +98,6 @@ url = "2.5.8"
 walkdir = "2.5.0"
 
 [dev-dependencies]
-
-[[bench]]
-name = "parse_links"
-harness = false
 
 [lints.rust]
 
