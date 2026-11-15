@@ -75,39 +75,48 @@ fn with_legacy_names(
 #[derive(Deserialize, Debug)]
 #[serde(default)]
 pub(crate) struct Configuration {
+
     /// `BOOK_ROOT_DIR_PATH` environment variable:
     /// the book's root directory (which contains `book.toml`),
     /// typically '.'
     book_root_dir_path: PathBuf,
+
     /// `MARKDOWN_DIR_PATH` environment variable:
     /// Markdown source directory,
     /// typically ./src/
     markdown_dir_path: Option<PathBuf>,
+
     /// `BOOK_HTML_BUILD_DIR_PATH` environment variable:
     /// Directory where `mdbook` outputs the book's HTML and JS,
     /// typically ./book/ or ./book/html/
     book_html_build_dir_path: Option<PathBuf>,
+
     /// `BOOK_MARKDOWN_BUILD_DIR_PATH` environment variable:
     /// Directory where `mdbook` outputs the book's fully expanded Markdown,
     /// i.e. with all includes resolved. It is typically ./book/markdown/
     /// The directory is created only if `[output.markdown]` is added to
     /// `book.toml`.
     book_markdown_build_dir_path: Option<PathBuf>,
+
     /// `CARGO_TOML_DIR_PATH` environment variable:
     /// Directory where `Cargo.toml` may be found,
     /// typically '.'
     cargo_toml_dir_path: Option<PathBuf>,
+
     /// `DEFAULT_DEST_DIR_PATH` environment variable:
     /// Default destination directory for `mdbook-utils` outputs.
     default_dest_dir_path: Option<PathBuf>,
+
     /// `BASE_URL` environment variable:
     /// Base url of the website where the book will be deployed
     /// e.g. <https://example.com/mybook>/
     /// It is used to build sitemaps.
     base_url: Option<String>,
+
     /// `SITEMAP_MAP_INDEX` environment variable:
     /// Map a filename to another (e.g., 'intro.md' to 'index.md')
     sitemap_map_index: Option<String>,
+
     /// `MDBOOK_PATH` environment variable:
     /// Path to the `mdbook` binary
     /// typically `mdbook`
@@ -137,6 +146,7 @@ impl Default for Configuration {
 }
 
 impl Configuration {
+
     /// Returns the Markdown source directory provided by the
     /// command-line argument (if set);
     /// the `MARKDOWN_DIR_PATH` environment variable (if set);

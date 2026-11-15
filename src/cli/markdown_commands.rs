@@ -19,6 +19,7 @@ use super::log_command_paths;
 /// Command-line subcommands to manipulate Markdown
 #[derive(Subcommand, Debug)]
 pub(crate) enum MarkdownSubCommand {
+
     /// Copy Rust code examples from the Markdown into .rs files.
     ExtractCodeExamples(MarkdownSrcDirAndDestDirArgs),
 
@@ -39,6 +40,7 @@ pub(crate) enum MarkdownSubCommand {
 
     /// Generate a crate index and write to a Markdown file
     GenerateCrates(MarkdownSrcDirAndDestFileArgs),
+
     /// Identify .md files not in SUMMARY.md
     IdentifyFilesNotInSummary(MarkdownDirArgs),
 

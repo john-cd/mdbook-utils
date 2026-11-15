@@ -32,14 +32,18 @@ static ANCHOR_END_REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|
 
 /// A Markdown file rewrite, planned before any write.
 struct PlannedReplacement {
+
     /// Path of the file to replace.
     path: PathBuf,
+
     /// New contents of the file.
     contents: Vec<u8>,
 }
 
 /// range), or all of it without one.
+///
 /// # Errors
+///
 /// Returns an error if the selector is malformed or does not match.
 fn selected_contents<'a>(content: &'a str, selector: Option<&str>, path: &Path) -> Result<&'a str> {
     let Some(selector) = selector else {

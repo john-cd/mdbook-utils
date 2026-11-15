@@ -19,15 +19,19 @@ use tracing::warn;
 /// Stores a resolved direct dependency to a crate.
 #[derive(Debug)]
 pub(crate) struct Dependency {
+
     /// Package name, which differs from the library name for crates such as `md-5` (`md5`).
     package_name: Cow<'static, str>,
+
     /// Name of the dependency crate.
     pub(crate) library_name: Cow<'static, str>,
+
     /// URL of the crate's package repository, when Cargo metadata reports one.
     pub(crate) package_repo_url: Option<Cow<'static, str>>,
 }
 
 impl Dependency {
+
     /// Returns the crates.io package name, which may differ from the library name.
     pub(crate) fn package_name(&self) -> &str {
         self.package_name.as_ref()
@@ -37,12 +41,16 @@ impl Dependency {
 /// Cargo metadata package information needed to identify selected workspace members and libraries.
 #[derive(Debug, Deserialize)]
 struct CargoMetadata {
+
     /// Canonical path to the workspace root.
     workspace_root: std::path::PathBuf,
+
     /// Package identifiers included by Cargo when invoked at the workspace root.
     workspace_default_members: Vec<String>,
+
     /// Resolved packages available to the workspace.
     packages: Vec<CargoPackage>,
+
     /// Resolved package dependency graph.
     resolve: Option<CargoResolve>,
 }
@@ -50,14 +58,19 @@ struct CargoMetadata {
 /// Cargo package fields used to report dependency references.
 #[derive(Debug, Deserialize)]
 struct CargoPackage {
+
     /// Stable Cargo package identifier, including source and version.
     id: String,
+
     /// Registry package name.
     name: String,
+
     /// Package source repository URL.
     repository: Option<String>,
+
     /// Absolute Cargo manifest path.
     manifest_path: std::path::PathBuf,
+
     /// Package targets, including its library target when present.
     targets: Vec<CargoTarget>,
 }
@@ -65,8 +78,10 @@ struct CargoPackage {
 /// Cargo target fields needed to identify importable libraries.
 #[derive(Debug, Deserialize)]
 struct CargoTarget {
+
     /// Target name used as the Rust library name.
     name: String,
+
     /// Cargo target kinds, such as `lib` or `proc-macro`.
     kind: Vec<String>,
 }
@@ -74,6 +89,7 @@ struct CargoTarget {
 /// Resolved dependency graph from Cargo metadata.
 #[derive(Debug, Deserialize)]
 struct CargoResolve {
+
     /// Resolved workspace package nodes.
     nodes: Vec<CargoNode>,
 }
@@ -81,8 +97,10 @@ struct CargoResolve {
 /// A package node and its direct resolved dependencies.
 #[derive(Debug, Deserialize)]
 struct CargoNode {
+
     /// Package identifier for this node.
     id: String,
+
     /// Direct dependency edges.
     deps: Vec<CargoNodeDependency>,
 }
@@ -90,8 +108,10 @@ struct CargoNode {
 /// A dependency edge from one resolved package to another.
 #[derive(Debug, Deserialize)]
 struct CargoNodeDependency {
+
     /// Package identifier of the dependency target.
     pkg: String,
+
     /// Kinds under which this edge is used.
     dep_kinds: Vec<CargoDependencyKind>,
 }
@@ -99,6 +119,7 @@ struct CargoNodeDependency {
 /// A dependency edge's Cargo dependency kind.
 #[derive(Debug, Deserialize)]
 struct CargoDependencyKind {
+
     /// `None` denotes a normal dependency; other values include `dev` and `build`.
     kind: Option<String>,
 }

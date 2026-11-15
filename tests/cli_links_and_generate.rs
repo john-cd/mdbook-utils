@@ -15,10 +15,13 @@ use tempfile::tempdir;
 
 /// A temporary book with one Markdown file in `src/`.
 struct Fixture {
+
     /// Temporary directory containing the fixture files.
     dir: TempDir,
+
     /// Markdown source directory passed to the CLI.
     src: PathBuf,
+
     /// Destination used for generated output.
     out: PathBuf,
 }
@@ -43,6 +46,7 @@ fn fixture(markdown: &str) -> Result<Fixture> {
 fn run(fixture: &Fixture, args: &[&str]) -> Result<Output> {
     run_with_src(fixture, args, &fixture.src)
 }
+
 /// Runs the CLI with an explicit Markdown source directory and clean configuration environment.
 ///
 /// `args` are passed to the CLI after its executable name. `src` overrides the
@@ -65,6 +69,7 @@ fn run_with_src(fixture: &Fixture, args: &[&str], src: &Path) -> Result<Output> 
         .env("RUST_LOG", "off")
         .output()?)
 }
+
 /// Asserts success and returns the content of the output file.
 ///
 /// # Errors

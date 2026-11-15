@@ -27,33 +27,43 @@ use super::super::rules::suggest_label_from_url;
 /// conversions without removing a failure mode.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct Link<'a> {
+
     /// Link type reported by the parser (inline, reference, autolink, ...).
     #[expect(
         clippy::struct_field_names,
         reason = "mirrors pulldown-cmark `LinkType`"
     )]
     pub(crate) link_type: Option<LinkType>,
+
     /// Link text.
     pub(crate) text: Option<Cow<'a, str>>, // [text](...)
+
     /// Reference label.
     pub(crate) label: Option<Cow<'a, str>>, // [...][label] and [label]: ...
+
     /// Destination URL.
     pub(crate) url: Option<Cow<'a, str>>, // [...]: url or [...](url) or <url>
     // parsed_url: Option<Url>, Url::parse( )?
+
     /// Optional title.
     pub(crate) title: Option<Cow<'a, str>>, // [...]: url "title" or [...](url "title")
 
     // [![image_alt_text][image_label]][...]
     // [image_label]: image_url "image_title"
+
     /// Link type of the image, if the link text is an image.
     #[expect(dead_code, reason = "recorded for image links; no consumer yet")]
     pub(crate) image_link_type: Option<LinkType>,
+
     /// Image alt text.
     pub(crate) image_alt_text: Option<Cow<'a, str>>,
+
     /// Image reference label.
     pub(crate) image_label: Option<Cow<'a, str>>,
+
     /// Image URL.
     pub(crate) image_url: Option<Cow<'a, str>>,
+
     /// Image title.
     pub(crate) image_title: Option<Cow<'a, str>>,
 }
@@ -219,6 +229,7 @@ impl<'a> Link<'a> {
 }
 
 impl PartialOrd for Link<'_> {
+
     /// `PartialOrd` implementation for Link
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         // The type is `Ord``,
@@ -228,6 +239,7 @@ impl PartialOrd for Link<'_> {
 }
 
 impl Ord for Link<'_> {
+
     /// Ord implementation for Link
     fn cmp(&self, other: &Self) -> Ordering {
         self.label
@@ -238,6 +250,7 @@ impl Ord for Link<'_> {
 }
 
 impl PartialEq for Link<'_> {
+
     /// `PartialEq` implementation for Link
     fn eq(&self, other: &Self) -> bool {
         (self.label == other.label) && (self.url == other.url) && (self.title == other.title)

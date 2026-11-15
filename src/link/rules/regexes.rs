@@ -10,46 +10,67 @@ use regex::Regex;
 /// Identifies a URL-matching rule used by badge and reference helpers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum RuleKind {
+
     /// A crates.io category URL.
     Category,
+
     /// The crates.io home page.
     CratesIo,
+
     /// A crates.io crate page.
     Crate,
+
     /// The docs.rs home page.
     DocsRs,
+
     /// A docs.rs crate or item page.
     Documentation,
+
     /// The Rust standard-library home page.
     Std,
+
     /// A Rust standard-library or core item page.
     StdItemDocumentation,
+
     /// The lib.rs home page.
     LibRs,
+
     /// A crate page on lib.rs.
     CrateOnLibRs,
+
     /// A GitHub repository wiki page.
     GithubRepoWiki,
+
     /// A matching file under john-cd/rust_howto.
     GithubComJohnCd,
+
     /// A GitHub repository URL.
     GithubRepo,
+
     /// A GitHub Pages site.
     GithubPages,
+
     /// The Rust Book home page.
     RustBook,
+
     /// A Rust Book chapter page.
     RustBookItem,
+
     /// A Rust Reference page.
     RustReference,
+
     /// The Rust by Example home page.
     RustByExampleBook,
+
     /// A Rust by Example chapter page.
     RustByExampleChapter,
+
     /// A Cargo Book page.
     CargoBook,
+
     /// A generic website root URL.
     Website,
+
     /// A page on a generic website.
     WebsitePage,
 }
@@ -57,8 +78,10 @@ pub(crate) enum RuleKind {
 /// A URL-matching rule: a regex plus the patterns derived from a match.
 #[derive(Debug, Default)]
 pub(crate) struct Rule<'a> {
+
     /// Regex pattern that matches the URL.
     pub(crate) re: &'a str, // Regex pattern to match the url
+
     /// Optional replacement pattern that builds a badge image URL.
     pub(crate) badge_url_pattern: &'a str, /* optional pattern to build a
                                             * badge link */
@@ -361,6 +384,7 @@ mod tests {
     fn get_re(name: RuleKind) -> &'static Regex {
         COMPILED_RULES.get(&name).expect("rule kind should exist")
     }
+
     /// Confirms all link rules compile and the GitHub repository rule is registered.
     #[test]
     fn every_rule_compiles_and_the_github_repo_rule_exists() {

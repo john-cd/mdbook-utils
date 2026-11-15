@@ -18,8 +18,10 @@ type Writer = fn(&Path, &Path) -> anyhow::Result<()>;
 
 /// Number of Markdown files generated.
 const FILES: usize = 200;
+
 /// Links per generated file.
 const LINKS_PER_FILE: usize = 50;
+
 /// Timed repetitions per function.
 const ITERATIONS: u32 = 10;
 

@@ -24,6 +24,7 @@ pub fn generate_categories<P1: AsRef<Path>, P2: AsRef<Path>>(
 ) -> Result<()> {
     generate::crates::generate_categories(src_dir_path, dest_file_path)
 }
+
 /// Generate a crate index and write to a Markdown file.
 ///
 /// # Errors

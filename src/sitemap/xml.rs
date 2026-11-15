@@ -12,6 +12,7 @@ use quick_xml::events::BytesText;
 use quick_xml::writer::Writer;
 
 // Write in the sitemap.xml format to a file, given a list of links.
+
 /// Writes the links in `sitemap.xml` format.
 ///
 /// # Errors

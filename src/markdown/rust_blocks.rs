@@ -16,18 +16,23 @@ use pulldown_cmark::TagEnd;
 /// A fenced code block whose info string starts with the `rust` language.
 #[derive(Debug, PartialEq, Eq)]
 pub(super) struct RustBlock {
+
     /// Code inside the fence, as rendered by the parser (container indentation
     /// removed), including the trailing newline of the last line.
     pub(super) code: String,
+
     /// Byte range of the opening fence line, without its line ending.
     pub(super) open_fence: Range<usize>,
+
     /// Byte range of the closing fence line without indentation or line
     /// ending, or `None` if the block is not closed before the end of input.
     pub(super) close_fence: Option<Range<usize>>,
+
     /// Leading whitespace of the opening fence line, repeated before each
     /// line that replaces the block; `None` if the fence sits inside another
     /// container (such as a block quote) and cannot be rewritten safely.
     pub(super) indent: Option<String>,
+
     /// Byte range of the whole block, from the opening fence to the end of
     /// the closing fence line.
     pub(super) range: Range<usize>,
@@ -39,6 +44,7 @@ fn is_rust_info(info: &str) -> bool {
         .next()
         .is_some_and(|language| language == "rust")
 }
+
 /// Returns fenced Rust blocks from the Markdown input in document order, including
 /// an unclosed final Rust fence if present.
 pub(super) fn find_rust_blocks(markdown: &str) -> Vec<RustBlock> {

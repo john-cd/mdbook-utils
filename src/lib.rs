@@ -1,3 +1,5 @@
+//! Utilities and a command-line application for working with mdBook books.
+//!
 //! # mdbook-utils
 //!
 //! For installation and usage instructions for the `mdbook-utils` command-line

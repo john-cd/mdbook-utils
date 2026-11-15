@@ -225,16 +225,22 @@ where
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum LinkWrite {
+
     /// Inline link containing the destination.
     InlineLink = 1,
+
     /// Reference link pointing to a separate label definition.
     ReferenceLink = 2,
+
     /// Definition mapping a reference label to its destination and optional title.
     ReferenceDefinition = 4,
+
     /// Link containing a badge image.
     LinkWithBadge = 8,
+
     /// Definition mapping the badge label to its image URL.
     BadgeReferenceDefinition = 16,
+
     /// Angle-bracket autolink containing the destination.
     Autolink = 32,
 }
@@ -295,6 +301,7 @@ mod tests {
         .add_text(Cow::Borrowed(text))
         .build()
     }
+
     /// Reference-style output has a heading, the reference link, and its definition.
     #[test]
     fn writes_reference_links_and_definitions() -> Result<()> {

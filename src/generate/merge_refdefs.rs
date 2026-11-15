@@ -104,6 +104,7 @@ mod tests {
             .set_url(url.to_owned().into())
             .build()
     }
+
     /// A generated definition does not duplicate an existing label.
     #[test]
     fn existing_label_wins_over_generated_definition() {
