@@ -94,8 +94,8 @@ The built-in `debug` profile keeps full symbols on workspace crates while the sh
 
 Run `just build-setup` once per checkout. It creates ignored `target`, `build`, and `.sccache`
 links and refuses to replace existing files, directories, or links to another slot. PowerShell 7
-is required by `scripts/cargo-host.ps1`. Windows uses junctions and supports NTFS or ReFS intermediates with Rust 1.100.0 or newer. Unix
-uses native cache roots and symlinks. Existing Rust How-To setup recipes also provide native
+is required by `scripts/cargo-host.ps1`. Windows uses junctions; Unix uses native cache roots
+and symlinks. Existing Rust How-To setup recipes also provide native
 shell setup. Do not copy platform-specific links between Windows and Linux checkouts.
 
 The existing `just cargo <subcommand> ...` runner sets absolute `CODE_TARGET_ROOT/<repo>/<slot>`

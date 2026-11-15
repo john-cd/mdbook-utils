@@ -43,7 +43,7 @@ alias hr := hooks-run
 # CODE_PACKAGES_ROOT holds package-manager data (including Cargo, npm, and NuGet caches);
 # CODE_TOOLS_ROOT holds portable tool installations.
 # CODE_TARGET_ROOT stores compiled Cargo target artifacts; CODE_BUILD_ROOT stores intermediate
-# Cargo build files (Windows supports NTFS or ReFS with Rust 1.100.0 or newer).
+# CODE_BUILD_ROOT stores Cargo intermediate build files.
 # CODE_SCCACHE_ROOT selects the compiler cache; SCCACHE_DIR is accepted as a legacy fallback.
 set shell := ["bash", "-uc"]
 # Recipes run in Bash on every OS: Git Bash on Windows.
@@ -89,8 +89,7 @@ done
 
 export CARGO_TARGET_DIR := target_dir
 export CARGO_BUILD_TARGET_DIR := target_dir
-host_build_volume := if os() == "windows" { trim(shell('pwsh.exe -NoLogo -NoProfile -File "$1" -BuildRoot "$2"', join(repo_root, "scripts/cargo-host.ps1"), code_build_root)) } else { "ok" }
-export CARGO_BUILD_BUILD_DIR := if host_build_volume == "ok" { build_dir } else { error("Cargo build root must use NTFS or ReFS (Rust 1.100.0 or newer)") }
+export CARGO_BUILD_BUILD_DIR := build_dir
 export RUSTC_WRAPPER := "sccache"
 export CARGO_BUILD_RUSTC_WRAPPER := "sccache"
 export CARGO_INCREMENTAL := "0"
