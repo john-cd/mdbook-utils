@@ -18,6 +18,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .to_str()
         .is_some_and(|s| s.starts_with('.'))
 }
+
 /// Returns Markdown files in filename order within the supplied root.
 /// Skips hidden descendants. A Markdown file passed as the root is returned on its own.
 ///

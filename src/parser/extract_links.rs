@@ -17,10 +17,13 @@ use super::super::link::LinkBuilder;
 /// Tracks where we are in the Markdown parser event stream.
 #[derive(Debug, PartialEq, Copy, Clone)]
 enum Where {
+
     /// Not inside a link.
     Elsewhere,
+
     /// Inside a link, outside any image.
     InLink, // between Start(Tag::Link(...)) and End(Tag::Link(..))
+
     /// Inside an image that is itself inside a link (badge).
     InImageInLink, /* between Start(Tag::Image(...)) and
                     * End(Tag::Image(..)), within a link */

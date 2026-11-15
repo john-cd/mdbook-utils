@@ -10,6 +10,7 @@ use clap::Args;
 /// Destination file
 #[derive(Args, Debug, Clone)]
 pub(crate) struct DestFileArgs {
+
     /// Path of the file to create
     #[arg(short = 'o', long = "output", value_name = "FILE", value_hint = clap::ValueHint::FilePath)]
     pub(crate) file_path: Option<PathBuf>,
@@ -18,6 +19,7 @@ pub(crate) struct DestFileArgs {
 /// Destination directory
 #[derive(Args, Debug)]
 pub(crate) struct DestDirArgs {
+
     /// Destination directory
     #[arg(short = 't', long = "target-dir", value_name = "DIR", value_hint = clap::ValueHint::DirPath)]
     pub(crate) dir_path: Option<PathBuf>,
@@ -26,6 +28,7 @@ pub(crate) struct DestDirArgs {
 /// Markdown source directory
 #[derive(Args, Debug, Clone)]
 pub(crate) struct MarkdownDirArgs {
+
     /// Source directory containing the source Markdown files
     #[arg(short = 'm', long = "markdown-dir", value_name = "DIR", value_hint = clap::ValueHint::DirPath)]
     pub(crate) markdown_dir_path: Option<PathBuf>,
@@ -34,6 +37,7 @@ pub(crate) struct MarkdownDirArgs {
 /// Directory containing Cargo.toml
 #[derive(Args, Debug)]
 pub(crate) struct CargoTomlDirArgs {
+
     /// Path to the directory containing Cargo.toml
     #[arg(short = 'c', long = "cargo-toml-dir", value_name = "DIR", value_hint = clap::ValueHint::DirPath)]
     pub(crate) cargo_toml_dir_path: Option<PathBuf>,
@@ -42,6 +46,7 @@ pub(crate) struct CargoTomlDirArgs {
 /// URL
 #[derive(Args, Debug)]
 pub(crate) struct UrlArgs {
+
     /// Base URL
     #[arg(short='b', long="base-url", value_name = "URL", value_parser = parse_url)]
     pub(crate) url: Option<url::Url>,
@@ -60,6 +65,7 @@ fn parse_url(s: &str) -> Result<url::Url, Box<dyn std::error::Error + Send + Syn
 #[derive(Debug, Args)]
 #[command(flatten_help = true)]
 pub(crate) struct MarkdownSrcDirAndDestFileArgs {
+
     /// Source directory containing the Markdown files
     #[command(flatten)]
     pub(crate) src: MarkdownDirArgs,
@@ -73,6 +79,7 @@ pub(crate) struct MarkdownSrcDirAndDestFileArgs {
 #[derive(Debug, Args)]
 #[command(flatten_help = true)]
 pub(crate) struct DependenciesDirAndDestFileArgs {
+
     /// Source directory containing the Markdown files
     #[command(flatten)]
     pub(crate) src: MarkdownDirArgs,
@@ -93,6 +100,7 @@ pub(crate) struct DependenciesDirAndDestFileArgs {
 /// Markdown source directory and destination directory
 #[derive(Args, Debug)]
 pub(crate) struct MarkdownSrcDirAndDestDirArgs {
+
     /// Source directory containing the Markdown files
     #[command(flatten)]
     pub(crate) src: MarkdownDirArgs,
@@ -107,6 +115,7 @@ pub(crate) struct MarkdownSrcDirAndDestDirArgs {
 #[derive(Debug, Args)]
 #[command(flatten_help = true)]
 pub(crate) struct MarkdownSrcDirUrlAndDestFileArgs {
+
     /// Source directory containing the source Markdown files
     #[command(flatten)]
     pub(crate) src: MarkdownDirArgs,

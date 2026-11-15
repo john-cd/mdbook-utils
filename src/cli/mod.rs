@@ -152,10 +152,12 @@ pub(crate) fn parse_arguments() -> Cli {
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub(crate) struct Cli {
+
     /// Selected top-level command.
     #[command(subcommand)]
     pub(crate) command: Command,
     // This structure allows the addition of global options, if needed
+
     /// Options shared by every command.
     #[clap(flatten)]
     pub(crate) global_opts: GlobalOpts,
@@ -164,6 +166,7 @@ pub(crate) struct Cli {
 /// Command-line commands
 #[derive(Debug, Subcommand)]
 pub(crate) enum Command {
+
     /// Manage reference definitions
     #[command(subcommand, name = "refdefs")]
     RefDefs(RefDefsSubCommand),
@@ -188,6 +191,7 @@ pub(crate) enum Command {
 /// Global options that apply to all (sub)commands
 #[derive(Debug, Args, Default)]
 pub(crate) struct GlobalOpts {
+
     /// Automatically answer `yes` to any user confirmation request.
     #[clap(long, short = 'y', global = true)]
     pub(crate) yes: bool,
