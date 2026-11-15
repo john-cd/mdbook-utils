@@ -48,7 +48,6 @@ use std::sync::Mutex;
 /// A reference-style link that has no definition.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct BrokenReference {
-
     /// The undefined reference label.
     pub(crate) reference: String,
 
@@ -62,13 +61,11 @@ pub(crate) struct BrokenReference {
 /// Handler for broken references
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Handler {
-
     /// List of broken references found
     pub broken_links: Arc<Mutex<Vec<BrokenReference>>>,
 }
 
 impl Handler {
-
     /// Creates a handler with an empty list of broken links.
     pub(crate) fn new() -> Self {
         Self {
@@ -79,7 +76,6 @@ impl Handler {
 
 /// Implement the trait required by `new_with_broken_link_callback`
 impl<'input> BrokenLinkCallback<'input> for Handler {
-
     /// In case the parser encounters any potential links that have a broken
     /// reference (e.g \[foo\] when there is no \[foo\]:  entry at the bottom)
     /// the provided callback will be called with the reference name, and

@@ -12,14 +12,12 @@ use super::link::Link;
 /// from pieces of information
 #[derive(Debug, Default)]
 pub(crate) struct LinkBuilder<'a> {
-
     /// Accumulates the parts of a [`Link`] while the Markdown event stream is
     /// read.
     link: Link<'a>,
 }
 
 impl<'a> LinkBuilder<'a> {
-
     /// Starts a builder from a link's type, destination URL, title, and
     /// reference label; empty values are left unset.
     pub(crate) fn from_type_url_title(

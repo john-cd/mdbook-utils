@@ -10,7 +10,6 @@ use regex::Regex;
 /// Identifies a URL-matching rule used by badge and reference helpers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum RuleKind {
-
     /// A crates.io category URL.
     Category,
 
@@ -78,7 +77,6 @@ pub(crate) enum RuleKind {
 /// A URL-matching rule: a regex plus the patterns derived from a match.
 #[derive(Debug, Default)]
 pub(crate) struct Rule<'a> {
-
     /// Regex pattern that matches the URL.
     pub(crate) re: &'a str, // Regex pattern to match the url
 

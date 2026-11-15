@@ -16,7 +16,6 @@ use pulldown_cmark::TagEnd;
 /// A fenced code block whose info string starts with the `rust` language.
 #[derive(Debug, PartialEq, Eq)]
 pub(super) struct RustBlock {
-
     /// Code inside the fence, as rendered by the parser (container indentation
     /// removed), including the trailing newline of the last line.
     pub(super) code: String,

@@ -5,7 +5,6 @@
 /// Markdown syntax used when writing links.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum LinkFormat {
-
     /// Reference-style links with their reference definitions:
     /// `[text][label]` and `[label]: url "title"`.
     #[default]

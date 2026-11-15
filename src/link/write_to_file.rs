@@ -225,7 +225,6 @@ where
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum LinkWrite {
-
     /// Inline link containing the destination.
     InlineLink = 1,
 

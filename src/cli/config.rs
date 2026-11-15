@@ -75,7 +75,6 @@ fn with_legacy_names(
 #[derive(Deserialize, Debug)]
 #[serde(default)]
 pub(crate) struct Configuration {
-
     /// `BOOK_ROOT_DIR_PATH` environment variable:
     /// the book's root directory (which contains `book.toml`),
     /// typically '.'
@@ -146,7 +145,6 @@ impl Default for Configuration {
 }
 
 impl Configuration {
-
     /// Returns the Markdown source directory provided by the
     /// command-line argument (if set);
     /// the `MARKDOWN_DIR_PATH` environment variable (if set);

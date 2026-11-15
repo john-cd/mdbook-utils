@@ -32,7 +32,6 @@ static ANCHOR_END_REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|
 
 /// A Markdown file rewrite, planned before any write.
 struct PlannedReplacement {
-
     /// Path of the file to replace.
     path: PathBuf,
 
