@@ -42,7 +42,7 @@ alias hr := hooks-run
 # CODE_REPOS_ROOT names the canonical checkout root for tools; CODE_TEMP_ROOT holds temporary files.
 # CODE_PACKAGES_ROOT holds package-manager data (including Cargo, npm, and NuGet caches);
 # CODE_TOOLS_ROOT holds portable tool installations.
-# CODE_TARGET_ROOT stores compiled Cargo target artifacts; CODE_BUILD_ROOT stores intermediate
+# CODE_TARGET_ROOT stores compiled Cargo target artifacts;
 # CODE_BUILD_ROOT stores Cargo intermediate build files.
 # CODE_SCCACHE_ROOT selects the compiler cache; SCCACHE_DIR is accepted as a legacy fallback.
 set shell := ["bash", "-uc"]
