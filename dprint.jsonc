@@ -6,6 +6,7 @@
   "newLineKind": "lf",
   "markdown": {
     "lineWidth": 100,
+    "table.skipFormat": true,
     "textWrap": "maintain"
   },
   "includes": [
