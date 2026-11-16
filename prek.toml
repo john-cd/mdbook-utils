@@ -36,7 +36,7 @@ hooks = [
 [[repos]]
 repo = "local"
 hooks = [
-  { id = "cargo-fmt", name = "cargo fmt --check", entry = "just fmt-check", language = "system", types = [
+  { id = "cargo-fmt", name = "cargo fmt", entry = "just format", language = "system", types = [
     "rust",
   ], pass_filenames = false },
 ]
