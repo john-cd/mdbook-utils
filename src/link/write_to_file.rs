@@ -290,6 +290,7 @@ mod tests {
     use super::*;
     use crate::link::LinkBuilder;
 
+    /// Builds an inline link fixture with distinct display text and reference label.
     fn link(text: &'static str, label: &'static str, url: &'static str) -> Link<'static> {
         LinkBuilder::from_type_url_title(
             LinkType::Inline,

@@ -16,13 +16,19 @@ use super::run_logged;
 #[derive(Subcommand, Debug)]
 pub(crate) enum RefDefsSubCommand {
     /// Write existing reference definitions to a file
-    Write(MarkdownSrcDirAndDestFileArgs),
+    Write(
+        /// Source directory and output path for existing definitions.
+        MarkdownSrcDirAndDestFileArgs,
+    ),
 
     /// Generate reference definitions
     /// (e.g. badges for Github links or from the dependencies of the code
     /// examples)
     #[command(name = "generate")]
-    Generate(GenerateArgs),
+    Generate(
+        /// Options controlling which definitions are generated and where they are written.
+        GenerateArgs,
+    ),
 }
 
 /// Shields.io badge style, as accepted on the command line.
@@ -48,6 +54,7 @@ pub(crate) enum BadgeStyleArg {
 }
 
 impl From<BadgeStyleArg> for BadgeStyle {
+    /// Maps the CLI badge style to the generator's corresponding style.
     fn from(style: BadgeStyleArg) -> Self {
         match style {
             BadgeStyleArg::Flat => Self::Flat,
