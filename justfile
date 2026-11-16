@@ -130,7 +130,6 @@ format:
   @echo "[format] start (rustfmt={{rustfmt_toolchain}})"
   cargo +{{rustfmt_toolchain}} fmt --all
   @echo "[format] done"
-  echo "DONE"
 
 # Format everything.
 format-all: format
