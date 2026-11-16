@@ -147,7 +147,7 @@ Preserve active or dirty checkouts when reusing slots. The primary checkout's
 output slot is `main`, regardless of its branch name.
 
 | Variable | Windows default | Linux/macOS default |
-| ---| --- |
+| --- | --- | --- |
 | `CODE_TARGET_ROOT` | `D:/target` | `$XDG_CACHE_HOME/cargo-target` or `~/.cache/cargo-target` |
 | `CODE_BUILD_ROOT` | `D:/code_build` | `$XDG_CACHE_HOME/cargo-build` or `~/.cache/cargo-build` |
 | `CODE_SCCACHE_ROOT` | `D:/sccache` | `$XDG_CACHE_HOME/sccache` or `~/.cache/sccache` |
