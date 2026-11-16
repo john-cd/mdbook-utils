@@ -57,7 +57,7 @@ checkout_name := file_name(source_directory())
 worktree_name := if file_name(parent_directory(repo_root)) == ".worktrees" { checkout_name } else { "main" }
 cache_home := env("XDG_CACHE_HOME", join(home_directory(), ".cache"))
 code_repos_root := env("CODE_REPOS_ROOT", if os_family() == "windows" { "D:/code" } else { join(home_directory(), "code") })
-code_temp_root := env("CODE_TEMP_ROOT", if os_family() == "windows" { if path_exists("D:/temp") == "true" { "D:/temp" } else { "C:/temp" } } else { env("TMPDIR", "/tmp") })
+code_temp_root := env("CODE_TEMP_ROOT", if os_family() == "windows" { "C:/temp" } else { env("TMPDIR", "/tmp") })
 code_packages_root := env("CODE_PACKAGES_ROOT", if os_family() == "windows" { "D:/packages" } else { join(home_directory(), ".local/share") })
 code_tools_root := env("CODE_TOOLS_ROOT", if os_family() == "windows" { "C:/tools" } else { join(home_directory(), ".local/tools") })
 code_target_root := env("CODE_TARGET_ROOT", if os_family() == "windows" { "D:/target" } else { join(cache_home, "cargo-target") })
