@@ -255,6 +255,7 @@ impl PartialEq for Link<'_> {
 impl Eq for Link<'_> {}
 
 impl Hash for Link<'_> {
+    /// Hashes the label, destination, and title used to identify matching links.
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.label.hash(state);
         self.url.hash(state);

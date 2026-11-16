@@ -128,6 +128,7 @@ pub(crate) struct Configuration {
 
 /// Defaults if the environment variables are not set
 impl Default for Configuration {
+    /// Uses the current directory as the book root and leaves optional overrides unset.
     fn default() -> Self {
         Self {
             book_root_dir_path: PathBuf::from("."),

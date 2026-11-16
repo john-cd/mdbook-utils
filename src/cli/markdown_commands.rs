@@ -20,31 +20,55 @@ use super::log_command_paths;
 #[derive(Subcommand, Debug)]
 pub(crate) enum MarkdownSubCommand {
     /// Copy Rust code examples from the Markdown into .rs files.
-    ExtractCodeExamples(MarkdownSrcDirAndDestDirArgs),
+    ExtractCodeExamples(
+        /// Markdown source and output directory for extracted Rust files.
+        MarkdownSrcDirAndDestDirArgs,
+    ),
 
     /// Replace Rust code examples from the Markdown by
     /// {{#include ...}} statements
-    ReplaceCodeExamplesByIncludes(MarkdownSrcDirAndDestDirArgs),
+    ReplaceCodeExamplesByIncludes(
+        /// Markdown source and example directory used to build include paths.
+        MarkdownSrcDirAndDestDirArgs,
+    ),
 
     /// Replace {{#include file.md}} by the file contents
-    ReplaceIncludesByContents(MarkdownDirArgs),
+    ReplaceIncludesByContents(
+        /// Directory in which to expand Markdown file includes.
+        MarkdownDirArgs,
+    ),
 
     /// Remove {{#include }} statements
     /// (and replace them by a hard-coded string)
-    RemoveIncludes(MarkdownDirArgs),
+    RemoveIncludes(
+        /// Directory in which to replace include directives.
+        MarkdownDirArgs,
+    ),
 
     /// Generate a listing of crates.io categories
     /// and write to a Markdown file
-    GenerateCategories(MarkdownSrcDirAndDestFileArgs),
+    GenerateCategories(
+        /// Markdown source and destination for the category listing.
+        MarkdownSrcDirAndDestFileArgs,
+    ),
 
     /// Generate a crate index and write to a Markdown file
-    GenerateCrates(MarkdownSrcDirAndDestFileArgs),
+    GenerateCrates(
+        /// Markdown source and destination for the crate index.
+        MarkdownSrcDirAndDestFileArgs,
+    ),
 
     /// Identify .md files not in SUMMARY.md
-    IdentifyFilesNotInSummary(MarkdownDirArgs),
+    IdentifyFilesNotInSummary(
+        /// Directory containing chapters and the summary used for comparison.
+        MarkdownDirArgs,
+    ),
 
     /// Identify .rs examples not used in Markdown files
-    IdentifyUnusedRsExamples(MarkdownSrcDirAndDestDirArgs),
+    IdentifyUnusedRsExamples(
+        /// Markdown and example directories to compare for unused Rust files.
+        MarkdownSrcDirAndDestDirArgs,
+    ),
 }
 
 /// Process "markdown" subcommands of the command-line interface

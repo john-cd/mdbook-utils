@@ -27,6 +27,7 @@ pub(crate) enum LinkFormatArg {
 }
 
 impl From<LinkFormatArg> for LinkFormat {
+    /// Translates the CLI link format into the format used by the writer.
     fn from(format: LinkFormatArg) -> Self {
         match format {
             LinkFormatArg::Reference => Self::Reference,
@@ -53,19 +54,31 @@ pub(crate) struct WriteInlineArgs {
 #[derive(Subcommand, Debug)]
 pub(crate) enum LinksSubCommand {
     /// Write all existing links to a Markdown file
-    WriteAll(MarkdownSrcDirAndDestFileArgs),
+    WriteAll(
+        /// Source directory and destination for the complete link report.
+        MarkdownSrcDirAndDestFileArgs,
+    ),
 
     /// Write all existing inline / autolinks (i.e., not
     /// written as reference-style links) to a Markdown file
-    WriteInline(WriteInlineArgs),
+    WriteInline(
+        /// Report paths and options for inline links and autolinks.
+        WriteInlineArgs,
+    ),
 
     /// Identify links that repeat the same label, URL and title (inline links:
     /// the same URL) and write them to a Markdown file
-    DuplicateLinks(MarkdownSrcDirAndDestFileArgs),
+    DuplicateLinks(
+        /// Source directory and destination for the duplicate link report.
+        MarkdownSrcDirAndDestFileArgs,
+    ),
 
     /// Identify broken links (i.e. without reference definition) and
     /// write to a Markdown file
-    BrokenLinks(MarkdownSrcDirAndDestFileArgs),
+    BrokenLinks(
+        /// Source directory and destination for the unresolved reference report.
+        MarkdownSrcDirAndDestFileArgs,
+    ),
 }
 
 /// Process "links" subcommands of the command-line interface

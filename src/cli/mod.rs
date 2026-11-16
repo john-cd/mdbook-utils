@@ -166,23 +166,38 @@ pub(crate) struct Cli {
 pub(crate) enum Command {
     /// Manage reference definitions
     #[command(subcommand, name = "refdefs")]
-    RefDefs(RefDefsSubCommand),
+    RefDefs(
+        /// Reference-definition operation chosen by the caller.
+        RefDefsSubCommand,
+    ),
 
     /// Manage links
     #[command(subcommand)]
-    Links(LinksSubCommand),
+    Links(
+        /// Link report selected by the caller.
+        LinksSubCommand,
+    ),
 
     /// Manage code blocks (embedded examples) and includes
     #[command(subcommand)]
-    Markdown(MarkdownSubCommand),
+    Markdown(
+        /// Markdown or example maintenance operation selected by the caller.
+        MarkdownSubCommand,
+    ),
 
     /// Generate a sitemap.xml file from published HTML pages in SUMMARY.md
     #[command(name = "sitemap")]
-    SiteMap(MarkdownSrcDirUrlAndDestFileArgs),
+    SiteMap(
+        /// Book source, base URL, and XML output location.
+        MarkdownSrcDirUrlAndDestFileArgs,
+    ),
 
     /// Parse the entire Markdown code as events
     /// and write them to a file.
-    Debug(MarkdownSrcDirAndDestFileArgs),
+    Debug(
+        /// Markdown source and destination for the parser event dump.
+        MarkdownSrcDirAndDestFileArgs,
+    ),
 }
 
 /// Global options that apply to all (sub)commands
