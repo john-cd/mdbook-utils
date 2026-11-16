@@ -42,7 +42,7 @@ In turn, most commands offer a menu of subcommands.
 `mdbook-utils` and [`book_tooling`](https://github.com/john-cd/book_tooling) overlap. The split is:
 
 | Task | Tool |
-| --- | --- |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | Sitemap, `book.toml` path resolution | `mdbook-utils` |
 | Extract, replace, or remove `{{#include}}` and code examples; unused `.rs` examples; files not in `SUMMARY.md` | `mdbook-utils` |
 | Crate and category indexes, dependency reference definitions, GitHub badges | `mdbook-utils` |

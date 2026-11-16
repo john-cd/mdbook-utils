@@ -18,7 +18,7 @@ Keep this file, README, contributor guidance, and configuration comments synchro
 ## File ownership
 
 | Files | Convention |
-| --- | --- |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.editorconfig`, `.gitattributes` | UTF-8 and LF, four-space Rust/Python, two-space configuration; preserve Markdown hard breaks and binary attributes. |
 | `.gitignore`, `.dockerignore`, `.aiexclude` | Exclude outputs, compiler caches, environments, and worktrees; keep maintained configuration and lockfiles reviewable. Ignore files are not a security boundary. |
 | `AGENTS.md`, `CONTRIBUTING.md`, `README.md` | Keep repository-specific commands, ownership, and examples; link this reference. |
@@ -40,7 +40,7 @@ Python uv workspace members share the root lock; they do not need overlapping up
 Version updates have a seven-day cooldown; security updates are not delayed by this setting.
 
 | Ecosystem | Roots |
-| --- | --- |
+| ---------------- | --------------------- |
 | `cargo` | `/` |
 | `docker` | `/.devcontainer` |
 | `docker-compose` | `/`, `/.devcontainer` |
@@ -79,7 +79,7 @@ especially when that workspace has a child config. Config values override manife
 and environment/command-line overrides take precedence over config values.
 
 | Profile | Workspace code | Dependencies and build tools |
-| --- | --- | --- |
+| -------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `dev` / `test` | Level 0, no symbols, incremental disabled | Level 1 by default, selected compute-heavy dependencies at level 3, no symbols. |
 | `debug` | Level 2 symbols for workspace crates | Same optimized dependency settings as `dev`, with dependency symbols disabled. |
 | `ci` | Inherits `dev`, incremental disabled | Same flags as `dev` for dependency cache reuse. Use release jobs for performance validation. |
@@ -120,7 +120,7 @@ of nextest's test-runner `--profile ci`.
 ## Linkers
 
 | Platform | Policy |
-| --- | --- |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Windows MSVC | Rust-bundled `rust-lld.exe` in the maintained repos; preserve stack flags. Rust How-To retains its measured default-linker exception. MSVC libraries/SDK are still required. |
 | x86-64 GNU/Linux | Rust 1.90+ already defaults to LLD. Existing mold users retain mold and its installation steps. For AArch64/other triples, explicitly install/configure the appropriate linker before switching. |
 | macOS | Use the modern Apple linker shipped with Xcode 15+. sold's maintainer now recommends Apple's linker. |
