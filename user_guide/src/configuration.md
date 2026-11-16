@@ -9,7 +9,7 @@ Path selection follows this order when a command supports the corresponding opti
 The mdBook `book.toml` is the only TOML configuration source; no separate `mdbook-utils` TOML file is needed. A missing `book.toml` is optional. If path resolution reaches an unreadable or malformed `book.toml`, the command reports the error instead of silently using defaults. When a valid configuration disables the HTML renderer, `sitemap` requires an explicit destination through `--output` or `MDBOOK_UTILS_BOOK_HTML_BUILD_DIR_PATH`.
 
 | Priority | Source | Example |
-| --- | --- | --- |
+| -------- | -------------------------------------------------------------- | ----------------------------------------------------- |
 | 1 | Command-line option | `--markdown-dir ./src/` |
 | 2 | Environment variable (or `.env` file in the current directory) | `MDBOOK_UTILS_MARKDOWN_DIR_PATH` |
 | 3 | mdBook's `book.toml` | `book.src`, `build.build-dir`, `output.html.site-url` |
