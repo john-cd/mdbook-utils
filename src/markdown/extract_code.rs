@@ -44,6 +44,22 @@ struct PlannedFile {
     contents: Vec<u8>,
 }
 
+/// Applies a preflighted plan, reporting earlier successful writes if a later write fails.
+fn apply_write_plan(
+    planned: Vec<PlannedFile>,
+    mut write: impl FnMut(&Path, &[u8]) -> Result<()>,
+) -> Result<()> {
+    for (completed, output) in planned.into_iter().enumerate() {
+        write(&output.path, &output.contents).with_context(|| {
+            format!(
+                "Could not write {} after completing {completed} earlier write(s). Fix the cause and rerun the same command.",
+                output.path.display()
+            )
+        })?;
+    }
+    Ok(())
+}
+
 /// Return the stable output path for one code block in a Markdown chapter.
 ///
 /// Keeping the complete Markdown path in a per-chapter directory prevents
@@ -304,10 +320,7 @@ where
     for output in &planned {
         let _matches = existing_file_matches(&output.path, &output.contents)?;
     }
-    for output in planned {
-        write_generated_file(&output.path, &output.contents)?;
-    }
-    Ok(())
+    apply_write_plan(planned, write_generated_file)
 }
 
 /// Remove Rust code blocks from Markdown files, replacing each by an
@@ -420,10 +433,9 @@ where
 
     let mut planned: Vec<PlannedFile> = planned?.into_iter().flatten().collect();
     planned.sort_by(|left, right| left.path.cmp(&right.path));
-    for source in planned {
-        crate::fs::write_atomically(&source.path, &source.contents)?;
-    }
-    Ok(())
+    apply_write_plan(planned, |path, contents| {
+        crate::fs::write_atomically(path, contents)
+    })
 }
 
 /// Tests for example extraction and include replacement across fence variants.
@@ -598,6 +610,37 @@ mod tests {
 
         assert!(remove_code_from_all_markdown_files_in(&src_dir, &code_dir).is_err());
         assert_eq!(fs::read_to_string(&chapter)?, edited);
+        Ok(())
+    }
+    /// Reports partial completion and allows the remaining writes to be retried.
+    #[test]
+    fn later_write_failure_reports_completed_writes() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        let first = dir.path().join("first.rs");
+        let blocker = dir.path().join("blocked");
+        let second = blocker.join("second.rs");
+        let plan = || {
+            [&first, &second]
+                .into_iter()
+                .map(|path| PlannedFile {
+                    path: path.clone(),
+                    contents: b"fn main() {}\n".to_vec(),
+                })
+                .collect()
+        };
+        fs::write(&blocker, "not a directory")?;
+        let error = apply_write_plan(plan(), write_generated_file).expect_err("later write fails");
+        assert!(
+            error
+                .to_string()
+                .contains("after completing 1 earlier write(s)")
+        );
+        assert!(error.to_string().contains("second.rs"));
+        assert!(first.is_file());
+        assert!(!second.exists());
+        fs::remove_file(blocker)?;
+        apply_write_plan(plan(), write_generated_file)?;
+        assert_eq!(fs::read(first)?, fs::read(second)?);
         Ok(())
     }
 }
