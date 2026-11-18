@@ -8,7 +8,7 @@
 # https://docs.docker.com/go/dockerfile-reference/
 # See also https://docs.docker.com/language/rust/
 
-ARG RUST_IMAGE_LABEL=1.100.0-trixie
+ARG RUST_IMAGE_LABEL
 FROM rust:${RUST_IMAGE_LABEL} AS base
 ## Repo for the Rust images: https://github.com/rust-lang/docker-rust/tree/master
 ## The full Rust image depends on https://github.com/docker-library/buildpack-deps
