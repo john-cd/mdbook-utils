@@ -158,6 +158,32 @@ jobs:
           toolchain: 1.98.1
       - name: Check declared minimum version
         run: cargo check --all-targets --locked
+
+  container-build:
+    name: Build the CI container
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Load pinned container build inputs
+        run: cat .devcontainer/container-build.env >> "$GITHUB_ENV"
+
+      - name: Build the CI image
+        run: |
+          docker build --progress=plain \
+            --file .devcontainer/Dockerfile \
+            --target ci \
+            --tag "mdbook-utils-ci:${GITHUB_SHA}" \
+            --build-arg "RUST_IMAGE_LABEL=${RUST_IMAGE_LABEL}" \
+            --build-arg "CARGO_BINSTALL_VERSION=${CARGO_BINSTALL_VERSION}" \
+            --build-arg "RUSTFMT_TOOLCHAIN=${RUSTFMT_TOOLCHAIN}" \
+            --build-arg "MDBOOK_VERSION=${MDBOOK_VERSION}" \
+            --build-arg "SCCACHE_VERSION=${SCCACHE_VERSION}" \
+            --build-arg "JUST_VERSION=${JUST_VERSION}" \
+            .
 env:
   CODE_TARGET_ROOT: ${{ github.workspace }}/.ci/target
   CODE_BUILD_ROOT: ${{ github.workspace }}/.ci/build

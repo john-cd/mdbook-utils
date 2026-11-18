@@ -8,8 +8,8 @@
 # https://docs.docker.com/go/dockerfile-reference/
 # See also https://docs.docker.com/language/rust/
 
-ARG RUST_IMAGE_LABEL
-FROM rust:${RUST_IMAGE_LABEL} as base
+ARG RUST_IMAGE_LABEL=1.100.0-trixie
+FROM rust:${RUST_IMAGE_LABEL} AS base
 ## Repo for the Rust images: https://github.com/rust-lang/docker-rust/tree/master
 ## The full Rust image depends on https://github.com/docker-library/buildpack-deps
 
@@ -52,7 +52,7 @@ WORKDIR /code
 
 ## --------------------------------
 ## Stage for development
-FROM base as development
+FROM base AS development
 
 ## Optional packages for development only
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -95,7 +95,7 @@ CMD [ "sleep", "infinity" ]
 
 ## --------------------------------
 ## Stage for Continuous Integration / Deployment
-FROM base as ci
+FROM base AS ci
 
 ## Copy the code in the container (in WORKDIR), excluding what is in .dockerignore
 COPY . .
