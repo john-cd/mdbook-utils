@@ -261,6 +261,99 @@ fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
     Ok(())
 }
 
+/// Extracts and compiles mdBook-compatible hidden lines and preserves visible hashes.
+#[test]
+fn extracts_compilable_hidden_lines_with_mdbook_visible_hashes() -> Result<()> {
+    let dir = tempdir()?;
+    let book_root = dir.path();
+    let src = book_root.join("src");
+    let code = book_root.join("extracted");
+    fs::create_dir_all(&src)?;
+    fs::write(
+        book_root.join("book.toml"),
+        "[book]\ntitle = \"Hidden lines\"\nauthors = [\"Test\"]\nlanguage = \"en\"\nsrc = \"src\"\n",
+    )?;
+    fs::write(
+        src.join("SUMMARY.md"),
+        "# Summary\n\n- [Chapter](chapter.md)\n",
+    )?;
+    fs::write(
+        src.join("chapter.md"),
+        "# Hidden lines\n\n- Nested example:\n\n  ```rust\n  #\n  # \n  # fn main() {\n  #     let hidden = \"compiled but hidden\";\n  #     println!(\"{hidden}\");\n  # }\n  ##[allow(dead_code)]\n  fn helper() {}\n  #[derive(Debug)]\n  struct Marker;\n  const HASH: &str = \"# inside a string\";\n  // The # hash in this comment stays visible.\n  ```\n",
+    )?;
+
+    let extracted = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
+        .args(["-y", "markdown", "extract-code-examples", "-m"])
+        .arg(&src)
+        .arg("-t")
+        .arg(&code)
+        .current_dir(book_root)
+        .env_remove("BOOK_ROOT_DIR_PATH")
+        .env_remove("MARKDOWN_DIR_PATH")
+        .env_remove("DEFAULT_DEST_DIR_PATH")
+        .env("RUST_LOG", "off")
+        .output()?;
+    assert!(
+        extracted.status.success(),
+        "extract-code-examples stderr: {}",
+        String::from_utf8_lossy(&extracted.stderr)
+    );
+
+    let extracted_source = code.join("chapter.md.d/block-000.rs");
+    let extracted_text = fs::read_to_string(&extracted_source)?;
+    assert_eq!(
+        extracted_text,
+        "\n\nfn main() {\n    let hidden = \"compiled but hidden\";\n    println!(\"{hidden}\");\n}\n#[allow(dead_code)]\nfn helper() {}\n#[derive(Debug)]\nstruct Marker;\nconst HASH: &str = \"# inside a string\";\n// The # hash in this comment stays visible.\n"
+    );
+
+    let cargo_target_dir = std::env::var_os("CARGO_TARGET_DIR")
+        .map(PathBuf::from)
+        .expect("repository test commands set CARGO_TARGET_DIR");
+    let compiled_outputs = tempfile::Builder::new()
+        .prefix("mdbook-utils-extracted-probe-")
+        .tempdir_in(cargo_target_dir)?;
+    let compiled_binary = compiled_outputs.path().join("extracted-probe.exe");
+    let compilation = Command::new("rustc")
+        .args(["--edition=2024"])
+        .arg(&extracted_source)
+        .arg("--crate-name")
+        .arg("extracted_probe")
+        .arg("-o")
+        .arg(compiled_binary)
+        .output()?;
+    assert!(
+        compilation.status.success(),
+        "rustc stderr: {}",
+        String::from_utf8_lossy(&compilation.stderr)
+    );
+
+    let mdbook = Command::new("mdbook").arg("--version").output()?;
+    assert!(
+        mdbook.status.success(),
+        "mdbook --version stderr: {}",
+        String::from_utf8_lossy(&mdbook.stderr)
+    );
+    let rendered_dir = compiled_outputs.path().join("rendered");
+    let rendered = Command::new("mdbook")
+        .arg("build")
+        .arg(book_root)
+        .arg("--dest-dir")
+        .arg(&rendered_dir)
+        .output()?;
+    assert!(
+        rendered.status.success(),
+        "mdbook build stderr: {}",
+        String::from_utf8_lossy(&rendered.stderr)
+    );
+    let html = fs::read_to_string(rendered_dir.join("chapter.html"))?;
+    assert!(html.contains("class=\"hidden\""), "{html}");
+    assert!(html.contains("#[allow(dead_code)]"), "{html}");
+    assert!(html.contains("#[derive(Debug)]"), "{html}");
+    assert!(html.contains("# inside a string"), "{html}");
+    assert!(html.contains("# hash in this comment"), "{html}");
+    Ok(())
+}
+
 /// Requires confirmation before replacing includes and reports changes after approval.
 #[test]
 fn remove_includes_requires_confirmation_and_replaces_includes() -> Result<()> {
