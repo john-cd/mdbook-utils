@@ -1,4 +1,4 @@
-<!-- TODO Reviewed ??-??-2026. -->
+<!-- TODO Reviewed 2026-11-18. -->
 
 # Task tracking
 
@@ -6,7 +6,7 @@
 
 ## Ready and blocked issues
 
-Snapshot: November 17, 2026, from live GitHub issues. No open unblocked issues remain.
+Snapshot: November 18, 2026, from live GitHub issues. No open unblocked issues remain.
 Blocked issues are grouped by blocker; each group has one tracking issue labelled `tracking`.
 Epics are listed where they wait on a blocker. Recheck the live issue before starting.
 
@@ -32,5 +32,7 @@ with `rustc` and verifies mdBook 0.5.4 rendering for hidden lines and visible es
 
 For the separate container-build criterion #273, [Rust CI](https://github.com/john-cd/mdbook-utils/actions/runs/44309557766)
 and [guide deployment](https://github.com/john-cd/mdbook-utils/actions/runs/44309557764) passed
-at `bac0ffb`. Coverage now installs the pinned mdBook binary required by its integration tests.
-Neither run establishes container-build validation. No container build was run during this review.
+at `bac0ffb`; newer runs [44245484471](https://github.com/john-cd/mdbook-utils/actions/runs/44245484471)
+and [44245484627](https://github.com/john-cd/mdbook-utils/actions/runs/44245484627) also passed.
+The CI workflow now builds the pinned `ci` image as a separate job. Local BuildKit checks pass
+without warnings; keep #273 open until the full hosted image build succeeds.
