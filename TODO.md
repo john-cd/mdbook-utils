@@ -30,7 +30,7 @@ passed 208 tests. `just cargo test --doc --locked --offline` passed with zero do
 `dprint check`, and `git diff --check` passed. The #278 CLI regression compiles extracted Rust
 with `rustc` and verifies mdBook 0.5.4 rendering for hidden lines and visible escaped hashes.
 
-For the separate container-build criterion #273, [Rust CI](https://github.com/john-cd/mdbook-utils/actions/runs/44245484471)
-and [guide deployment](https://github.com/john-cd/mdbook-utils/actions/runs/44245484627) passed
-at `a6e36f9`, but neither establishes container-build validation. No container build was run
-during this review.
+For the separate container-build criterion #273, [Rust CI](https://github.com/john-cd/mdbook-utils/actions/runs/44309557766)
+and [guide deployment](https://github.com/john-cd/mdbook-utils/actions/runs/44309557764) passed
+at `bac0ffb`. Coverage now installs the pinned mdBook binary required by its integration tests.
+Neither run establishes container-build validation. No container build was run during this review.
