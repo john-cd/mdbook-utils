@@ -31,7 +31,7 @@ code_packages_root := env("CODE_PACKAGES_ROOT", if os_family() == "windows" { "D
 code_tools_root := env("CODE_TOOLS_ROOT", if os_family() == "windows" { "C:/tools" } else { join(home_directory(), ".local/tools") })
 code_target_root := env("CODE_TARGET_ROOT", if os_family() == "windows" { "D:/target" } else { join(cache_home, "cargo-target") })
 code_build_root := env("CODE_BUILD_ROOT", if os_family() == "windows" { "D:/code_build" } else { join(cache_home, "cargo-build") })
-code_sccache_root := env("CODE_SCCACHE_ROOT", env("SCCACHE_DIR", if os_family() == "windows" { "D:/sccache" } else { join(cache_home, "sccache") }))
+code_sccache_root := env("CODE_SCCACHE_ROOT", env("SCCACHE_DIR", if os_family() == "windows" { "D:/cache/sccache" } else { join(cache_home, "sccache") }))
 repo_root := source_directory()
 target_root := join(code_target_root, repo_cache_name)
 build_root := join(code_build_root, repo_cache_name)
