@@ -13,25 +13,36 @@ use anyhow::Context as _;
 use anyhow::Result;
 use anyhow::bail;
 use rayon::prelude::*;
-use regex::Regex;
 use tempfile::NamedTempFile;
 use tracing::info;
 
 use super::rust_blocks::find_rust_blocks;
 
-/// Regex to match hidden lines in Rust code blocks.
-///
-/// In mdBook, lines starting with `# ` (pound sign followed by a space) are
-/// hidden in the rendered output but remain part of the code. This pattern
-/// matches such lines and captures the rest of the line (after `# `) in the
-/// named group `rest`, so they can be included verbatim in extracted `.rs`
-/// files.
-static REG: std::sync::LazyLock<Regex> =
-    std::sync::LazyLock::new(|| Regex::new("(?m)^# (?<rest>.*)$").expect("regex literal is valid"));
-
-/// Strip the mdBook hidden-line marker (`# `) so the code compiles as a file.
+/// Apply mdBook's Rust hidden-line markers to code extracted into a standalone file.
 fn hidden_lines_removed(code: &str) -> String {
-    REG.replace_all(code, "$rest").into_owned()
+    let mut visible = String::with_capacity(code.len());
+    for line in code.split_inclusive('\n') {
+        let (line, ending) = if let Some(line) = line.strip_suffix("\r\n") {
+            (line, "\r\n")
+        } else if let Some(line) = line.strip_suffix('\n') {
+            (line, "\n")
+        } else {
+            (line, "")
+        };
+
+        if line == "#" {
+            // A bare hidden line contributes an empty source line.
+        } else if let Some(escaped) = line.strip_prefix("##") {
+            visible.push('#');
+            visible.push_str(escaped);
+        } else if let Some(hidden) = line.strip_prefix("# ") {
+            visible.push_str(hidden);
+        } else {
+            visible.push_str(line);
+        }
+        visible.push_str(ending);
+    }
+    visible
 }
 
 /// A file to be written, planned before any write so that collisions are
@@ -448,6 +459,17 @@ mod tests {
 
     use super::*;
 
+    /// Removes hidden markers and exposes escaped hashes without altering visible Rust lines.
+    #[test]
+    fn applies_hidden_line_markers_and_preserves_crlf() {
+        let code = "#\r\n# fn hidden() {}\r\n## fn escaped() {}\r\n#[derive(Debug)]\r\nlet text = \"# visible\";\r\n";
+
+        assert_eq!(
+            hidden_lines_removed(code),
+            "\r\nfn hidden() {}\r\n# fn escaped() {}\r\n#[derive(Debug)]\r\nlet text = \"# visible\";\r\n"
+        );
+    }
+
     /// Builds a Markdown chapter with one Rust code fence per supplied block.
     fn chapter_with_blocks(blocks: &[&str]) -> String {
         let mut content = String::from("# Chapter\n");
@@ -583,11 +605,15 @@ mod tests {
     #[test]
     fn handles_fence_variants_and_is_idempotent() -> Result<()> {
         let (updated, code_dir) = round_trip(
-            "~~~rust\na();\n~~~\n\n```rustc\nb\n```\n\n- item\n\n  ```rust,ignore\n  c();\n  ```\n",
+            "~~~rust\na();\n~~~\n\n```rustc\nb\n```\n\n- item\n\n  ```rust,ignore\n  #\n  ##[derive(Debug)]\n  # fn main() {}\n  ```\n",
         )?;
         assert_eq!(
             updated,
             "~~~rust\n{{#include code/ch.md.d/block-000.rs}}\n~~~\n\n```rustc\nb\n```\n\n- item\n\n  ```rust,ignore\n  {{#include code/ch.md.d/block-001.rs}}\n  ```\n"
+        );
+        assert_eq!(
+            fs::read_to_string(code_dir.join("ch.md.d/block-001.rs"))?,
+            "\n#[derive(Debug)]\nfn main() {}\n"
         );
         let src_dir = code_dir.parent().context("expected source directory")?;
         remove_code_from_all_markdown_files_in(src_dir, &code_dir)?;
