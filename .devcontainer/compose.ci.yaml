@@ -21,10 +21,10 @@ services:
         RUST_IMAGE_LABEL: ${RUST_IMAGE_LABEL:?Set RUST_IMAGE_LABEL in .devcontainer/.env or the host environment}
         SCCACHE_VERSION: ${SCCACHE_VERSION:?Set SCCACHE_VERSION in .devcontainer/.env or the host environment}
       cache_from:
-        - type=gha # GitHub Action cache
+        - type=gha,scope=mdbook-utils-ci # GitHub Actions cache
       #- type=local,dest=./.cache
       cache_to:
-        - type=gha,mode=max
+        - type=gha,mode=max,scope=mdbook-utils-ci,ignore-error=true
         #- type=local,dest=./.cache
     volumes:
       - type: bind

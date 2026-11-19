@@ -58,6 +58,8 @@ jobs:
         with:
           fetch-depth: "0" # 0 indicates all history for all branches and tags. Allows the use of `git`. See https://github.com/actions/checkout
           persist-credentials: false
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - name: Git status and tags
         run: |
           git --version
