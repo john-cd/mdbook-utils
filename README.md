@@ -195,4 +195,4 @@ build-profile, cache, linker, and editor conventions. Keep it synchronized with 
 
 ## License
 
-This project is proprietary. See the [LICENSE](LICENSE) for terms, including restrictions on AI model training.
+The [LICENSE](LICENSE) grants limited website browsing, linking, and noncommercial use of individual code snippets. It also sets out the proprietary terms and restrictions on AI use.
