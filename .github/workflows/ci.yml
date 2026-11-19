@@ -179,6 +179,7 @@ jobs:
             --tag "mdbook-utils-ci:${GITHUB_SHA}" \
             --build-arg "RUST_IMAGE_LABEL=${RUST_IMAGE_LABEL}" \
             --build-arg "CARGO_BINSTALL_VERSION=${CARGO_BINSTALL_VERSION}" \
+            --build-arg "CARGO_BINSTALL_SHA256=${CARGO_BINSTALL_SHA256}" \
             --build-arg "RUSTFMT_TOOLCHAIN=${RUSTFMT_TOOLCHAIN}" \
             --build-arg "MDBOOK_VERSION=${MDBOOK_VERSION}" \
             --build-arg "SCCACHE_VERSION=${SCCACHE_VERSION}" \

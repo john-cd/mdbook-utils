@@ -20,7 +20,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ## Install utilities
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends jq \
+    && apt-get install -y --no-install-recommends curl jq \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 ## To cache:
@@ -40,10 +40,17 @@ ARG SCCACHE_VERSION
 ARG JUST_VERSION
 ARG CARGO_BINSTALL_VERSION
 
-## Install cargo binstall (binary install)
+## Install the versioned, checksum-verified cargo-binstall release.
+ARG CARGO_BINSTALL_SHA256
+RUN curl --fail --location --silent --show-error \
+        "https://github.com/cargo-bins/cargo-binstall/releases/download/v${CARGO_BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.tgz" \
+        --output /tmp/cargo-binstall.tgz \
+    && echo "${CARGO_BINSTALL_SHA256}  /tmp/cargo-binstall.tgz" | sha256sum --check --status \
+    && tar -xzf /tmp/cargo-binstall.tgz -C /usr/local/cargo/bin cargo-binstall \
+    && rm /tmp/cargo-binstall.tgz
+
 ## Install just, mdbook, etc... from the binary release
-RUN cargo install --locked --version "${CARGO_BINSTALL_VERSION}" cargo-binstall \
-    && cargo binstall --no-confirm --version ${JUST_VERSION} just \
+RUN cargo binstall --no-confirm --version ${JUST_VERSION} just \
     && cargo binstall --no-confirm --version ${MDBOOK_VERSION} mdbook \
     && cargo binstall --no-confirm --secure --version ${SCCACHE_VERSION} sccache
 #    && cargo binstall --no-confirm --secure cargo-nextest
