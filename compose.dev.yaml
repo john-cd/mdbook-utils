@@ -9,7 +9,8 @@ services:
     entrypoint:
       - sleep
       - infinity
-    image: docker/dev-environments-default:stable-1
+    # Docker's official CLI image is Alpine-based and includes the socket client.
+    image: docker:cli
     init: true
     volumes:
       - type: bind
