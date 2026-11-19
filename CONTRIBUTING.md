@@ -138,7 +138,7 @@ This guide is based on the **contributing.md**. [Make your own][make-your-own]!
 
 ## Legal
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in _ by you, shall be licensed as __, without any additional terms or conditions.
+Unless you explicitly state otherwise, any contribution you intentionally submit for inclusion in this repository is licensed under the [project license](LICENSE) without additional terms or conditions.
 
 ## Configuration consistency
 

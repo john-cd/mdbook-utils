@@ -192,3 +192,7 @@ from a standalone `mdbook-utils` checkout.
 
 See [CONFIGURATION.md](CONFIGURATION.md) for shared formatting, lint, dependency-update,
 build-profile, cache, linker, and editor conventions. Keep it synchronized with configuration changes.
+
+## License
+
+This project is proprietary. See the [LICENSE](LICENSE) for terms, including restrictions on AI model training.
