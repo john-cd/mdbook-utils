@@ -15,7 +15,7 @@ use tracing::info;
 
 /// Regex to find {{#include \<file\>.md}}
 static REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
-    Regex::new(r"\{\{#include.*?\}\}").expect("regex literal is valid")
+    Regex::new(r"\\?\{\{#include.*?\}\}").expect("regex literal is valid")
 });
 
 /// Within each mdBook-style Markdown file in a source directory,
@@ -52,12 +52,21 @@ where
             info!("Looking into {p:?}");
             let buf = fs::read_to_string(p.as_path())
                 .with_context(|| format!("Failed to read {}", p.display()))?;
-            Ok(
-                match REGEX.replace_all(&buf, regex::NoExpand(contents_to_insert)) {
-                    std::borrow::Cow::Owned(new_txt) => Some((p, new_txt)),
-                    std::borrow::Cow::Borrowed(_) => None,
-                },
-            )
+            let mut new_txt = String::with_capacity(buf.len());
+            let mut last_match = 0;
+            for matched in REGEX.find_iter(&buf) {
+                if matched.as_str().starts_with('\\') {
+                    continue;
+                }
+                new_txt.push_str(&buf[last_match..matched.start()]);
+                new_txt.push_str(contents_to_insert);
+                last_match = matched.end();
+            }
+            if last_match == 0 {
+                return Ok(None);
+            }
+            new_txt.push_str(&buf[last_match..]);
+            Ok(Some((p, new_txt)))
         })
         .collect::<Result<_>>()?;
 

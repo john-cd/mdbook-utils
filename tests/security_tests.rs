@@ -154,3 +154,42 @@ fn test_path_traversal_identify_files_not_in_summary() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+/// Escaped directives remain literal during expansion and removal.
+#[test]
+fn escaped_includes_are_preserved_by_markdown_commands() -> anyhow::Result<()> {
+    let dir = tempdir()?;
+    let source_dir = dir.path().join("src");
+    fs::create_dir(&source_dir)?;
+    fs::write(source_dir.join("existing.md"), "included")?;
+    let chapter = source_dir.join("chapter.md");
+    let literals = r"\{{#include existing.md}} \{{#include missing.md}}";
+    let input = format!("{literals}\n{{{{#include existing.md}}}}\n");
+    for (subcommand, active_result) in [
+        ("replace-includes-by-contents", "included"),
+        ("remove-includes", "// MISSING INCLUDE FILE\nfn main() {}"),
+    ] {
+        fs::write(&chapter, &input)?;
+        let output = Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
+            .args(["--yes", "markdown", subcommand, "--markdown-dir"])
+            .arg(&source_dir)
+            .current_dir(dir.path())
+            .output()?;
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let rewritten = fs::read_to_string(&chapter)?;
+        assert!(rewritten.starts_with(literals), "{rewritten}");
+        assert!(
+            !rewritten[literals.len()..].contains("{{#include"),
+            "{rewritten}"
+        );
+        assert!(
+            rewritten[literals.len()..].contains(active_result),
+            "{rewritten}"
+        );
+    }
+    Ok(())
+}

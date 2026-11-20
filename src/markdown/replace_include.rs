@@ -14,7 +14,7 @@ use tracing::info;
 
 /// Regex to find {{#include \<file\>.md}}.
 static INSERT_REGEX: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
-    Regex::new(r"\{\{#include (?<filepath>\S+?\.md)(?<selector>:[^}\s]+)?\}\}")
+    Regex::new(r"\\?\{\{#include (?<filepath>\S+?\.md)(?<selector>:[^}\s]+)?\}\}")
         .expect("regex literal is valid")
 });
 
@@ -183,6 +183,9 @@ fn expand_includes(
 
     for cap in INSERT_REGEX.captures_iter(selected) {
         let matched = cap.get(0).context("Missing include match")?;
+        if matched.as_str().starts_with('\\') {
+            continue;
+        }
         new_txt.push_str(&selected[last_match..matched.start()]);
 
         let rel_file_path = cap
