@@ -261,6 +261,83 @@ fn code_example_round_trip_keeps_surrounding_text() -> Result<()> {
     Ok(())
 }
 
+/// Renders a generated include with the repository's pinned mdBook version.
+#[test]
+fn generated_include_renders_with_pinned_mdbook() -> Result<()> {
+    let dir = tempdir()?;
+    let book_root = dir.path();
+    let src = book_root.join("src");
+    let code = book_root.join("extracted");
+    fs::create_dir_all(&src)?;
+    fs::write(
+        book_root.join("book.toml"),
+        "[book]\ntitle = \"Generated include\"\nauthors = [\"Test\"]\nlanguage = \"en\"\nsrc = \"src\"\n",
+    )?;
+    fs::write(
+        src.join("SUMMARY.md"),
+        "# Summary\n\n- [Chapter](chapter.md)\n",
+    )?;
+    let chapter = src.join("chapter.md");
+    fs::write(
+        &chapter,
+        "# Generated include\n\n```rust\nfn generated_include_sentinel() {\n    println!(\"generated include sentinel\");\n}\n```\n",
+    )?;
+
+    let run = |subcommand: &str| -> Result<Output> {
+        Ok(Command::new(env!("CARGO_BIN_EXE_mdbook-utils"))
+            .args(["-y", "markdown", subcommand, "-m"])
+            .arg(&src)
+            .arg("-t")
+            .arg(&code)
+            .current_dir(book_root)
+            .env_remove("BOOK_ROOT_DIR_PATH")
+            .env_remove("MARKDOWN_DIR_PATH")
+            .env_remove("DEFAULT_DEST_DIR_PATH")
+            .env("RUST_LOG", "off")
+            .output()?)
+    };
+    for subcommand in ["extract-code-examples", "replace-code-examples-by-includes"] {
+        let output = run(subcommand)?;
+        assert!(
+            output.status.success(),
+            "{subcommand} stderr: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+
+    let rewritten = fs::read_to_string(&chapter)?;
+    assert!(
+        rewritten.contains("{{#include ../extracted/chapter.md.d/block-000.rs}}"),
+        "{rewritten}"
+    );
+
+    let mdbook_version = Command::new("mdbook").arg("--version").output()?;
+    assert!(
+        mdbook_version.status.success(),
+        "mdbook --version stderr: {}",
+        String::from_utf8_lossy(&mdbook_version.stderr)
+    );
+    assert_eq!(
+        String::from_utf8_lossy(&mdbook_version.stdout).trim(),
+        "mdbook v0.5.4"
+    );
+    let rendered_dir = dir.path().join("rendered");
+    let rendered = Command::new("mdbook")
+        .arg("build")
+        .arg(book_root)
+        .arg("--dest-dir")
+        .arg(&rendered_dir)
+        .output()?;
+    assert!(
+        rendered.status.success(),
+        "mdbook build stderr: {}",
+        String::from_utf8_lossy(&rendered.stderr)
+    );
+    let html = fs::read_to_string(rendered_dir.join("chapter.html"))?;
+    assert!(html.contains("generated include sentinel"), "{html}");
+    Ok(())
+}
+
 /// Extracts and compiles mdBook-compatible hidden lines and preserves visible hashes.
 #[test]
 fn extracts_compilable_hidden_lines_with_mdbook_visible_hashes() -> Result<()> {
