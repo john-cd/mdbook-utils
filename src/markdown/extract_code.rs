@@ -418,8 +418,20 @@ where
                 let include_path = relative_path(source_dir, &canonical_code_path)?;
                 let include_path = include_path
                     .to_str()
-                    .context("Include path contains non-UTF-8 characters")?
-                    .replace('\\', "/");
+                    .with_context(|| {
+                        format!(
+                            "Cannot generate an mdBook include in {} for {}. Rename the chapter or choose a code directory with a UTF-8 path.",
+                            markdown_file.display(),
+                            include_path.display()
+                        )
+                    })?
+                    .replace(std::path::MAIN_SEPARATOR, "/");
+                if include_path.contains(char::is_whitespace) || include_path.contains([':', '}']) {
+                    bail!(
+                        "Cannot generate an mdBook include in {} for {include_path:?}. Rename the chapter or choose a code directory so the relative include path has no whitespace, colons, or closing braces.",
+                        markdown_file.display()
+                    );
+                }
                 new_txt.push_str(&buf[last_match..block.range.start]);
                 write!(
                     new_txt,
