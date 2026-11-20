@@ -1,4 +1,4 @@
-<!-- TODO Reviewed 2026-11-18. -->
+<!-- TODO Reviewed 2026-11-20. -->
 
 # Task tracking
 
@@ -6,8 +6,12 @@
 
 ## Ready and blocked issues
 
-Snapshot: November 18, 2026, from live GitHub issues. No open unblocked issues remain.
+Snapshot: November 20, 2026, from live GitHub issues. One open unblocked issue remains.
 Recheck the live issue before starting.
+
+### Ready
+
+- [#280 — Prevent invalid mdBook includes when extracted example paths contain spaces](https://github.com/john-cd/mdbook-utils/issues/280): render a valid generated include with the pinned mdBook version and verify that the snippet appears. Path validation and regressions for spaces in output and chapter paths are on `develop`.
 
 ### Blocked
 
