@@ -169,7 +169,10 @@ jobs:
           persist-credentials: false
 
       - name: Load pinned container build inputs
-        run: cat .devcontainer/container-build.env >> "$GITHUB_ENV"
+        # GITHUB_ENV accepts assignments, not the file's preserved review comments.
+        run: |
+          grep -E '^(RUST_IMAGE_LABEL|CARGO_BINSTALL_VERSION|CARGO_BINSTALL_SHA256|RUSTFMT_TOOLCHAIN|MDBOOK_VERSION|SCCACHE_VERSION|JUST_VERSION)=' \
+            .devcontainer/container-build.env >> "$GITHUB_ENV"
 
       - name: Build the CI image
         run: |
