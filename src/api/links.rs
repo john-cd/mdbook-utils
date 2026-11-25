@@ -28,11 +28,17 @@ use crate::parser;
 /// output cannot be rendered.
 pub fn render_inline_links<P: AsRef<Path>>(src_dir_path: P, format: LinkFormat) -> Result<String> {
     let src_dir_path = fs::check_is_dir(src_dir_path)?;
-    let all_markdown = fs::read_to_string_all_markdown_files_in(src_dir_path)?;
-    let mut parser = parser::get_parser(all_markdown.as_ref());
-    let links: Vec<link::Link<'_>> = parser::extract_links(&mut parser);
+    let sources = fs::find_markdown_files_in(src_dir_path)?
+        .iter()
+        .map(|path| {
+            std::fs::read_to_string(path)
+                .with_context(|| format!("Could not read {}", path.display()))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let links = sources
+        .iter()
+        .flat_map(|source| parser::extract_links(&mut parser::get_parser(source)));
     let links: Vec<_> = links
-        .into_iter()
         .filter(|link| {
             matches!(
                 link.get_link_type(),

@@ -701,3 +701,14 @@ fn refdefs_from_dependencies_reports_and_logs_cargo_failures() -> Result<()> {
     );
     Ok(())
 }
+
+/// An EOF-terminated fence cannot consume links from a different source file.
+#[test]
+fn inline_report_keeps_file_boundaries() -> Result<()> {
+    let fixture = fixture("[link](https://example.org/visible)\n")?;
+    fs::write(fixture.src.join("a.md"), "~~~text\nexample\n")?;
+    let result = run(&fixture, &["links", "write-inline"])?;
+    assert!(result.status.success(), "{:?}", result.stderr);
+    assert!(fs::read_to_string(&fixture.out)?.contains("https://example.org/visible"));
+    Ok(())
+}
