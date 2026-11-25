@@ -153,10 +153,8 @@ pub fn identify_unused_rs_examples<
     for md_file in md_files {
         let content = std::fs::read_to_string(&md_file)?;
         for cap in RUST_FILE_REFERENCE_REGEX.captures_iter(&content) {
-            if is_inside_literal(
-                &content,
-                cap.get(0).context("Missing Rust helper match")?.start(),
-            ) {
+            let start = cap.get(0).context("Missing Rust helper match")?.start();
+            if content[..start].ends_with('\\') || is_inside_literal(&content, start) {
                 continue;
             }
             let rel_path = Path::new(&cap["path"]);
@@ -422,6 +420,7 @@ let path = \"../code/incidental.rs\";\n\
 let directive = \"{{#include ../code/literal_helper.rs}}\";\n\
 ```\n\
 The literal path `../code/incidental.rs` is documentation.\n\
+\\{{#include ../code/incidental.rs}}\n\
 ",
         )?;
 
