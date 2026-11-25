@@ -17,8 +17,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      container: ${{ steps.filter.outputs.container }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
+        id: filter
+        with:
+          predicate-quantifier: every
+          filters: |
+            code:
+              - '**'
+              - '!README.md'
+              - '!TODO.md'
+              - '!AGENTS.md'
+              - '!CONTRIBUTING.md'
+              - '!CHANGELOG.md'
+              - '!RELEASES.md'
+              - '!.github/workflows/README.md'
+              - '!user_guide/**/*.md'
+            container:
+              - '{.devcontainer/**,.dockerignore,.github/workflows/**}'
   validate:
+    needs: changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}
     name: Validate (${{ matrix.os }})
+    timeout-minutes: 45
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -47,6 +80,7 @@ jobs:
           components: clippy
 
       - name: Install pinned nightly rustfmt
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           RUSTFMT_TOOLCHAIN="${RUSTFMT_TOOLCHAIN:-$(sed -n 's/^channel *= *"\([^"]*\)".*/\1/p' rustfmt-toolchain.toml)}"
@@ -54,6 +88,7 @@ jobs:
           rustup toolchain install "$RUSTFMT_TOOLCHAIN" --profile minimal --component rustfmt
 
       - name: Check formatting
+        if: runner.os == 'Linux'
         shell: bash
         run: cargo +"$RUSTFMT_TOOLCHAIN" fmt --all -- --check
 
@@ -71,11 +106,9 @@ jobs:
           workspaces: . -> .ci/target/mdbook-utils/main
 
       - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
+        if: runner.os == 'Linux'
         with:
-          tool: mdbook@0.5.4,sccache@0.19.0
-
-      - name: Check all targets
-        run: cargo check --all-targets --locked
+          tool: mdbook@0.5.4
 
       - name: Run Clippy
         run: cargo clippy --all-targets --locked -- -D warnings
@@ -87,9 +120,11 @@ jobs:
         run: cargo test --doc --locked
 
       - name: Build API documentation
+        if: runner.os == 'Linux'
         run: cargo doc --no-deps --locked
 
       - name: Build and test mdBooks
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           mdbook build ./user_guide
@@ -97,8 +132,31 @@ jobs:
           mdbook build ./test_book
           mdbook test ./test_book
 
+  documentation:
+    needs: changes
+    if: needs.changes.outputs.code != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dprint/check@371a959e3c77f34a76a03d2c50df2e3f2302d016 # v2
+      - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
+        with:
+          tool: mdbook@0.5.4
+      - name: Build and test mdBooks
+        run: |
+          mdbook build ./user_guide
+          mdbook test ./user_guide
+          mdbook build ./test_book
+          mdbook test ./test_book
+
   coverage:
+    needs: changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}
     name: Coverage baseline
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -137,12 +195,14 @@ jobs:
 
       - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
-          tool: cargo-llvm-cov,mdbook@0.5.4,sccache@0.19.0
+          tool: cargo-llvm-cov
 
       - name: Report line coverage
         run: cargo llvm-cov --locked --summary-only
 
   msrv:
+    needs: changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}
     name: Minimum supported Rust
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -160,6 +220,8 @@ jobs:
         run: cargo check --all-targets --locked
 
   container-build:
+    needs: changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.container == 'true' }}
     name: Build the CI container
     runs-on: ubuntu-latest
     timeout-minutes: 30

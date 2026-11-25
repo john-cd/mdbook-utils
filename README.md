@@ -196,3 +196,17 @@ build-profile, cache, linker, and editor conventions. Keep it synchronized with 
 ## License
 
 The [LICENSE](LICENSE) grants limited website browsing, linking, and noncommercial use of individual code snippets. It also sets out the proprietary terms and restrictions on AI use.
+
+## CI cost and local checks
+
+Recognized root/user-guide Markdown changes use a documentation lane. Fixture and test-book
+changes still run Rust CI. The three-OS matrix keeps Clippy, tests and doctests on every OS;
+formatting, API docs and mdBook checks run once on Linux. Clippy replaces the redundant
+`cargo check` step. Container validation runs for container/workflow changes or manual dispatch.
+Coverage and MSRV checks remain independent. Tool installation no longer repeats sccache.
+
+[Trusted Windows checks](https://github.com/john-cd/local_runners/actions/workflows/rust-repositories.yml)
+can be manually dispatched by the owner against current `develop`. J-RAZER serializes these
+checks with Book Tooling and Rust How-To. Static mode checks formatting/workflows; full mode
+runs Clippy, tests and doctests with two Cargo workers and requires 15 GiB free on D:.
+Public PR checks remain GitHub-hosted, and deployment stays in its existing hosted workflow.
