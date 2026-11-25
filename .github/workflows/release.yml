@@ -99,7 +99,7 @@ jobs:
   release:
     name: Attach archives to the GitHub release
     # Only for pushed tags: a manual run builds and tests the archives only.
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: build
     runs-on: ubuntu-latest
     permissions:
