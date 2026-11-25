@@ -1,3 +1,20 @@
+# Workflow contract documentation (maintained with the implementation).
+# Workflow contract: mdbook-utils / Build, test, optionally deploy to Pages & publish.
+# Purpose: Build or exercise the container environment used by this repository; Deploy the checked
+# site or application through the configured destination.
+# Execution: workflow_dispatch. Trigger branches/paths below are the authoritative input boundary.
+# Manual operation: use the Actions tab or gh workflow run; input defaults below apply unless
+# explicitly overridden.
+# Manual controls: publish: If true, publish the code to crates.io; deploy_to_gh_pages: If true,
+# deploy the user guide to GitHub Pages.
+# Run policy: the concurrency block below controls cancellation/serialization; preserve production
+# and manual side-effect guards.
+# Access: workflow token permissions are {"contents": "read"}; job-level overrides below own any
+# elevated access.
+# Maintenance: keep full-SHA action references/tool pins coordinated with Dependabot and the
+# repository configuration. See README.md in this directory for the job map and local validation.
+# End workflow contract documentation.
+
 # TODO Reviewed ??-??-2026.
 
 ## Build, test the mdbook-utils code; build, test its user guide, and optionally publish to crates.io and deploy the user guide to Pages
@@ -44,7 +61,11 @@ defaults:
 
 jobs:
   # Each job will run inside its own virtual machine runner
+  # Job build: Build or exercise the container environment used by this repository.
+  # Container/toolchain validation covers packaging and native dependencies that a host-only
+  # compiler check cannot prove.
   build:
+    timeout-minutes: 60
     name: Build
     runs-on: ubuntu-latest
     steps:
@@ -86,13 +107,23 @@ jobs:
       - name: Setup Github Pages
         id: pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      # Transfer this job output to the next consumer or retain diagnostics. Uploading an artifact
+      # alone does not execute the deployment job.
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ./user_guide_book/
 
   ## GitHub Pages Deployment job
+  # Job pages-deploy: Deploy the checked site or application through the configured destination.
+  # This job can change a live environment; keep its condition, permissions and environment
+  # protections together.
+  # Dependency boundary: "build"; downstream work must not consume an unchecked or missing upstream
+  # result.
+  # Guard: ${{ inputs.deploy_to_gh_pages }}. Keep this condition when refactoring triggers or job
+  # dependencies.
   pages-deploy:
+    timeout-minutes: 30
     name: Deploy to GitHub Pages
     if: ${{ inputs.deploy_to_gh_pages }}
     needs: build
@@ -104,6 +135,8 @@ jobs:
       pages: write
       id-token: write
     steps:
+      # This is a publication boundary. Preserve its preceding validation, existing event/ref guard,
+      # environment approvals and write permissions.
       - name: Deploy to GitHub Pages
         id: github_deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

@@ -1,3 +1,21 @@
+# Workflow contract documentation (maintained with the implementation).
+# Workflow contract: mdbook-utils / Rust CI.
+# Purpose: Classify changed inputs and export decisions to downstream jobs; Compile, lint or test
+# the Rust source for the scope selected by the commands below; Build or validate the maintained
+# documentation and generated output; Measure executed-code coverage with instrumented binaries;
+# Check the declared minimum Rust compiler, independently of the current development compiler; Build
+# or exercise the container environment used by this repository.
+# Execution: pull_request, push, workflow_dispatch. Trigger branches/paths below are the
+# authoritative input boundary.
+# Manual operation: use the Actions tab or gh workflow run; input defaults below apply unless
+# explicitly overridden.
+# Run policy: newer runs replace obsolete validation in the same group.
+# Access: workflow token permissions are {"contents": "read"}; job-level overrides below own any
+# elevated access.
+# Maintenance: keep full-SHA action references/tool pins coordinated with Dependabot and the
+# repository configuration. See README.md in this directory for the job map and local validation.
+# End workflow contract documentation.
+
 # TODO Reviewed ??-??-2026.
 
 name: Rust CI
@@ -17,6 +35,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Job changes: Classify changed inputs and export decisions to downstream jobs.
+  # Skip only the scopes named by these filters; fixtures, manifests and workflow changes must still
+  # select their owning validation.
   changes:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -47,6 +68,16 @@ jobs:
               - '!user_guide/**/*.md'
             container:
               - '{.devcontainer/**,.dockerignore,.github/workflows/**}'
+  # Job validate: Compile, lint or test the Rust source for the scope selected by the commands
+  # below.
+  # Keep compiler/profile/feature selections aligned so adjacent commands reuse outputs; retain real
+  # binary generation, doctests and distinct minimum-version checks.
+  # Dependency boundary: "changes"; downstream work must not consume an unchecked or missing
+  # upstream result.
+  # Guard: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}.
+  # Keep this condition when refactoring triggers or job dependencies.
+  # Matrix entries are independent runners. Keep OS/toolchain/feature-specific tests; consolidate
+  # only checks whose inputs are identical.
   validate:
     needs: changes
     if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}
@@ -62,6 +93,8 @@ jobs:
         with:
           persist-credentials: false
 
+      # Export trusted step outputs for later steps in this job. GITHUB_ENV requires assignments or
+      # its explicit multiline syntax; comments in pin files are not assignments.
       - name: Load pinned stable Rust version
         id: load-stable-rust
         shell: bash
@@ -74,11 +107,15 @@ jobs:
           fi
           echo "RUST_VERSION=$rust_version" >> "$GITHUB_ENV"
           echo "version=$rust_version" >> "$GITHUB_OUTPUT"
+      # Install the compiler/components required by this lane. Keep the stable, minimum-version and
+      # formatter toolchains distinct where their contracts differ.
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: ${{ steps.load-stable-rust.outputs.version }}
           components: clippy
 
+      # Export trusted step outputs for later steps in this job. GITHUB_ENV requires assignments or
+      # its explicit multiline syntax; comments in pin files are not assignments.
       - name: Install pinned nightly rustfmt
         if: runner.os == 'Linux'
         shell: bash
@@ -92,10 +129,15 @@ jobs:
         shell: bash
         run: cargo +"$RUSTFMT_TOOLCHAIN" fmt --all -- --check
 
+      # Install the tool versions consumed by the following checks. Prefer the existing prebuilt
+      # installer path to recompiling development tools on every fresh runner.
       - name: Install compiler cache
         uses: taiki-e/install-action@a4d3f3f761dcd95cce1b72cb61cb6d1963438177
         with:
           tool: sccache@0.19.0
+      # Reuse downloaded dependencies/compiler artifacts through this cache configuration. Cache
+      # misses must remain correct; keys must distinguish incompatible toolchains, profiles and
+      # dependency graphs.
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: config-v1-${{ github.workflow }}-${{ github.job }}-${{ runner.arch }}-${{
@@ -105,16 +147,22 @@ jobs:
             github.event.repository.default_branch) }}
           workspaces: . -> .ci/target/mdbook-utils/main
 
+      # Install the tool versions consumed by the following checks. Prefer the existing prebuilt
+      # installer path to recompiling development tools on every fresh runner.
       - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
           tool: mdbook@0.5.4
 
+      # Clippy performs compiler checking for these targets/features as well as linting. Keep a
+      # separate cargo check only when it covers a different compiler, target or feature set.
       - name: Run Clippy
         run: cargo clippy --all-targets --locked -- -D warnings
 
       - name: Run tests
         run: cargo test --all-targets --locked
 
+      # Execute documentation examples separately: passing unit/integration tests or Nextest does
+      # not establish doctest correctness.
       - name: Run doctests
         run: cargo test --doc --locked
 
@@ -131,6 +179,13 @@ jobs:
           mdbook build ./test_book
           mdbook test ./test_book
 
+  # Job documentation: Build or validate the maintained documentation and generated output.
+  # Rendering catches broken configuration, includes and generated links that a source formatter
+  # cannot detect.
+  # Dependency boundary: "changes"; downstream work must not consume an unchecked or missing
+  # upstream result.
+  # Guard: needs.changes.outputs.code != 'true'. Keep this condition when refactoring triggers or
+  # job dependencies.
   documentation:
     needs: changes
     if: needs.changes.outputs.code != 'true'
@@ -141,6 +196,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: dprint/check@371a959e3c77f34a76a03d2c50df2e3f2302d016 # v2
+      # Install the tool versions consumed by the following checks. Prefer the existing prebuilt
+      # installer path to recompiling development tools on every fresh runner.
       - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
           tool: mdbook@0.5.4
@@ -151,6 +208,13 @@ jobs:
           mdbook build ./test_book
           mdbook test ./test_book
 
+  # Job coverage: Measure executed-code coverage with instrumented binaries.
+  # Instrumentation can change build outputs; this job is separate from ordinary validation so
+  # coverage does not reuse incompatible binaries.
+  # Dependency boundary: "changes"; downstream work must not consume an unchecked or missing
+  # upstream result.
+  # Guard: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}.
+  # Keep this condition when refactoring triggers or job dependencies.
   coverage:
     needs: changes
     if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}
@@ -162,6 +226,8 @@ jobs:
         with:
           persist-credentials: false
 
+      # Export trusted step outputs for later steps in this job. GITHUB_ENV requires assignments or
+      # its explicit multiline syntax; comments in pin files are not assignments.
       - name: Load pinned stable Rust version
         id: load-stable-rust
         shell: bash
@@ -174,15 +240,22 @@ jobs:
           fi
           echo "RUST_VERSION=$rust_version" >> "$GITHUB_ENV"
           echo "version=$rust_version" >> "$GITHUB_OUTPUT"
+      # Install the compiler/components required by this lane. Keep the stable, minimum-version and
+      # formatter toolchains distinct where their contracts differ.
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: ${{ steps.load-stable-rust.outputs.version }}
           components: llvm-tools-preview
 
+      # Install the tool versions consumed by the following checks. Prefer the existing prebuilt
+      # installer path to recompiling development tools on every fresh runner.
       - name: Install compiler cache
         uses: taiki-e/install-action@a4d3f3f761dcd95cce1b72cb61cb6d1963438177
         with:
           tool: sccache@0.19.0
+      # Reuse downloaded dependencies/compiler artifacts through this cache configuration. Cache
+      # misses must remain correct; keys must distinguish incompatible toolchains, profiles and
+      # dependency graphs.
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: config-v1-${{ github.workflow }}-${{ github.job }}-${{ runner.arch }}-${{
@@ -192,6 +265,8 @@ jobs:
             github.event.repository.default_branch) }}
           workspaces: . -> .ci/target/mdbook-utils/main
 
+      # Install the tool versions consumed by the following checks. Prefer the existing prebuilt
+      # installer path to recompiling development tools on every fresh runner.
       - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
           tool: cargo-llvm-cov,mdbook@0.5.4
@@ -199,6 +274,13 @@ jobs:
       - name: Report line coverage
         run: cargo llvm-cov --locked --summary-only
 
+  # Job msrv: Check the declared minimum Rust compiler, independently of the current development
+  # compiler.
+  # A passing current-toolchain build does not prove the advertised minimum version still compiles.
+  # Dependency boundary: "changes"; downstream work must not consume an unchecked or missing
+  # upstream result.
+  # Guard: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}.
+  # Keep this condition when refactoring triggers or job dependencies.
   msrv:
     needs: changes
     if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.code == 'true' }}
@@ -212,12 +294,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Install the compiler/components required by this lane. Keep the stable, minimum-version and
+      # formatter toolchains distinct where their contracts differ.
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
         with:
           toolchain: 1.98.1
       - name: Check declared minimum version
         run: cargo check --all-targets --locked
 
+  # Job container-build: Build or exercise the container environment used by this repository.
+  # Container/toolchain validation covers packaging and native dependencies that a host-only
+  # compiler check cannot prove.
+  # Dependency boundary: "changes"; downstream work must not consume an unchecked or missing
+  # upstream result.
+  # Guard: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.container == 'true'
+  # }}. Keep this condition when refactoring triggers or job dependencies.
   container-build:
     needs: changes
     if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.container == 'true' }}
@@ -229,6 +320,8 @@ jobs:
         with:
           persist-credentials: false
 
+      # Export trusted step outputs for later steps in this job. GITHUB_ENV requires assignments or
+      # its explicit multiline syntax; comments in pin files are not assignments.
       - name: Load pinned container build inputs
         # GITHUB_ENV accepts assignments, not the file's preserved review comments.
         run: |

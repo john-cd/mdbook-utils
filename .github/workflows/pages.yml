@@ -1,3 +1,19 @@
+# Workflow contract documentation (maintained with the implementation).
+# Workflow contract: mdbook-utils / Deploy the user guide to Pages.
+# Purpose: Build or validate the maintained documentation and generated output; Deploy the checked
+# site or application through the configured destination.
+# Execution: push, workflow_dispatch. Trigger branches/paths below are the authoritative input
+# boundary.
+# Manual operation: use the Actions tab or gh workflow run; input defaults below apply unless
+# explicitly overridden.
+# Run policy: the concurrency block below controls cancellation/serialization; preserve production
+# and manual side-effect guards.
+# Access: workflow token permissions are {"contents": "read"}; job-level overrides below own any
+# elevated access.
+# Maintenance: keep full-SHA action references/tool pins coordinated with Dependabot and the
+# repository configuration. See README.md in this directory for the job map and local validation.
+# End workflow contract documentation.
+
 # TODO Reviewed ??-??-2026.
 
 name: Deploy the user guide to Pages
@@ -26,7 +42,11 @@ env:
   CARGO_BUILD_BUILD_DIR: ${{ github.workspace }}/.ci/build/mdbook-utils/main
   CARGO_INCREMENTAL: "0"
 jobs:
+  # Job build: Build or validate the maintained documentation and generated output.
+  # Rendering catches broken configuration, includes and generated links that a source formatter
+  # cannot detect.
   build:
+    timeout-minutes: 120
     name: Build the user guide and its sitemap
     runs-on: ubuntu-latest
     steps:
@@ -34,6 +54,8 @@ jobs:
         with:
           persist-credentials: false
 
+      # Export trusted step outputs for later steps in this job. GITHUB_ENV requires assignments or
+      # its explicit multiline syntax; comments in pin files are not assignments.
       - name: Load pinned stable Rust version
         id: load-stable-rust
         shell: bash
@@ -46,14 +68,21 @@ jobs:
           fi
           echo "RUST_VERSION=$rust_version" >> "$GITHUB_ENV"
           echo "version=$rust_version" >> "$GITHUB_OUTPUT"
+      # Install the compiler/components required by this lane. Keep the stable, minimum-version and
+      # formatter toolchains distinct where their contracts differ.
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: ${{ steps.load-stable-rust.outputs.version }}
 
+      # Install the tool versions consumed by the following checks. Prefer the existing prebuilt
+      # installer path to recompiling development tools on every fresh runner.
       - name: Install compiler cache
         uses: taiki-e/install-action@a4d3f3f761dcd95cce1b72cb61cb6d1963438177
         with:
           tool: sccache@0.19.0
+      # Reuse downloaded dependencies/compiler artifacts through this cache configuration. Cache
+      # misses must remain correct; keys must distinguish incompatible toolchains, profiles and
+      # dependency graphs.
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: config-v1-${{ github.workflow }}-${{ github.job }}-${{ runner.arch }}-${{
@@ -63,6 +92,8 @@ jobs:
             github.event.repository.default_branch) }}
           workspaces: . -> .ci/target/mdbook-utils/main
 
+      # Install the tool versions consumed by the following checks. Prefer the existing prebuilt
+      # installer path to recompiling development tools on every fresh runner.
       - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
           tool: mdbook@0.5.4,sccache@0.19.0
@@ -79,11 +110,19 @@ jobs:
 
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
+      # Transfer this job output to the next consumer or retain diagnostics. Uploading an artifact
+      # alone does not execute the deployment job.
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ./user_guide/book/
 
+  # Job deploy: Deploy the checked site or application through the configured destination.
+  # This job can change a live environment; keep its condition, permissions and environment
+  # protections together.
+  # Dependency boundary: "build"; downstream work must not consume an unchecked or missing upstream
+  # result.
   deploy:
+    timeout-minutes: 30
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
@@ -94,5 +133,7 @@ jobs:
       pages: write
       id-token: write
     steps:
+      # This is a publication boundary. Preserve its preceding validation, existing event/ref guard,
+      # environment approvals and write permissions.
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

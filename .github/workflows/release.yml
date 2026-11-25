@@ -1,3 +1,19 @@
+# Workflow contract documentation (maintained with the implementation).
+# Workflow contract: mdbook-utils / Release binaries.
+# Purpose: Validate the maintained source with the tools and commands listed in this job; Produce or
+# publish the distribution artifacts selected by this job.
+# Execution: push, workflow_dispatch. Trigger branches/paths below are the authoritative input
+# boundary.
+# Manual operation: use the Actions tab or gh workflow run; input defaults below apply unless
+# explicitly overridden.
+# Run policy: the concurrency block below controls cancellation/serialization; preserve production
+# and manual side-effect guards.
+# Access: workflow token permissions are {"contents": "read"}; job-level overrides below own any
+# elevated access.
+# Maintenance: keep full-SHA action references/tool pins coordinated with Dependabot and the
+# repository configuration. See README.md in this directory for the job map and local validation.
+# End workflow contract documentation.
+
 # TODO Reviewed ??-??-2026.
 
 ## Build versioned binary archives when a `vX.Y.Z` tag is pushed and attach them,
@@ -14,8 +30,19 @@ on:
 permissions:
   contents: read
 
+# Serialize side effects; superseded validation may stop before spending more runner time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  # Job build: Validate the maintained source with the tools and commands listed in this job.
+  # Keep compatible checks in the same job to reuse installed dependencies and build outputs;
+  # distinct OS/feature entries retain their behavior coverage.
+  # Matrix entries are independent runners. Keep OS/toolchain/feature-specific tests; consolidate
+  # only checks whose inputs are identical.
   build:
+    timeout-minutes: 120
     name: Build (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -34,6 +61,8 @@ jobs:
         with:
           persist-credentials: false
 
+      # Export trusted step outputs for later steps in this job. GITHUB_ENV requires assignments or
+      # its explicit multiline syntax; comments in pin files are not assignments.
       - name: Load pinned stable Rust version
         id: load-stable-rust
         shell: bash
@@ -46,16 +75,22 @@ jobs:
           fi
           echo "RUST_VERSION=$rust_version" >> "$GITHUB_ENV"
           echo "version=$rust_version" >> "$GITHUB_OUTPUT"
+      # Install the compiler/components required by this lane. Keep the stable, minimum-version and
+      # formatter toolchains distinct where their contracts differ.
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: ${{ steps.load-stable-rust.outputs.version }}
           targets: ${{ matrix.target }}
 
+      # Install the tool versions consumed by the following checks. Prefer the existing prebuilt
+      # installer path to recompiling development tools on every fresh runner.
       - name: Install the configured compiler wrapper
         uses: taiki-e/install-action@86f7a0ffb25f40114606501a311ebcfaf882ea32 # v2.88.0
         with:
           tool: sccache@0.19.0
 
+      # Retain real code generation/linking for the requested build scope; a typecheck alone cannot
+      # prove linked binaries/examples can be produced.
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
 
@@ -89,6 +124,8 @@ jobs:
           "$smoke_binary" --help > smoke/help.txt
           sed -n '1,5p' smoke/help.txt
 
+      # Transfer this job output to the next consumer or retain diagnostics. Uploading an artifact
+      # alone does not execute the deployment job.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.target }}
@@ -96,7 +133,15 @@ jobs:
             ${{ steps.package.outputs.archive }}
             ${{ steps.package.outputs.archive }}.sha256
 
+  # Job release: Produce or publish the distribution artifacts selected by this job.
+  # Packaging is kept distinct from ordinary checks because credentials, signing and release
+  # conditions have a different lifecycle.
+  # Dependency boundary: "build"; downstream work must not consume an unchecked or missing upstream
+  # result.
+  # Guard: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'). Keep this condition
+  # when refactoring triggers or job dependencies.
   release:
+    timeout-minutes: 30
     name: Attach archives to the GitHub release
     # Only for pushed tags: a manual run builds and tests the archives only.
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -105,6 +150,8 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Consume the artifact produced by an earlier job instead of rebuilding it here; its producer
+      # must have validated the same source/platform.
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: artifacts
