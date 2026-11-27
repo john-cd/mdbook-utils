@@ -21,8 +21,8 @@ The following works with Ubuntu (including WSL):
 sudo apt-get update
 rustup update
 rustup component add clippy
-rustup toolchain install nightly
-rustup component add rustfmt --toolchain nightly
+rustup toolchain install nightly-2026-11-16
+rustup component add rustfmt --toolchain nightly-2026-11-16
 cargo install just
 cargo install mdbook
 ```
